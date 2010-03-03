@@ -111,6 +111,11 @@
 			border-right: 1px solid #FF0000;
 			border-bottom: 1px solid #FF0000;
 			}
+			
+		#menuHeader {
+			position: absolute; /* for ie */
+			z-index: 1;
+		}
 
   	</style>
 		
@@ -138,6 +143,7 @@
     <!--<script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
         <div id="switcher"></div>-->
 		
+	<div id="menuHeader">
 	<ul class="sf-menu">
 		<li class="ui-corner-all">
 			<a class="ui-corner-all" href="#a">View</a>
@@ -182,7 +188,8 @@
 		</li>
 		-->
 	</ul>
-
+	</div>
+	
 	<div id="organismSelector"></div>
 	<div id="srcFeatureSelector"></div>
 	
