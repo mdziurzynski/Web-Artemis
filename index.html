@@ -12,19 +12,19 @@
 				
 		<style type="text/css">
 		  .bases {
-		  	height : 14px;
+		  	height : 12px;
+			line-height : 12px; /* for ie6 */
 			position : absolute;
 			border-left: 1px solid #000;
 			border-right: 1px solid #000;
 		  }
 		  
 		  .feat, .featCDS, .featGene, .featGreen {
-		  	height : 14px;
+		  	height : 12px;
+			line-height : 12px; /* for ie6 */
 			position : absolute;
 			background-color:#d0e4fe;
-			border-width: 1px;
-			border-color: #020202;
-			border-style: solid;
+			border: 1px solid #020202;
 		  }
 		  
 		  .featGene {
@@ -33,7 +33,6 @@
 		  .featCDS {
 			background-color:#CCCCCC;
 		  }
-		  
 		  .featGreen {
 			background-color:#00FF00;
 		  }
@@ -200,7 +199,7 @@
 	<div class="bwdFrames"></div>
 	<div class="strands"></div>
 		
-	<div id="featureConnections" class="canvas"></div>
+	<div id="featureDisplay" class="canvas"></div>
 	<div id="stop_codons"></div>
 	<div id="sequence"></div>
 	<div id="translation"></div>
