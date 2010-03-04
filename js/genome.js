@@ -263,6 +263,7 @@ function drawFrameAndStrand(){
 function addStrandLine(selector, ypos, strand) {
 	var cssObj = {
 		'height':frameLineHeight+'px',
+		'line-height' : frameLineHeight+'px',
 		'width':displayWidth+'px',
 		'margin-left': margin+'px',
 		'margin-top': ypos+'px',
@@ -277,6 +278,7 @@ function addStrandLine(selector, ypos, strand) {
 function addFrameLine(selector, ypos, frame) {
 	var cssObj = {
 		'height':frameLineHeight+'px',
+		'line-height' : frameLineHeight+'px',
 		'width':displayWidth+'px',
 		'margin-left': margin+'px',
 		'margin-top': ypos+'px',
@@ -1021,7 +1023,11 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 	$('#features').html(featureStr);
 	
 	if($('.feat').height() != frameLineHeight) {
-		$('.feat, .featCDS, .featGene, .featGreen').css({'height' : frameLineHeight+'px'});
+		var cssObj = {
+				'height':frameLineHeight+'px',
+				'line-height' : frameLineHeight+'px'
+			};
+		$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
 	}
 	
 	setupFeatureList(features);
