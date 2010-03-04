@@ -112,7 +112,6 @@ $(document).ready(function() {
 });
 
 //
-
 function adjustFeatureDisplayPosition(drag) {
 	
 	var cssObj = {
@@ -145,7 +144,7 @@ function adjustFeatureDisplayPosition(drag) {
 	     'top': marginTop+7+'px'
 	};
 	$('#slider_vertical_container').css(cssObj);
-	$('#featureConnections').css('margin-top', marginTop-5+'px');
+	$('#featureDisplay').css('margin-top', marginTop-5+'px');
 	
 	if(!drag) {
 		cssObj = {
@@ -255,7 +254,7 @@ function drawFrameAndStrand(){
 	ypos+=frameLineHeight*2;
 	for(var i=0;i<3; i++)
 	{
-		$('.bwdFrame'+i).html('');
+	  $('.bwdFrame'+i).html('');
 	  addFrameLine('.bwdFrames',ypos,'bwdFrame'+i);
 	  ypos+=frameLineHeight*2;
 	}
@@ -263,13 +262,12 @@ function drawFrameAndStrand(){
 
 function addStrandLine(selector, ypos, strand) {
 	var cssObj = {
-			'height':frameLineHeight+'px',
-			'width':displayWidth+'px',
-			'margin-left': margin+'px',
-			'margin-top': ypos+'px',
-			'background':  'rgb(200, 200, 200)',
-			'color': '#000000',
-			'position':'absolute'
+		'height':frameLineHeight+'px',
+		'width':displayWidth+'px',
+		'margin-left': margin+'px',
+		'margin-top': ypos+'px',
+		'background':  'rgb(200, 200, 200)',
+		'position':'absolute'
 	};
 
 	$(selector).append('<div class='+strand+'>&nbsp;</div>');
@@ -278,13 +276,12 @@ function addStrandLine(selector, ypos, strand) {
 
 function addFrameLine(selector, ypos, frame) {
 	var cssObj = {
-			'height':frameLineHeight+'px',
-			'width':displayWidth+'px',
-			'margin-left': margin+'px',
-			'margin-top': ypos+'px',
-			'background':  'rgb(240, 240, 240)',
-			'color': '#000000',
-			'position':'absolute'
+		'height':frameLineHeight+'px',
+		'width':displayWidth+'px',
+		'margin-left': margin+'px',
+		'margin-top': ypos+'px',
+		'background':  'rgb(240, 240, 240)',
+		'position':'absolute'
 	};
 
 	$(selector).append('<div class='+frame+'>&nbsp;</div>');
@@ -295,7 +292,7 @@ function drawAll(leftBase, firstTime) {
 	  baseInterval = (basesDisplayWidth/displayWidth)*screenInterval;
 	  basePerPixel  = baseInterval/screenInterval;
 
-      $('#featureConnections').html('');
+      $('#featureDisplay').html('');
 
       if(firstTime == 1 || showStopCodons || showGC || showAG) {
         getSequence(leftBase, firstTime);
@@ -318,7 +315,7 @@ function getSequence(leftBase, firstTime) {
 	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
 	  end+=2;
 	}
-	
+
 	var serviceName = '/sourcefeatures/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
 			{ uniqueName:srcFeature, start:leftBase, end:end }, 
@@ -342,7 +339,7 @@ function drawStopCodons(leftBase) {
 	var nstops = fwdStops1.length + fwdStops2.length + fwdStops3.length +
 				 bwdStops1.length + bwdStops2.length + bwdStops3.length; 
 	if(nstops > 3000) {
-		var canvasTop = $('#featureConnections').css('margin-top').replace("px", "");
+		var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
 		drawStopOnCanvas(fwdStops1, marginTop+((frameLineHeight*2)*0+1)-canvasTop);
 		drawStopOnCanvas(fwdStops2, marginTop+((frameLineHeight*2)*1+1)-canvasTop);
 		drawStopOnCanvas(fwdStops3, marginTop+((frameLineHeight*2)*2+1)-canvasTop);
@@ -363,8 +360,9 @@ function drawStopCodons(leftBase) {
 		drawBwdStop(bwdStops3, 2);
 		//console.timeEnd('draw bwd stop codons');
 		
-		if($('.bases').height() != frameLineHeight)
+		if($('.bases').height() != frameLineHeight) {
 		  $('.bases').css({'height' : frameLineHeight+'px'});
+		}
 	}
 };
 
@@ -375,7 +373,7 @@ function drawStopOnCanvas(stop, ypos) {
 	for(var i=0; i<len; i++ ) {
 		var position1 = stop[i];
 		var stopPosition1 = margin+Math.round(stop[i]/basePerPixel);
-		$("#featureConnections").drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
+		$("#featureDisplay").drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
 				{color: colour, stroke:'1'});
 	}
 }
@@ -727,7 +725,7 @@ function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour
 	var Xpoints = new Array(lpos, mid, rpos) ;
 	var Ypoints = new Array(lastYpos+4, ymid, ypos+4);
 	
-	$("#featureConnections").drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
+	$("#featureDisplay").drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
 }
 
 function drawArrow(leftBase, exon, ypos) {
@@ -746,7 +744,7 @@ function drawArrow(leftBase, exon, ypos) {
 	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+frameLineHeight);
 	}
 
-	$("#featureConnections").drawPolyline(Xpoints,Ypoints, {color:'#020202', stroke:'1'});
+	$("#featureDisplay").drawPolyline(Xpoints,Ypoints, {color:'#020202', stroke:'1'});
 }
 
 
@@ -990,7 +988,7 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 		      featureToColourList.push(exon.uniquename);
 		      featureStr = drawFeature(leftBase, exon, featureStr, ypos, "featCDS") ;
 		      
-		      var canvasTop = $('#featureConnections').css('margin-top').replace("px", "");
+		      var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
 		      if(lastYpos > -1) {
 		      	  drawFeatureConnections(leftBase, lastExon, exon, 
 		      			  lastYpos-canvasTop, ypos-canvasTop, colour);
