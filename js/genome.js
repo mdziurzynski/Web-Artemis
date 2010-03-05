@@ -503,100 +503,6 @@ function drawAminoAcids(leftBasePosition) {
 }
 
 
-function complement(base) {
-    switch (base) {
-    case 'a': case 'A': return 'T';
-    case 't': case 'T': case 'u': case 'U': return 'A';
-    case 'g': case 'G': return 'C';
-    case 'c': case 'C': return 'G';
-    case 'r': case 'R': return 'Y';
-    case 'y': case 'Y': return 'R';
-    case 'k': case 'K': return 'M';
-    case 'm': case 'M': return 'K';
-    case 's': case 'S': return 'S';
-    case 'w': case 'W': return 'W';
-    case 'b': case 'B': return 'V';
-    case 'd': case 'D': return 'H';
-    case 'h': case 'H': return 'D';
-    case 'v': case 'V': return 'B';
-    case 'n': case 'N': return 'N';
-    case 'x': case 'X': return 'X';
-    default:
-      return '@';
-    }
-}
-
-function calculateStopCodons(leftBase, stops1, stops2, stops3, codon1, codon2, codon3, strand) {
-    var index = sequence.indexOf(codon1, 0);
-    var firstInd = index;
-    
-    while(index >= 0 && index < basesDisplayWidth)
-    {
-    	var frame;
-    	if(strand == -1) {
-    		var reversePos = sequenceLength-(index+leftBase+1);
-    		frame = 3 - ((reversePos+3)-1) % 3 -1;
-    	}	
-    	else {
-    		frame = (index + leftBase -1 ) % 3;
-    	}
-    		
-    	index++;
-    	if(frame == 0)	
-    	  stops1.push(index);
-    	else if(frame == 1)
-    	  stops2.push(index);
-    	else
-    	  stops3.push(index);
-    	index = sequence.indexOf(codon1, index+1);
-    }
-    
-    index = sequence.indexOf(codon2, 0);
-    while(index >= 0 && index < basesDisplayWidth)
-    {
-    	var frame;
-    	if(strand == -1) {
-    		var reversePos = sequenceLength-(index+leftBase+1);
-    		frame = 3 - ((reversePos+3)-1) % 3 -1;
-    	}	
-    	else {
-    		frame = (index + leftBase -1 ) % 3;
-    	}
-    	
-    	index++;
-    	if(frame == 0)	
-      	  stops1.push(index);
-      	else if(frame == 1)
-      	  stops2.push(index);
-      	else
-      	  stops3.push(index);
-    	index = sequence.indexOf(codon2, index+1);
-    }
-
-    index = sequence.indexOf(codon3, 0);
-    while(index >= 0 && index < basesDisplayWidth)
-    {
-    	var frame;
-    	if(strand == -1) {
-    		var reversePos = sequenceLength-(index+leftBase+1);
-    		frame = 3 - ((reversePos+3)-1) % 3 -1;
-    	}	
-    	else {
-    		frame = (index + leftBase -1 ) % 3;
-    	}
-    	
-    	index++;
-    	if(frame == 0)	
-      	  stops1.push(index);
-      	else if(frame == 1)
-      	  stops2.push(index);
-      	else
-      	  stops3.push(index);
-    	index = sequence.indexOf(codon3, index+1);
-    }
-}
-
-
 function drawFeatures(leftBase, firstTime) {
 	var end = leftBase+basesDisplayWidth;
 	if(end > sequenceLength) {
@@ -613,7 +519,6 @@ function drawFeatures(leftBase, firstTime) {
 			{ uniqueName:srcFeature, start:leftBase, end:end, relationships:['part_of','derives_from'] }, 
 			leftBase, end, 11);
 }
-
 
 
 function getFeatureExons(transcript) {
@@ -635,25 +540,6 @@ function getFeatureExons(transcript) {
 	  exons.sort(sortFeatures);
 	}
 	return exons;
-}
-
-function sortFeatures(a, b){
-	//Compare "a" and "b" in some fashion, and return -1, 0, or 1
-	if( (a.start - b.start) > 0) {
-	  if(a.strand == 1) {
-		return 1;
-	  } else {
-		return -1;
-	  }
-	}
-	else if( (b.start - a.start) > 0) {
-	  if(a.strand == 1) {
-		return -1;
-	  } else {
-		return 1;
-	  }
-	}
-	return 0;
 }
 
 function getSegmentFrameShift(exons, index, phase) {
@@ -717,6 +603,9 @@ function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour
 	}
 	
 	var lpos = margin+((exonL.end   - leftBase )/basePerPixel) + 1;
+	if(lpos > displayWidth) {
+	  return;
+	}
 	var rpos = margin+((exonR.start - leftBase +1 )/basePerPixel) - 1;
 	var mid  = lpos+(rpos-lpos)/2;
 	
@@ -738,10 +627,16 @@ function drawArrow(leftBase, exon, ypos) {
 	var frameLineHeight2 = frameLineHeight/2;
 	if(exon.strand == 1) {
 	  var end = margin+((exon.end - leftBase )/basePerPixel) + 1;
+	  if(end > displayWidth) {
+		  return;
+	  }
 	  Xpoints = new Array(end, end+frameLineHeight2, end) ;
 	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+frameLineHeight);
 	} else {
 	  var start = margin+((exon.start - leftBase )/basePerPixel) - 1;
+	  if(start > displayWidth) {
+		  return;
+	  }
 	  Xpoints = new Array(start, start-frameLineHeight2, start) ;
 	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+frameLineHeight);
 	}
@@ -1082,74 +977,3 @@ var aSequence = function ajaxGetSequence(leftBase, end, firstTime, returned) {
     
     return;
 };
-
-
-//
-// Utilities
-//
-function handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end, firstTime) {
-
-	var jsonUrl = webService[serviceType]+serviceName;
-    debugLog(serviceName+" "+jsonUrl);
-    $.ajax({
-		  url: jsonUrl,
-		  data: dataArray,
-		  dataType: dataType[serviceType],
-		  global: false,
-		  success: function(returned) {
-
-    	ajaxFunction(leftBase, end, firstTime, returned);
-
-  },
-  beforeSend: function(XMLHttpRequest) {
-      //XMLHttpRequest.setRequestHeader("Connection", "keep-alive");
-  }, 
-  error: function(xhr, ajaxOptions, thrownError) {
-  	
-  	if(xhr.status == "408") {
-  		//
-  		// timeout repeat call
-  		handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end, firstTime);
-  	} else {
-  		alert(xhr.status+"\n"+thrownError);
-  	}
-  }
-  });
-
-  logJsonp(serviceName);
-}
-
-function escapeId(myid) { 
-	   return myid.replace(/(:|\.)/g,'\\$1');
-}
-
-function debugLog(txt) {
-	if(window.console) {
-		console.log(txt);
-	} else {
-        var ghgt = $('#graph').height();
-		var fhgt = $('#featureList').height(); 
-		var top = (marginTop+275)+ghgt+fhgt;
-
-		$('#logger').css('top', top+'px');
-		$('#logger').append("<br />"+txt);
-	}
-}
-
-function logJsonp(serviceName) {
-	if(dataType[serviceType] != "jsonp") {
-		return;
-	}
-	var $jsonScript = $('head script[src*='+serviceName+']');
-
-    for(var i=0; i<$jsonScript.length; i++) {
-    	var src = $jsonScript[i].src;
-    	$jsonScript[i].onerror = function(e) {
-            debugLog("ERROR :: "+src);
-        }; 
-        
-        $jsonScript[i].onload = function(e) {
-            debugLog("LOAD :: "+src);
-        };
-    }
-}
