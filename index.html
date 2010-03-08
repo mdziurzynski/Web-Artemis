@@ -114,16 +114,17 @@
 		 }
 		 
 		#rightDraggableEdge { 
-			width: 8px; height: 290px;
+			width: 12px; height: 12px;
 			border-right: 1px solid #FF0000;
 			border-bottom: 1px solid #FF0000;
-			}
+			position: absolute;
+			opacity:0.4; 
+		}
 			
 		#menuHeader {
 			position: absolute; /* for ie */
 			z-index: 1;
 		}
-
   	</style>
 		
 	<!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
@@ -227,6 +228,7 @@
 	<div id="featureList"></div>
 
 	<div id="logger"></div>
-	<div id="rightDraggableEdge" class="ui-widget-content"></div>
+	<div id="rightDraggableEdge" class="ui-resizable-se"></div>
+	<div id="properties" class="holder" style="display: none;"></div>
     </body>
 </html>
