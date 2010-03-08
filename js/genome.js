@@ -30,6 +30,7 @@ var showStopCodons = true;
 var showGC = false;
 var showAG = false;
 
+var features;
 var srcFeature = 'Pf3D7_01';
 
 var colour = [ 
@@ -148,11 +149,8 @@ function adjustFeatureDisplayPosition(drag) {
 	
 	if(!drag) {
 		cssObj = {
-		     'margin-left': margin+displayWidth-7+'px',
-		     'height': 8+'px',
-		     'position':'absolute',
-		     'top': marginTop+(frameLineHeight*16)+'px',
-		     'opacity':0.4
+		     'left': margin+displayWidth+'px',
+		     'top': marginTop+(frameLineHeight*16)+'px'
 		};
 		$('#rightDraggableEdge').css(cssObj);
 	} else {
@@ -542,6 +540,23 @@ function getFeatureExons(transcript) {
 	return exons;
 }
 
+function getFeaturePeptide(transcript) {
+	var nkids = transcript.features.length;
+	if(nkids > 0)
+	{
+	  for(var i=0; i<nkids; i++)
+	  {
+		var kid = transcript.features[i];	
+		if(kid.type == "polypeptide") {
+	       return kid;
+		}
+      }	
+	}
+	return -1;
+}
+
+
+
 function getSegmentFrameShift(exons, index, phase) {
   // find the number of bases in the segments before this one
   var base_count = 0;
@@ -706,13 +721,57 @@ function getSrcFeatureList(taxonomyid)
 
 function handleFeatureClick(tgt) {
 	featureSelected = $(tgt).attr('id');
-	
+
 	var width = $(tgt).css('borderLeftWidth');
     if(width == '1px') {
 	  $(tgt).css('border-width', '2px');
     } else {
       $(tgt).css('border-width', '1px');
     }
+    showProperties();
+}
+
+function showProperties() {
+    var nfeatures = features.length
+	var featurePropertyList = new Array();
+	featurePropertyList.push(featureSelected);
+	 
+	var name = featureSelected;
+	for(var i=0; i<nfeatures; i++ ) {
+		var feature = features[i];
+		var nkids = feature.features.length;
+	  
+		if(nkids > 0) {
+			for(var j=0; j<nkids; j++ ) { 
+				var kid = feature.features[j];
+				var exons = getFeatureExons(kid);
+				var nexons = exons.length;
+
+				for(var k=0; k<nexons; k++) {
+					var exon = exons[k];
+					if(exon.uniquename == featureSelected ||
+					   feature.uniquename == featureSelected) {
+						name = feature.uniquename;
+						featurePropertyList.push(feature.uniquename);
+						var polypep = getFeaturePeptide(kid);
+						if(polypep != -1) {
+							featurePropertyList.push(polypep.uniquename);
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+        
+    var serviceName = '/genes/featureproperties.json?';   
+	handleAjaxCalling(serviceName, aFeatureProps,
+		'us='+featurePropertyList, 
+		-1, 1, 0);
+        
+    $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
+    $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
+		width:550, position: 'top', title:name});
 }
 
 function positionFeatureList() {
@@ -821,16 +880,27 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureProps = function ajaxGetFeatureProp(leftBase, end, firstTime, returned) {
-	var features  = returned.response.features;
-	for(var i=0; i<features.length; i++) {	
-		var featureprops = features[i].props;
+var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, firstTime, returned) {
+	var featProps  = returned.response.features;
+	
+    for(var i=0; i<featProps.length; i++) {	
+		var featureprops = featProps[i].props;
+		for(var j=0; j<featureprops.length; j++) {
+		   $("div#DISP"+escapeId(featureSelected)).append(featureprops[j].name+"="+featureprops[j].value+";<br />");
+		}
+	}
+};
+
+var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, firstTime, returned) {
+	var featProps  = returned.response.features;
+	for(var i=0; i<featProps.length; i++) {	
+		var featureprops = featProps[i].props;
 		for(var j=0; j<featureprops.length; j++) {
 
-			$('#'+escapeId(features[i].uniquename+":PROPS")).append(featureprops[j].name+"="+featureprops[j].value+";");
+			$('#'+escapeId(featProps[i].uniquename+":PROPS")).append(featureprops[j].name+"="+featureprops[j].value+";<br />");
 			
 			if(featureprops[j].name == 'colour') {
-				var featureId = escapeId(features[i].uniquename);
+				var featureId = escapeId(featProps[i].uniquename);
 				$('#'+featureId).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 			}
 		}
@@ -839,7 +909,7 @@ var aFeatureProps = function ajaxGetFeatureProp(leftBase, end, firstTime, return
 
 var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 	
-	var features  = returned.response.features;
+	features  = returned.response.features;
 	var nfeatures = features.length;
 
 	debugLog("No. of features "+ nfeatures+"  "+leftBase+".."+end);
@@ -857,7 +927,11 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 		for(var j=0; j<nkids; j++ ) { 
 		  var kid = feature.features[j];
 		  
-		  if(kid.type == "mRNA") {  
+		  if(kid.type == "mRNA") {
+			/*var polypep = getFeaturePeptide(kid);
+			if(polypep != -1) {
+				featureToColourList.push(polypep.uniquename);
+			}*/
 			var exons = getFeatureExons(kid);
 			var nexons = exons.length;
 			var lastExon = 0;
@@ -928,7 +1002,7 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 	setupFeatureList(features);
 	if(featureToColourList.length > 0) {
 		var serviceName = '/genes/featureproperties.json?';
-		handleAjaxCalling(serviceName, aFeatureProps,
+		handleAjaxCalling(serviceName, aFeaturePropColours,
 			'us='+featureToColourList, 
 			//featureToColourArray, 
 			leftBase, 1, 0);
