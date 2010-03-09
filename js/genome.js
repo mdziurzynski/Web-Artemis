@@ -733,6 +733,8 @@ function handleFeatureClick(tgt) {
 
 function showProperties() {
     var nfeatures = features.length
+    
+    var featureStr = "&features="+featureSelected;
 	var featurePropertyList = new Array();
 	featurePropertyList.push(featureSelected);
 	 
@@ -753,9 +755,11 @@ function showProperties() {
 					   feature.uniquename == featureSelected) {
 						name = feature.uniquename;
 						featurePropertyList.push(feature.uniquename);
+						featureStr += "&features="+feature.uniquename;
 						var polypep = getFeaturePeptide(kid);
 						if(polypep != -1) {
 							featurePropertyList.push(polypep.uniquename);
+							featureStr += "&features="+polypep.uniquename;
 						}
 						break;
 					}
@@ -768,6 +772,10 @@ function showProperties() {
 	handleAjaxCalling(serviceName, aFeatureProps,
 		'us='+featurePropertyList, 
 		-1, 1, 0);
+	
+    serviceName = '/genes/featurecvterm.json?';   
+	handleAjaxCalling(serviceName, aFeatureCvTerms,
+			featureStr, -1, 1, 0);
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
@@ -880,16 +888,61 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, firstTime, returned) {
-	var featProps  = returned.response.features;
+var aFeatureCvTerms = function ajaxGetFeatureCvTerms(leftBase, end, firstTime, returned) {
+	var go = [ ['cellular_component', 'C'], 
+	           ['biological_process', 'P'], 
+	           ['molecular_function', 'F'] ];
+	var featureCvTerms = returned.response.features;
 	
-    for(var i=0; i<featProps.length; i++) {	
-		var featureprops = featProps[i].props;
-		for(var j=0; j<featureprops.length; j++) {
-		   $("div#DISP"+escapeId(featureSelected)).append(featureprops[j].name+"="+featureprops[j].value+";<br />");
+    for(var i=0; i<featureCvTerms.length; i++) {	
+		var featurecvterms = featureCvTerms[i].terms;
+		for(var j=0; j<featurecvterms.length; j++) {
+		   var cvName = featurecvterms[j].cv;
+		   if(cvName == 'genedb_products')
+			   cvName = 'product';
+		   
+		   var aspect = '';
+		   for(var k=0; k<go.length; k++) {
+			   if(go[k][0] == cvName) {
+				   aspect = ';aspect'+go[k][1];
+				   cvName = 'GO';
+			   }
+		   }
+		   
+		   $("div#DISP"+escapeId(featureSelected)).append(
+				   cvName+"="+featurecvterms[j].cvterm+aspect);
+		   var featureCvTermProps = featurecvterms[j].props;
+		   
+		   for(var k=0; k<featureCvTermProps.length; k++) {
+			   $("div#DISP"+escapeId(featureSelected)).append(";"+featureCvTermProps[k].prop);
+		   }
+		   
+		   $("div#DISP"+escapeId(featureSelected)).append("<br />");
 		}
 	}
 };
+
+var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private' ];
+var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, firstTime, returned) {
+	
+	var featProps  = returned.response.features;
+    for(var i=0; i<featProps.length; i++) {	
+		var featureprops = featProps[i].props;
+		for(var j=0; j<featureprops.length; j++) {
+			if(!containsString(propertyFilter, featureprops[j].name))
+				$("div#DISP"+escapeId(featureSelected)).append(
+						featureprops[j].name+"="+featureprops[j].value+"<br />");
+		}
+	}
+};
+
+function containsString(anArray, aStr) {
+	for(var i=0; i<anArray.length; i++) {
+		if(aStr == anArray[i])
+			return true;
+	}
+	return false;
+}
 
 var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, firstTime, returned) {
 	var featProps  = returned.response.features;
@@ -897,7 +950,9 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, firs
 		var featureprops = featProps[i].props;
 		for(var j=0; j<featureprops.length; j++) {
 
-			$('#'+escapeId(featProps[i].uniquename+":PROPS")).append(featureprops[j].name+"="+featureprops[j].value+";<br />");
+			if(featureprops[j].name == 'comment')
+				$('#'+escapeId(featProps[i].uniquename+":PROPS")).append(
+						featureprops[j].name+"="+featureprops[j].value+";<br />");
 			
 			if(featureprops[j].name == 'colour') {
 				var featureId = escapeId(featProps[i].uniquename);
@@ -916,7 +971,6 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 
 	var ypos;
 	var featureStr = '';
-	//var featureToColourArray = '';
 	var featureToColourList = new Array();
 	
 	for(var i=0; i<nfeatures; i++ ) {
@@ -928,10 +982,10 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 		  var kid = feature.features[j];
 		  
 		  if(kid.type == "mRNA") {
-			/*var polypep = getFeaturePeptide(kid);
+			var polypep = getFeaturePeptide(kid);
 			if(polypep != -1) {
 				featureToColourList.push(polypep.uniquename);
-			}*/
+			}
 			var exons = getFeatureExons(kid);
 			var nexons = exons.length;
 			var lastExon = 0;
@@ -1004,7 +1058,6 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 		var serviceName = '/genes/featureproperties.json?';
 		handleAjaxCalling(serviceName, aFeaturePropColours,
 			'us='+featureToColourList, 
-			//featureToColourArray, 
 			leftBase, 1, 0);
 	}
 	return;
