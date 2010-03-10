@@ -753,7 +753,11 @@ function showProperties() {
 					var exon = exons[k];
 					if(exon.uniquename == featureSelected ||
 					   feature.uniquename == featureSelected) {
-						name = feature.uniquename;
+						
+						if(nkids == 1)
+							name = feature.uniquename;
+						else
+							name = kid.uniquename;
 						featurePropertyList.push(feature.uniquename);
 						featureStr += "&features="+feature.uniquename;
 						var polypep = getFeaturePeptide(kid);
@@ -889,40 +893,10 @@ function positionLists() {
 }
 
 var aFeatureCvTerms = function ajaxGetFeatureCvTerms(leftBase, end, firstTime, returned) {
-	var go = [ ['cellular_component', 'C'], 
-	           ['biological_process', 'P'], 
-	           ['molecular_function', 'F'] ];
-	var featureCvTerms = returned.response.features;
-	
-    for(var i=0; i<featureCvTerms.length; i++) {	
-		var featurecvterms = featureCvTerms[i].terms;
-		for(var j=0; j<featurecvterms.length; j++) {
-		   var cvName = featurecvterms[j].cv;
-		   if(cvName == 'genedb_products')
-			   cvName = 'product';
-		   
-		   var aspect = '';
-		   for(var k=0; k<go.length; k++) {
-			   if(go[k][0] == cvName) {
-				   aspect = ';aspect'+go[k][1];
-				   cvName = 'GO';
-			   }
-		   }
-		   
-		   $("div#DISP"+escapeId(featureSelected)).append(
-				   cvName+"="+featurecvterms[j].cvterm+aspect);
-		   var featureCvTermProps = featurecvterms[j].props;
-		   
-		   for(var k=0; k<featureCvTermProps.length; k++) {
-			   $("div#DISP"+escapeId(featureSelected)).append(";"+featureCvTermProps[k].prop);
-		   }
-		   
-		   $("div#DISP"+escapeId(featureSelected)).append("<br />");
-		}
-	}
+	showFeatureCvTerm(returned.response.features, featureSelected);
 };
 
-var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private' ];
+var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
 var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, firstTime, returned) {
 	
 	var featProps  = returned.response.features;
