@@ -98,11 +98,17 @@ $(document).ready(function() {
 		stop: function(event, ui) {
 			var xpos = parseInt(
 					$('#rightDraggableEdge').css('margin-left').replace("px", ""));
-			//var ypos = parseInt(
-			//		$('#rightDraggableEdge').css('top').replace("px", ""));
 			
 			frameLineHeight = (ui.offset.top-marginTop+8)/17;
 			displayWidth = (xpos-margin)+ui.offset.left;
+			
+			// adjust feature display canvas
+			var cssObj = {
+					 'height': frameLineHeight*17+'px',
+					 'width': displayWidth+'px'
+			};
+			$('#featureDisplay').css(cssObj);
+			
 			drawAll($(".slider").slider("value"), 0);
 			adjustFeatureDisplayPosition(true);
 			drawFrameAndStrand();
@@ -117,30 +123,29 @@ $(document).ready(function() {
 
 //
 function adjustFeatureDisplayPosition(drag) {
-	
 	var cssObj = {
 			 'margin-left': margin+'px',
 			 'position':'absolute',
 			 'top': marginTop+(frameLineHeight*17.5)+'px'
 	};
 	$('#left').css(cssObj);
-		
+
 	cssObj = {
 			'margin-left': margin+displayWidth+'px',
 			'position':'absolute',
 			'top': marginTop+(frameLineHeight*17.5)+'px'
 	};
 	$('#right').css(cssObj);
-	
+
 	var buttonWidth = $('#left').width()+5;
 	cssObj = {
         'margin-left': margin+buttonWidth+'px',
         'width': displayWidth-buttonWidth+'px',
         'position':'absolute',
-        'top':marginTop+(frameLineHeight*16.5)+'px'
+        'top':marginTop+(frameLineHeight*17.0)+'px'
 	};
 	$('#slider_container').css(cssObj);
-	
+
 	cssObj = {
 	     'margin-left': margin+margin+displayWidth+'px',
 	     'height': (frameLineHeight*16)+'px',
@@ -149,7 +154,7 @@ function adjustFeatureDisplayPosition(drag) {
 	};
 	$('#slider_vertical_container').css(cssObj);
 	$('#featureDisplay').css('margin-top', marginTop-5+'px');
-	
+
 	if(!drag) {
 		cssObj = {
 		     'left': margin+displayWidth+'px',
@@ -168,7 +173,7 @@ function addEventHandlers() {
 		showStopCodons = !showStopCodons;
 		drawAll($(".slider").slider("value"), 0);
 	});
-	
+
 	// graphs
 	$('#gcGraphToggle').click(function(event){
 		if(showGC) {
@@ -181,7 +186,6 @@ function addEventHandlers() {
 			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
 			showGC = true;	
 		}
-		
 		drawAll($(".slider").slider("value"), 0);
 	});
 	
@@ -196,7 +200,6 @@ function addEventHandlers() {
 			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
 			showAG = true;	
 		}
-		
 		drawAll($(".slider").slider("value"), 0);
 	});
 	
@@ -237,8 +240,6 @@ function addEventHandlers() {
 }
 
 //
-//
-
 function drawFrameAndStrand(){
 	var ypos = marginTop;
 	for(var i=0;i<3; i++)
@@ -296,7 +297,6 @@ function drawAll(leftBase) {
 	  basePerPixel  = baseInterval/screenInterval;
 
       $('#featureDisplay').html('');
-
       var showSequence = true;
       
       if(minimumDisplay &&
@@ -318,9 +318,6 @@ function drawAll(leftBase) {
 
 function getSequence(leftBase) {
 	var end = leftBase+basesDisplayWidth;
-/*	if(end > sequenceLength) {
-		end = sequenceLength;
-	}*/
 	
 	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
 	  end+=2;
@@ -387,7 +384,6 @@ function drawStopOnCanvas(stop, ypos) {
 				{color: colour, stroke:'1'});
 	}
 }
-
 
 function drawFwdStop(stop, frame) {
 	
@@ -488,7 +484,7 @@ function drawAminoAcids(leftBasePosition) {
 	  };		  
 	  $('#'+fwdid).css(cssObj);	   
 
-	  
+
   	  var reversePos = sequenceLength-(i+leftBasePosition+1);
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
@@ -510,7 +506,6 @@ function drawAminoAcids(leftBasePosition) {
   }
 }
 
-
 function drawFeatures(leftBase) {
 	var end = leftBase+basesDisplayWidth;
 	if(end > sequenceLength) {
@@ -527,7 +522,6 @@ function drawFeatures(leftBase) {
 			{ uniqueName:srcFeature, start:leftBase, end:end, relationships:['part_of','derives_from'] }, 
 			leftBase, end, 11);
 }
-
 
 function getFeatureExons(transcript) {
 	var nkids = transcript.features.length;
@@ -1035,15 +1029,15 @@ var aFeature = function ajaxGetFeatures(leftBase, end, returned) {
 	
 	$('#features').html(featureStr);
 	
-	if($('.feat').height() != frameLineHeight) {
-		var cssObj = {
+	if(!minimumDisplay) {
+		if($('.feat').height() != frameLineHeight) {
+			var cssObj = {
 				'height':frameLineHeight+'px',
 				'line-height' : frameLineHeight+'px'
 			};
-		$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
-	}
+			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
+		}
 	
-	if(!minimumDisplay) {
 		setupFeatureList(features);
 		if(featureToColourList.length > 0) {
 			var serviceName = '/genes/featureproperties.json?';
