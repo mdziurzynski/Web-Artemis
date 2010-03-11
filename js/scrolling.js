@@ -25,11 +25,11 @@ function scroll(direction) {
         		return false;
         	}
         	
-            drawAll(leftBase, 0);
+        	drawAll(leftBase, 0);
         	$(".slider").slider('option', 'value', leftBase);
             
             var code2run = 'scroll('+ direction + ')';
-            setTimeout(code2run,500);
+            setTimeout(code2run,80);
     }
     return false;
 }
@@ -37,19 +37,27 @@ function scroll(direction) {
 function addScrollEventHandlers() {
 	$('#left').mousedown(function(event){
 		scrolling = 1;
+    	minimumDisplay = true
 		scroll(-1);
 	});
 	
 	$('#left').mouseup(function(event){
 		scrolling = 0;
+    	minimumDisplay = false
+		var leftBase = $(".slider").slider('option', 'value');
+    	drawAll(leftBase, 0);
 	});
 	
 	$('#right').mousedown(function(event){
 		scrolling = 1;
+    	minimumDisplay = true
 		scroll(1);
 	});
 	
 	$('#right').mouseup(function(event){
 		scrolling = 0;
+    	minimumDisplay = false;
+		var leftBase = $(".slider").slider('option', 'value');
+		drawAll(leftBase, 0);
 	});
 }

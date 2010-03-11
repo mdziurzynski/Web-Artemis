@@ -26,12 +26,15 @@ var baseInterval;
 var basePerPixel;
 var frameLineHeight = 12;
 var featureSelected = -1;
+
+var minimumDisplay = false;
 var showStopCodons = true;
 var showGC = false;
 var showAG = false;
 
 var features;
 var srcFeature = 'Pf3D7_01';
+var firstTime = true;
 
 var colour = [ 
     '255,255,255',
@@ -288,25 +291,32 @@ function addFrameLine(selector, ypos, frame) {
 	$('.'+frame).css(cssObj);
 }
 
-function drawAll(leftBase, firstTime) {
+function drawAll(leftBase) {
 	  baseInterval = (basesDisplayWidth/displayWidth)*screenInterval;
 	  basePerPixel  = baseInterval/screenInterval;
 
       $('#featureDisplay').html('');
 
-      if(firstTime == 1 || showStopCodons || showGC || showAG) {
-        getSequence(leftBase, firstTime);
+      var showSequence = true;
+      
+      if(minimumDisplay &&
+    	$('#slider_vertical_container').slider('option', 'value') >= 5000) {
+    	  showSequence = false;
+      }
+      
+      if(showSequence && (firstTime || showStopCodons || showGC || showAG)) {
+        getSequence(leftBase);
       } else {
     	$('#stop_codons').html('');
         $('#sequence').html('');
         $('#translation').html('');
       }
 
-	  drawFeatures(leftBase, firstTime);
-	  drawTicks(leftBase, firstTime);
+	  drawFeatures(leftBase);
+	  drawTicks(leftBase);
 }
 
-function getSequence(leftBase, firstTime) {
+function getSequence(leftBase) {
 	var end = leftBase+basesDisplayWidth;
 /*	if(end > sequenceLength) {
 		end = sequenceLength;
@@ -319,7 +329,7 @@ function getSequence(leftBase, firstTime) {
 	var serviceName = '/sourcefeatures/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
 			{ uniqueName:srcFeature, start:leftBase, end:end }, 
-			leftBase, 1,firstTime);
+			leftBase, 1);
 }
 
 function drawStopCodons(leftBase) {
@@ -501,7 +511,7 @@ function drawAminoAcids(leftBasePosition) {
 }
 
 
-function drawFeatures(leftBase, firstTime) {
+function drawFeatures(leftBase) {
 	var end = leftBase+basesDisplayWidth;
 	if(end > sequenceLength) {
 		end = sequenceLength;
@@ -603,6 +613,9 @@ function drawFeature(leftBase, feature, featureStr, ypos, className) {
 }
 
 function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour) {
+	if(minimumDisplay)
+		return;
+	
 	var exonL;
 	var exonR;
 	
@@ -635,6 +648,9 @@ function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour
 }
 
 function drawArrow(leftBase, exon, ypos) {
+	if(minimumDisplay)
+		return;
+	
 	var Xpoints;
 	var Ypoints;
 	ypos++;
@@ -660,7 +676,7 @@ function drawArrow(leftBase, exon, ypos) {
 }
 
 
-function drawTicks(leftBasePosition, firstTime) {
+function drawTicks(leftBasePosition) {
 	var nticks = basesDisplayWidth/baseInterval;
 
 	var baseRemainder = (leftBasePosition-1) % baseInterval;
@@ -840,7 +856,7 @@ function appendFeatureToList(feature) {
 //
 // AJAX functions
 //
-var aSrcFeature = function ajaxGetSrcFeatures(leftBase, end, firstTime, returned) {
+var aSrcFeature = function ajaxGetSrcFeatures(leftBase, end, returned) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
@@ -860,7 +876,7 @@ var aSrcFeature = function ajaxGetSrcFeatures(leftBase, end, firstTime, returned
 	});
 };
 
-var aOrganism = function ajaxGetOrganisms(leftBase, end, firstTime, returned) {
+var aOrganism = function ajaxGetOrganisms(leftBase, end, returned) {
 	var organisms  = returned.response.organisms;
 	$('#organismSelector').html('<select id="organismList"></select>');
 	$('#organismList').append('<option value="Organism:">Organism:</option>');
@@ -892,12 +908,12 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureCvTerms = function ajaxGetFeatureCvTerms(leftBase, end, firstTime, returned) {
+var aFeatureCvTerms = function ajaxGetFeatureCvTerms(leftBase, end, returned) {
 	showFeatureCvTerm(returned.response.features, featureSelected);
 };
 
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
-var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, firstTime, returned) {
+var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, returned) {
 	
 	var featProps  = returned.response.features;
     for(var i=0; i<featProps.length; i++) {	
@@ -918,7 +934,7 @@ function containsString(anArray, aStr) {
 	return false;
 }
 
-var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, firstTime, returned) {
+var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, returned) {
 	var featProps  = returned.response.features;
 	for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].props;
@@ -936,7 +952,7 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, firs
 	}
 };
 
-var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
+var aFeature = function ajaxGetFeatures(leftBase, end, returned) {
 	
 	features  = returned.response.features;
 	var nfeatures = features.length;
@@ -1027,20 +1043,23 @@ var aFeature = function ajaxGetFeatures(leftBase, end, firstTime, returned) {
 		$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
 	}
 	
-	setupFeatureList(features);
-	if(featureToColourList.length > 0) {
-		var serviceName = '/genes/featureproperties.json?';
-		handleAjaxCalling(serviceName, aFeaturePropColours,
-			'us='+featureToColourList, 
-			leftBase, 1, 0);
+	if(!minimumDisplay) {
+		setupFeatureList(features);
+		if(featureToColourList.length > 0) {
+			var serviceName = '/genes/featureproperties.json?';
+			handleAjaxCalling(serviceName, aFeaturePropColours,
+					'us='+featureToColourList, 
+					leftBase, 1, 0);
+		}
 	}
 	return;
 };
 
 
-var aSequence = function ajaxGetSequence(leftBase, end, firstTime, returned) {
+var aSequence = function ajaxGetSequence(leftBase, end, returned) {
 
-	sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
+	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
+	sequence = returned.response.sequence[0].dna.toUpperCase();
 	var seqLen = returned.response.sequence[0].length;
 
 	debugLog("getSequence() sequence length = "+seqLen);
@@ -1062,14 +1081,16 @@ var aSequence = function ajaxGetSequence(leftBase, end, firstTime, returned) {
 	}
     //console.timeEnd('draw stop codons');  
 
-    if (firstTime == 1) {
+    if (firstTime) {
     	$("#slider_vertical_container").slider('option', 'max', sequenceLength);
     	$("#slider_vertical_container").slider('option', 'value', basesDisplayWidth);
     			
     	$(".slider").slider('option', 'max', sequenceLength);
     	$(".slider").slider('option', 'step', basesDisplayWidth/2);
+
+    	firstTime = false;
 	}
-    
+
     if(showGC || showAG) {
     	drawContentGraphs(basesDisplayWidth, leftBase, sequence, showAG, showGC);
     }

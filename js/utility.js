@@ -17,7 +17,7 @@ function sortFeatures(a, b){
 	return 0;
 }
 
-function handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end, firstTime) {
+function handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end) {
 
 	var jsonUrl = webService[serviceType]+serviceName;
     debugLog(serviceName+" "+jsonUrl);
@@ -28,7 +28,7 @@ function handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end, 
 		  global: false,
 		  success: function(returned) {
 
-    	ajaxFunction(leftBase, end, firstTime, returned);
+    	ajaxFunction(leftBase, end, returned);
 
   },
   beforeSend: function(XMLHttpRequest) {
@@ -39,7 +39,7 @@ function handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end, 
   	if(xhr.status == "408") {
   		//
   		// timeout repeat call
-  		handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end, firstTime);
+  		handleAjaxCalling(serviceName, ajaxFunction, dataArray, leftBase, end);
   	} else {
   		alert(xhr.status+"\n"+thrownError);
   	}
