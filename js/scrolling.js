@@ -2,9 +2,8 @@
 // SCROLLING
 //
 var scrolling = 0;
-var display;
 
-function scroll(direction) {
+function scroll(direction, featureDisplay) {
     if (scrolling == 1) {
     	
     	var leftBase = $(".slider").slider('option', 'value');
@@ -26,24 +25,25 @@ function scroll(direction) {
         		return false;
         	}
         	
-        	display.leftBase = leftBase;
-        	drawAll(display);
+        	featureDisplay.leftBase = leftBase;
+        	drawAll(featureDisplay);
         	$(".slider").slider('option', 'value', leftBase);
-            
-            var code2run = 'scroll('+ direction +')';
-            setTimeout(code2run,80);
+
+        	//var code2run = "scroll("+direction+"," +"featureDisplay)";
+            setTimeout(function() { scroll(direction, featureDisplay); }, 80);
+
     }
     return false;
 }
 
 function addScrollEventHandlers(featureDisplay) {
-	display = featureDisplay;
+
 	$('#left').mousedown(function(event){
 		scrolling = 1;
     	minimumDisplay = true
-		scroll(-1);
+		scroll(-1, featureDisplay);
 	});
-	
+
 	$('#left').mouseup(function(event){
 		scrolling = 0;
     	minimumDisplay = false
@@ -55,7 +55,7 @@ function addScrollEventHandlers(featureDisplay) {
 	$('#right').mousedown(function(event){
 		scrolling = 1;
     	minimumDisplay = true
-		scroll(1);
+		scroll(1, featureDisplay);
 	});
 	
 	$('#right').mouseup(function(event){
