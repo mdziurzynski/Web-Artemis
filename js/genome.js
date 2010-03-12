@@ -14,17 +14,13 @@ var dataType = [ "json", "jsonp", "jsonp", "jsonp" ];
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000
 
-var marginTop = 40;
-var margin = 5;
 
-var basesDisplayWidth = 10000;
+var margin = 5;
 var displayWidth = 1000;
-var sequenceLength = 16000;
-var sequence;
+
 var screenInterval = 100;
 var baseInterval;
 var basePerPixel;
-var frameLineHeight = 12;
 var featureSelected = -1;
 
 var minimumDisplay = false;
@@ -33,7 +29,6 @@ var showGC = false;
 var showAG = false;
 
 var features;
-var srcFeature = 'Pf3D7_01';
 var firstTime = true;
 
 var colour = [ 
@@ -58,22 +53,23 @@ var colour = [
 ];
 
 $(document).ready(function() {
-	
+
 	var tmpSrcFeature = getUrlVars()["src"];
-	if(tmpSrcFeature)
-		srcFeature = tmpSrcFeature;
 	var leftBase = getUrlVars()["base"];
 	if(!leftBase)
 		leftBase = 1;
 	else
 		leftBase = parseInt(leftBase);
-	adjustFeatureDisplayPosition(false);
+	
+	var featureDisplay = new featureDisplayObject(10000, 40, 16000, tmpSrcFeature, 12, leftBase);
+
+	adjustFeatureDisplayPosition(false, featureDisplay);
 	
 	$("#slider_vertical_container").slider({
 		orientation: "vertical",
 		min: 140,
-		max: sequenceLength,
-		value: basesDisplayWidth,
+		max: featureDisplay.sequenceLength,
+		value: featureDisplay.basesDisplayWidth,
 		step: 10000,
 		change: function(event, ui) {
 		  var basesInView = $('#slider_vertical_container').slider('option', 'value');
@@ -84,19 +80,19 @@ $(document).ready(function() {
 			  showStopCodons = true;
 		  }
 		  
-		  basesDisplayWidth = ui.value;
-		  drawAll($(".slider").slider("value"));
-		  $(".slider").slider('option', 'step', basesDisplayWidth/2);
+		  featureDisplay.basesDisplayWidth = ui.value;
+		  drawAll(featureDisplay);
+		  $(".slider").slider('option', 'step', featureDisplay.basesDisplayWidth/2);
 		}
 	});
 
 	$(".slider").slider( {
 		animate: true,
 		min : 1,
-		max : sequenceLength,
-		step : basesDisplayWidth/2,
+		max : featureDisplay.sequenceLength,
+		step : featureDisplay.basesDisplayWidth/2,
 		change : function(ev, ui) {
-			drawAll(ui.value);
+			drawAll(featureDisplay);
 		}
 	});
 	
@@ -107,41 +103,58 @@ $(document).ready(function() {
 			var xpos = parseInt(
 					$('#rightDraggableEdge').css('margin-left').replace("px", ""));
 			
-			frameLineHeight = (ui.offset.top-marginTop+8)/17;
+			featureDisplay.frameLineHeight = (ui.offset.top-featureDisplay.marginTop+8)/17;
 			displayWidth = (xpos-margin)+ui.offset.left;
 			
 			// adjust feature display canvas
 			var cssObj = {
-					 'height': frameLineHeight*17+'px',
+					 'height': featureDisplay.frameLineHeight*17+'px',
 					 'width': displayWidth+'px'
 			};
 			$('#featureDisplay').css(cssObj);
 			
-			drawAll($(".slider").slider("value"));
-			adjustFeatureDisplayPosition(true);
-			drawFrameAndStrand();
+			drawAll(featureDisplay);
+			adjustFeatureDisplayPosition(true, featureDisplay);
+			drawFrameAndStrand(featureDisplay);
 		}
 	});
 	
-    drawFrameAndStrand();
-	drawAll(leftBase);
-	getOrganismList();
-	addEventHandlers();
+    drawFrameAndStrand(featureDisplay);
+	drawAll(featureDisplay);
+	getOrganismList(featureDisplay);
+	addEventHandlers(featureDisplay);
 });
 
+function featureDisplayObject(basesDisplayWidth, marginTop, sequenceLength, 
+		                      srcFeature, frameLineHeight, leftBase) {
+	this.basesDisplayWidth = basesDisplayWidth;
+	this.marginTop = marginTop;
+	this.sequenceLength = sequenceLength;
+	if(srcFeature)
+	  this.srcFeature = srcFeature;
+	else
+	  this.srcFeature = 'Pf3D7_01';
+	this.frameLineHeight = frameLineHeight;
+	this.leftBase = leftBase;
+	this.sequence;
+}
+
 //
-function adjustFeatureDisplayPosition(drag) {
+function adjustFeatureDisplayPosition(drag, featureDisplay) {
+	var thisMarginTop = featureDisplay.marginTop;
+	var thisFLH = featureDisplay.frameLineHeight;
+	
 	var cssObj = {
 			 'margin-left': margin+'px',
 			 'position':'absolute',
-			 'top': marginTop+(frameLineHeight*17.5)+'px'
+			 'top': thisMarginTop+(thisFLH*17.5)+'px'
 	};
 	$('#left').css(cssObj);
 
 	cssObj = {
 			'margin-left': margin+displayWidth+'px',
 			'position':'absolute',
-			'top': marginTop+(frameLineHeight*17.5)+'px'
+			'top': thisMarginTop+(thisFLH*17.5)+'px'
 	};
 	$('#right').css(cssObj);
 
@@ -150,36 +163,36 @@ function adjustFeatureDisplayPosition(drag) {
         'margin-left': margin+buttonWidth+'px',
         'width': displayWidth-buttonWidth+'px',
         'position':'absolute',
-        'top':marginTop+(frameLineHeight*17.0)+'px'
+        'top':thisMarginTop+(thisFLH*17.0)+'px'
 	};
 	$('#slider_container').css(cssObj);
 
 	cssObj = {
 	     'margin-left': margin+margin+displayWidth+'px',
-	     'height': (frameLineHeight*16)+'px',
+	     'height': (thisFLH*16)+'px',
 	     'position':'absolute',
-	     'top': marginTop+7+'px'
+	     'top': thisMarginTop+7+'px'
 	};
 	$('#slider_vertical_container').css(cssObj);
-	$('#featureDisplay').css('margin-top', marginTop-5+'px');
+	$('#featureDisplay').css('margin-top', thisMarginTop-5+'px');
 
 	if(!drag) {
 		cssObj = {
 		     'left': margin+displayWidth+'px',
-		     'top': marginTop+(frameLineHeight*16)+'px'
+		     'top': thisMarginTop+(thisFLH*16)+'px'
 		};
 		$('#rightDraggableEdge').css(cssObj);
 	} else {
-		$('#rightDraggableEdge').css('top',marginTop+(frameLineHeight*16)+'px');
+		$('#rightDraggableEdge').css('top',thisMarginTop+(thisFLH*16)+'px');
 	}
 }
 
 //
-function addEventHandlers() {
+function addEventHandlers(featureDisplay) {
 	// show/hide stop codons
 	$('#stopCodonToggle').click(function(event){
 		showStopCodons = !showStopCodons;
-		drawAll($(".slider").slider("value"));
+		drawAll(featureDisplay);
 	});
 
 	// graphs
@@ -194,7 +207,7 @@ function addEventHandlers() {
 			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
 			showGC = true;	
 		}
-		drawAll($(".slider").slider("value"));
+		drawAll(featureDisplay);
 	});
 	
 	$('#agGraphToggle').click(function(event){
@@ -208,7 +221,7 @@ function addEventHandlers() {
 			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
 			showAG = true;	
 		}
-		drawAll($(".slider").slider("value"));
+		drawAll(featureDisplay);
 	});
 	
 	// popup
@@ -244,36 +257,39 @@ function addEventHandlers() {
 	 });
 	
 	//scrolling
-	addScrollEventHandlers();
+	addScrollEventHandlers(featureDisplay);
 }
 
 //
-function drawFrameAndStrand(){
-	var ypos = marginTop;
+function drawFrameAndStrand(featureDisplay){
+	var ypos = featureDisplay.marginTop;
+	var thisFLH = featureDisplay.frameLineHeight;
+	
 	for(var i=0;i<3; i++)
 	{
 	  $('.fwdFrame'+i).html('');
-	  addFrameLine('.fwdFrames',ypos,'fwdFrame'+i);
-	  ypos+=frameLineHeight*2;
+	  addFrameLine('.fwdFrames',ypos,'fwdFrame'+i, featureDisplay);
+	  ypos+=thisFLH*2;
 	}
 	
-	addStrandLine('.strands', ypos, 'fwdStrand');
-	ypos+=frameLineHeight*3;
-	addStrandLine('.strands', ypos, 'bwdStrand');
+	addStrandLine('.strands', ypos, 'fwdStrand', featureDisplay);
+	ypos+=thisFLH*3;
+	addStrandLine('.strands', ypos, 'bwdStrand', featureDisplay);
 	
-	ypos+=frameLineHeight*2;
+	ypos+=thisFLH*2;
 	for(var i=0;i<3; i++)
 	{
 	  $('.bwdFrame'+i).html('');
-	  addFrameLine('.bwdFrames',ypos,'bwdFrame'+i);
-	  ypos+=frameLineHeight*2;
+	  addFrameLine('.bwdFrames',ypos,'bwdFrame'+i, featureDisplay);
+	  ypos+=thisFLH*2;
 	}
 }
 
-function addStrandLine(selector, ypos, strand) {
+function addStrandLine(selector, ypos, strand, featureDisplay) {
+	var thisFLH = featureDisplay.frameLineHeight;
 	var cssObj = {
-		'height':frameLineHeight+'px',
-		'line-height' : frameLineHeight+'px',
+		'height':thisFLH+'px',
+		'line-height' : thisFLH+'px',
 		'width':displayWidth+'px',
 		'margin-left': margin+'px',
 		'margin-top': ypos+'px',
@@ -285,10 +301,10 @@ function addStrandLine(selector, ypos, strand) {
 	$('.'+strand).css(cssObj);
 }
 
-function addFrameLine(selector, ypos, frame) {
+function addFrameLine(selector, ypos, frame, featureDisplay) {
 	var cssObj = {
-		'height':frameLineHeight+'px',
-		'line-height' : frameLineHeight+'px',
+		'height':featureDisplay.frameLineHeight+'px',
+		'line-height' : featureDisplay.frameLineHeight+'px',
 		'width':displayWidth+'px',
 		'margin-left': margin+'px',
 		'margin-top': ypos+'px',
@@ -300,8 +316,8 @@ function addFrameLine(selector, ypos, frame) {
 	$('.'+frame).css(cssObj);
 }
 
-function drawAll(leftBase) {
-	  baseInterval = (basesDisplayWidth/displayWidth)*screenInterval;
+function drawAll(featureDisplay) {
+	  baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	  basePerPixel  = baseInterval/screenInterval;
 
       $('#featureDisplay').html('');
@@ -313,19 +329,19 @@ function drawAll(leftBase) {
       }
       
       if(showSequence && (firstTime || showStopCodons || showGC || showAG)) {
-        getSequence(leftBase);
+        getSequence(featureDisplay);
       } else {
     	$('#stop_codons').html('');
         $('#sequence').html('');
         $('#translation').html('');
       }
 
-	  drawFeatures(leftBase);
-	  drawTicks(leftBase);
+	  drawFeatures(featureDisplay);
+	  drawTicks(featureDisplay);
 }
 
-function getSequence(leftBase) {
-	var end = leftBase+basesDisplayWidth;
+function getSequence(featureDisplay) {
+	var end = featureDisplay.leftBase+featureDisplay.basesDisplayWidth;
 
 	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
 	  end+=2;
@@ -333,11 +349,11 @@ function getSequence(leftBase) {
 
 	var serviceName = '/sourcefeatures/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
-			{ uniqueName:srcFeature, start:leftBase, end:end }, 
-			leftBase, 1);
+			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end }, 
+			featureDisplay);
 }
 
-function drawStopCodons(leftBase) {
+function drawStopCodons(featureDisplay) {
     var fwdStops1 = new Array();
     var fwdStops2 = new Array();
     var fwdStops3 = new Array();
@@ -347,42 +363,45 @@ function drawStopCodons(leftBase) {
     var bwdStops3 = new Array();
 
     //console.time('calculate stop codons');  
-    calculateStopCodons(leftBase, fwdStops1, fwdStops2, fwdStops3, 'TAG', 'TAA', 'TGA', 1);
-    calculateStopCodons(leftBase, bwdStops1, bwdStops2, bwdStops3, 'CTA', 'TTA', 'TCA', -1);
+    calculateStopCodons(featureDisplay, fwdStops1, fwdStops2, fwdStops3, 'TAG', 'TAA', 'TGA', 1);
+    calculateStopCodons(featureDisplay, bwdStops1, bwdStops2, bwdStops3, 'CTA', 'TTA', 'TCA', -1);
     //console.timeEnd('calculate stop codons');
 	
 	var nstops = fwdStops1.length + fwdStops2.length + fwdStops3.length +
 				 bwdStops1.length + bwdStops2.length + bwdStops3.length; 
 	if(nstops > 3000) {
 		var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
-		drawStopOnCanvas(fwdStops1, marginTop+((frameLineHeight*2)*0+1)-canvasTop);
-		drawStopOnCanvas(fwdStops2, marginTop+((frameLineHeight*2)*1+1)-canvasTop);
-		drawStopOnCanvas(fwdStops3, marginTop+((frameLineHeight*2)*2+1)-canvasTop);
+		var mTop = featureDisplay.marginTop;
+		var flh  = featureDisplay.frameLineHeight;
+		
+		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh);
+		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh);
+		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh);
 	
-		drawStopOnCanvas(bwdStops1, marginTop+(frameLineHeight*10)+frameLineHeight+((frameLineHeight*2)*0+1)-canvasTop);
-		drawStopOnCanvas(bwdStops2, marginTop+(frameLineHeight*10)+frameLineHeight+((frameLineHeight*2)*1+1)-canvasTop);
-		drawStopOnCanvas(bwdStops3, marginTop+(frameLineHeight*10)+frameLineHeight+((frameLineHeight*2)*2+1)-canvasTop);
+		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh);
+		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh);
+		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh);
 	} else {
 		//console.time('draw fwd stop codons');
-		drawFwdStop(fwdStops1, 0);
-		drawFwdStop(fwdStops2, 1);
-		drawFwdStop(fwdStops3, 2);
+		drawFwdStop(fwdStops1, 0, featureDisplay);
+		drawFwdStop(fwdStops2, 1, featureDisplay);
+		drawFwdStop(fwdStops3, 2, featureDisplay);
 		//console.timeEnd('draw fwd stop codons');
 	
 		//console.time('draw bwd stop codons');  
-		drawBwdStop(bwdStops1, 0);
-		drawBwdStop(bwdStops2, 1);
-		drawBwdStop(bwdStops3, 2);
+		drawBwdStop(bwdStops1, 0, featureDisplay);
+		drawBwdStop(bwdStops2, 1, featureDisplay);
+		drawBwdStop(bwdStops3, 2, featureDisplay);
 		//console.timeEnd('draw bwd stop codons');
 		
-		if($('.bases').height() != frameLineHeight) {
-		  $('.bases').css({'height' : frameLineHeight+'px'});
+		if($('.bases').height() != featureDisplay.frameLineHeight) {
+		  $('.bases').css({'height' : featureDisplay.frameLineHeight+'px'});
 		}
 	}
 };
 
 
-function drawStopOnCanvas(stop, ypos) {
+function drawStopOnCanvas(stop, ypos, frameLineHeight) {
 	var len=stop.length;
 	var colour = '#000000';
 	for(var i=0; i<len; i++ ) {
@@ -393,10 +412,10 @@ function drawStopOnCanvas(stop, ypos) {
 	}
 }
 
-function drawFwdStop(stop, frame) {
-	
+function drawFwdStop(stop, frame, featureDisplay) {
+
   var len=stop.length;
-  var ypos = marginTop+((frameLineHeight*2)*frame);
+  var ypos = featureDisplay.marginTop+((featureDisplay.frameLineHeight*2)*frame);
 
   var fwdStopsStr = '';
   for(var i=0; i<len; i+=2 )
@@ -418,9 +437,10 @@ function drawFwdStop(stop, frame) {
   $('#stop_codons').append(fwdStopsStr);
 }
 
-function drawBwdStop(stop, frame) {
+function drawBwdStop(stop, frame, featureDisplay) {
   var len=stop.length;
-  var ypos = marginTop+(frameLineHeight*10)+frameLineHeight+((frameLineHeight*2)*frame);
+  var ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*10)+
+  			featureDisplay.frameLineHeight+((featureDisplay.frameLineHeight*2)*frame);
 
   var bwdStopsStr = '';
   for(var i=0; i<len; i+=2 )
@@ -442,19 +462,19 @@ function drawBwdStop(stop, frame) {
   $('#stop_codons').append(bwdStopsStr);
 }
 
-function drawCodons(leftBasePosition) {
-  var yposFwd = marginTop+(6*frameLineHeight);
-  var yposBwd = yposFwd+(frameLineHeight*3);
+function drawCodons(featureDisplay) {
+  var yposFwd = featureDisplay.marginTop+(6*featureDisplay.frameLineHeight);
+  var yposBwd = yposFwd+(featureDisplay.frameLineHeight*3);
   var xpos = margin;
-  for(var i=0;i<basesDisplayWidth; i++) {
+  for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
 	  
-	  if(i+leftBasePosition > sequenceLength)
+	  if(i+featureDisplay.leftBase > sequenceLength)
 		  break;
 	  
 	  var fwdid = 'fwdbase'+i;
 	  var bwdid = 'bwdbase'+i;
-	  $('#sequence').append('<div class="base" id="'+fwdid+'" >'+sequence[i]+'</div>');
-	  $('#sequence').append('<div class="base" id="'+bwdid+'" >'+complement(sequence[i])+'</div>');
+	  $('#sequence').append('<div class="base" id="'+fwdid+'" >'+featureDisplay.sequence[i]+'</div>');
+	  $('#sequence').append('<div class="base" id="'+bwdid+'" >'+complement(featureDisplay.sequence[i])+'</div>');
 
 	  var cssObj = {
 			  'margin-top': yposFwd+'px',
@@ -471,19 +491,20 @@ function drawCodons(leftBasePosition) {
   }
 }
 
-function drawAminoAcids(leftBasePosition) {
+function drawAminoAcids(featureDisplay) {
   var xpos = margin;
-  for(var i=0;i<basesDisplayWidth; i++) {
+  for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
 	  
-	  if(i+leftBasePosition > sequenceLength)
+	  if(i+featureDisplay.leftBase > sequenceLength)
 		  break;
 	  
-	  var frame = (leftBasePosition-1+i) % 3;
+	  var frame = (featureDisplay.leftBase-1+i) % 3;
 	  
-	  var yposFwd = marginTop+(frame*(frameLineHeight*2));
+	  var yposFwd = featureDisplay.marginTop+(frame*(featureDisplay.frameLineHeight*2));
 	  var fwdid = 'fwdAA1'+i;
 	  $('#translation').append('<div class="aminoacid" id="'+fwdid+'" >'+
-			  getCodonTranslation(sequence[i], sequence[i+1], sequence[i+2])+'</div>');
+			  getCodonTranslation(featureDisplay.sequence[i], featureDisplay.sequence[i+1], 
+					  featureDisplay.sequence[i+2])+'</div>');
 	  
 	  var cssObj = {
 			  'width': 3/basePerPixel+'px',
@@ -493,15 +514,16 @@ function drawAminoAcids(leftBasePosition) {
 	  $('#'+fwdid).css(cssObj);	   
 
 
-  	  var reversePos = sequenceLength-(i+leftBasePosition+1);
+  	  var reversePos = sequenceLength-(i+featureDisplay.leftBase+1);
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
-	  var yposBwd = marginTop+(frameLineHeight*11)+((frameLineHeight*2)*frame);
+	  var yposBwd = featureDisplay.marginTop+(featureDisplay.frameLineHeight*11)+
+	  						((featureDisplay.frameLineHeight*2)*frame);
 	  var bwdid = 'bwdAA1'+i;
 	  $('#translation').append('<div class="aminoacid" id="'+bwdid+'" >'+
-			  getCodonTranslation(complement(sequence[i+2]), 
-					              complement(sequence[i+1]), 
-					              complement(sequence[i]))+'</div>');
+			  getCodonTranslation(complement(featureDisplay.sequence[i+2]), 
+					              complement(featureDisplay.sequence[i+1]), 
+					              complement(featureDisplay.sequence[i]))+'</div>');
 
 	  var cssObj = {
 			  'width': 3/basePerPixel+'px',
@@ -514,10 +536,13 @@ function drawAminoAcids(leftBasePosition) {
   }
 }
 
-function drawFeatures(leftBase) {
-	var end = leftBase+basesDisplayWidth;
-	if(end > sequenceLength && leftBase < sequenceLength) {
-		end = sequenceLength;
+function drawFeatures(featureDisplay) {
+	var end = parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth);
+	
+	debugLog("start..end = "+featureDisplay.leftBase+".."+end);
+	if(end > featureDisplay.sequenceLength && 
+	   featureDisplay.leftBase < featureDisplay.sequenceLength) {
+		end = featureDisplay.sequenceLength;
 	}
 	
 	var serviceName = '/sourcefeatures/featureloc.json?';
@@ -527,8 +552,8 @@ function drawFeatures(leftBase) {
 	relationshipsList.push('derives_from');
 	
 	handleAjaxCalling(serviceName, aFeature,
-			{ uniqueName:srcFeature, start:leftBase, end:end, relationships:['part_of','derives_from'] }, 
-			leftBase, end, 11);
+			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end, relationships:['part_of','derives_from'] }, 
+			featureDisplay);
 }
 
 function getFeatureExons(transcript) {
@@ -649,7 +674,7 @@ function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour
 	$("#featureDisplay").drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
 }
 
-function drawArrow(leftBase, exon, ypos) {
+function drawArrow(featureDisplay, exon, ypos) {
 	if(minimumDisplay)
 		return;
 	
@@ -657,36 +682,36 @@ function drawArrow(leftBase, exon, ypos) {
 	var Ypoints;
 	ypos++;
 	
-	var frameLineHeight2 = frameLineHeight/2;
+	var frameLineHeight2 = featureDisplay.frameLineHeight/2;
 	if(exon.strand == 1) {
-	  var end = margin+((exon.end - leftBase )/basePerPixel) + 1;
+	  var end = margin+((exon.end - featureDisplay.leftBase )/basePerPixel) + 1;
 	  if(end > displayWidth) {
 		  return;
 	  }
 	  Xpoints = new Array(end, end+frameLineHeight2, end) ;
-	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+frameLineHeight);
+	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+featureDisplay.frameLineHeight);
 	} else {
-	  var start = margin+((exon.start - leftBase )/basePerPixel) - 1;
+	  var start = margin+((exon.start - featureDisplay.leftBase )/basePerPixel) - 1;
 	  if(start > displayWidth) {
 		  return;
 	  }
 	  Xpoints = new Array(start, start-frameLineHeight2, start) ;
-	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+frameLineHeight);
+	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+featureDisplay.frameLineHeight);
 	}
 
 	$("#featureDisplay").drawPolyline(Xpoints,Ypoints, {color:'#020202', stroke:'1'});
 }
 
 
-function drawTicks(leftBasePosition) {
-	var nticks = basesDisplayWidth/baseInterval;
+function drawTicks(featureDisplay) {
+	var nticks = featureDisplay.basesDisplayWidth/baseInterval;
 
-	var baseRemainder = (leftBasePosition-1) % baseInterval;
-	var start = Math.round(Math.floor((leftBasePosition-1)/baseInterval)*baseInterval);
+	var baseRemainder = (featureDisplay.leftBase-1) % baseInterval;
+	var start = Math.round(Math.floor((featureDisplay.leftBase-1)/baseInterval)*baseInterval);
 	
 	var xScreen = margin-(1/basePerPixel);
 	if(baseRemainder > 0) {
-	  xScreen -= ((leftBasePosition-start-1)/basePerPixel);
+	  xScreen -= ((featureDisplay.leftBase-start-1)/basePerPixel);
 	}
  
 	$('#ticks').html('');
@@ -705,7 +730,7 @@ function drawTicks(leftBasePosition) {
 		else if(xScreen < margin) {
 			continue;
 		}
-		var pos = marginTop+(frameLineHeight*9)-14+"px "+xScreen+"px";
+		var pos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9)-14+"px "+xScreen+"px";
 		var thisTick = 'tick'+i;
 		
 		$('#ticks').append('<div class="tickClass" id='+thisTick+'></div>');
@@ -719,13 +744,13 @@ function setTickCSS(offset, number, selector) {
 }
 
 
-function getOrganismList() {
+function getOrganismList(featureDisplay) {
 	var serviceName = '/organisms/list.json';
 	handleAjaxCalling(serviceName, aOrganism,
-			{ }, 1, 1, 1);
+			{ }, featureDisplay);
 }
 
-function getSrcFeatureList(taxonomyid)
+function getSrcFeatureList(taxonomyid, featureDisplay)
 {
 	$('#srcFeatureSelector').html('');
 	var jsonUrl = webService[serviceType]+'/genes/top.json?taxonID='+taxonomyid;
@@ -734,7 +759,7 @@ function getSrcFeatureList(taxonomyid)
 	
 	var serviceName = '/genes/top.json';
 	handleAjaxCalling(serviceName, aSrcFeature,
-			{ taxonID:taxonomyid }, 1, 1, 1);
+			{ taxonID:taxonomyid }, featureDisplay);
 }
 
 function handleFeatureClick(tgt) {
@@ -804,9 +829,9 @@ function showProperties() {
 		width:550, position: 'top', title:name});
 }
 
-function positionFeatureList() {
+function positionFeatureList(featureDisplay) {
 	var ghgt = $('#graph').height();
-	var top = marginTop+(frameLineHeight*19.5)+ghgt; 
+	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt; 
 	
     var cssObj = {
 			 'margin-left': margin+'px',
@@ -819,8 +844,8 @@ function positionFeatureList() {
 	$('#featureList').css(cssObj);
 }
 
-function setupFeatureList(features) {
-	positionFeatureList();
+function setupFeatureList(features, featureDisplay) {
+	positionFeatureList(featureDisplay);
 	$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
 	$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th><th>Properties</th></tr></thead>');
 	$('#featureListTable').append('<tbody>');
@@ -858,7 +883,7 @@ function appendFeatureToList(feature) {
 //
 // AJAX functions
 //
-var aSrcFeature = function ajaxGetSrcFeatures(leftBase, end, returned) {
+var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
@@ -873,12 +898,13 @@ var aSrcFeature = function ajaxGetSrcFeatures(leftBase, end, returned) {
 	positionLists();
 	
 	$('#srcFeatureSelector').change(function(event){
-		srcFeature = $('#srcFeatureList option:selected')[0].value;
-		drawAll($(".slider").slider("value"));
+		featureDisplay.srcFeature = $('#srcFeatureList option:selected')[0].value;
+		firstTime = true;
+		drawAll(featureDisplay);
 	});
 };
 
-var aOrganism = function ajaxGetOrganisms(leftBase, end, returned) {
+var aOrganism = function ajaxGetOrganisms(featureDisplay, returned) {
 	var organisms  = returned.response.organisms;
 	$('#organismSelector').html('<select id="organismList"></select>');
 	$('#organismList').append('<option value="Organism:">Organism:</option>');
@@ -893,7 +919,7 @@ var aOrganism = function ajaxGetOrganisms(leftBase, end, returned) {
 	
 	$('#organismSelector').change(function(event){
 		var taxonomyid = $('#organismList option:selected')[0].value;
-		getSrcFeatureList(taxonomyid);
+		getSrcFeatureList(taxonomyid, featureDisplay);
 	});
 };
 
@@ -910,12 +936,12 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureCvTerms = function ajaxGetFeatureCvTerms(leftBase, end, returned) {
+var aFeatureCvTerms = function ajaxGetFeatureCvTerms(featureDisplay, returned) {
 	showFeatureCvTerm(returned.response.features, featureSelected);
 };
 
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
-var aFeatureProps = function ajaxGetFeatureProps(leftBase, end, returned) {
+var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned) {
 	
 	var featProps  = returned.response.features;
     for(var i=0; i<featProps.length; i++) {	
@@ -936,7 +962,7 @@ function containsString(anArray, aStr) {
 	return false;
 }
 
-var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, returned) {
+var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, returned) {
 	var featProps  = returned.response.features;
 	for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].props;
@@ -954,12 +980,13 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(leftBase, end, retu
 	}
 };
 
-var aFeature = function ajaxGetFeatures(leftBase, end, returned) {
+var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
 	
 	features  = returned.response.features;
 	var nfeatures = features.length;
 
-	debugLog("No. of features "+ nfeatures+"  "+leftBase+".."+end);
+	debugLog("No. of features "+ nfeatures+"  "+featureDisplay.leftBase+".."+
+			(parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth)));
 
 	var ypos;
 	var featureStr = '';
@@ -993,25 +1020,26 @@ var aFeature = function ajaxGetFeatures(leftBase, end, returned) {
 
 		      if(exon.strand == 1) {
 		    	var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
-			  	ypos = marginTop+((frameLineHeight*2)*frame);
+			  	ypos = featureDisplay.marginTop+((featureDisplay.frameLineHeight*2)*frame);
 		      }
 		      else {
 			    var frame = 3 -
 			          ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
-			    ypos = marginTop+(frameLineHeight*9)+((frameLineHeight*2)*frame);
+			    ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9)+
+			    		((featureDisplay.frameLineHeight*2)*frame);
 		      }
 
 		      //featureToColourArray += '&uniqueName='+exon.uniquename;
 		      featureToColourList.push(exon.uniquename);
-		      featureStr = drawFeature(leftBase, exon, featureStr, ypos, "featCDS") ;
+		      featureStr = drawFeature(featureDisplay.leftBase, exon, featureStr, ypos, "featCDS") ;
 		      
 		      var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
 		      if(lastYpos > -1) {
-		      	  drawFeatureConnections(leftBase, lastExon, exon, 
+		      	  drawFeatureConnections(featureDisplay.leftBase, lastExon, exon, 
 		      			  lastYpos-canvasTop, ypos-canvasTop, colour);
 		      }
 		      if(k == nexons-1) {
-		      	  drawArrow(leftBase, exon, ypos-canvasTop);
+		      	  drawArrow(featureDisplay, exon, ypos-canvasTop);
 		      }
   			  lastExon = exon;
   			  lastYpos = ypos;
@@ -1021,51 +1049,52 @@ var aFeature = function ajaxGetFeatures(leftBase, end, returned) {
 	  }
 	  
 	  if(feature.strand == 1) {
-			ypos = marginTop+(frameLineHeight*6);
+			ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*6);
 		  }
 		  else {
-			ypos = marginTop+(frameLineHeight*9);
+			ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9);
 		  }	
 	  
 	  var className = "feat";
 	  if(feature.type == "gene") {
 		  className = "featGene";
 	  }
-	  featureStr = drawFeature(leftBase, feature, featureStr, ypos, className) ;
+	  featureStr = drawFeature(featureDisplay.leftBase, feature, featureStr, ypos, className) ;
 	  
 	}
 	
 	$('#features').html(featureStr);
 	
 	if(!minimumDisplay) {
-		if($('.feat').height() != frameLineHeight) {
+		if($('.feat').height() != featureDisplay.frameLineHeight) {
 			var cssObj = {
-				'height':frameLineHeight+'px',
-				'line-height' : frameLineHeight+'px'
+				'height':featureDisplay.frameLineHeight+'px',
+				'line-height' : featureDisplay.frameLineHeight+'px'
 			};
 			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
 		}
 	
-		setupFeatureList(features);
+		setupFeatureList(features, featureDisplay);
 		if(featureToColourList.length > 0) {
 			var serviceName = '/genes/featureproperties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
 					'us='+featureToColourList, 
-					leftBase, 1, 0);
+					featureDisplay.leftBase);
 		}
 	}
 	return;
 };
 
 
-var aSequence = function ajaxGetSequence(leftBase, end, returned) {
+var aSequence = function ajaxGetSequence(featureDisplay, returned) {
 
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
-	sequence = returned.response.sequence[0].dna.toUpperCase();
+	var sequence = returned.response.sequence[0].dna.toUpperCase();
+	featureDisplay.sequence = sequence;
 	var seqLen = returned.response.sequence[0].length;
 
 	debugLog("getSequence() sequence length = "+seqLen);
-	if((seqLen-sequenceLength) != 0) {
+	if((seqLen-featureDisplay.sequenceLength) != 0) {
       $(".slider").slider('option', 'max', seqLen);
 	}
 
@@ -1076,28 +1105,30 @@ var aSequence = function ajaxGetSequence(leftBase, end, returned) {
     $('#sequence').html('');
     $('#translation').html('');
 	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
-	  drawCodons(leftBase);
-	  drawAminoAcids(leftBase);
+	  drawCodons(featureDisplay);
+	  drawAminoAcids(featureDisplay);
 	} else if(showStopCodons) {
-      drawStopCodons(leftBase);
+      drawStopCodons(featureDisplay);
 	}
     //console.timeEnd('draw stop codons');  
 
     if (firstTime) {
     	$("#slider_vertical_container").slider('option', 'max', sequenceLength);
-    	$("#slider_vertical_container").slider('option', 'value', basesDisplayWidth);
+    	$("#slider_vertical_container").slider('option', 'value', featureDisplay.basesDisplayWidth);
     			
     	$(".slider").slider('option', 'max', sequenceLength);
-    	$(".slider").slider('option', 'step', basesDisplayWidth/2);
-    	$(".slider").slider('option', 'value', leftBase);
+    	$(".slider").slider('option', 'step', featureDisplay.basesDisplayWidth/2);
+    	$(".slider").slider('option', 'value', featureDisplay.leftBase);
     	firstTime = false;
 	}
 
     if(showGC || showAG) {
-    	drawContentGraphs(basesDisplayWidth, leftBase, sequence, showAG, showGC);
+    	drawContentGraphs(featureDisplay.basesDisplayWidth, 
+    			featureDisplay.leftBase, featureDisplay.sequence, 
+    			showAG, showGC);
     }
     
-    positionFeatureList();
+    positionFeatureList(featureDisplay);
     
     return;
 };

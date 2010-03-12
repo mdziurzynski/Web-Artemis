@@ -2,6 +2,7 @@
 // SCROLLING
 //
 var scrolling = 0;
+var display;
 
 function scroll(direction) {
     if (scrolling == 1) {
@@ -25,16 +26,18 @@ function scroll(direction) {
         		return false;
         	}
         	
-        	drawAll(leftBase, 0);
+        	display.leftBase = leftBase;
+        	drawAll(display);
         	$(".slider").slider('option', 'value', leftBase);
             
-            var code2run = 'scroll('+ direction + ')';
+            var code2run = 'scroll('+ direction +')';
             setTimeout(code2run,80);
     }
     return false;
 }
 
-function addScrollEventHandlers() {
+function addScrollEventHandlers(featureDisplay) {
+	display = featureDisplay;
 	$('#left').mousedown(function(event){
 		scrolling = 1;
     	minimumDisplay = true
@@ -45,7 +48,8 @@ function addScrollEventHandlers() {
 		scrolling = 0;
     	minimumDisplay = false
 		var leftBase = $(".slider").slider('option', 'value');
-    	drawAll(leftBase, 0);
+    	featureDisplay.leftBase = leftBase;
+    	drawAll(featureDisplay);
 	});
 	
 	$('#right').mousedown(function(event){
@@ -58,6 +62,7 @@ function addScrollEventHandlers() {
 		scrolling = 0;
     	minimumDisplay = false;
 		var leftBase = $(".slider").slider('option', 'value');
-		drawAll(leftBase, 0);
+		featureDisplay.leftBase = leftBase;
+		drawAll(featureDisplay);
 	});
 }

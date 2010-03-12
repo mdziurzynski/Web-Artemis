@@ -22,7 +22,11 @@ function complement(base) {
     }
 }
 
-function calculateStopCodons(leftBase, stops1, stops2, stops3, codon1, codon2, codon3, strand) {
+function calculateStopCodons(featureDisplay, stops1, stops2, stops3, codon1, codon2, codon3, strand) {
+	var leftBase = featureDisplay.leftBase;
+	var sequence = featureDisplay.sequence;
+	var basesDisplayWidth = featureDisplay.basesDisplayWidth;
+	
     var index = sequence.indexOf(codon1, 0);
     var firstInd = index;
     
