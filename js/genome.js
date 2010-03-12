@@ -12,7 +12,7 @@ var webService = [ "http://127.0.0.1/testservice/",
 var dataType = [ "json", "jsonp", "jsonp", "jsonp" ];
 
 //
-//
+// web-artemis/index.html?src=Pf3D7_04&base=200000
 
 var marginTop = 40;
 var margin = 5;
@@ -59,6 +59,14 @@ var colour = [
 
 $(document).ready(function() {
 	
+	var tmpSrcFeature = getUrlVars()["src"];
+	if(tmpSrcFeature)
+		srcFeature = tmpSrcFeature;
+	var leftBase = getUrlVars()["base"];
+	if(!leftBase)
+		leftBase = 1;
+	else
+		leftBase = parseInt(leftBase);
 	adjustFeatureDisplayPosition(false);
 	
 	$("#slider_vertical_container").slider({
@@ -77,7 +85,7 @@ $(document).ready(function() {
 		  }
 		  
 		  basesDisplayWidth = ui.value;
-		  drawAll($(".slider").slider("value"), 0);
+		  drawAll($(".slider").slider("value"));
 		  $(".slider").slider('option', 'step', basesDisplayWidth/2);
 		}
 	});
@@ -88,7 +96,7 @@ $(document).ready(function() {
 		max : sequenceLength,
 		step : basesDisplayWidth/2,
 		change : function(ev, ui) {
-			drawAll(ui.value, 0);
+			drawAll(ui.value);
 		}
 	});
 	
@@ -109,14 +117,14 @@ $(document).ready(function() {
 			};
 			$('#featureDisplay').css(cssObj);
 			
-			drawAll($(".slider").slider("value"), 0);
+			drawAll($(".slider").slider("value"));
 			adjustFeatureDisplayPosition(true);
 			drawFrameAndStrand();
 		}
 	});
-
+	
     drawFrameAndStrand();
-	drawAll(1, 1);
+	drawAll(leftBase);
 	getOrganismList();
 	addEventHandlers();
 });
@@ -171,7 +179,7 @@ function addEventHandlers() {
 	// show/hide stop codons
 	$('#stopCodonToggle').click(function(event){
 		showStopCodons = !showStopCodons;
-		drawAll($(".slider").slider("value"), 0);
+		drawAll($(".slider").slider("value"));
 	});
 
 	// graphs
@@ -186,7 +194,7 @@ function addEventHandlers() {
 			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
 			showGC = true;	
 		}
-		drawAll($(".slider").slider("value"), 0);
+		drawAll($(".slider").slider("value"));
 	});
 	
 	$('#agGraphToggle').click(function(event){
@@ -200,7 +208,7 @@ function addEventHandlers() {
 			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
 			showAG = true;	
 		}
-		drawAll($(".slider").slider("value"), 0);
+		drawAll($(".slider").slider("value"));
 	});
 	
 	// popup
@@ -318,7 +326,7 @@ function drawAll(leftBase) {
 
 function getSequence(leftBase) {
 	var end = leftBase+basesDisplayWidth;
-	
+
 	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
 	  end+=2;
 	}
@@ -508,7 +516,7 @@ function drawAminoAcids(leftBasePosition) {
 
 function drawFeatures(leftBase) {
 	var end = leftBase+basesDisplayWidth;
-	if(end > sequenceLength) {
+	if(end > sequenceLength && leftBase < sequenceLength) {
 		end = sequenceLength;
 	}
 	
@@ -866,7 +874,7 @@ var aSrcFeature = function ajaxGetSrcFeatures(leftBase, end, returned) {
 	
 	$('#srcFeatureSelector').change(function(event){
 		srcFeature = $('#srcFeatureList option:selected')[0].value;
-		drawAll($(".slider").slider("value"), 0);
+		drawAll($(".slider").slider("value"));
 	});
 };
 
@@ -1081,7 +1089,7 @@ var aSequence = function ajaxGetSequence(leftBase, end, returned) {
     			
     	$(".slider").slider('option', 'max', sequenceLength);
     	$(".slider").slider('option', 'step', basesDisplayWidth/2);
-
+    	$(".slider").slider('option', 'value', leftBase);
     	firstTime = false;
 	}
 
