@@ -67,12 +67,15 @@ function escapeId(myid) {
 }
 
 function debugLog(txt) {
+	if(!debug)
+		return;
+	
 	if(window.console) {
 		console.log(txt);
 	} else {
         var ghgt = $('#graph').height();
 		var fhgt = $('#featureList').height(); 
-		var top = (marginTop+275)+ghgt+fhgt;
+		var top = (50+275)+ghgt+fhgt;
 
 		$('#logger').css('top', top+'px');
 		$('#logger').append("<br />"+txt);
