@@ -14,7 +14,7 @@ var dataType = [ "json", "jsonp", "jsonp", "jsonp" ];
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000
 
-
+var debug = false;
 var margin = 5;
 var displayWidth = 1000;
 
@@ -92,6 +92,7 @@ $(document).ready(function() {
 		max : featureDisplay.sequenceLength,
 		step : featureDisplay.basesDisplayWidth/2,
 		change : function(ev, ui) {
+			featureDisplay.leftBase = ui.value;
 			drawAll(featureDisplay);
 		}
 	});
