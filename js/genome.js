@@ -14,7 +14,7 @@ var dataType = [ "json", "jsonp", "jsonp", "jsonp" ];
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000
 
-var debug = false;
+var debug = true;
 var margin = 5;
 var displayWidth = 1000;
 
@@ -754,11 +754,11 @@ function getOrganismList(featureDisplay) {
 function getSrcFeatureList(taxonomyid, featureDisplay)
 {
 	$('#srcFeatureSelector').html('');
-	var jsonUrl = webService[serviceType]+'/genes/top.json?taxonID='+taxonomyid;
+	var jsonUrl = webService[serviceType]+'/srcfeatures/top.json?taxonID='+taxonomyid;
 
 	debugLog(jsonUrl);
 	
-	var serviceName = '/genes/top.json';
+	var serviceName = '/srcfeatures/top.json';
 	handleAjaxCalling(serviceName, aSrcFeature,
 			{ taxonID:taxonomyid }, featureDisplay);
 }
@@ -816,14 +816,15 @@ function showProperties() {
 		}
 	}
         
-    var serviceName = '/genes/featureproperties.json?';   
-	handleAjaxCalling(serviceName, aFeatureProps,
-		'us='+featurePropertyList, 
-		-1, 1, 0);
+  
+	handleAjaxCalling('/features/featureproperties.json?', aFeatureProps,
+		'us='+featurePropertyList, -1);
+
+	handleAjaxCalling('/features/terms.json?', aFeatureCvTerms,
+			featureStr, -1);
 	
-    serviceName = '/genes/featurecvterm.json?';   
-	handleAjaxCalling(serviceName, aFeatureCvTerms,
-			featureStr, -1, 1, 0);
+	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
+			featureStr, -1);
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
@@ -939,6 +940,22 @@ function positionLists() {
 
 var aFeatureCvTerms = function ajaxGetFeatureCvTerms(featureDisplay, returned) {
 	showFeatureCvTerm(returned.response.features, featureSelected);
+};
+
+var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned) {
+	var orthologues = returned.response.features;
+	
+	if(!orthologues || orthologues.length == 0)
+		return;
+	$("div#DISP"+escapeId(featureSelected)).append(
+			   "<br /><strong>Orthologues : </strong><br />");
+	for(var i=0; i<orthologues.length; i++) {	
+		var featureOrthologues = orthologues[i].orthologues;
+		for(var j=0; j<featureOrthologues.length; j++) {
+		   var featureOrthologue = featureOrthologues[j].ortho;
+		   $("div#DISP"+escapeId(featureSelected)).append(featureOrthologue+"<br />");
+		}
+	}
 };
 
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
@@ -1077,7 +1094,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
 	
 		setupFeatureList(features, featureDisplay);
 		if(featureToColourList.length > 0) {
-			var serviceName = '/genes/featureproperties.json?';
+			var serviceName = '/features/featureproperties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
 					'us='+featureToColourList, 
 					featureDisplay.leftBase);
