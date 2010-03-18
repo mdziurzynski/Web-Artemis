@@ -348,7 +348,7 @@ function getSequence(featureDisplay) {
 	  end+=2;
 	}
 
-	var serviceName = '/sourcefeatures/sequence.json?';
+	var serviceName = '/regions/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
 			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end }, 
 			featureDisplay);
@@ -546,7 +546,7 @@ function drawFeatures(featureDisplay) {
 		end = featureDisplay.sequenceLength;
 	}
 	
-	var serviceName = '/sourcefeatures/featureloc.json?';
+	var serviceName = '/regions/featureloc.json?';
 
 	var relationshipsList = new Array();
 	relationshipsList.push('part_of');
@@ -754,11 +754,11 @@ function getOrganismList(featureDisplay) {
 function getSrcFeatureList(taxonomyid, featureDisplay)
 {
 	$('#srcFeatureSelector').html('');
-	var jsonUrl = webService[serviceType]+'/srcfeatures/top.json?taxonID='+taxonomyid;
+	var jsonUrl = webService[serviceType]+'/regions/inorganism.json?taxonID='+taxonomyid;
 
 	debugLog(jsonUrl);
 	
-	var serviceName = '/srcfeatures/top.json';
+	var serviceName = '/regions/inorganism.json';
 	handleAjaxCalling(serviceName, aSrcFeature,
 			{ taxonID:taxonomyid }, featureDisplay);
 }
@@ -889,7 +889,7 @@ var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
-	var srcFeatures  = returned.response.features;
+	var srcFeatures  = returned.response.regions;
 	for(var j=0; j<srcFeatures.length; j++) {
 		var feat = srcFeatures[j];
 		if(feat)
