@@ -30,7 +30,8 @@ function sortFeatures(a, b){
 	return 0;
 }
 
-function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay) {
+
+function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay, options) {
 
 	var jsonUrl = webService[serviceType]+serviceName;
     debugLog(serviceName+" "+jsonUrl);
@@ -38,10 +39,9 @@ function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay)
 		  url: jsonUrl,
 		  data: dataArray,
 		  dataType: dataType[serviceType],
-		  global: false,
 		  success: function(returned) {
 
-    	ajaxFunction(featureDisplay, returned);
+    	ajaxFunction(featureDisplay, returned, options);
 
   },
   beforeSend: function(XMLHttpRequest) {

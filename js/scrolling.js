@@ -2,6 +2,7 @@
 // SCROLLING
 //
 var scrolling = 0;
+var timeoutTime = 160; // ms
 
 function scroll(direction, featureDisplay) {
     if (scrolling == 1) {
@@ -30,7 +31,7 @@ function scroll(direction, featureDisplay) {
         	$(".slider").slider('option', 'value', leftBase);
 
         	//var code2run = "scroll("+direction+"," +"featureDisplay)";
-            setTimeout(function() { scroll(direction, featureDisplay); }, 80);
+            setTimeout(function() { scroll(direction, featureDisplay); }, timeoutTime);
 
     }
     return false;
@@ -40,13 +41,13 @@ function addScrollEventHandlers(featureDisplay) {
 
 	$('#left').mousedown(function(event){
 		scrolling = 1;
-    	minimumDisplay = true
+		featureDisplay.minimumDisplay = true
 		scroll(-1, featureDisplay);
 	});
 
 	$('#left').mouseup(function(event){
 		scrolling = 0;
-    	minimumDisplay = false
+		featureDisplay.minimumDisplay = false
 		var leftBase = $(".slider").slider('option', 'value');
     	featureDisplay.leftBase = leftBase;
     	drawAll(featureDisplay);
@@ -54,13 +55,13 @@ function addScrollEventHandlers(featureDisplay) {
 	
 	$('#right').mousedown(function(event){
 		scrolling = 1;
-    	minimumDisplay = true
+		featureDisplay.minimumDisplay = true
 		scroll(1, featureDisplay);
 	});
 	
 	$('#right').mouseup(function(event){
 		scrolling = 0;
-    	minimumDisplay = false;
+		featureDisplay.minimumDisplay = false;
 		var leftBase = $(".slider").slider('option', 'value');
 		featureDisplay.leftBase = leftBase;
 		drawAll(featureDisplay);

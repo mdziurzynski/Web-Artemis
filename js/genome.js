@@ -23,7 +23,6 @@ var baseInterval;
 var basePerPixel;
 var featureSelected = -1;
 
-var minimumDisplay = false;
 var showStopCodons = true;
 var showGC = false;
 var showAG = false;
@@ -138,6 +137,7 @@ function featureDisplayObject(basesDisplayWidth, marginTop, sequenceLength,
 	this.frameLineHeight = frameLineHeight;
 	this.leftBase = leftBase;
 	this.sequence;
+	this.minimumDisplay = false;
 }
 
 //
@@ -244,7 +244,7 @@ function addEventHandlers(featureDisplay) {
 	 });
 	
 	$('#features').click(function(event){
-		handleFeatureClick($(event.target));
+		handleFeatureClick($(event.target), featureDisplay);
 	 });
 	
 	$('#features').mouseout(function(event){
@@ -324,7 +324,7 @@ function drawAll(featureDisplay) {
       $('#featureDisplay').html('');
       var showSequence = true;
       
-      if(minimumDisplay &&
+      if(featureDisplay.minimumDisplay &&
     	$('#slider_vertical_container').slider('option', 'value') >= 5000) {
     	  showSequence = false;
       }
@@ -337,7 +337,7 @@ function drawAll(featureDisplay) {
         $('#translation').html('');
       }
 
-	  drawFeatures(featureDisplay);
+      drawFeatures(featureDisplay);
 	  drawTicks(featureDisplay);
 }
 
@@ -351,7 +351,7 @@ function getSequence(featureDisplay) {
 	var serviceName = '/regions/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
 			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end }, 
-			featureDisplay);
+			featureDisplay, {});
 }
 
 function drawStopCodons(featureDisplay) {
@@ -554,7 +554,7 @@ function drawFeatures(featureDisplay) {
 	
 	handleAjaxCalling(serviceName, aFeature,
 			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end, relationships:['part_of','derives_from'] }, 
-			featureDisplay);
+			featureDisplay, { minDisplay:featureDisplay.minimumDisplay });
 }
 
 function getFeatureExons(transcript) {
@@ -640,8 +640,8 @@ function drawFeature(leftBase, feature, featureStr, ypos, className) {
   return featureStr;
 }
 
-function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour) {
-	if(minimumDisplay)
+function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, colour) {
+	if(featureDisplay.minimumDisplay)
 		return;
 	
 	var exonL;
@@ -658,11 +658,11 @@ function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour
 	 lastYpos = tmpPos;
 	}
 	
-	var lpos = margin+((exonL.end   - leftBase )/basePerPixel) + 1;
+	var lpos = margin+((exonL.end   - featureDisplay.leftBase )/basePerPixel) + 1;
 	if(lpos > displayWidth) {
 	  return;
 	}
-	var rpos = margin+((exonR.start - leftBase +1 )/basePerPixel) - 1;
+	var rpos = margin+((exonR.start - featureDisplay.leftBase +1 )/basePerPixel) - 1;
 	var mid  = lpos+(rpos-lpos)/2;
 	
 	var ymid = ypos-4;
@@ -676,7 +676,7 @@ function drawFeatureConnections(leftBase, lastExon, exon, lastYpos, ypos, colour
 }
 
 function drawArrow(featureDisplay, exon, ypos) {
-	if(minimumDisplay)
+	if(featureDisplay.minimumDisplay)
 		return;
 	
 	var Xpoints;
@@ -748,7 +748,7 @@ function setTickCSS(offset, number, selector) {
 function getOrganismList(featureDisplay) {
 	var serviceName = '/organisms/list.json';
 	handleAjaxCalling(serviceName, aOrganism,
-			{ }, featureDisplay);
+			{ }, featureDisplay, {});
 }
 
 function getSrcFeatureList(taxonomyid, featureDisplay)
@@ -760,10 +760,10 @@ function getSrcFeatureList(taxonomyid, featureDisplay)
 	
 	var serviceName = '/regions/inorganism.json';
 	handleAjaxCalling(serviceName, aSrcFeature,
-			{ taxonID:taxonomyid }, featureDisplay);
+			{ taxonID:taxonomyid }, featureDisplay, {});
 }
 
-function handleFeatureClick(tgt) {
+function handleFeatureClick(tgt, featureDisplay) {
 	featureSelected = $(tgt).attr('id');
 
 	var width = $(tgt).css('borderLeftWidth');
@@ -772,10 +772,10 @@ function handleFeatureClick(tgt) {
     } else {
       $(tgt).css('border-width', '1px');
     }
-    showProperties();
+    showProperties(featureDisplay);
 }
 
-function showProperties() {
+function showProperties(featureDisplay) {
     var nfeatures = features.length
     
     var featureStr = "&features="+featureSelected;
@@ -818,13 +818,13 @@ function showProperties() {
         
   
 	handleAjaxCalling('/features/featureproperties.json?', aFeatureProps,
-		'us='+featurePropertyList, -1);
+		'us='+featurePropertyList, -1, {});
 
 	handleAjaxCalling('/features/terms.json?', aFeatureCvTerms,
-			featureStr, -1);
+			featureStr, -1, {});
 	
 	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
-			featureStr, -1);
+			featureStr, featureDisplay, {});
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
@@ -885,7 +885,7 @@ function appendFeatureToList(feature) {
 //
 // AJAX functions
 //
-var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned) {
+var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned, options) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
@@ -906,7 +906,7 @@ var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned) {
 	});
 };
 
-var aOrganism = function ajaxGetOrganisms(featureDisplay, returned) {
+var aOrganism = function ajaxGetOrganisms(featureDisplay, returned, options) {
 	var organisms  = returned.response.organisms;
 	$('#organismSelector').html('<select id="organismList"></select>');
 	$('#organismList').append('<option value="Organism:">Organism:</option>');
@@ -938,12 +938,13 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureCvTerms = function ajaxGetFeatureCvTerms(featureDisplay, returned) {
+var aFeatureCvTerms = function ajaxGetFeatureCvTerms(featureDisplay, returned, options) {
 	showFeatureCvTerm(returned.response.features, featureSelected);
 };
 
-var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned) {
+var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options) {
 	var orthologues = returned.response.features;
+	var midDisplay = featureDisplay.basesDisplayWidth/2;
 	
 	if(!orthologues || orthologues.length == 0)
 		return;
@@ -953,13 +954,26 @@ var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned) {
 		var featureOrthologues = orthologues[i].orthologues;
 		for(var j=0; j<featureOrthologues.length; j++) {
 		   var featureOrthologue = featureOrthologues[j].ortho;
-		   $("div#DISP"+escapeId(featureSelected)).append(featureOrthologue+"<br />");
+		   $("div#DISP"+escapeId(featureSelected)).append(
+				   '<a href="javascript:void(0)" onclick="openMe(\''+
+				   featureOrthologue+'\','+midDisplay+');">'+
+				   featureOrthologue+"</a><br />");
 		}
 	}
 };
 
+function openMe(gene, midDisplay) {
+	handleAjaxCalling('/features/featurecoordinates.json?', 
+			function(featureDisplay, returned, options) { 
+		      var src  = returned.response.coordinates[0].region; 
+		      var base = parseInt(returned.response.coordinates[0].fmin)-midDisplay;
+		      window.open('?&src='+src+'&base='+base);
+		    }, 
+			{ features: gene}, {}, {});
+}
+
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
-var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned) {
+var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, options) {
 	
 	var featProps  = returned.response.features;
     for(var i=0; i<featProps.length; i++) {	
@@ -980,7 +994,7 @@ function containsString(anArray, aStr) {
 	return false;
 }
 
-var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, returned) {
+var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, returned, options) {
 	var featProps  = returned.response.features;
 	for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].props;
@@ -998,7 +1012,7 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 	}
 };
 
-var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
+var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	
 	features  = returned.response.features;
 	var nfeatures = features.length;
@@ -1019,9 +1033,11 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
 		  var kid = feature.features[j];
 		  
 		  if(kid.type == "mRNA") {
-			var polypep = getFeaturePeptide(kid);
-			if(polypep != -1) {
-				featureToColourList.push(polypep.uniquename);
+			if(!options.minDisplay) {
+				var polypep = getFeaturePeptide(kid);
+				if(polypep != -1) {
+					featureToColourList.push(polypep.uniquename);
+				}
 			}
 			var exons = getFeatureExons(kid);
 			var nexons = exons.length;
@@ -1053,7 +1069,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
 		      
 		      var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
 		      if(lastYpos > -1) {
-		      	  drawFeatureConnections(featureDisplay.leftBase, lastExon, exon, 
+		      	  drawFeatureConnections(featureDisplay, lastExon, exon, 
 		      			  lastYpos-canvasTop, ypos-canvasTop, colour);
 		      }
 		      if(k == nexons-1) {
@@ -1083,7 +1099,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
 	
 	$('#features').html(featureStr);
 	
-	if(!minimumDisplay) {
+	if(!options.minDisplay) {
 		if($('.feat').height() != featureDisplay.frameLineHeight) {
 			var cssObj = {
 				'height':featureDisplay.frameLineHeight+'px',
@@ -1094,17 +1110,18 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned) {
 	
 		setupFeatureList(features, featureDisplay);
 		if(featureToColourList.length > 0) {
+			
 			var serviceName = '/features/featureproperties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
 					'us='+featureToColourList, 
-					featureDisplay.leftBase);
+					featureDisplay.leftBase, {});
 		}
 	}
 	return;
 };
 
 
-var aSequence = function ajaxGetSequence(featureDisplay, returned) {
+var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
 
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
 	var sequence = returned.response.sequence[0].dna.toUpperCase();
