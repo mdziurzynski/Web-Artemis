@@ -29,6 +29,7 @@ var showAG = false;
 
 var features;
 var firstTime = true;
+var count = 0;
 
 var colour = [ 
     '255,255,255',
@@ -60,73 +61,15 @@ $(document).ready(function() {
 	else
 		leftBase = parseInt(leftBase);
 	
-	var featureDisplay = new featureDisplayObject(10000, 40, 16000, tmpSrcFeature, 12, leftBase);
-
-	adjustFeatureDisplayPosition(false, featureDisplay);
-	
-	$("#slider_vertical_container").slider({
-		orientation: "vertical",
-		min: 140,
-		max: featureDisplay.sequenceLength,
-		value: featureDisplay.basesDisplayWidth,
-		step: 10000,
-		change: function(event, ui) {
-		  var basesInView = $('#slider_vertical_container').slider('option', 'value');
-		
-		  if(basesInView > 50000) {
-			  showStopCodons = false;
-		  } else if(basesInView < 1000) {
-			  showStopCodons = true;
-		  }
-		  
-		  featureDisplay.basesDisplayWidth = ui.value;
-		  drawAll(featureDisplay);
-		  $(".slider").slider('option', 'step', featureDisplay.basesDisplayWidth/2);
-		}
-	});
-
-	$(".slider").slider( {
-		animate: true,
-		min : 1,
-		max : featureDisplay.sequenceLength,
-		step : featureDisplay.basesDisplayWidth/2,
-		change : function(ev, ui) {
-			featureDisplay.leftBase = ui.value;
-			drawAll(featureDisplay);
-		}
-	});
+	var featureDisplay = new featureDisplayObj(10000, 40, 16000, tmpSrcFeature, 12, leftBase);
 	
 	$('ul.sf-menu').superfish();
-	
-	$('#rightDraggableEdge').draggable({
-		stop: function(event, ui) {
-			var xpos = parseInt(
-					$('#rightDraggableEdge').css('margin-left').replace("px", ""));
-			
-			featureDisplay.frameLineHeight = (ui.offset.top-featureDisplay.marginTop+8)/17;
-			displayWidth = (xpos-margin)+ui.offset.left;
-			
-			// adjust feature display canvas
-			var cssObj = {
-					 'height': featureDisplay.frameLineHeight*17+'px',
-					 'width': displayWidth+'px'
-			};
-			$('#featureDisplay').css(cssObj);
-			
-			drawAll(featureDisplay);
-			adjustFeatureDisplayPosition(true, featureDisplay);
-			drawFrameAndStrand(featureDisplay);
-		}
-	});
-	
-    drawFrameAndStrand(featureDisplay);
-	drawAll(featureDisplay);
-	getOrganismList(featureDisplay);
-	addEventHandlers(featureDisplay);
 });
 
-function featureDisplayObject(basesDisplayWidth, marginTop, sequenceLength, 
-		                      srcFeature, frameLineHeight, leftBase) {
+function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
+		                   srcFeature, frameLineHeight, leftBase) {
+	count++;
+	this.index = count;
 	this.basesDisplayWidth = basesDisplayWidth;
 	this.marginTop = marginTop;
 	this.sequenceLength = sequenceLength;
@@ -138,6 +81,68 @@ function featureDisplayObject(basesDisplayWidth, marginTop, sequenceLength,
 	this.leftBase = leftBase;
 	this.sequence;
 	this.minimumDisplay = false;
+	var self = this;
+	
+	adjustFeatureDisplayPosition(false, self);
+	
+	$("#slider_vertical_container").slider({
+		orientation: "vertical",
+		min: 140,
+		max: self.sequenceLength,
+		value: self.basesDisplayWidth,
+		step: 10000,
+		change: function(event, ui) {
+		  var basesInView = $('#slider_vertical_container').slider('option', 'value');
+		
+		  if(basesInView > 50000) {
+			  showStopCodons = false;
+		  } else if(basesInView < 1000) {
+			  showStopCodons = true;
+		  }
+		  
+		  self.basesDisplayWidth = ui.value;
+		  drawAll(self);
+		  $(".slider").slider('option', 'step', self.basesDisplayWidth/2);
+		}
+	});
+
+	$(".slider").slider( {
+		animate: true,
+		min : 1,
+		max : self.sequenceLength,
+		step : self.basesDisplayWidth/2,
+		change : function(ev, ui) {
+			self.leftBase = ui.value;
+			drawAll(self);
+		}
+	});
+	
+	//
+	$('#rightDraggableEdge').draggable({
+		stop: function(event, ui) {
+			var xpos = parseInt(
+					$('#rightDraggableEdge').css('margin-left').replace("px", ""));
+			
+			self.frameLineHeight = (ui.offset.top-self.marginTop+8)/17;
+			displayWidth = (xpos-margin)+ui.offset.left;
+			
+			// adjust feature display canvas
+			var cssObj = {
+					 'height': self.frameLineHeight*17+'px',
+					 'width': displayWidth+'px'
+			};
+			$('#featureDisplay').css(cssObj);
+			
+			drawAll(self);
+			adjustFeatureDisplayPosition(true, self);
+			drawFrameAndStrand(self);
+		}
+	});
+	
+	drawFrameAndStrand(self);
+	drawAll(self);
+	getOrganismList(self);
+	addEventHandlers(self);
 }
 
 //
@@ -268,20 +273,22 @@ function drawFrameAndStrand(featureDisplay){
 	
 	for(var i=0;i<3; i++)
 	{
-	  $('.fwdFrame'+i).html('');
-	  addFrameLine('.fwdFrames',ypos,'fwdFrame'+i, featureDisplay);
+	  var name = 'fwdFrame'+i+featureDisplay.index;
+	  $('.'+name).html('');
+	  addFrameLine('.fwdFrames',ypos,name, featureDisplay);
 	  ypos+=thisFLH*2;
 	}
 	
-	addStrandLine('.strands', ypos, 'fwdStrand', featureDisplay);
+	addStrandLine('.strands', ypos, 'fwdStrand'+featureDisplay.index, featureDisplay);
 	ypos+=thisFLH*3;
-	addStrandLine('.strands', ypos, 'bwdStrand', featureDisplay);
+	addStrandLine('.strands', ypos, 'bwdStrand'+featureDisplay.index, featureDisplay);
 	
 	ypos+=thisFLH*2;
 	for(var i=0;i<3; i++)
 	{
-	  $('.bwdFrame'+i).html('');
-	  addFrameLine('.bwdFrames',ypos,'bwdFrame'+i, featureDisplay);
+	  var name = 'bwdFrame'+i+featureDisplay.index;
+	  $('.'+name).html('');
+	  addFrameLine('.bwdFrames',ypos,name, featureDisplay);
 	  ypos+=thisFLH*2;
 	}
 }
