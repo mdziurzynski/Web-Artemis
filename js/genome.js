@@ -28,7 +28,6 @@ var showGC = false;
 var showAG = false;
 
 var features;
-var firstTime = true;
 var count = 0;
 
 var colour = [ 
@@ -61,7 +60,8 @@ $(document).ready(function() {
 	else
 		leftBase = parseInt(leftBase);
 	
-	var featureDisplay = new featureDisplayObj(10000, 40, 16000, tmpSrcFeature, 12, leftBase);
+	var featureDisplay1 = new featureDisplayObj(10000, 40, 16000, tmpSrcFeature, 12, leftBase);
+	//var featureDisplay2 = new featureDisplayObj(10000, 310, 16000, 'Pf3D7_02', 12, leftBase);
 	
 	$('ul.sf-menu').superfish();
 });
@@ -70,6 +70,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		                   srcFeature, frameLineHeight, leftBase) {
 	count++;
 	this.index = count;
+	this.firstTime = true;
 	this.basesDisplayWidth = basesDisplayWidth;
 	this.marginTop = marginTop;
 	this.sequenceLength = sequenceLength;
@@ -81,18 +82,24 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.leftBase = leftBase;
 	this.sequence;
 	this.minimumDisplay = false;
-	var self = this;
 	
+	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" class="canvas"></div>');
+	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
+	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
+	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
+	$('#features').append('<div id="features'+this.index+'"></div>');
+	
+	var self = this;
 	adjustFeatureDisplayPosition(false, self);
 	
-	$("#slider_vertical_container").slider({
+	$("#slider_vertical_container"+this.index).slider({
 		orientation: "vertical",
 		min: 140,
 		max: self.sequenceLength,
 		value: self.basesDisplayWidth,
 		step: 10000,
 		change: function(event, ui) {
-		  var basesInView = $('#slider_vertical_container').slider('option', 'value');
+		  var basesInView = $('#slider_vertical_container'+self.index).slider('option', 'value');
 		
 		  if(basesInView > 50000) {
 			  showStopCodons = false;
@@ -102,11 +109,11 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		  
 		  self.basesDisplayWidth = ui.value;
 		  drawAll(self);
-		  $(".slider").slider('option', 'step', self.basesDisplayWidth/2);
+		  $('#slider'+this.index).slider('option', 'step', self.basesDisplayWidth/2);
 		}
 	});
 
-	$(".slider").slider( {
+	$('#slider'+this.index).slider( {
 		animate: true,
 		min : 1,
 		max : self.sequenceLength,
@@ -131,7 +138,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 					 'height': self.frameLineHeight*17+'px',
 					 'width': displayWidth+'px'
 			};
-			$('#featureDisplay').css(cssObj);
+			$('#featureDisplay'+self.index).css(cssObj);
 			
 			drawAll(self);
 			adjustFeatureDisplayPosition(true, self);
@@ -171,7 +178,7 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
         'position':'absolute',
         'top':thisMarginTop+(thisFLH*17.0)+'px'
 	};
-	$('#slider_container').css(cssObj);
+	$('#slider'+featureDisplay.index).css(cssObj);
 
 	cssObj = {
 	     'margin-left': margin+margin+displayWidth+'px',
@@ -179,8 +186,8 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	     'position':'absolute',
 	     'top': thisMarginTop+7+'px'
 	};
-	$('#slider_vertical_container').css(cssObj);
-	$('#featureDisplay').css('margin-top', thisMarginTop-5+'px');
+	$('#slider_vertical_container'+featureDisplay.index).css(cssObj);
+	$('#featureDisplay'+featureDisplay.index).css('margin-top', thisMarginTop-5+'px');
 
 	if(!drag) {
 		cssObj = {
@@ -231,7 +238,7 @@ function addEventHandlers(featureDisplay) {
 	});
 	
 	// popup
-	$('#features').mouseenter(function(event){
+	$('#features'+featureDisplay.index).mouseenter(function(event){
 		var tgt = $(event.target);
 	    var x = event.pageX+10;
 		var y = event.pageY+10;
@@ -248,11 +255,11 @@ function addEventHandlers(featureDisplay) {
 	    }
 	 });
 	
-	$('#features').click(function(event){
+	$('#features'+featureDisplay.index).click(function(event){
 		handleFeatureClick($(event.target), featureDisplay);
 	 });
 	
-	$('#features').mouseout(function(event){
+	$('#features'+featureDisplay.index).mouseout(function(event){
 		disablePopup();
 	 });
 	
@@ -328,18 +335,18 @@ function drawAll(featureDisplay) {
 	  baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	  basePerPixel  = baseInterval/screenInterval;
 
-      $('#featureDisplay').html('');
+      $('#featureDisplay'+featureDisplay.index).html('');
       var showSequence = true;
       
       if(featureDisplay.minimumDisplay &&
-    	$('#slider_vertical_container').slider('option', 'value') >= 5000) {
+    	$('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') >= 5000) {
     	  showSequence = false;
       }
       
-      if(showSequence && (firstTime || showStopCodons || showGC || showAG)) {
+      if(showSequence && (featureDisplay.firstTime || showStopCodons || showGC || showAG)) {
         getSequence(featureDisplay);
       } else {
-    	$('#stop_codons').html('');
+    	$('#stop_codons'+featureDisplay.index).html('');
         $('#sequence').html('');
         $('#translation').html('');
       }
@@ -351,7 +358,7 @@ function drawAll(featureDisplay) {
 function getSequence(featureDisplay) {
 	var end = featureDisplay.leftBase+featureDisplay.basesDisplayWidth;
 
-	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
+	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') < 5000) {
 	  end+=2;
 	}
 
@@ -378,17 +385,17 @@ function drawStopCodons(featureDisplay) {
 	var nstops = fwdStops1.length + fwdStops2.length + fwdStops3.length +
 				 bwdStops1.length + bwdStops2.length + bwdStops3.length; 
 	if(nstops > 3000) {
-		var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
+		var canvasTop = $('#featureDisplay'+featureDisplay.index).css('margin-top').replace("px", "");
 		var mTop = featureDisplay.marginTop;
 		var flh  = featureDisplay.frameLineHeight;
 		
-		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh);
-		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh);
-		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh);
+		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh, featureDisplay);
+		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh, featureDisplay);
+		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh, featureDisplay);
 	
-		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh);
-		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh);
-		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh);
+		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh, featureDisplay);
+		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh, featureDisplay);
+		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh, featureDisplay);
 	} else {
 		//console.time('draw fwd stop codons');
 		drawFwdStop(fwdStops1, 0, featureDisplay);
@@ -409,13 +416,13 @@ function drawStopCodons(featureDisplay) {
 };
 
 
-function drawStopOnCanvas(stop, ypos, frameLineHeight) {
+function drawStopOnCanvas(stop, ypos, frameLineHeight, featureDisplay) {
 	var len=stop.length;
 	var colour = '#000000';
 	for(var i=0; i<len; i++ ) {
 		var position1 = stop[i];
 		var stopPosition1 = margin+Math.round(stop[i]/basePerPixel);
-		$("#featureDisplay").drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
+		$("#featureDisplay"+featureDisplay.index).drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
 				{color: colour, stroke:'1'});
 	}
 }
@@ -442,7 +449,7 @@ function drawFwdStop(stop, frame, featureDisplay) {
 	fwdStopsStr = fwdStopsStr + '<div id=fs'+position1+' class="bases" style="width:'+width+'; margin:'+pos+'"></div>';
   }
   
-  $('#stop_codons').append(fwdStopsStr);
+  $('#stop_codons'+featureDisplay.index).append(fwdStopsStr);
 }
 
 function drawBwdStop(stop, frame, featureDisplay) {
@@ -467,7 +474,7 @@ function drawBwdStop(stop, frame, featureDisplay) {
 	bwdStopsStr = bwdStopsStr + '<div id=bs'+position1+' class="bases" style="width:'+width+'; margin:'+pos+'"></div>';
   }
   //return bwdStopsStr;
-  $('#stop_codons').append(bwdStopsStr);
+  $('#stop_codons'+featureDisplay.index).append(bwdStopsStr);
 }
 
 function drawCodons(featureDisplay) {
@@ -679,7 +686,7 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	var Xpoints = new Array(lpos, mid, rpos) ;
 	var Ypoints = new Array(lastYpos+4, ymid, ypos+4);
 	
-	$("#featureDisplay").drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
+	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
 }
 
 function drawArrow(featureDisplay, exon, ypos) {
@@ -707,7 +714,7 @@ function drawArrow(featureDisplay, exon, ypos) {
 	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+featureDisplay.frameLineHeight);
 	}
 
-	$("#featureDisplay").drawPolyline(Xpoints,Ypoints, {color:'#020202', stroke:'1'});
+	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpoints,Ypoints, {color:'#020202', stroke:'1'});
 }
 
 
@@ -1074,7 +1081,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 		      featureToColourList.push(exon.uniquename);
 		      featureStr = drawFeature(featureDisplay.leftBase, exon, featureStr, ypos, "featCDS") ;
 		      
-		      var canvasTop = $('#featureDisplay').css('margin-top').replace("px", "");
+		      var canvasTop = $('#featureDisplay'+featureDisplay.index).css('margin-top').replace("px", "");
 		      if(lastYpos > -1) {
 		      	  drawFeatureConnections(featureDisplay, lastExon, exon, 
 		      			  lastYpos-canvasTop, ypos-canvasTop, colour);
@@ -1104,7 +1111,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	  
 	}
 	
-	$('#features').html(featureStr);
+	$('#features'+featureDisplay.index).html(featureStr);
 	
 	if(!options.minDisplay) {
 		if($('.feat').height() != featureDisplay.frameLineHeight) {
@@ -1137,16 +1144,16 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
 
 	debugLog("getSequence() sequence length = "+seqLen);
 	if((seqLen-featureDisplay.sequenceLength) != 0) {
-      $(".slider").slider('option', 'max', seqLen);
+      $('#slider'+featureDisplay.index).slider('option', 'max', seqLen);
 	}
 
     sequenceLength = seqLen;
     
     //console.time('draw stop codons');
-    $('#stop_codons').html('');
+    $('#stop_codons'+featureDisplay.index).html('');
     $('#sequence').html('');
     $('#translation').html('');
-	if($('#slider_vertical_container').slider('option', 'value') < 5000) {
+	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') < 5000) {
 	  drawCodons(featureDisplay);
 	  drawAminoAcids(featureDisplay);
 	} else if(showStopCodons) {
@@ -1154,14 +1161,14 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
 	}
     //console.timeEnd('draw stop codons');  
 
-    if (firstTime) {
-    	$("#slider_vertical_container").slider('option', 'max', sequenceLength);
-    	$("#slider_vertical_container").slider('option', 'value', featureDisplay.basesDisplayWidth);
+    if (featureDisplay.firstTime) {
+    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'max', sequenceLength);
+    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'value', featureDisplay.basesDisplayWidth);
     			
-    	$(".slider").slider('option', 'max', sequenceLength);
-    	$(".slider").slider('option', 'step', featureDisplay.basesDisplayWidth/2);
-    	$(".slider").slider('option', 'value', featureDisplay.leftBase);
-    	firstTime = false;
+    	$('#slider'+featureDisplay.index).slider('option', 'max', sequenceLength);
+    	$('#slider'+featureDisplay.index).slider('option', 'step', featureDisplay.basesDisplayWidth/2);
+    	$('#slider'+featureDisplay.index).slider('option', 'value', featureDisplay.leftBase);
+    	featureDisplay.firstTime = false;
 	}
 
     if(showGC || showAG) {

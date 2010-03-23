@@ -7,16 +7,16 @@ var timeoutTime = 160; // ms
 function scroll(direction, featureDisplay) {
     if (scrolling == 1) {
     	
-    	var leftBase = $(".slider").slider('option', 'value');
+    	var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
             if(direction == 1) {
             	// scroll right
             	leftBase = Math.round(Math.floor(
-            			leftBase + $(".slider").slider('option', 'step')/4));
+            			leftBase + $('#slider'+featureDisplay.index).slider('option', 'step')/4));
             }
             else {
             	// scroll left
             	leftBase = Math.round(Math.floor(
-            			leftBase - $(".slider").slider('option', 'step')/4));
+            			leftBase - $('#slider'+featureDisplay.index).slider('option', 'step')/4));
             	if(leftBase == 0) {
             		leftBase = 1;
             	}
@@ -28,7 +28,7 @@ function scroll(direction, featureDisplay) {
         	
         	featureDisplay.leftBase = leftBase;
         	drawAll(featureDisplay);
-        	$(".slider").slider('option', 'value', leftBase);
+        	$('#slider'+featureDisplay.index).slider('option', 'value', leftBase);
 
         	//var code2run = "scroll("+direction+"," +"featureDisplay)";
             setTimeout(function() { scroll(direction, featureDisplay); }, timeoutTime);
@@ -48,7 +48,7 @@ function addScrollEventHandlers(featureDisplay) {
 	$('#left').mouseup(function(event){
 		scrolling = 0;
 		featureDisplay.minimumDisplay = false
-		var leftBase = $(".slider").slider('option', 'value');
+		var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
     	featureDisplay.leftBase = leftBase;
     	drawAll(featureDisplay);
 	});
@@ -62,7 +62,7 @@ function addScrollEventHandlers(featureDisplay) {
 	$('#right').mouseup(function(event){
 		scrolling = 0;
 		featureDisplay.minimumDisplay = false;
-		var leftBase = $(".slider").slider('option', 'value');
+		var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
 		featureDisplay.leftBase = leftBase;
 		drawAll(featureDisplay);
 	});
