@@ -190,7 +190,7 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
         'margin-left': margin+buttonWidth+'px',
         'width': displayWidth-buttonWidth+'px',
         'position':'absolute',
-        'top':thisMarginTop+(thisFLH*17.0)+'px'
+        'top':thisMarginTop+(thisFLH*17.5)+'px'
 	};
 	$('#slider'+featureDisplay.index).css(cssObj);
 
