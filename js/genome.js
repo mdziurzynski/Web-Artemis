@@ -60,19 +60,24 @@ $(document).ready(function() {
 	else
 		leftBase = parseInt(leftBase);
  
+	var title = '';
 	var ypos = 40;
 	for(var i in arr) {
 		var value = arr[i];
 		if(i.indexOf("src") > -1) {
+			title+=value+' ';
 			new featureDisplayObj(8000, ypos, 16000, value, 10, leftBase);
 			ypos+=250;
 		}
 	}
 
-	if(count == 0)
-		new featureDisplayObj(8000, 40, 16000, null, 12, leftBase);
-
+	if(count == 0) {
+		title = 'Pf3D7_01';
+		new featureDisplayObj(8000, 40, 16000, title, 12, leftBase);
+	}
+	
 	$('ul.sf-menu').superfish();
+	$(this).attr("title", title);
 });
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
@@ -83,10 +88,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.basesDisplayWidth = basesDisplayWidth;
 	this.marginTop = marginTop;
 	this.sequenceLength = sequenceLength;
-	if(srcFeature)
-	  this.srcFeature = srcFeature;
-	else
-	  this.srcFeature = 'Pf3D7_01';
+	this.srcFeature = srcFeature;
 	this.frameLineHeight = frameLineHeight;
 	this.leftBase = leftBase;
 	this.sequence;
