@@ -53,16 +53,25 @@ var colour = [
 
 $(document).ready(function() {
 
-	var tmpSrcFeature = getUrlVars()["src"];
-	var leftBase = getUrlVars()["base"];
+	var arr = getUrlVars();
+	var leftBase = arr["base"];
 	if(!leftBase)
 		leftBase = 1;
 	else
 		leftBase = parseInt(leftBase);
-	
-	var featureDisplay1 = new featureDisplayObj(10000, 40, 16000, tmpSrcFeature, 12, leftBase);
-	//var featureDisplay2 = new featureDisplayObj(10000, 310, 16000, 'Pf3D7_02', 12, leftBase);
-	
+ 
+	var ypos = 40;
+	for(var i in arr) {
+		var value = arr[i];
+		if(i.indexOf("src") > -1) {
+			new featureDisplayObj(8000, ypos, 16000, value, 10, leftBase);
+			ypos+=250;
+		}
+	}
+
+	if(count == 0)
+		new featureDisplayObj(8000, 40, 16000, null, 12, leftBase);
+
 	$('ul.sf-menu').superfish();
 });
 
@@ -88,6 +97,11 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
 	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
 	$('#features').append('<div id="features'+this.index+'"></div>');
+	$('#ticks').append('<div id="ticks'+this.index+'"></div>');
+	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
+	$('#buttons').append('<div id="right'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>');
+	$('#rightDraggableEdge').append('<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se"></div>');
+
 	
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
@@ -125,10 +139,10 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	});
 	
 	//
-	$('#rightDraggableEdge').draggable({
+	$('#rightDraggableEdge'+this.index).draggable({
 		stop: function(event, ui) {
 			var xpos = parseInt(
-					$('#rightDraggableEdge').css('margin-left').replace("px", ""));
+					$('#rightDraggableEdge'+self.index).css('margin-left').replace("px", ""));
 			
 			self.frameLineHeight = (ui.offset.top-self.marginTop+8)/17;
 			displayWidth = (xpos-margin)+ui.offset.left;
@@ -162,16 +176,16 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 			 'position':'absolute',
 			 'top': thisMarginTop+(thisFLH*17.5)+'px'
 	};
-	$('#left').css(cssObj);
+	$('#left'+featureDisplay.index).css(cssObj);
 
 	cssObj = {
 			'margin-left': margin+displayWidth+'px',
 			'position':'absolute',
 			'top': thisMarginTop+(thisFLH*17.5)+'px'
 	};
-	$('#right').css(cssObj);
+	$('#right'+featureDisplay.index).css(cssObj);
 
-	var buttonWidth = $('#left').width()+5;
+	var buttonWidth = $('#left'+featureDisplay.index).width()+5;
 	cssObj = {
         'margin-left': margin+buttonWidth+'px',
         'width': displayWidth-buttonWidth+'px',
@@ -191,12 +205,18 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 
 	if(!drag) {
 		cssObj = {
-		     'left': margin+displayWidth+'px',
-		     'top': thisMarginTop+(thisFLH*16)+'px'
+			'width': '12px', 
+			'height': '12px',
+			'border-right': '1px solid #FF0000',
+			'border-bottom': '1px solid #FF0000',
+			'position': 'absolute',
+			'opacity':'0.4',
+		    'left': margin+displayWidth+'px',
+		    'top': thisMarginTop+(thisFLH*16)+'px'
 		};
-		$('#rightDraggableEdge').css(cssObj);
+		$('#rightDraggableEdge'+featureDisplay.index).css(cssObj);
 	} else {
-		$('#rightDraggableEdge').css('top',thisMarginTop+(thisFLH*16)+'px');
+		$('#rightDraggableEdge'+featureDisplay.index).css('top',thisMarginTop+(thisFLH*16)+'px');
 	}
 }
 
@@ -217,7 +237,7 @@ function addEventHandlers(featureDisplay) {
 			}
 			showGC = false;
 		} else {
-			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
+			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
 			showGC = true;	
 		}
 		drawAll(featureDisplay);
@@ -231,7 +251,7 @@ function addEventHandlers(featureDisplay) {
 			}
 			showAG = false;
 		} else {
-			setGraphCss(displayWidth, marginTop, margin, frameLineHeight);
+			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
 			showAG = true;	
 		}
 		drawAll(featureDisplay);
@@ -729,7 +749,7 @@ function drawTicks(featureDisplay) {
 	  xScreen -= ((featureDisplay.leftBase-start-1)/basePerPixel);
 	}
  
-	$('#ticks').html('');
+	$('#ticks'+featureDisplay.index).html('');
 	/*console.log('nticks='+nticks+' '+basePerPixel+
 			" basesDisplayWidth="+basesDisplayWidth+" displayWidth="+displayWidth+ 
 			" leftBasePosition="+leftBasePosition+
@@ -746,9 +766,9 @@ function drawTicks(featureDisplay) {
 			continue;
 		}
 		var pos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9)-14+"px "+xScreen+"px";
-		var thisTick = 'tick'+i;
+		var thisTick = 'tick'+featureDisplay.index+i;
 		
-		$('#ticks').append('<div class="tickClass" id='+thisTick+'></div>');
+		$('#ticks'+featureDisplay.index).append('<div class="tickClass" id='+thisTick+'></div>');
 		setTickCSS(pos, Math.round(i*baseInterval)+(start), '#'+thisTick);
 	}
 }
@@ -1122,13 +1142,14 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
 		}
 	
-		setupFeatureList(features, featureDisplay);
+		if(count < 2) {
+			setupFeatureList(features, featureDisplay);
+		}
 		if(featureToColourList.length > 0) {
-			
 			var serviceName = '/features/featureproperties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
-					'us='+featureToColourList, 
-					featureDisplay.leftBase, {});
+				'us='+featureToColourList, 
+				featureDisplay.leftBase, {});
 		}
 	}
 	return;

@@ -112,14 +112,6 @@
  			display:block; 
 			position: absolute;
 		 }
-		 
-		#rightDraggableEdge { 
-			width: 12px; height: 12px;
-			border-right: 1px solid #FF0000;
-			border-bottom: 1px solid #FF0000;
-			position: absolute;
-			opacity:0.4; 
-		}
 			
 		#menuHeader {
 			position: absolute; /* for ie */
@@ -220,16 +212,13 @@
 
 	<div id="slider_container"></div>
 	<div id="slider_vertical_container"></div>
-	<div id="buttons">
-		<div id="left" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>
-		<div id="right" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>
-	</div>
+	<div id="buttons"></div>
 
 	<div id="graph"></div>
 	<div id="featureList"></div>
 
 	<div id="logger"></div>
-	<div id="rightDraggableEdge" class="ui-resizable-se"></div>
+	<div id="rightDraggableEdge"></div>
 	<div id="properties" class="holder" style="display: none;"></div>
     </body>
 </html>

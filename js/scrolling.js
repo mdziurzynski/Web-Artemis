@@ -39,13 +39,13 @@ function scroll(direction, featureDisplay) {
 
 function addScrollEventHandlers(featureDisplay) {
 
-	$('#left').mousedown(function(event){
+	$('#left'+featureDisplay.index).mousedown(function(event){
 		scrolling = 1;
 		featureDisplay.minimumDisplay = true
 		scroll(-1, featureDisplay);
 	});
 
-	$('#left').mouseup(function(event){
+	$('#left'+featureDisplay.index).mouseup(function(event){
 		scrolling = 0;
 		featureDisplay.minimumDisplay = false
 		var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
@@ -53,13 +53,13 @@ function addScrollEventHandlers(featureDisplay) {
     	drawAll(featureDisplay);
 	});
 	
-	$('#right').mousedown(function(event){
+	$('#right'+featureDisplay.index).mousedown(function(event){
 		scrolling = 1;
 		featureDisplay.minimumDisplay = true
 		scroll(1, featureDisplay);
 	});
 	
-	$('#right').mouseup(function(event){
+	$('#right'+featureDisplay.index).mouseup(function(event){
 		scrolling = 0;
 		featureDisplay.minimumDisplay = false;
 		var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
