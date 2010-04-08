@@ -984,19 +984,61 @@ var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options
 	
 	if(!orthologues || orthologues.length == 0)
 		return;
-	$("div#DISP"+escapeId(featureSelected)).append(
-			   "<br /><strong>Orthologues : </strong><br />");
+	
+	var clusters = new Array();
+	var count = 0;
+	
 	for(var i=0; i<orthologues.length; i++) {	
 		var featureOrthologues = orthologues[i].orthologues;
 		for(var j=0; j<featureOrthologues.length; j++) {
-		   var featureOrthologue = featureOrthologues[j].ortho;
-		   $("div#DISP"+escapeId(featureSelected)).append(
+			   
+		   if(featureOrthologues[j].orthotype == 'polypeptide') {
+			   
+			 if(count == 0)
+				$("div#DISP"+escapeId(featureSelected)).append(
+				   "<br /><strong>Orthologues : </strong><br />");
+				
+			 count++;
+		     var featureOrthologue = featureOrthologues[j].ortho;
+		     $("div#DISP"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   featureOrthologue+'\','+midDisplay+');">'+
-				   featureOrthologue+"</a><br />");
+				   featureOrthologue+"</a> ("+featureOrthologues[j].orthoproduct+")<br />");
+		   } else {
+			 clusters.push(featureOrthologues[j].ortho);
+		   }
 		}
 	}
+	
+	var serviceName = '/features/clusters.json?';
+	handleAjaxCalling(serviceName, aCluster,
+		'orthologues='+clusters, 
+		featureDisplay, {});
 };
+
+var aCluster = function ajaxGetClusters(featureDisplay, returned, options) {
+	var clusters = returned.response.clusters;
+	var midDisplay = featureDisplay.basesDisplayWidth/2;
+	
+	if(!clusters || clusters.length == 0)
+		return;
+	
+	$("div#DISP"+escapeId(featureSelected)).append(
+			   "<br /><strong>Clusters : </strong><br />");
+	for(var i=0; i<clusters.length; i++) {	
+		var featureCluster = clusters[i].cluster;
+		for(var j=0; j<featureCluster.length; j++) {
+			   
+		   if(featureCluster[j].subject_type == 'polypeptide') {
+		     var subject = featureCluster[j].subject;
+		     $("div#DISP"+escapeId(featureSelected)).append(
+				   '<a href="javascript:void(0)" onclick="openMe(\''+
+				   subject+'\','+midDisplay+');">'+
+				   subject+"</a><br />");
+		   }
+		}
+	}
+}
 
 function openMe(gene, midDisplay) {
 	handleAjaxCalling('/features/featurecoordinates.json?', 
