@@ -853,8 +853,14 @@ function showProperties(featureDisplay) {
 	}
         
   
-	handleAjaxCalling('/features/featureproperties.json?', aFeatureProps,
+	handleAjaxCalling('/features/properties.json?', aFeatureProps,
 		'us='+featurePropertyList, -1, {});
+	
+	handleAjaxCalling('/features/pubs.json?', aFeaturePubs,
+			featureStr, -1, {});
+	
+	handleAjaxCalling('/features/dbxrefs.json?', aFeatureDbXRefs,
+			featureStr, -1, {});
 
 	handleAjaxCalling('/features/terms.json?', aFeatureCvTerms,
 			featureStr, -1, {});
@@ -1041,10 +1047,10 @@ var aCluster = function ajaxGetClusters(featureDisplay, returned, options) {
 }
 
 function openMe(gene, midDisplay) {
-	handleAjaxCalling('/features/featurecoordinates.json?', 
+	handleAjaxCalling('/features/coordinates.json?', 
 			function(featureDisplay, returned, options) { 
-		      var src  = returned.response.coordinates[0].region; 
-		      var base = parseInt(returned.response.coordinates[0].fmin)-midDisplay;
+		      var src  = returned.response.coordinates[0].regions[0].region; 
+		      var base = parseInt(returned.response.coordinates[0].regions[0].fmin)-midDisplay;
 		      window.open('?&src='+src+'&base='+base);
 		    }, 
 			{ features: gene}, {}, {});
@@ -1064,6 +1070,38 @@ var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, optio
 	}
 };
 
+var aFeaturePubs = function ajaxGetFeaturePubs(featureDisplay, returned, options) {
+	var featPubs  = returned.response.features;
+	if(!featPubs || featPubs.length == 0)
+		return;
+	
+	$("div#DISP"+escapeId(featureSelected)).append(
+			   "<br /><strong>Literature : </strong><br />");
+	
+    for(var i=0; i<featPubs.length; i++) {	
+		var featurepubs = featPubs[i].pubs;
+		showFeaturePubs(featurepubs, featureSelected);
+	}
+    
+	$("div#DISP"+escapeId(featureSelected)).append("<br />");
+};
+
+
+var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(featureDisplay, returned, options) {
+	var featDbXRefs  = returned.response.features;
+	if(!featDbXRefs || featDbXRefs.length == 0)
+		return;
+	
+	$("div#DISP"+escapeId(featureSelected)).append(
+			   "<br /><strong>DbXRefs : </strong><br />");
+	
+    for(var i=0; i<featDbXRefs.length; i++) {	
+		showFeaturePubs(featDbXRefs[i].dbxrefs, featureSelected);
+	}
+    
+	$("div#DISP"+escapeId(featureSelected)).append("<br />");
+};
+
 function containsString(anArray, aStr) {
 	for(var i=0; i<anArray.length; i++) {
 		if(aStr == anArray[i])
@@ -1079,11 +1117,11 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 		for(var j=0; j<featureprops.length; j++) {
 
 			if(featureprops[j].name == 'comment')
-				$('#'+escapeId(featProps[i].uniquename+":PROPS")).append(
+				$('#'+escapeId(featProps[i].feature+":PROPS")).append(
 						featureprops[j].name+"="+featureprops[j].value+";<br />");
 			
 			if(featureprops[j].name == 'colour') {
-				var featureId = escapeId(featProps[i].uniquename);
+				var featureId = escapeId(featProps[i].feature);
 				$('#'+featureId).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 			}
 		}
@@ -1190,7 +1228,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 			setupFeatureList(features, featureDisplay);
 		}
 		if(featureToColourList.length > 0) {
-			var serviceName = '/features/featureproperties.json?';
+			var serviceName = '/features/properties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
 				'us='+featureToColourList, 
 				featureDisplay.leftBase, {});

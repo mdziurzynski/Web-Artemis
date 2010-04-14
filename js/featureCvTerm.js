@@ -50,10 +50,10 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 			   $("div#DISP"+escapeId(featureSelected)).append(
 					   '<a href="javascript:void(0)" onclick="window.open(\'http://www.genedb.org/cgi-bin/amigo/term-details.cgi?term=GO:'+
 							   featurecvterms[j].accession+'\');">GO:'+
-					   featurecvterms[j].accession+'</a>'+aspect+'; '+featurecvterms[j].cvterm);
+					   featurecvterms[j].accession+'</a>'+aspect+'; '+featurecvterms[j].cvterm+'; ');
 			   showFeatureProps(featurecvterms[j], featureSelected);
-			   showFeatureCvTermDbXRefs(featurecvterms[j], featureSelected);
-			   showFeatureCvTermPubs(featurecvterms[j], featureSelected);
+			   showFeatureCvTermDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
+			   showFeaturePubs(featurecvterms[j].pubs, featureSelected);
 			   $("div#DISP"+escapeId(featureSelected)).append("<br />");
 		   }
 		}
@@ -81,11 +81,11 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 				   "<br /><strong>Controlled Curation : </strong><br />");
 			   }
 			   $("div#DISP"+escapeId(featureSelected)).append(
-				   cvName+"="+featurecvterms[j].cvterm);
+				   cvName+"="+featurecvterms[j].cvterm+'; ');
 
 			   showFeatureProps(featurecvterms[j], featureSelected);
-			   showFeatureCvTermDbXRefs(featurecvterms[j], featureSelected);
-			   showFeatureCvTermPubs(featurecvterms[j], featureSelected);
+			   showFeatureCvTermDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
+			   showFeaturePubs(featurecvterms[j].pubs, featureSelected);
 			   $("div#DISP"+escapeId(featureSelected)).append("<br />");
 		   }
 		}
@@ -96,29 +96,28 @@ function showFeatureProps(featurecvterm, featureSelected) {
 	var featureCvTermProps = featurecvterm.props;
 	for(var k=0; k<featureCvTermProps.length; k++) {
 		   $("div#DISP"+escapeId(featureSelected)).append(
-				   "; "+featureCvTermProps[k].proptype+"="+featureCvTermProps[k].prop);
+				   featureCvTermProps[k].proptype+"="+featureCvTermProps[k].prop+"; ");
 	}	
 }
 
-function showFeatureCvTermDbXRefs(featurecvterm, featureSelected) {
-	var featureCvTermDbXRefs = featurecvterm.dbxrefs;
-	for(var k=0; k<featureCvTermDbXRefs.length; k++) {
+function showFeatureCvTermDbXRefs(featuredbxrefs, featureSelected) {
+	for(var k=0; k<featuredbxrefs.length; k++) {
 		$("div#DISP"+escapeId(featureSelected)).append(
-			   "; "+featureCvTermDbXRefs[k].database+"="+featureCvTermDbXRefs[k].accession);
+			   featureCvTermDbXRefs[k].database+"="+featuredbxrefs[k].accession+'; ');
 	}
 }
 
 
-function showFeatureCvTermPubs(featurecvterm, featureSelected) {
-	var featureCvTermPubs = featurecvterm.pubs;
-	for(var k=0; k<featureCvTermPubs.length; k++) {
-		   if(featureCvTermPubs[k].database == 'PMID') {
+function showFeaturePubs(pubs, featureSelected) {
+
+	for(var k=0; k<pubs.length; k++) {
+		   if(pubs[k].database == 'PMID') {
 			   $("div#DISP"+escapeId(featureSelected)).append(
-				   '; <a href="javascript:void(0)" onclick="window.open(\'http://www.ncbi.nlm.nih.gov/pubmed/'+
-				   featureCvTermPubs[k].accession+'\');">'+
-				   featureCvTermPubs[k].database+"="+featureCvTermPubs[k].accession);
+				   '<a href="javascript:void(0)" onclick="window.open(\'http://www.ncbi.nlm.nih.gov/pubmed/'+
+				   pubs[k].accession+'\');">'+
+				   pubs[k].database+":"+pubs[k].accession+'</a>; ');
 		   } else
 			   $("div#DISP"+escapeId(featureSelected)).append(
-					   "; "+featureCvTermPubs[k].database+"="+featureCvTermPubs[k].accession);
+					   pubs[k].database+":"+pubs[k].accession+';');
 	}
 }
