@@ -1096,7 +1096,7 @@ var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(featureDisplay, returned, o
 			   "<br /><strong>DbXRefs : </strong><br />");
 	
     for(var i=0; i<featDbXRefs.length; i++) {	
-		showFeaturePubs(featDbXRefs[i].dbxrefs, featureSelected);
+		showFeatureDbXRefs(featDbXRefs[i].dbxrefs, featureSelected);
 	}
     
 	$("div#DISP"+escapeId(featureSelected)).append("<br />");

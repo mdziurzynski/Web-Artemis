@@ -52,7 +52,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 							   featurecvterms[j].accession+'\');">GO:'+
 					   featurecvterms[j].accession+'</a>'+aspect+'; '+featurecvterms[j].cvterm+'; ');
 			   showFeatureProps(featurecvterms[j], featureSelected);
-			   showFeatureCvTermDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
+			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
 			   showFeaturePubs(featurecvterms[j].pubs, featureSelected);
 			   $("div#DISP"+escapeId(featureSelected)).append("<br />");
 		   }
@@ -84,7 +84,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 				   cvName+"="+featurecvterms[j].cvterm+'; ');
 
 			   showFeatureProps(featurecvterms[j], featureSelected);
-			   showFeatureCvTermDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
+			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
 			   showFeaturePubs(featurecvterms[j].pubs, featureSelected);
 			   $("div#DISP"+escapeId(featureSelected)).append("<br />");
 		   }
@@ -100,10 +100,10 @@ function showFeatureProps(featurecvterm, featureSelected) {
 	}	
 }
 
-function showFeatureCvTermDbXRefs(featuredbxrefs, featureSelected) {
+function showFeatureDbXRefs(featuredbxrefs, featureSelected) {
 	for(var k=0; k<featuredbxrefs.length; k++) {
 		$("div#DISP"+escapeId(featureSelected)).append(
-			   featureCvTermDbXRefs[k].database+"="+featuredbxrefs[k].accession+'; ');
+				featuredbxrefs[k].database+":"+featuredbxrefs[k].accession+'; ');
 	}
 }
 
