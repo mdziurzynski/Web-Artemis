@@ -26,6 +26,7 @@ var featureSelected = -1;
 var showStopCodons = true;
 var showGC = false;
 var showAG = false;
+var showOther = false;
 
 var features;
 var count = 0;
@@ -55,6 +56,7 @@ $(document).ready(function() {
 
 	var arr = getUrlVars();
 	var leftBase = arr["base"];
+	
 	if(!leftBase)
 		leftBase = 1;
 	else
@@ -233,7 +235,7 @@ function addEventHandlers(featureDisplay) {
 	// graphs
 	$('#gcGraphToggle').click(function(event){
 		if(showGC) {
-			if(!showAG) {
+			if(!showAG && !showOther) {
 				$("#graph").css('height', 0+'px');
 				$("#graph").html('');
 			}
@@ -247,7 +249,7 @@ function addEventHandlers(featureDisplay) {
 	
 	$('#agGraphToggle').click(function(event){
 		if(showAG) {
-			if(!showGC) {
+			if(!showGC && !showOther) {
 				$("#graph").css('height', 0+'px');
 				$("#graph").html('');
 			}
@@ -255,6 +257,20 @@ function addEventHandlers(featureDisplay) {
 		} else {
 			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
 			showAG = true;	
+		}
+		drawAll(featureDisplay);
+	});
+	
+	$('#otherGraphToggle').click(function(event){
+		if(showOther) {
+			if(!showGC && !showAG) {
+				$("#graph").css('height', 0+'px');
+				$("#graph").html('');
+			}
+			showOther = false;
+		} else {
+			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+			showOther = true;
 		}
 		drawAll(featureDisplay);
 	});
@@ -365,7 +381,7 @@ function drawAll(featureDisplay) {
     	  showSequence = false;
       }
       
-      if(showSequence && (featureDisplay.firstTime || showStopCodons || showGC || showAG)) {
+      if(showSequence && (featureDisplay.firstTime || showStopCodons || showGC || showAG || showOther)) {
         getSequence(featureDisplay);
       } else {
     	$('#stop_codons'+featureDisplay.index).html('');
@@ -1274,10 +1290,8 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
     	featureDisplay.firstTime = false;
 	}
 
-    if(showGC || showAG) {
-    	drawContentGraphs(featureDisplay.basesDisplayWidth, 
-    			featureDisplay.leftBase, featureDisplay.sequence, 
-    			showAG, showGC);
+    if(showGC || showAG || showOther) {
+    	drawContentGraphs(featureDisplay, showAG, showGC, showOther);
     }
     
     positionFeatureList(featureDisplay);
