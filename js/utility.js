@@ -32,9 +32,13 @@ function sortFeatures(a, b){
 
 
 function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay, options) {
+	handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisplay, options, true);
+}
 
+function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisplay, options, async) {
 	var jsonUrl = webService[serviceType]+serviceName;
-    debugLog(serviceName+" "+jsonUrl);
+    debugLog(serviceName+" "+jsonUrl+ " async "+async);
+    
     $.ajax({
 		  url: jsonUrl,
 		  data: dataArray,
@@ -44,6 +48,7 @@ function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay,
     	ajaxFunction(featureDisplay, returned, options);
 
   },
+  async: async,
   beforeSend: function(XMLHttpRequest) {
       //XMLHttpRequest.setRequestHeader("Connection", "keep-alive");
   }, 
