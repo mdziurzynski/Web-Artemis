@@ -12,7 +12,7 @@ var webService = [ "http://127.0.0.1/testservice/",
 var dataType = [ "json", "jsonp", "jsonp", "jsonp" ];
 
 //
-// web-artemis/index.html?src=Pf3D7_04&base=200000
+// web-artemis/index.html?src=Pf3D7_04&base=200000&width=8000&height=10
 
 var debug = true;
 var margin = 5;
@@ -57,25 +57,51 @@ $(document).ready(function() {
 	var arr = getUrlVars();
 	var leftBase = arr["base"];
 	
-	if(!leftBase)
+	if(!leftBase) {
 		leftBase = 1;
-	else
+	}
+	else {
 		leftBase = parseInt(leftBase);
- 
+	}
+
+	var basesDisplayWidth = arr["width"];
+	if(!basesDisplayWidth) {
+		basesDisplayWidth = 8000;
+	}
+	else {
+		basesDisplayWidth = parseInt(basesDisplayWidth);
+	}
+	
+	var hgt = arr["height"];
+	
 	var title = '';
 	var ypos = 40;
 	for(var i in arr) {
 		var value = arr[i];
 		if(i.indexOf("src") > -1) {
 			title+=value+' ';
-			new featureDisplayObj(8000, ypos, 16000, value, 10, leftBase);
+			
+			if(!hgt) {
+				hgt = 10
+			}
+			else {
+				hgt = parseInt(hgt);
+			}
+				
+			new featureDisplayObj(basesDisplayWidth, ypos, 16000, value, hgt, leftBase);
 			ypos+=250;
 		}
 	}
 
 	if(count == 0) {
+		if(!hgt) {
+			hgt = 12
+		}
+		else {
+			hgt = parseInt(hgt);
+		}
 		title = 'Pf3D7_01';
-		new featureDisplayObj(8000, 40, 16000, title, 12, leftBase);
+		new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
 	}
 	
 	$('ul.sf-menu').superfish();
@@ -106,18 +132,18 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#buttons').append('<div id="right'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>');
 	$('#rightDraggableEdge').append('<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se"></div>');
 
-	
+
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
 	
 	$("#slider_vertical_container"+this.index).slider({
 		orientation: "vertical",
-		min: 140,
-		max: self.sequenceLength,
-		value: self.basesDisplayWidth,
-		step: 10000,
+		min: 0,
+		max: self.sequenceLength-140,
+		value: self.sequenceLength-self.basesDisplayWidth,
+		step: 100,
 		change: function(event, ui) {
-		  var basesInView = $('#slider_vertical_container'+self.index).slider('option', 'value');
+		  var basesInView = self.sequenceLength-ui.value;
 		
 		  if(basesInView > 50000) {
 			  showStopCodons = false;
@@ -125,7 +151,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 			  showStopCodons = true;
 		  }
 		  
-		  self.basesDisplayWidth = ui.value;
+		  self.basesDisplayWidth = self.sequenceLength-ui.value;
 		  drawAll(self);
 		  $('#slider'+this.index).slider('option', 'step', self.basesDisplayWidth/2);
 		}
@@ -377,7 +403,7 @@ function drawAll(featureDisplay) {
       var showSequence = true;
       
       if(featureDisplay.minimumDisplay &&
-    	$('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') >= 5000) {
+    	$('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') <= featureDisplay.sequenceLength-800) {
     	  showSequence = false;
       }
       
@@ -396,7 +422,7 @@ function drawAll(featureDisplay) {
 function getSequence(featureDisplay) {
 	var end = featureDisplay.leftBase+featureDisplay.basesDisplayWidth;
 
-	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') < 5000) {
+	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > featureDisplay.sequenceLength-800) {
 	  end+=2;
 	}
 
@@ -1273,7 +1299,7 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
     $('#stop_codons'+featureDisplay.index).html('');
     $('#sequence').html('');
     $('#translation').html('');
-	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') < 5000) {
+	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > seqLen-800) {
 	  drawCodons(featureDisplay);
 	  drawAminoAcids(featureDisplay);
 	} else if(showStopCodons) {
@@ -1282,8 +1308,8 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
     //console.timeEnd('draw stop codons');  
 
     if (featureDisplay.firstTime) {
-    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'max', sequenceLength);
-    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'value', featureDisplay.basesDisplayWidth);
+    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'max', (seqLen-140));
+    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'value', (seqLen-featureDisplay.basesDisplayWidth));
     			
     	$('#slider'+featureDisplay.index).slider('option', 'max', sequenceLength);
     	$('#slider'+featureDisplay.index).slider('option', 'step', featureDisplay.basesDisplayWidth/2);
