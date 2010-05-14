@@ -1266,6 +1266,7 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
       $('#slider'+featureDisplay.index).slider('option', 'max', seqLen);
 	}
 
+	featureDisplay.sequenceLength = seqLen;
     sequenceLength = seqLen;
     
     //console.time('draw stop codons');
