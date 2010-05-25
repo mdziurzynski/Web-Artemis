@@ -3,13 +3,14 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 3;
+var serviceType = 2;
 
 var webService = [ "http://127.0.0.1/testservice/",
-                   "http://t81-omixed.internal.sanger.ac.uk:6666",
+                   "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
+                   "http://t81-omixed.internal.sanger.ac.uk:6668", // bigtest2
                    "http://www.genedb.org/testservice",
                    "http://127.0.0.1:6666"]; 
-var dataType = [ "json", "jsonp", "jsonp", "jsonp" ];
+var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=8000&height=10
@@ -27,6 +28,7 @@ var showStopCodons = true;
 var showGC = false;
 var showAG = false;
 var showOther = false;
+var compare = true;
 
 var features;
 var count = 0;
@@ -76,20 +78,28 @@ $(document).ready(function() {
 	
 	var title = '';
 	var ypos = 40;
+	var lastObj;
+	var compCount = 0;
 	for(var i in arr) {
 		var value = arr[i];
 		if(i.indexOf("src") > -1) {
 			title+=value+' ';
 			
 			if(!hgt) {
-				hgt = 10
+				hgt = 10;
 			}
 			else {
 				hgt = parseInt(hgt);
 			}
 				
-			new featureDisplayObj(basesDisplayWidth, ypos, 16000, value, hgt, leftBase);
+			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 16000, value, hgt, leftBase);
 			ypos+=250;
+			
+			if(compare && (count % 2) == 0) {
+				new comparisonObj(lastObj, obj, compCount);
+				compCount++;
+			}
+			lastObj = obj;
 		}
 	}
 
@@ -194,6 +204,37 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	drawAll(self);
 	getOrganismList(self);
 	addEventHandlers(self);
+}
+
+
+function comparisonObj(featureDisplay1, featureDisplay2, index) {
+	this.featureDisplay1 = featureDisplay1;
+	this.featureDisplay2 = featureDisplay2;
+	this.index = index;
+	this.lock = true;
+	featureDisplay1.comparison = this;
+	
+	
+	$('#comparisons').append('<div id="comp'+this.index+'" class="canvas"></div>');
+}
+
+function drawComparison(featureDisplay) {
+	
+	if(!featureDisplay.comparison) {
+		return;
+	}
+	
+	$('#comp'+featureDisplay.comparison.index).html('');
+	
+	var serviceName = '/regions/featurelocwithnamelike.json?';
+	
+	var start = featureDisplay.leftBase;
+	var end = start + featureDisplay.basesDisplayWidth;
+	var un  = featureDisplay.srcFeature;
+	var term = '%blast%';
+	
+	handleAjaxCalling(serviceName, aComparison,
+			{ uniqueName:un, start:start, end:end, term:term }, featureDisplay, {});
 }
 
 //
@@ -417,6 +458,10 @@ function drawAll(featureDisplay) {
 
       drawFeatures(featureDisplay);
 	  drawTicks(featureDisplay);
+	  
+	  if(compare) {
+	    drawComparison(featureDisplay);
+	  }
 }
 
 function getSequence(featureDisplay) {
@@ -1279,6 +1324,41 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	return;
 };
 
+var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
+	var blastFeatures = returned.response.features;
+	var comparison = featureDisplay.comparison;
+	
+	var featureDisplay1 = comparison.featureDisplay1;
+	var featureDisplay2 = comparison.featureDisplay2;
+	var canvasTop = featureDisplay1.marginTop+(featureDisplay1.frameLineHeight*16);
+	var canvasBtm = featureDisplay2.marginTop;
+	
+	// adjust comparison canvas
+	var cssObj = {
+			'margin-top': canvasTop+'px',
+			'height': canvasBtm-canvasTop+'px',
+			'width': displayWidth+'px',
+			'background-color': '#CCCCCC'
+	};
+	$('#comp'+comparison.index).css(cssObj);
+	
+	for(var i=0; i<blastFeatures.length; i++ ) {
+		var match = blastFeatures[i];
+		debugLog(match.fmin+".."+match.fmax+"    "+match.uniquename);
+		
+		var lpos1 = margin+((match.fmin - featureDisplay.leftBase)/basePerPixel) + 1;
+		var rpos1 = margin+((match.fmax - featureDisplay.leftBase +1 )/basePerPixel) - 1;
+		
+		var lpos2 = margin+((1)/basePerPixel) + 1;
+		var rpos2 = margin+((1+5000 )/basePerPixel) - 1;
+		
+		var Xpoints = new Array(lpos1, rpos1, lpos2, rpos2) ;
+		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
+		var colour = '#FF0000';
+			
+		$("#comp"+comparison.index).fillPolygon(Xpoints,Ypoints, {color: colour, stroke:'1'});
+	}
+}
 
 var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
 
