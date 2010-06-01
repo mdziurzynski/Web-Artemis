@@ -25,10 +25,11 @@ var basePerPixel;
 var featureSelected = -1;
 
 var showStopCodons = true;
+var lockCheckBox = true;
 var showGC = false;
 var showAG = false;
 var showOther = false;
-var compare = true;
+var compare = false;
 
 var features;
 var count = 0;
@@ -95,7 +96,8 @@ $(document).ready(function() {
 			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 16000, value, hgt, leftBase);
 			ypos+=250;
 			
-			if(compare && (count % 2) == 0) {
+			if((count % 2) == 0) {
+				compare = true;
 				new comparisonObj(lastObj, obj, compCount);
 				compCount++;
 			}
@@ -142,7 +144,6 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#buttons').append('<div id="right'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>');
 	$('#rightDraggableEdge').append('<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se"></div>');
 
-
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
 	
@@ -174,6 +175,9 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		step : self.basesDisplayWidth/2,
 		change : function(ev, ui) {
 			self.leftBase = ui.value;
+			if(lockCheckBox) {
+				
+			}
 			drawAll(self);
 		}
 	});
@@ -213,28 +217,32 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	this.index = index;
 	this.lock = true;
 	featureDisplay1.comparison = this;
-	
+	featureDisplay2.comparison = this;
 	
 	$('#comparisons').append('<div id="comp'+this.index+'" class="canvas"></div>');
+	drawComparison(featureDisplay1);
 }
 
 function drawComparison(featureDisplay) {
 	
-	if(!featureDisplay.comparison) {
-		return;
-	}
-	
 	$('#comp'+featureDisplay.comparison.index).html('');
 	
-	var serviceName = '/regions/featurelocwithnamelike.json?';
+	var serviceName = '/features/blast.json?';
 	
-	var start = featureDisplay.leftBase;
-	var end = start + featureDisplay.basesDisplayWidth;
-	var un  = featureDisplay.srcFeature;
-	var term = '%blast%';
+	//?subject=Pk_strainH_chr09.embl&target=Pf3D7_10&score=1e-05&start=1&end=1000
+	var comparison = featureDisplay.comparison;
+	var featureDisplay1 = comparison.featureDisplay1;
+	var featureDisplay2 = comparison.featureDisplay2;
+	
+	var start = featureDisplay1.leftBase;
+	var end   = start + featureDisplay1.basesDisplayWidth;
+
+	var subj  = featureDisplay1.srcFeature;
+	var obj   = featureDisplay2.srcFeature;
+	var score = '1e-07';
 	
 	handleAjaxCalling(serviceName, aComparison,
-			{ uniqueName:un, start:start, end:end, term:term }, featureDisplay, {});
+			{ subject:subj, start:start, end:end, target:obj, score:score }, featureDisplay, {});
 }
 
 //
@@ -297,6 +305,10 @@ function addEventHandlers(featureDisplay) {
 	$('#stopCodonToggle').click(function(event){
 		showStopCodons = !showStopCodons;
 		drawAll(featureDisplay);
+	});
+	
+	$('#lockCheckBox').click(function(event){
+		lockCheckBox = !lockCheckBox;
 	});
 
 	// graphs
@@ -460,7 +472,9 @@ function drawAll(featureDisplay) {
 	  drawTicks(featureDisplay);
 	  
 	  if(compare) {
-	    drawComparison(featureDisplay);
+		if(featureDisplay.uniqueName == featureDisplay.comparison.featureDisplay1.uniqueName) {
+	      drawComparison(featureDisplay);
+		}
 	  }
 }
 
@@ -1229,6 +1243,10 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	
 	for(var i=0; i<nfeatures; i++ ) {
 	  var feature = features[i];
+	  
+	  if(feature.type == "match_part") {
+		  continue;
+	  }
 	  var nkids = feature.features.length;
 	  
 	  if(nkids > 0) {
@@ -1325,7 +1343,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 };
 
 var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
-	var blastFeatures = returned.response.features;
+	var blastFeatures = returned.response.matches;
 	var comparison = featureDisplay.comparison;
 	
 	var featureDisplay1 = comparison.featureDisplay1;
@@ -1344,15 +1362,20 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	
 	for(var i=0; i<blastFeatures.length; i++ ) {
 		var match = blastFeatures[i];
-		debugLog(match.fmin+".."+match.fmax+"    "+match.uniquename);
 		
-		var lpos1 = margin+((match.fmin - featureDisplay.leftBase)/basePerPixel) + 1;
-		var rpos1 = margin+((match.fmax - featureDisplay.leftBase +1 )/basePerPixel) - 1;
+		var diff = match.subject_fmax-match.subject_fmin;
+		if(diff < 200) {
+			continue;
+		}
+		debugLog(match.subject_fmin+".."+match.subject_fmax+"    "+match.match);
 		
-		var lpos2 = margin+((1)/basePerPixel) + 1;
-		var rpos2 = margin+((1+5000 )/basePerPixel) - 1;
+		var lpos1 = margin+((match.subject_fmin - featureDisplay1.leftBase)/basePerPixel) + 1;
+		var rpos1 = margin+((match.subject_fmax - featureDisplay1.leftBase +1 )/basePerPixel) - 1;
 		
-		var Xpoints = new Array(lpos1, rpos1, lpos2, rpos2) ;
+		var lpos2 = margin+((match.target_fmin - featureDisplay2.leftBase)/basePerPixel) + 1;
+		var rpos2 = margin+((match.target_fmax - featureDisplay2.leftBase +1 )/basePerPixel) - 1;
+		
+		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
 		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
 		var colour = '#FF0000';
 			
