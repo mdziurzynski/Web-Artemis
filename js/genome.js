@@ -220,29 +220,38 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	featureDisplay2.comparison = this;
 	
 	$('#comparisons').append('<div id="comp'+this.index+'" class="canvas"></div>');
+
 	drawComparison(featureDisplay1);
 }
 
 function drawComparison(featureDisplay) {
-	
+
+	if(!featureDisplay.comparison) {
+		return;
+	}
 	$('#comp'+featureDisplay.comparison.index).html('');
 	
-	var serviceName = '/features/blast.json?';
-	
+	var serviceName = '/features/blastpair.json?';
 	//?subject=Pk_strainH_chr09.embl&target=Pf3D7_10&score=1e-05&start=1&end=1000
+	//?blastpair.json?f2=Pk_strainH_chr09.embl&f1=Pf3D7_10&start1=1&end1=10000&start2=1&end2=10000&normscore=0.000000000001
+	
 	var comparison = featureDisplay.comparison;
 	var featureDisplay1 = comparison.featureDisplay1;
 	var featureDisplay2 = comparison.featureDisplay2;
 	
-	var start = featureDisplay1.leftBase;
-	var end   = start + featureDisplay1.basesDisplayWidth;
+	var start1 = featureDisplay1.leftBase;
+	var end1   = start1 + featureDisplay1.basesDisplayWidth;
+	
+	var start2 = featureDisplay2.leftBase;
+	var end2   = start2 + featureDisplay2.basesDisplayWidth;
 
-	var subj  = featureDisplay1.srcFeature;
-	var obj   = featureDisplay2.srcFeature;
-	var score = '1e-07';
+	var f1 = featureDisplay1.srcFeature;
+	var f2 = featureDisplay2.srcFeature;
+	var normscore = '1e-07';
+	var maxLength = 200;
 	
 	handleAjaxCalling(serviceName, aComparison,
-			{ subject:subj, start:start, end:end, target:obj, score:score }, featureDisplay, {});
+			{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, {});
 }
 
 //
@@ -472,9 +481,7 @@ function drawAll(featureDisplay) {
 	  drawTicks(featureDisplay);
 	  
 	  if(compare) {
-		if(featureDisplay.uniqueName == featureDisplay.comparison.featureDisplay1.uniqueName) {
-	      drawComparison(featureDisplay);
-		}
+		drawComparison(featureDisplay);
 	  }
 }
 
@@ -1351,6 +1358,12 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	var canvasTop = featureDisplay1.marginTop+(featureDisplay1.frameLineHeight*16);
 	var canvasBtm = featureDisplay2.marginTop;
 	
+	var baseInterval1 = (featureDisplay1.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel1 = baseInterval1/screenInterval;
+	
+	var baseInterval2 = (featureDisplay2.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel2 = baseInterval2/screenInterval;
+	
 	// adjust comparison canvas
 	var cssObj = {
 			'margin-top': canvasTop+'px',
@@ -1362,18 +1375,13 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	
 	for(var i=0; i<blastFeatures.length; i++ ) {
 		var match = blastFeatures[i];
+
+		//debugLog(match.fmin1+".."+match.fmax1+"    "+match.match+"  "+(match.fmax1-match.fmin1));
+		var lpos1 = margin+((match.fmin1 - featureDisplay1.leftBase)/basePerPixel1) + 1;
+		var rpos1 = margin+((match.fmax1 - featureDisplay1.leftBase +1 )/basePerPixel1) - 1;
 		
-		var diff = match.subject_fmax-match.subject_fmin;
-		if(diff < 200) {
-			continue;
-		}
-		debugLog(match.subject_fmin+".."+match.subject_fmax+"    "+match.match);
-		
-		var lpos1 = margin+((match.subject_fmin - featureDisplay1.leftBase)/basePerPixel) + 1;
-		var rpos1 = margin+((match.subject_fmax - featureDisplay1.leftBase +1 )/basePerPixel) - 1;
-		
-		var lpos2 = margin+((match.target_fmin - featureDisplay2.leftBase)/basePerPixel) + 1;
-		var rpos2 = margin+((match.target_fmax - featureDisplay2.leftBase +1 )/basePerPixel) - 1;
+		var lpos2 = margin+((match.fmin2 - featureDisplay2.leftBase)/basePerPixel2) + 1;
+		var rpos2 = margin+((match.fmax2 - featureDisplay2.leftBase +1 )/basePerPixel2) - 1;
 		
 		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
 		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
