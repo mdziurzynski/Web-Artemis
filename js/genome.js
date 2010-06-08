@@ -239,8 +239,18 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	this.featureDisplay2 = featureDisplay2;
 	this.index = index;
 	this.lock = true;
-	featureDisplay1.comparison = this;
-	featureDisplay2.comparison = this;
+	
+	if(!featureDisplay1.comparison) {
+		featureDisplay1.comparison = [];
+	}
+	
+	if(!featureDisplay2.comparison) {
+		featureDisplay2.comparison = [];
+	}
+	
+	
+	featureDisplay1.comparison[ featureDisplay1.comparison.length ] = this;
+	featureDisplay2.comparison[ featureDisplay2.comparison.length ] = this;
 	
 	$('#comparisons').append('<div id="comp'+this.index+'" class="canvas"></div>');
 
@@ -252,29 +262,33 @@ function drawComparison(featureDisplay) {
 	if(!featureDisplay.comparison) {
 		return;
 	}
-	$('#comp'+featureDisplay.comparison.index).html('');
 	
-	var serviceName = '/features/blastpair.json?';
-	//?subject=Pk_strainH_chr09.embl&target=Pf3D7_10&score=1e-05&start=1&end=1000
-	//?blastpair.json?f2=Pk_strainH_chr09.embl&f1=Pf3D7_10&start1=1&end1=10000&start2=1&end2=10000&normscore=0.000000000001
-	
-	var comparison = featureDisplay.comparison;
-	var featureDisplay1 = comparison.featureDisplay1;
-	var featureDisplay2 = comparison.featureDisplay2;
-	
-	var start1 = featureDisplay1.leftBase;
-	var end1   = start1 + featureDisplay1.basesDisplayWidth;
-	
-	var start2 = featureDisplay2.leftBase;
-	var end2   = start2 + featureDisplay2.basesDisplayWidth;
+	for(var i=0;i<featureDisplay.comparison.length;i++) {
+		var comparison = featureDisplay.comparison[i];
+		$('#comp'+comparison.index).html('');
+		
+		var serviceName = '/features/blastpair.json?';
+		//?subject=Pk_strainH_chr09.embl&target=Pf3D7_10&score=1e-05&start=1&end=1000
+		//?blastpair.json?f2=Pk_strainH_chr09.embl&f1=Pf3D7_10&start1=1&end1=10000&start2=1&end2=10000&normscore=0.000000000001
+		
 
-	var f1 = featureDisplay1.srcFeature;
-	var f2 = featureDisplay2.srcFeature;
-	var normscore = '1e-07';
-	var maxLength = 200;
-	
-	handleAjaxCalling(serviceName, aComparison,
-			{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, {});
+		var featureDisplay1 = comparison.featureDisplay1;
+		var featureDisplay2 = comparison.featureDisplay2;
+		
+		var start1 = featureDisplay1.leftBase;
+		var end1   = start1 + featureDisplay1.basesDisplayWidth;
+		
+		var start2 = featureDisplay2.leftBase;
+		var end2   = start2 + featureDisplay2.basesDisplayWidth;
+
+		var f1 = featureDisplay1.srcFeature;
+		var f2 = featureDisplay2.srcFeature;
+		var normscore = '1e-07';
+		var maxLength = 200;
+		
+		handleAjaxCalling(serviceName, aComparison,
+				{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, { comparison:comparison });
+	}
 }
 
 //
@@ -1396,7 +1410,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 
 var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
 	var blastFeatures = returned.response.matches;
-	var comparison = featureDisplay.comparison;
+	var comparison = options.comparison;
 	
 	var featureDisplay1 = comparison.featureDisplay1;
 	var featureDisplay2 = comparison.featureDisplay2;
@@ -1490,8 +1504,7 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
     if(showGC || showAG || showOther) {
     	drawContentGraphs(featureDisplay, showAG, showGC, showOther);
     }
-    
+
     positionFeatureList(featureDisplay);
-    
     return;
 };
