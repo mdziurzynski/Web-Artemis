@@ -3,6 +3,7 @@
 //
 var scrolling = 0;
 var timeoutTime = 160; // ms
+var lastLeftBase = -1;
 
 function scroll(direction, featureDisplay) {
     if (scrolling == 1) {
@@ -40,6 +41,9 @@ function scroll(direction, featureDisplay) {
 function addScrollEventHandlers(featureDisplay) {
 
 	$('#left'+featureDisplay.index).mousedown(function(event){
+		if(scrolling != 1) {
+			lastLeftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
+		}
 		scrolling = 1;
 		featureDisplay.minimumDisplay = true
 		scroll(-1, featureDisplay);
@@ -50,10 +54,13 @@ function addScrollEventHandlers(featureDisplay) {
 		featureDisplay.minimumDisplay = false
 		var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
     	featureDisplay.leftBase = leftBase;
-    	drawAll(featureDisplay);
+    	drawAndScroll(featureDisplay, lastLeftBase);
 	});
 	
 	$('#right'+featureDisplay.index).mousedown(function(event){
+		if(scrolling != 1) {
+			lastLeftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
+		}
 		scrolling = 1;
 		featureDisplay.minimumDisplay = true
 		scroll(1, featureDisplay);
@@ -64,6 +71,6 @@ function addScrollEventHandlers(featureDisplay) {
 		featureDisplay.minimumDisplay = false;
 		var leftBase = $('#slider'+featureDisplay.index).slider('option', 'value');
 		featureDisplay.leftBase = leftBase;
-		drawAll(featureDisplay);
+		drawAndScroll(featureDisplay, lastLeftBase);
 	});
 }
