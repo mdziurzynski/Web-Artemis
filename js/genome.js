@@ -21,11 +21,10 @@ var displayWidth = 1000;
 
 var screenInterval = 100;
 var baseInterval;
-var basePerPixel;
 var featureSelected = -1;
 
 var showStopCodons = true;
-var lockCheckBox = true;
+var lockSeqs = true;
 var showGC = false;
 var showAG = false;
 var showOther = false;
@@ -33,6 +32,7 @@ var compare = false;
 
 var features;
 var count = 0;
+var featureDisplayObjs = new Array();
 
 var colour = [ 
     '255,255,255',
@@ -85,7 +85,7 @@ $(document).ready(function() {
 		var value = arr[i];
 		if(i.indexOf("src") > -1) {
 			title+=value+' ';
-			
+
 			if(!hgt) {
 				hgt = 10;
 			}
@@ -94,9 +94,10 @@ $(document).ready(function() {
 			}
 				
 			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 16000, value, hgt, leftBase);
+			featureDisplayObjs[count - 1] = obj;
 			ypos+=250;
 			
-			if((count % 2) == 0) {
+			if(count > 1) {
 				compare = true;
 				new comparisonObj(lastObj, obj, compCount);
 				compCount++;
@@ -134,7 +135,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.sequence;
 	this.minimumDisplay = false;
 	
-	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" class="canvas"></div>');
+	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" name="fDisplays" class="canvas"></div>');
 	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
 	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
@@ -161,24 +162,25 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		  } else if(basesInView < 1000) {
 			  showStopCodons = true;
 		  }
-		  
+		  	
 		  self.basesDisplayWidth = self.sequenceLength-ui.value;
 		  drawAll(self);
 		  $('#slider'+this.index).slider('option', 'step', self.basesDisplayWidth/2);
 		}
 	});
 
+	this.lastLeftBase = leftBase;
 	$('#slider'+this.index).slider( {
 		animate: true,
 		min : 1,
 		max : self.sequenceLength,
 		step : self.basesDisplayWidth/2,
+		start: function(event, ui) {  
+			lastLeftBase = ui.value;
+	    },
 		change : function(ev, ui) {
 			self.leftBase = ui.value;
-			if(lockCheckBox) {
-				
-			}
-			drawAll(self);
+			drawAndScroll(self, lastLeftBase);
 		}
 	});
 	
@@ -210,6 +212,27 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	addEventHandlers(self);
 }
 
+function drawAndScroll(featureDisplay, lastLeftBase) {
+	drawAll(featureDisplay);
+
+	if(lockSeqs) {
+	  var diff = featureDisplay.leftBase - lastLeftBase;
+	  for(var i=1; i<count+1; i++) {
+		if(i != featureDisplay.index) {
+			var pos = $('#slider'+i).slider('value')+diff
+			if(pos > featureDisplayObjs[i-1].sequenceLength) {
+				pos = featureDisplayObjs[i-1].sequenceLength - featureDisplayObjs[i-1].basesDisplayWidth;
+			} else if(pos < 1) {
+				pos = 1;
+			}
+			
+			$('#slider'+i).slider('option', 'value', pos);
+			featureDisplayObjs[i-1].leftBase = pos;
+			drawAll(featureDisplayObjs[i-1]);
+		}
+	  }
+	}	
+}
 
 function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	this.featureDisplay1 = featureDisplay1;
@@ -311,57 +334,65 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 //
 function addEventHandlers(featureDisplay) {
 	// show/hide stop codons
-	$('#stopCodonToggle').click(function(event){
-		showStopCodons = !showStopCodons;
-		drawAll(featureDisplay);
-	});
+	if(featureDisplay.index == 1) {
 	
-	$('#lockCheckBox').click(function(event){
-		lockCheckBox = !lockCheckBox;
-	});
+		$('#stopCodonToggle').click(function(event){
+			showStopCodons = !showStopCodons;
+			drawAll(featureDisplay);
+		});
+	
+		$('#lockCheckBox').click(function(event){
+			lockSeqs = !lockSeqs;
+			if(lockSeqs) {
+				$('#lockCheckBox').html("UnLock");
+			} else {
+				$('#lockCheckBox').html("Lock");
+			}
+		});
 
 	// graphs
-	$('#gcGraphToggle').click(function(event){
-		if(showGC) {
-			if(!showAG && !showOther) {
-				$("#graph").css('height', 0+'px');
-				$("#graph").html('');
+		$('#gcGraphToggle').click(function(event){
+			if(showGC) {
+				if(!showAG && !showOther) {
+					$("#graph").css('height', 0+'px');
+					$("#graph").html('');
+				}
+				showGC = false;
+			} else {
+				setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+				showGC = true;	
 			}
-			showGC = false;
-		} else {
-			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
-			showGC = true;	
-		}
-		drawAll(featureDisplay);
-	});
+			drawAll(featureDisplay);
+		});
 	
-	$('#agGraphToggle').click(function(event){
-		if(showAG) {
-			if(!showGC && !showOther) {
-				$("#graph").css('height', 0+'px');
-				$("#graph").html('');
+		$('#agGraphToggle').click(function(event){
+			if(showAG) {
+				if(!showGC && !showOther) {
+					$("#graph").css('height', 0+'px');
+					$("#graph").html('');
+				}
+				showAG = false;
+			} else {
+				setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+				showAG = true;	
 			}
-			showAG = false;
-		} else {
-			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
-			showAG = true;	
-		}
-		drawAll(featureDisplay);
-	});
+			drawAll(featureDisplay);
+		});
 	
-	$('#otherGraphToggle').click(function(event){
-		if(showOther) {
-			if(!showGC && !showAG) {
-				$("#graph").css('height', 0+'px');
-				$("#graph").html('');
+		$('#otherGraphToggle').click(function(event){
+			if(showOther) {
+				if(!showGC && !showAG) {
+					$("#graph").css('height', 0+'px');
+					$("#graph").html('');
+				}
+				showOther = false;
+			} else {
+				setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+				showOther = true;
 			}
-			showOther = false;
-		} else {
-			setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
-			showOther = true;
-		}
-		drawAll(featureDisplay);
-	});
+			drawAll(featureDisplay);
+		});
+	}
 	
 	// popup
 	$('#features'+featureDisplay.index).mouseenter(function(event){
@@ -394,6 +425,13 @@ function addEventHandlers(featureDisplay) {
 		var bgColour = $(event.target).css('background-color');
 		$(event.target).css('background-color', '#FFFF00');
 	 });
+	
+	if(count > 1) {
+		$('#comparisons').click(function(event){
+			debugLog("CLICK "+event.pageX+" "+event.pageY);
+			
+		});
+	}
 	
 	//scrolling
 	addScrollEventHandlers(featureDisplay);
@@ -458,9 +496,6 @@ function addFrameLine(selector, ypos, frame, featureDisplay) {
 }
 
 function drawAll(featureDisplay) {
-	  baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
-	  basePerPixel  = baseInterval/screenInterval;
-
       $('#featureDisplay'+featureDisplay.index).html('');
       var showSequence = true;
       
@@ -498,7 +533,7 @@ function getSequence(featureDisplay) {
 			featureDisplay, {});
 }
 
-function drawStopCodons(featureDisplay) {
+function drawStopCodons(featureDisplay, basePerPixel) {
     var fwdStops1 = new Array();
     var fwdStops2 = new Array();
     var fwdStops3 = new Array();
@@ -519,24 +554,24 @@ function drawStopCodons(featureDisplay) {
 		var mTop = featureDisplay.marginTop;
 		var flh  = featureDisplay.frameLineHeight;
 		
-		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh, featureDisplay);
-		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh, featureDisplay);
-		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh, featureDisplay);
+		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh, featureDisplay, basePerPixel);
+		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh, featureDisplay, basePerPixel);
+		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh, featureDisplay, basePerPixel);
 	
-		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh, featureDisplay);
-		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh, featureDisplay);
-		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh, featureDisplay);
+		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh, featureDisplay, basePerPixel);
+		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh, featureDisplay, basePerPixel);
+		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh, featureDisplay, basePerPixel);
 	} else {
 		//console.time('draw fwd stop codons');
-		drawFwdStop(fwdStops1, 0, featureDisplay);
-		drawFwdStop(fwdStops2, 1, featureDisplay);
-		drawFwdStop(fwdStops3, 2, featureDisplay);
+		drawFwdStop(fwdStops1, 0, featureDisplay, basePerPixel);
+		drawFwdStop(fwdStops2, 1, featureDisplay, basePerPixel);
+		drawFwdStop(fwdStops3, 2, featureDisplay, basePerPixel);
 		//console.timeEnd('draw fwd stop codons');
 	
 		//console.time('draw bwd stop codons');  
-		drawBwdStop(bwdStops1, 0, featureDisplay);
-		drawBwdStop(bwdStops2, 1, featureDisplay);
-		drawBwdStop(bwdStops3, 2, featureDisplay);
+		drawBwdStop(bwdStops1, 0, featureDisplay, basePerPixel);
+		drawBwdStop(bwdStops2, 1, featureDisplay, basePerPixel);
+		drawBwdStop(bwdStops3, 2, featureDisplay, basePerPixel);
 		//console.timeEnd('draw bwd stop codons');
 		
 		if($('.bases').height() != featureDisplay.frameLineHeight) {
@@ -546,7 +581,7 @@ function drawStopCodons(featureDisplay) {
 };
 
 
-function drawStopOnCanvas(stop, ypos, frameLineHeight, featureDisplay) {
+function drawStopOnCanvas(stop, ypos, frameLineHeight, featureDisplay, basePerPixel) {
 	var len=stop.length;
 	var colour = '#000000';
 	for(var i=0; i<len; i++ ) {
@@ -557,7 +592,7 @@ function drawStopOnCanvas(stop, ypos, frameLineHeight, featureDisplay) {
 	}
 }
 
-function drawFwdStop(stop, frame, featureDisplay) {
+function drawFwdStop(stop, frame, featureDisplay, basePerPixel) {
 
   var len=stop.length;
   var ypos = featureDisplay.marginTop+((featureDisplay.frameLineHeight*2)*frame);
@@ -582,7 +617,7 @@ function drawFwdStop(stop, frame, featureDisplay) {
   $('#stop_codons'+featureDisplay.index).append(fwdStopsStr);
 }
 
-function drawBwdStop(stop, frame, featureDisplay) {
+function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
   var len=stop.length;
   var ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*10)+
   			featureDisplay.frameLineHeight+((featureDisplay.frameLineHeight*2)*frame);
@@ -607,7 +642,7 @@ function drawBwdStop(stop, frame, featureDisplay) {
   $('#stop_codons'+featureDisplay.index).append(bwdStopsStr);
 }
 
-function drawCodons(featureDisplay) {
+function drawCodons(featureDisplay, basePerPixel) {
   var yposFwd = featureDisplay.marginTop+(6*featureDisplay.frameLineHeight);
   var yposBwd = yposFwd+(featureDisplay.frameLineHeight*3);
   var xpos = margin;
@@ -636,7 +671,7 @@ function drawCodons(featureDisplay) {
   }
 }
 
-function drawAminoAcids(featureDisplay) {
+function drawAminoAcids(featureDisplay, basePerPixel) {
   var xpos = margin;
   for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
 	  
@@ -709,7 +744,6 @@ function getFeatureExons(transcript) {
 	  for(var i=0; i<nkids; i++)
 	  {
 		var kid = transcript.features[i];
-			
 		if(kid.type == "exon") {
 	       exons.push(kid);
 		}
@@ -758,7 +792,7 @@ function getSegmentFrameShift(exons, index, phase) {
   return 0;
 }
 
-function drawFeature(leftBase, feature, featureStr, ypos, className) {
+function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixel) {
 
   var startFeature = margin+((feature.start - leftBase + 1)/basePerPixel);
   var endFeature   = margin+((feature.end - leftBase + 1)/basePerPixel);
@@ -784,7 +818,7 @@ function drawFeature(leftBase, feature, featureStr, ypos, className) {
   return featureStr;
 }
 
-function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, colour) {
+function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, colour, basePerPixel) {
 	if(featureDisplay.minimumDisplay)
 		return;
 	
@@ -819,7 +853,7 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
 }
 
-function drawArrow(featureDisplay, exon, ypos) {
+function drawArrow(featureDisplay, exon, ypos, basePerPixel) {
 	if(featureDisplay.minimumDisplay)
 		return;
 	
@@ -849,7 +883,9 @@ function drawArrow(featureDisplay, exon, ypos) {
 
 
 function drawTicks(featureDisplay) {
+	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var nticks = featureDisplay.basesDisplayWidth/baseInterval;
+	var basePerPixel  = baseInterval/screenInterval;
 
 	var baseRemainder = (featureDisplay.leftBase-1) % baseInterval;
 	var start = Math.round(Math.floor((featureDisplay.leftBase-1)/baseInterval)*baseInterval);
@@ -1244,6 +1280,10 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	debugLog("No. of features "+ nfeatures+"  "+featureDisplay.leftBase+".."+
 			(parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth)));
 
+	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel  = baseInterval/screenInterval;
+	  
+	  
 	var ypos;
 	var featureStr = '';
 	var featureToColourList = new Array();
@@ -1254,7 +1294,12 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	  if(feature.type == "match_part") {
 		  continue;
 	  }
-	  var nkids = feature.features.length;
+	  
+	  var nkids = 0;
+	  if(feature.features != undefined) {
+		  nkids = feature.features.length;
+	  }
+	  
 	  
 	  if(nkids > 0) {
 		for(var j=0; j<nkids; j++ ) { 
@@ -1293,15 +1338,15 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 
 		      //featureToColourArray += '&uniqueName='+exon.uniquename;
 		      featureToColourList.push(exon.uniquename);
-		      featureStr = drawFeature(featureDisplay.leftBase, exon, featureStr, ypos, "featCDS") ;
+		      featureStr = drawFeature(featureDisplay.leftBase, exon, featureStr, ypos, "featCDS", basePerPixel) ;
 		      
 		      var canvasTop = $('#featureDisplay'+featureDisplay.index).css('margin-top').replace("px", "");
 		      if(lastYpos > -1) {
 		      	  drawFeatureConnections(featureDisplay, lastExon, exon, 
-		      			  lastYpos-canvasTop, ypos-canvasTop, colour);
+		      			  lastYpos-canvasTop, ypos-canvasTop, colour, basePerPixel);
 		      }
 		      if(k == nexons-1) {
-		      	  drawArrow(featureDisplay, exon, ypos-canvasTop);
+		      	  drawArrow(featureDisplay, exon, ypos-canvasTop, basePerPixel);
 		      }
   			  lastExon = exon;
   			  lastYpos = ypos;
@@ -1321,8 +1366,8 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	  if(feature.type == "gene") {
 		  className = "featGene";
 	  }
-	  featureStr = drawFeature(featureDisplay.leftBase, feature, featureStr, ypos, className) ;
-	  
+	  featureStr = drawFeature(featureDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
+
 	}
 	
 	$('#features'+featureDisplay.index).html(featureStr);
@@ -1339,7 +1384,7 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 		if(count < 2) {
 			setupFeatureList(features, featureDisplay);
 		}
-		if(featureToColourList.length > 0) {
+		if(featureToColourList.length > 0 && featureToColourList.length < 500) {
 			var serviceName = '/features/properties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
 				'us='+featureToColourList, 
@@ -1376,17 +1421,28 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	for(var i=0; i<blastFeatures.length; i++ ) {
 		var match = blastFeatures[i];
 
-		//debugLog(match.fmin1+".."+match.fmax1+"    "+match.match+"  "+(match.fmax1-match.fmin1));
-		var lpos1 = margin+((match.fmin1 - featureDisplay1.leftBase)/basePerPixel1) + 1;
-		var rpos1 = margin+((match.fmax1 - featureDisplay1.leftBase +1 )/basePerPixel1) - 1;
+		var fmin1 = match.fmin1;
+		var fmax1 = match.fmax1;
+		var fmin2 = match.fmin2;
+		var fmax2 = match.fmax2;
 		
-		var lpos2 = margin+((match.fmin2 - featureDisplay2.leftBase)/basePerPixel2) + 1;
-		var rpos2 = margin+((match.fmax2 - featureDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		//debugLog(match.fmin1+".."+match.fmax1+"    "+match.match+"  "+(match.fmax1-match.fmin1));
+		var lpos1 = margin+((fmin1 - featureDisplay1.leftBase)/basePerPixel1) + 1;
+		var rpos1 = margin+((fmax1 - featureDisplay1.leftBase +1 )/basePerPixel1) - 1;
+		
+		var lpos2 = margin+((fmin2 - featureDisplay2.leftBase)/basePerPixel2) + 1;
+		var rpos2 = margin+((fmax2 - featureDisplay2.leftBase +1 )/basePerPixel2) - 1;
 		
 		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
 		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
-		var colour = '#FF0000';
-			
+		
+		
+		var colour;
+		if( (fmin1 > fmax1 && fmin2 > fmax2) || (fmax1 > fmin1 && fmax2 > fmin2) ) {
+			colour = '#FF0000';
+		} else {
+			colour = '#0000FF';
+		}
 		$("#comp"+comparison.index).fillPolygon(Xpoints,Ypoints, {color: colour, stroke:'1'});
 	}
 }
@@ -1398,6 +1454,9 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
 	featureDisplay.sequence = sequence;
 	var seqLen = returned.response.sequence[0].length;
 
+	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel  = baseInterval/screenInterval;
+	
 	debugLog("getSequence() sequence length = "+seqLen);
 	if((seqLen-featureDisplay.sequenceLength) != 0) {
       $('#slider'+featureDisplay.index).slider('option', 'max', seqLen);
@@ -1411,10 +1470,10 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
     $('#sequence').html('');
     $('#translation').html('');
 	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > seqLen-800) {
-	  drawCodons(featureDisplay);
-	  drawAminoAcids(featureDisplay);
+	  drawCodons(featureDisplay, basePerPixel);
+	  drawAminoAcids(featureDisplay, basePerPixel);
 	} else if(showStopCodons) {
-      drawStopCodons(featureDisplay);
+      drawStopCodons(featureDisplay, basePerPixel);
 	}
     //console.timeEnd('draw stop codons');  
 
