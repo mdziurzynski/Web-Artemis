@@ -34,7 +34,7 @@ function calculateStopCodons(featureDisplay, stops1, stops2, stops3, codon1, cod
     {
     	var frame;
     	if(strand == -1) {
-    		var reversePos = sequenceLength-(index+leftBase+1);
+    		var reversePos = featureDisplay.sequenceLength-(index+leftBase+1);
     		frame = 3 - ((reversePos+3)-1) % 3 -1;
     	}	
     	else {
@@ -56,7 +56,7 @@ function calculateStopCodons(featureDisplay, stops1, stops2, stops3, codon1, cod
     {
     	var frame;
     	if(strand == -1) {
-    		var reversePos = sequenceLength-(index+leftBase+1);
+    		var reversePos = featureDisplay.sequenceLength-(index+leftBase+1);
     		frame = 3 - ((reversePos+3)-1) % 3 -1;
     	}	
     	else {
@@ -78,7 +78,7 @@ function calculateStopCodons(featureDisplay, stops1, stops2, stops3, codon1, cod
     {
     	var frame;
     	if(strand == -1) {
-    		var reversePos = sequenceLength-(index+leftBase+1);
+    		var reversePos = featureDisplay.sequenceLength-(index+leftBase+1);
     		frame = 3 - ((reversePos+3)-1) % 3 -1;
     	}	
     	else {
