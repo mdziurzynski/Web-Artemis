@@ -7,10 +7,11 @@ var serviceType = 2;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
+                   "http://t81-omixed.internal.sanger.ac.uk:6667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:6668", // bigtest2
                    "http://www.genedb.org/testservice",
                    "http://127.0.0.1:6666"]; 
-var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp" ];
+var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=8000&height=10
@@ -30,9 +31,9 @@ var showAG = false;
 var showOther = false;
 var compare = false;
 
-var features;
 var count = 0;
 var featureDisplayObjs = new Array();
+var returnedSequence;
 
 var colour = [ 
     '255,255,255',
@@ -148,6 +149,20 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
 	
+	var scrollbar = $('#slider'+this.index).slider( {
+		animate: true,
+		min : 1,
+		max : self.sequenceLength,
+		step : self.basesDisplayWidth/2,
+		start: function(event, ui) {
+			lastLeftBase = parseInt(ui.value);
+	    },
+		change : function(ev, ui) {
+			self.leftBase = parseInt(ui.value);
+			drawAndScroll(self, lastLeftBase);
+		}
+	});
+	
 	$("#slider_vertical_container"+this.index).slider({
 		orientation: "vertical",
 		min: 0,
@@ -165,25 +180,13 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		  	
 		  self.basesDisplayWidth = self.sequenceLength-ui.value;
 		  drawAll(self);
-		  $('#slider'+this.index).slider('option', 'step', self.basesDisplayWidth/2);
+		  
+		  // update .ui-slider-horizontal .ui-slider-handle
+		  setScrollHandle(scrollbar, self);
 		}
 	});
-
 	this.lastLeftBase = leftBase;
-	$('#slider'+this.index).slider( {
-		animate: true,
-		min : 1,
-		max : self.sequenceLength,
-		step : self.basesDisplayWidth/2,
-		start: function(event, ui) {  
-			lastLeftBase = ui.value;
-	    },
-		change : function(ev, ui) {
-			self.leftBase = ui.value;
-			drawAndScroll(self, lastLeftBase);
-		}
-	});
-	
+
 	//
 	$('#rightDraggableEdge'+this.index).draggable({
 		stop: function(event, ui) {
@@ -210,6 +213,19 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	drawAll(self);
 	getOrganismList(self);
 	addEventHandlers(self);
+}
+
+function setScrollHandle(scrollbar, fDisplay) {	
+	var slider = $('#slider'+fDisplay.index);
+	slider.slider('option', 'step', fDisplay.basesDisplayWidth/2);
+
+	var handleSize = fDisplay.basesDisplayWidth/fDisplay.sequenceLength*100;
+	
+	if(handleSize > 5) {
+		handleSize = 5;
+	}
+	//debugLog("SLIDER WIDTH: "+scrollbar.find('.ui-slider-handle').css('width'));
+	scrollbar.find('.ui-slider-handle').css({ width: handleSize+'%' });
 }
 
 function drawAndScroll(featureDisplay, lastLeftBase) {
@@ -534,17 +550,23 @@ function drawAll(featureDisplay) {
 	  }
 }
 
-function getSequence(featureDisplay) {
-	var end = featureDisplay.leftBase+featureDisplay.basesDisplayWidth;
 
-	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > featureDisplay.sequenceLength-800) {
+function getSequence(fDisplay) {
+	var end = fDisplay.leftBase+fDisplay.basesDisplayWidth;
+
+	if(isZoomedIn(fDisplay)) {
+/*	  if(returnedSequence != undefined) {
+		  debugLog("HERE "+returnedSequence.response.sequence[0]);
+		  aSequence(featureDisplay, returnedSequence, {});
+		  return;
+	  }*/
 	  end+=2;
 	}
 
 	var serviceName = '/regions/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
-			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end }, 
-			featureDisplay, {});
+			{ uniqueName:fDisplay.srcFeature, start:fDisplay.leftBase, end:end }, 
+			fDisplay, {});
 }
 
 function drawStopCodons(featureDisplay, basePerPixel) {
@@ -657,14 +679,14 @@ function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
 }
 
 function drawCodons(featureDisplay, basePerPixel) {
-  var yposFwd = featureDisplay.marginTop+(6*featureDisplay.frameLineHeight);
-  var yposBwd = yposFwd+(featureDisplay.frameLineHeight*3);
+  var yposFwd = featureDisplay.marginTop+(6*featureDisplay.frameLineHeight)-1;
+  var yposBwd = yposFwd+(featureDisplay.frameLineHeight*3)-1;
   var xpos = margin;
   for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
-	  
-	  if(i+featureDisplay.leftBase > sequenceLength)
+
+	  if(i+featureDisplay.leftBase > featureDisplay.sequenceLength) {
 		  break;
-	  
+	  }
 	  var fwdid = 'fwdbase'+i;
 	  var bwdid = 'bwdbase'+i;
 	  $('#sequence').append('<div class="base" id="'+fwdid+'" >'+featureDisplay.sequence[i]+'</div>');
@@ -689,12 +711,11 @@ function drawAminoAcids(featureDisplay, basePerPixel) {
   var xpos = margin;
   for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
 	  
-	  if(i+featureDisplay.leftBase > sequenceLength)
+	  if(i+featureDisplay.leftBase > sequenceLength) {
 		  break;
-	  
+	  }
 	  var frame = (featureDisplay.leftBase-1+i) % 3;
-	  
-	  var yposFwd = featureDisplay.marginTop+(frame*(featureDisplay.frameLineHeight*2));
+	  var yposFwd = featureDisplay.marginTop+(frame*(featureDisplay.frameLineHeight*2))-1;
 	  var fwdid = 'fwdAA1'+i;
 	  $('#translation').append('<div class="aminoacid" id="'+fwdid+'" >'+
 			  getCodonTranslation(featureDisplay.sequence[i], featureDisplay.sequence[i+1], 
@@ -712,7 +733,7 @@ function drawAminoAcids(featureDisplay, basePerPixel) {
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
 	  var yposBwd = featureDisplay.marginTop+(featureDisplay.frameLineHeight*11)+
-	  						((featureDisplay.frameLineHeight*2)*frame);
+	  						((featureDisplay.frameLineHeight*2)*frame)-1;
 	  var bwdid = 'bwdAA1'+i;
 	  $('#translation').append('<div class="aminoacid" id="'+bwdid+'" >'+
 			  getCodonTranslation(complement(featureDisplay.sequence[i+2]), 
@@ -739,25 +760,23 @@ function drawFeatures(featureDisplay) {
 		end = featureDisplay.sequenceLength;
 	}
 	
-	var serviceName = '/regions/featureloc.json?';
-
-	var relationshipsList = new Array();
-	relationshipsList.push('part_of');
-	relationshipsList.push('derives_from');
-	
-	handleAjaxCalling(serviceName, aFeature,
-			{ uniqueName:featureDisplay.srcFeature, start:featureDisplay.leftBase, end:end, relationships:['part_of','derives_from'] }, 
+	//var serviceName = '/regions/featureloc.json?';
+	var serviceName = '/regions/locations.json?';
+	var excludes = ['match_part'];
+	handleAjaxCalling(serviceName, aFeatureFlatten,
+			{ region:featureDisplay.srcFeature, 
+		      start:featureDisplay.leftBase, end:end, 
+		      exclude:excludes }, 
 			featureDisplay, { minDisplay:featureDisplay.minimumDisplay });
 }
 
 function getFeatureExons(transcript) {
-	var nkids = transcript.features.length;
+	var nkids = transcript.children.length;
 	var exons = [];
 	if(nkids > 0)
 	{
-	  for(var i=0; i<nkids; i++)
-	  {
-		var kid = transcript.features[i];
+	  for(var i=0; i<nkids; i++) {
+		var kid = transcript.children[i];
 		if(kid.type == "exon") {
 	       exons.push(kid);
 		}
@@ -771,12 +790,11 @@ function getFeatureExons(transcript) {
 }
 
 function getFeaturePeptide(transcript) {
-	var nkids = transcript.features.length;
+	var nkids = transcript.children.length;
 	if(nkids > 0)
 	{
-	  for(var i=0; i<nkids; i++)
-	  {
-		var kid = transcript.features[i];	
+	  for(var i=0; i<nkids; i++) {
+		var kid = transcript.children[i];	
 		if(kid.type == "polypeptide") {
 	       return kid;
 		}
@@ -828,7 +846,7 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
   var width = (endFeature-startFeature)+"px";
 
   featureStr = featureStr + 
-	'<div id='+feature.uniquename+' class="'+className+'" style="width:'+width+'; '+pos+';'+extra+'"></div>';
+	'<div id='+feature.feature+' class="'+className+'" style="width:'+width+'; '+pos+';'+extra+'"></div>';
   return featureStr;
 }
 
@@ -966,70 +984,13 @@ function handleFeatureClick(tgt, featureDisplay) {
     } else {
       $(tgt).css('border-width', '1px');
     }
-    showProperties(featureDisplay);
-}
-
-function showProperties(featureDisplay) {
-    var nfeatures = features.length
     
-    var featureStr = "&features="+featureSelected;
-	var featurePropertyList = new Array();
-	featurePropertyList.push(featureSelected);
-	 
-	var name = featureSelected;
-	for(var i=0; i<nfeatures; i++ ) {
-		var feature = features[i];
-		var nkids = feature.features.length;
-	  
-		if(nkids > 0) {
-			for(var j=0; j<nkids; j++ ) { 
-				var kid = feature.features[j];
-				var exons = getFeatureExons(kid);
-				var nexons = exons.length;
-
-				for(var k=0; k<nexons; k++) {
-					var exon = exons[k];
-					if(exon.uniquename == featureSelected ||
-					   feature.uniquename == featureSelected) {
-						
-						if(nkids == 1)
-							name = feature.uniquename;
-						else
-							name = kid.uniquename;
-						featurePropertyList.push(feature.uniquename);
-						featureStr += "&features="+feature.uniquename;
-						var polypep = getFeaturePeptide(kid);
-						if(polypep != -1) {
-							featurePropertyList.push(polypep.uniquename);
-							featureStr += "&features="+polypep.uniquename;
-						}
-						break;
-					}
-				}
-			}
-		}
-	}
-        
-  
-	handleAjaxCalling('/features/properties.json?', aFeatureProps,
-		'us='+featurePropertyList, -1, {});
-	
-	handleAjaxCalling('/features/pubs.json?', aFeaturePubs,
-			featureStr, -1, {});
-	
-	handleAjaxCalling('/features/dbxrefs.json?', aFeatureDbXRefs,
-			featureStr, -1, {});
-
-	handleAjaxCalling('/features/terms.json?', aFeatureCvTerms,
-			featureStr, -1, {});
-	
-	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
-			featureStr, featureDisplay, {});
-        
-    $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
-    $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
-		width:550, position: 'top', title:name});
+    var serviceName = '/features/heirarchy.json';
+	handleAjaxCalling(serviceName, aShowProperties,
+			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
 }
+
+
 
 function positionFeatureList(featureDisplay) {
 	var ghgt = $('#graph').height();
@@ -1057,7 +1018,7 @@ function setupFeatureList(features, featureDisplay) {
 		
 		appendFeatureToList(feature);
 		
-		for(var j=0; j<feature.features.length; j++) {
+/*		for(var j=0; j<feature.features.length; j++) {
 			var kid = feature.features[j];
 			appendFeatureToList(kid);
 
@@ -1065,7 +1026,7 @@ function setupFeatureList(features, featureDisplay) {
 				var kid2 = kid.features[k];
 				appendFeatureToList(kid2);
 			}
-		}
+		}*/
 	}
 	
 	$('#featureListTable').append('</tbody>');
@@ -1074,17 +1035,79 @@ function setupFeatureList(features, featureDisplay) {
 
 function appendFeatureToList(feature) {
 	$('#featureListTable').append('<tr>'+
-			'<td>'+feature.uniquename+'</td>'+
+			'<td>'+feature.feature+'</td>'+
 			'<td>'+feature.type+'</td>'+
 			'<td>'+feature.start+'</td>'+
 			'<td>'+feature.end+'</td>'+
-			'<td id="'+feature.uniquename+':PROPS"></td>'+
+			'<td id="'+feature.feature+':PROPS"></td>'+
 			'</tr>');
 }
 
 //
 // AJAX functions
 //
+
+var aShowProperties = function showProperties(featureDisplay, returned, options) {
+    var features = returned.response.heirarchy;
+    
+    var featureStr = "&features="+options.featureSelected;
+	var featurePropertyList = new Array();
+	featurePropertyList.push(options.featureSelected);
+
+	for(var i=0; i<features.length; i++ ) {
+		var feature = features[i];
+		var nkids = feature.children.length;
+	  
+		if(nkids > 0) {
+			for(var j=0; j<nkids; j++ ) { 
+				var kid = feature.children[j];
+				var exons = getFeatureExons(kid);
+				var nexons = exons.length;
+				
+				for(var k=0; k<nexons; k++) {
+					var exon = exons[k];
+					if(exon.name == featureSelected ||
+					   feature.name == featureSelected) {
+
+						if(nkids == 1) {
+							name = feature.name;
+						} else {
+							name = kid.name;
+						}
+						featurePropertyList.push(feature.name);
+						featureStr += "&features="+feature.name;
+						var polypep = getFeaturePeptide(kid);
+						if(polypep != -1) {
+							featurePropertyList.push(polypep.name);
+							featureStr += "&features="+polypep.name;
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	handleAjaxCalling('/features/properties.json?', aFeatureProps,
+		'us='+featurePropertyList, -1, {});
+	
+	handleAjaxCalling('/features/pubs.json?', aFeaturePubs,
+			featureStr, -1, {});
+	
+	handleAjaxCalling('/features/dbxrefs.json?', aFeatureDbXRefs,
+			featureStr, -1, {});
+
+	handleAjaxCalling('/features/terms.json?', aFeatureCvTerms,
+			featureStr, -1, {});
+	
+	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
+			featureStr, featureDisplay, {});
+        
+    $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
+    $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
+		width:550, position: 'top', title:name});
+}
+
 var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned, options) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
@@ -1286,7 +1309,7 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 	}
 };
 
-var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
+/*var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	
 	features  = returned.response.features;
 	var nfeatures = features.length;
@@ -1407,6 +1430,135 @@ var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
 	}
 	return;
 };
+*/
+
+var aFeatureFlatten = function ajaxGetFeaturesFlatten(featureDisplay, returned, options) {
+	
+	var features  = returned.response.features;
+	var nfeatures = features.length;
+
+	debugLog("No. of features "+ nfeatures+"  "+featureDisplay.leftBase+".."+
+			(parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth)));
+
+	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel  = baseInterval/screenInterval;
+	  
+	var ypos;
+	var featureStr = '';
+	var featureToColourList = new Array();
+	var lastExonParent;
+	var nexon = 0;
+
+	var exonMap = new Object();
+	var exonParent = new Array();
+	
+	for(var i=0; i<nfeatures; i++ ) {
+	  var feature = features[i];
+	  
+	  if(feature.type == "exon") {
+		  featureToColourList.push(feature.feature);
+	  }
+
+	  if(feature.type == "exon") {  
+		  var exons = exonMap[feature.part_of];
+		  if(exons == undefined) {
+			  exons = new Array();
+			  exonParent.push(feature.part_of);
+			  exonMap[feature.part_of] = exons;
+		  }
+		  if(feature.strand == 1) {
+		     exons.push(feature);
+		  } else {
+			  exons.unshift(feature);
+		  }
+		  continue;
+	  }
+	  
+	  if(feature.strand == 1) {
+		ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*6);
+	  }
+	  else {
+		ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9);
+	  }	
+	  
+	  var className = "feat";
+	  if(feature.type == "gene") {
+		  className = "featGene";
+	  }
+	  featureStr = drawFeature(featureDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
+	}
+
+	for(var i=0; i<exonParent.length; i++) {
+		featureStr = 
+			drawExons(featureDisplay, exonMap[exonParent[i]], featureStr, basePerPixel);
+	}
+	
+	$('#features'+featureDisplay.index).html(featureStr);
+	
+	if(!options.minDisplay) {
+		if($('.feat').height() != featureDisplay.frameLineHeight) {
+			var cssObj = {
+				'height':featureDisplay.frameLineHeight+'px',
+				'line-height' : featureDisplay.frameLineHeight+'px'
+			};
+			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
+		}
+	
+		if(count < 2) {
+			setupFeatureList(features, featureDisplay);
+		}
+		if(featureToColourList.length > 0 && featureToColourList.length < 500) {
+			var serviceName = '/features/properties.json?';
+			handleAjaxCalling(serviceName, aFeaturePropColours,
+				'us='+featureToColourList, 
+				featureDisplay.leftBase, {});
+		}
+	}
+	return;
+};
+
+function drawExons(fDisplay, exons, featureStr, basePerPixel) {
+	if(exons != undefined) {
+	  var lastExon = 0;
+	  var lastYpos = -1;
+	  var colour = '#666666';
+	  var ypos = 0;
+		  
+	  for(var k=0; k<exons.length; k++) {
+	    var exon = exons[k];
+
+		var phase = 0;
+		if(exon.phase != "None") {
+		   phase = exon.phase;
+	    } 
+
+		if(exon.strand == 1) {
+		   var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
+		   ypos = fDisplay.marginTop+((fDisplay.frameLineHeight*2)*frame);
+		}
+		else {
+		   var frame = 3 -
+		         ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
+		   ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*9)+
+				    		((fDisplay.frameLineHeight*2)*frame);
+		}
+
+		featureStr = drawFeature(fDisplay.leftBase, exon, featureStr, ypos, "featCDS", basePerPixel) ;
+		var canvasTop = $('#featureDisplay'+fDisplay.index).css('margin-top').replace("px", "");
+		if(lastYpos > -1) {
+		   drawFeatureConnections(fDisplay, lastExon, exon, 
+		    	  lastYpos-canvasTop, ypos-canvasTop, colour, basePerPixel);
+		}
+		if(k == exons.length-1) {
+		   drawArrow(fDisplay, exon, ypos-canvasTop, basePerPixel);
+		}
+  		lastExon = exon;
+  		lastYpos = ypos;
+	  }
+	}
+	return featureStr;
+}
+
 
 var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
 	var blastFeatures = returned.response.matches;
@@ -1461,6 +1613,14 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	}
 }
 
+function isZoomedIn(featureDisplay) {
+	var seqLen = featureDisplay.sequenceLength;
+	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > seqLen-800) {
+		return true;
+	} 
+	return false;
+}
+
 var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
 
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
@@ -1483,9 +1643,10 @@ var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
     $('#stop_codons'+featureDisplay.index).html('');
     $('#sequence').html('');
     $('#translation').html('');
-	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > seqLen-800) {
+	if(isZoomedIn(featureDisplay)) {
 	  drawCodons(featureDisplay, basePerPixel);
 	  drawAminoAcids(featureDisplay, basePerPixel);
+	  returnedSequence = returned;
 	} else if(showStopCodons) {
       drawStopCodons(featureDisplay, basePerPixel);
 	}
