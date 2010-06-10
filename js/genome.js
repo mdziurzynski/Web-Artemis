@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 2;
+var serviceType = 3;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
@@ -678,77 +678,64 @@ function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
   $('#stop_codons'+featureDisplay.index).append(bwdStopsStr);
 }
 
-function drawCodons(featureDisplay, basePerPixel) {
-  var yposFwd = featureDisplay.marginTop+(6*featureDisplay.frameLineHeight)-1;
-  var yposBwd = yposFwd+(featureDisplay.frameLineHeight*3)-1;
+function drawCodons(fDisplay, basePerPixel) {
+  var yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-1;
+  var yposBwd = yposFwd+(fDisplay.frameLineHeight*3)-1;
   var xpos = margin;
-  for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
+  
+  //console.time('draw codons');
+  var baseStr = '';
+  for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
 
-	  if(i+featureDisplay.leftBase > featureDisplay.sequenceLength) {
+	  if(i+fDisplay.leftBase > fDisplay.sequenceLength) {
 		  break;
 	  }
 	  var fwdid = 'fwdbase'+i;
 	  var bwdid = 'bwdbase'+i;
-	  $('#sequence').append('<div class="base" id="'+fwdid+'" >'+featureDisplay.sequence[i]+'</div>');
-	  $('#sequence').append('<div class="base" id="'+bwdid+'" >'+complement(featureDisplay.sequence[i])+'</div>');
+	  baseStr = baseStr+'<div class="base" id="'+fwdid+'" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>';
+	  baseStr = baseStr+'<div class="base" id="'+bwdid+'" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(fDisplay.sequence[i])+'</div>';
 
-	  var cssObj = {
-			  'margin-top': yposFwd+'px',
-			  'margin-left': xpos+'px'
-	  };		  
-	  $('#'+fwdid).css(cssObj);
-	  
-	  cssObj = {
-			  'margin-top': yposBwd+'px',
-			  'margin-left': xpos+'px'
-	  };
-	  $('#'+bwdid).css(cssObj); 
 	  xpos += (1/basePerPixel);
   }
+  $('#sequence').html(baseStr);
+  //console.timeEnd('draw codons');
 }
 
-function drawAminoAcids(featureDisplay, basePerPixel) {
+function drawAminoAcids(fDisplay, basePerPixel) {
   var xpos = margin;
-  for(var i=0;i<featureDisplay.basesDisplayWidth; i++) {
+  //console.time('draw aas');
+  var aaStr = '';
+  for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
 	  
-	  if(i+featureDisplay.leftBase > sequenceLength) {
+	  if(i+fDisplay.leftBase > fDisplay.sequenceLength) {
 		  break;
 	  }
-	  var frame = (featureDisplay.leftBase-1+i) % 3;
-	  var yposFwd = featureDisplay.marginTop+(frame*(featureDisplay.frameLineHeight*2))-1;
+	  var frame = (fDisplay.leftBase-1+i) % 3;
+	  var yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-1;
 	  var fwdid = 'fwdAA1'+i;
-	  $('#translation').append('<div class="aminoacid" id="'+fwdid+'" >'+
-			  getCodonTranslation(featureDisplay.sequence[i], featureDisplay.sequence[i+1], 
-					  featureDisplay.sequence[i+2])+'</div>');
-	  
-	  var cssObj = {
-			  'width': 3/basePerPixel+'px',
-			  'margin-top': yposFwd+'px',
-			  'margin-left': xpos+'px'
-	  };		  
-	  $('#'+fwdid).css(cssObj);	   
+	  aaStr = aaStr + '<div class="aminoacid" id="'+fwdid+
+			  '" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
+			  getCodonTranslation(fDisplay.sequence[i], 
+					  			  fDisplay.sequence[i+1], 
+					  			  fDisplay.sequence[i+2])+'</div>';   
 
-
-  	  var reversePos = sequenceLength-(i+featureDisplay.leftBase+1);
+  	  var reversePos = fDisplay.sequenceLength-(i+fDisplay.leftBase+1);
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
-	  var yposBwd = featureDisplay.marginTop+(featureDisplay.frameLineHeight*11)+
-	  						((featureDisplay.frameLineHeight*2)*frame)-1;
+	  var yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
+	  						((fDisplay.frameLineHeight*2)*frame)-1;
 	  var bwdid = 'bwdAA1'+i;
-	  $('#translation').append('<div class="aminoacid" id="'+bwdid+'" >'+
-			  getCodonTranslation(complement(featureDisplay.sequence[i+2]), 
-					              complement(featureDisplay.sequence[i+1]), 
-					              complement(featureDisplay.sequence[i]))+'</div>');
+	  aaStr = aaStr + '<div class="aminoacid" id="'+bwdid+
+	  		  '" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
+			  getCodonTranslation(complement(fDisplay.sequence[i+2]), 
+					              complement(fDisplay.sequence[i+1]), 
+					              complement(fDisplay.sequence[i]))+'</div>';
 
-	  var cssObj = {
-			  'width': 3/basePerPixel+'px',
-			  'margin-top': yposBwd+'px',
-			  'margin-left': xpos+'px'
-	  };		  
-	  $('#'+bwdid).css(cssObj);	 
-	  
 	  xpos += (1/basePerPixel);
   }
+  
+  $('#translation').html(aaStr);
+  //console.timeEnd('draw aas');
 }
 
 function drawFeatures(featureDisplay) {
@@ -1309,138 +1296,15 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 	}
 };
 
-/*var aFeature = function ajaxGetFeatures(featureDisplay, returned, options) {
-	
-	features  = returned.response.features;
-	var nfeatures = features.length;
+var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, options) {
 
-	debugLog("No. of features "+ nfeatures+"  "+featureDisplay.leftBase+".."+
-			(parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth)));
-
-	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
-	var basePerPixel  = baseInterval/screenInterval;
-	  
-	  
-	var ypos;
-	var featureStr = '';
-	var featureToColourList = new Array();
-	
-	for(var i=0; i<nfeatures; i++ ) {
-	  var feature = features[i];
-	  
-	  if(feature.type == "match_part") {
-		  continue;
-	  }
-	  
-	  var nkids = 0;
-	  if(feature.features != undefined) {
-		  nkids = feature.features.length;
-	  }
-	  
-	  
-	  if(nkids > 0) {
-		for(var j=0; j<nkids; j++ ) { 
-		  var kid = feature.features[j];
-		  
-		  if(kid.type == "mRNA") {
-			if(!options.minDisplay) {
-				var polypep = getFeaturePeptide(kid);
-				if(polypep != -1) {
-					featureToColourList.push(polypep.uniquename);
-				}
-			}
-			var exons = getFeatureExons(kid);
-			var nexons = exons.length;
-			var lastExon = 0;
-			var lastYpos = -1;
-			var colour = '#666666';
-			for(var k=0; k<nexons; k++) {
-			  var exon = exons[k];
-
-			  var phase = 0;
-		      if(exon.phase != "None") {
-			    phase = exon.phase;
-		      }
-
-		      if(exon.strand == 1) {
-		    	var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
-			  	ypos = featureDisplay.marginTop+((featureDisplay.frameLineHeight*2)*frame);
-		      }
-		      else {
-			    var frame = 3 -
-			          ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
-			    ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9)+
-			    		((featureDisplay.frameLineHeight*2)*frame);
-		      }
-
-		      //featureToColourArray += '&uniqueName='+exon.uniquename;
-		      featureToColourList.push(exon.uniquename);
-		      featureStr = drawFeature(featureDisplay.leftBase, exon, featureStr, ypos, "featCDS", basePerPixel) ;
-		      
-		      var canvasTop = $('#featureDisplay'+featureDisplay.index).css('margin-top').replace("px", "");
-		      if(lastYpos > -1) {
-		      	  drawFeatureConnections(featureDisplay, lastExon, exon, 
-		      			  lastYpos-canvasTop, ypos-canvasTop, colour, basePerPixel);
-		      }
-		      if(k == nexons-1) {
-		      	  drawArrow(featureDisplay, exon, ypos-canvasTop, basePerPixel);
-		      }
-  			  lastExon = exon;
-  			  lastYpos = ypos;
-			}
-	      }  
-		}
-	  }
-	  
-	  if(feature.strand == 1) {
-			ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*6);
-		  }
-		  else {
-			ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9);
-		  }	
-	  
-	  var className = "feat";
-	  if(feature.type == "gene") {
-		  className = "featGene";
-	  }
-	  featureStr = drawFeature(featureDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
-
-	}
-	
-	$('#features'+featureDisplay.index).html(featureStr);
-	
-	if(!options.minDisplay) {
-		if($('.feat').height() != featureDisplay.frameLineHeight) {
-			var cssObj = {
-				'height':featureDisplay.frameLineHeight+'px',
-				'line-height' : featureDisplay.frameLineHeight+'px'
-			};
-			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
-		}
-	
-		if(count < 2) {
-			setupFeatureList(features, featureDisplay);
-		}
-		if(featureToColourList.length > 0 && featureToColourList.length < 500) {
-			var serviceName = '/features/properties.json?';
-			handleAjaxCalling(serviceName, aFeaturePropColours,
-				'us='+featureToColourList, 
-				featureDisplay.leftBase, {});
-		}
-	}
-	return;
-};
-*/
-
-var aFeatureFlatten = function ajaxGetFeaturesFlatten(featureDisplay, returned, options) {
-	
 	var features  = returned.response.features;
 	var nfeatures = features.length;
 
-	debugLog("No. of features "+ nfeatures+"  "+featureDisplay.leftBase+".."+
-			(parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth)));
+	debugLog("No. of features "+ nfeatures+"  "+fDisplay.leftBase+".."+
+			(parseInt(fDisplay.leftBase)+parseInt(fDisplay.basesDisplayWidth)));
 
-	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	  
 	var ypos;
@@ -1475,49 +1339,50 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(featureDisplay, returned, 
 	  }
 	  
 	  if(feature.strand == 1) {
-		ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*6);
+		ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*6);
 	  }
 	  else {
-		ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9);
+		ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*9);
 	  }	
 	  
 	  var className = "feat";
 	  if(feature.type == "gene") {
 		  className = "featGene";
 	  }
-	  featureStr = drawFeature(featureDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
+	  featureStr = drawFeature(fDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
 	}
 
 	for(var i=0; i<exonParent.length; i++) {
 		featureStr = 
-			drawExons(featureDisplay, exonMap[exonParent[i]], featureStr, basePerPixel);
+			drawExons(fDisplay, exonMap[exonParent[i]], featureStr, basePerPixel);
 	}
 	
-	$('#features'+featureDisplay.index).html(featureStr);
+	$('#features'+fDisplay.index).html(featureStr);
 	
 	if(!options.minDisplay) {
-		if($('.feat').height() != featureDisplay.frameLineHeight) {
+		if($('.feat').height() != fDisplay.frameLineHeight) {
 			var cssObj = {
-				'height':featureDisplay.frameLineHeight+'px',
-				'line-height' : featureDisplay.frameLineHeight+'px'
+				'height':fDisplay.frameLineHeight+'px',
+				'line-height' : fDisplay.frameLineHeight+'px'
 			};
 			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
 		}
 	
 		if(count < 2) {
-			setupFeatureList(features, featureDisplay);
+			setupFeatureList(features, fDisplay);
 		}
 		if(featureToColourList.length > 0 && featureToColourList.length < 500) {
 			var serviceName = '/features/properties.json?';
 			handleAjaxCalling(serviceName, aFeaturePropColours,
 				'us='+featureToColourList, 
-				featureDisplay.leftBase, {});
+				fDisplay.leftBase, {});
 		}
 	}
 	return;
 };
 
 function drawExons(fDisplay, exons, featureStr, basePerPixel) {
+	var sequenceLength = fDisplay.sequenceLength;
 	if(exons != undefined) {
 	  var lastExon = 0;
 	  var lastYpos = -1;
@@ -1613,59 +1478,58 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	}
 }
 
-function isZoomedIn(featureDisplay) {
-	var seqLen = featureDisplay.sequenceLength;
-	if($('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') > seqLen-800) {
+function isZoomedIn(fDisplay) {
+	var seqLen = fDisplay.sequenceLength;
+	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-800) {
 		return true;
 	} 
 	return false;
 }
 
-var aSequence = function ajaxGetSequence(featureDisplay, returned, options) {
-
+var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
+	//console.time('draw all');
 	var sequence = returned.response.sequence[0].dna.toUpperCase();
-	featureDisplay.sequence = sequence;
-	var seqLen = returned.response.sequence[0].length;
+	fDisplay.sequence = sequence;
+	fDisplay.sequenceLength = returned.response.sequence[0].length;
 
-	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	
-	debugLog("getSequence() sequence length = "+seqLen);
-	if((seqLen-featureDisplay.sequenceLength) != 0) {
-      $('#slider'+featureDisplay.index).slider('option', 'max', seqLen);
+	debugLog("getSequence() sequence length = "+fDisplay.sequenceLength);
+	if((fDisplay.sequenceLength-fDisplay.sequenceLength) != 0) {
+      $('#slider'+fDisplay.index).slider('option', 'max', seqLen);
 	}
 
-	featureDisplay.sequenceLength = seqLen;
-    sequenceLength = seqLen;
-    
     //console.time('draw stop codons');
-    $('#stop_codons'+featureDisplay.index).html('');
-    $('#sequence').html('');
-    $('#translation').html('');
-	if(isZoomedIn(featureDisplay)) {
-	  drawCodons(featureDisplay, basePerPixel);
-	  drawAminoAcids(featureDisplay, basePerPixel);
+    $('#stop_codons'+fDisplay.index).html('');
+
+	if(isZoomedIn(fDisplay)) {
+	  drawCodons(fDisplay, basePerPixel);
+	  drawAminoAcids(fDisplay, basePerPixel);
 	  returnedSequence = returned;
 	} else if(showStopCodons) {
-      drawStopCodons(featureDisplay, basePerPixel);
+	  $('#sequence').html('');
+	  $('#translation').html('');
+      drawStopCodons(fDisplay, basePerPixel);
 	}
     //console.timeEnd('draw stop codons');  
 
-    if (featureDisplay.firstTime) {
-    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'max', (seqLen-140));
-    	$("#slider_vertical_container"+featureDisplay.index).slider('option', 'value', (seqLen-featureDisplay.basesDisplayWidth));
+    if (fDisplay.firstTime) {
+    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'max', (fDisplay.sequenceLength-140));
+    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'value', (fDisplay.sequenceLength-fDisplay.basesDisplayWidth));
     			
-    	$('#slider'+featureDisplay.index).slider('option', 'max', sequenceLength);
-    	$('#slider'+featureDisplay.index).slider('option', 'step', featureDisplay.basesDisplayWidth/2);
-    	$('#slider'+featureDisplay.index).slider('option', 'value', featureDisplay.leftBase);
-    	featureDisplay.firstTime = false;
+    	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength);
+    	$('#slider'+fDisplay.index).slider('option', 'step', fDisplay.basesDisplayWidth/2);
+    	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
+    	fDisplay.firstTime = false;
 	}
 
     if(showGC || showAG || showOther) {
-    	drawContentGraphs(featureDisplay, showAG, showGC, showOther);
+    	drawContentGraphs(fDisplay, showAG, showGC, showOther);
     }
 
-    positionFeatureList(featureDisplay);
+    positionFeatureList(fDisplay);
+    //console.timeEnd('draw all');
     return;
 };
