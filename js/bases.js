@@ -1,22 +1,22 @@
 
 function complement(base) {
     switch (base) {
-    case 'a': case 'A': return 'T';
-    case 't': case 'T': case 'u': case 'U': return 'A';
-    case 'g': case 'G': return 'C';
-    case 'c': case 'C': return 'G';
-    case 'r': case 'R': return 'Y';
-    case 'y': case 'Y': return 'R';
-    case 'k': case 'K': return 'M';
-    case 'm': case 'M': return 'K';
-    case 's': case 'S': return 'S';
-    case 'w': case 'W': return 'W';
-    case 'b': case 'B': return 'V';
-    case 'd': case 'D': return 'H';
-    case 'h': case 'H': return 'D';
-    case 'v': case 'V': return 'B';
-    case 'n': case 'N': return 'N';
-    case 'x': case 'X': return 'X';
+    case 'A': return 'T';
+    case 'T': case 'u': case 'U': return 'A';
+    case 'G': return 'C';
+    case 'C': return 'G';
+    case 'R': return 'Y';
+    case 'Y': return 'R';
+    case 'K': return 'M';
+    case 'M': return 'K';
+    case 'S': return 'S';
+    case 'W': return 'W';
+    case 'B': return 'V';
+    case 'D': return 'H';
+    case 'H': return 'D';
+    case 'V': return 'B';
+    case 'N': return 'N';
+    case 'X': return 'X';
     default:
       return '@';
     }
