@@ -135,7 +135,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.leftBase = leftBase;
 	this.sequence;
 	this.minimumDisplay = false;
-	
+
 	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" name="fDisplays" class="canvas"></div>');
 	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
@@ -148,7 +148,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
-	
+
 	var scrollbar = $('#slider'+this.index).slider( {
 		animate: true,
 		min : 1,
@@ -162,7 +162,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 			drawAndScroll(self, lastLeftBase);
 		}
 	});
-	
+
 	$("#slider_vertical_container"+this.index).slider({
 		orientation: "vertical",
 		min: 0,
@@ -208,7 +208,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 			drawFrameAndStrand(self);
 		}
 	});
-	
+
 	drawFrameAndStrand(self);
 	drawAll(self);
 	getOrganismList(self);
@@ -219,13 +219,16 @@ function setScrollHandle(scrollbar, fDisplay) {
 	var slider = $('#slider'+fDisplay.index);
 	slider.slider('option', 'step', fDisplay.basesDisplayWidth/2);
 
-	var handleSize = fDisplay.basesDisplayWidth/fDisplay.sequenceLength*100;
+	// TODO slider scaling
+	// http://groups.google.com/group/jquery-ui/browse_thread/thread/1605420a9af60ab2
+	//
+	/*var handleSize = fDisplay.basesDisplayWidth/fDisplay.sequenceLength*100;
 	
 	if(handleSize > 5) {
 		handleSize = 5;
 	}
 	//debugLog("SLIDER WIDTH: "+scrollbar.find('.ui-slider-handle').css('width'));
-	scrollbar.find('.ui-slider-handle').css({ width: handleSize+'%' });
+	scrollbar.find('.ui-slider-handle').css({ width: handleSize+'%' });*/
 }
 
 function drawAndScroll(featureDisplay, lastLeftBase) {
@@ -273,7 +276,7 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	drawComparison(featureDisplay1);
 }
 
-function drawComparison(featureDisplay) {
+function drawComparison(featureDisplay, clickX, clickY) {
 
 	if(!featureDisplay.comparison) {
 		return;
@@ -281,12 +284,10 @@ function drawComparison(featureDisplay) {
 	
 	for(var i=0;i<featureDisplay.comparison.length;i++) {
 		var comparison = featureDisplay.comparison[i];
-		$('#comp'+comparison.index).html('');
-		
+			
 		var serviceName = '/features/blastpair.json?';
 		//?subject=Pk_strainH_chr09.embl&target=Pf3D7_10&score=1e-05&start=1&end=1000
 		//?blastpair.json?f2=Pk_strainH_chr09.embl&f1=Pf3D7_10&start1=1&end1=10000&start2=1&end2=10000&normscore=0.000000000001
-		
 
 		var featureDisplay1 = comparison.featureDisplay1;
 		var featureDisplay2 = comparison.featureDisplay2;
@@ -303,7 +304,7 @@ function drawComparison(featureDisplay) {
 		var maxLength = 200;
 		
 		handleAjaxCalling(serviceName, aComparison,
-				{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, { comparison:comparison });
+				{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, { comparison:comparison, clickX:clickX, clickY:clickY });
 	}
 }
 
@@ -456,10 +457,20 @@ function addEventHandlers(featureDisplay) {
 		$(event.target).css('background-color', '#FFFF00');
 	 });
 	
-	if(count > 1) {
+	if(count == 2) {
 		$('#comparisons').click(function(event){
-			debugLog("CLICK "+event.pageX+" "+event.pageY);
-			
+			var compId = $(event.target).parent().attr('id');
+			var index = parseInt(compId.replace("comp",""));
+			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY);
+		});
+		
+		$('#comparisons').dblclick(function(event){
+
+			var compId = $(event.target).parent().attr('id');
+			var index = parseInt(compId.replace("comp",""));
+			debugLog("CLICK "+event.pageX+" "+event.pageY+"  "+compId+" "+index);
+
+			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY);
 		});
 	}
 	
@@ -1440,10 +1451,12 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	var baseInterval2 = (featureDisplay2.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel2 = baseInterval2/screenInterval;
 	
+	var canvasHgt = canvasBtm-canvasTop;
+	$('#comp'+comparison.index).html('');
 	// adjust comparison canvas
 	var cssObj = {
 			'margin-top': canvasTop+'px',
-			'height': canvasBtm-canvasTop+'px',
+			'height': canvasHgt+'px',
 			'width': displayWidth+'px',
 			'background-color': '#CCCCCC'
 	};
@@ -1467,9 +1480,33 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
 		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
 		
-		
+		var clicked = false;
+		if(options.clickX != undefined) {
+			var match_left_x =
+		        lpos1 + ((lpos2 - lpos1) * ((options.clickY-canvasTop-margin) / canvasHgt));
+
+		    var match_right_x =
+		    	rpos1 + ((rpos2 - rpos1) * ((options.clickY-canvasTop-margin) / canvasHgt));
+
+		    //debugLog('CANVAS HGT: '+(canvasBtm-canvasTop));
+		    //debugLog('CLICK POS : '+(options.clickY-canvasTop-margin));
+			//debugLog(lpos1+'..'+rpos1+'  '+lpos2+'..'+rpos2+' CLICK= '+options.clickX+'..'+(options.clickY-canvasTop-margin)+' MATCH= '+match_left_x+'..'+match_right_x);
+
+			var clickX = options.clickX - margin;
+		    if(clickX >= match_left_x - 1 &&
+		       clickX <= match_right_x + 1 ||
+		       clickX <= match_left_x + 1 &&
+		       clickX >= match_right_x - 1) {
+		    	clicked = true;
+		    	
+		    	debugLog('MATCH '+fmin1+'..'+fmax1+'  '+fmin2+'..'+fmax2+' '+match.score);
+		    }
+		}
+
 		var colour;
-		if( (fmin1 > fmax1 && fmin2 > fmax2) || (fmax1 > fmin1 && fmax2 > fmin2) ) {
+		if(clicked) {
+			colour = '#FFFF00';
+		} else if( (fmin1 > fmax1 && fmin2 > fmax2) || (fmax1 > fmin1 && fmax2 > fmin2) ) {
 			colour = '#FF0000';
 		} else {
 			colour = '#0000FF';
