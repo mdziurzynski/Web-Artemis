@@ -271,12 +271,45 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	featureDisplay1.comparison[ featureDisplay1.comparison.length ] = this;
 	featureDisplay2.comparison[ featureDisplay2.comparison.length ] = this;
 	
+	this.selectedMatches = [];
+	
 	$('#comparisons').append('<div id="comp'+this.index+'" class="canvas"></div>');
 
 	drawComparison(featureDisplay1);
 }
 
-function drawComparison(featureDisplay, clickX, clickY) {
+function doubleClickComparison(featureDisplay) {
+	if(!featureDisplay.comparison) {
+		return;
+	}
+	
+	for(var i=0;i<featureDisplay.comparison.length;i++) {
+		var comparison = featureDisplay.comparison[i];
+		var matches = comparison.selectedMatches;
+		if(matches.length > 0) {
+			var centerMatch = matches[0];
+			var fDisplay1 = comparison.featureDisplay1;
+			var fDisplay2 = comparison.featureDisplay2;
+
+			var center1 = parseInt(centerMatch.fmin1)+((parseInt(centerMatch.fmax1) - parseInt(centerMatch.fmin1))/2);
+			var center2 = parseInt(centerMatch.fmin2)+((parseInt(centerMatch.fmax2) - parseInt(centerMatch.fmin2))/2);
+			
+			if(fDisplay1.srcFeature == centerMatch.f1) {
+				fDisplay1.leftBase = Math.round(center1 - (fDisplay1.basesDisplayWidth/2));
+				drawAll(fDisplay1);
+				$('#slider'+fDisplay1.index).slider('option', 'value', fDisplay1.leftBase);
+			}
+			
+			if(fDisplay2.srcFeature == centerMatch.f2) {
+				fDisplay2.leftBase = Math.round(center2 - (fDisplay2.basesDisplayWidth/2));
+				drawAll(fDisplay2);
+				$('#slider'+fDisplay2.index).slider('option', 'value', fDisplay2.leftBase);
+			}
+		}
+	}
+}
+
+function drawComparison(featureDisplay, clickX, clickY, clearSelections) {
 
 	if(!featureDisplay.comparison) {
 		return;
@@ -303,8 +336,9 @@ function drawComparison(featureDisplay, clickX, clickY) {
 		var normscore = '1e-07';
 		var maxLength = 200;
 		
+		//debugLog(i+" CALL BLASTPAIR "+f1+" ("+start1+".."+end1+") "+f2+" ("+start2+".."+end2+")");
 		handleAjaxCalling(serviceName, aComparison,
-				{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, { comparison:comparison, clickX:clickX, clickY:clickY });
+				{ f1:f1, start1:start1, end1:end1, start2:start2, end2:end2, f2:f2, normscore:normscore, length:maxLength }, featureDisplay, { comparison:comparison, clickX:clickX, clickY:clickY, clearSelections:clearSelections });
 	}
 }
 
@@ -458,19 +492,29 @@ function addEventHandlers(featureDisplay) {
 	 });
 	
 	if(count == 2) {
+		var last;
+
 		$('#comparisons').click(function(event){
 			var compId = $(event.target).parent().attr('id');
 			var index = parseInt(compId.replace("comp",""));
-			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY);
-		});
-		
-		$('#comparisons').dblclick(function(event){
+			
+			
+			// detect double clicks
+			var diff = 4000;
+			if(last) {
+				diff = event.timeStamp - last;
+			}
+			last = event.timeStamp;
+			
+			if(diff < 2000) {
+				// double click
+				debugLog("DOUBLE CLICK ");
+				doubleClickComparison(featureDisplayObjs[index]);
+				return;
+			}
 
-			var compId = $(event.target).parent().attr('id');
-			var index = parseInt(compId.replace("comp",""));
-			debugLog("CLICK "+event.pageX+" "+event.pageY+"  "+compId+" "+index);
-
-			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY);
+			debugLog("CLICK time between clicks = "+diff);
+			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY, true);
 		});
 	}
 	
@@ -1462,6 +1506,10 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	};
 	$('#comp'+comparison.index).css(cssObj);
 	
+	if(options.clearSelections) {
+		comparison.selectedMatches = [];
+	}
+	
 	for(var i=0; i<blastFeatures.length; i++ ) {
 		var match = blastFeatures[i];
 
@@ -1499,8 +1547,15 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		       clickX >= match_right_x - 1) {
 		    	clicked = true;
 		    	
-		    	debugLog('MATCH '+fmin1+'..'+fmax1+'  '+fmin2+'..'+fmax2+' '+match.score);
+		    	comparison.selectedMatches.push(match);
+		    	//debugLog('MATCH '+fmin1+'..'+fmax1+'  '+fmin2+'..'+fmax2+' '+match.score);
 		    }
+		} else if(comparison.selectedMatches != undefined) {
+			for(var j=0;j<comparison.selectedMatches.length ; j++) {
+				if(comparison.selectedMatches[j].match == match.match) {
+					clicked = true;
+				}
+			}
 		}
 
 		var colour;
