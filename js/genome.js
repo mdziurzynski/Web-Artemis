@@ -350,14 +350,14 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	var cssObj = {
 			 'margin-left': margin+'px',
 			 'position':'absolute',
-			 'top': thisMarginTop+(thisFLH*17.5)+'px'
+			 'top': thisMarginTop+(thisFLH*16.8)+'px'
 	};
 	$('#left'+featureDisplay.index).css(cssObj);
 
 	cssObj = {
 			'margin-left': margin+displayWidth+'px',
 			'position':'absolute',
-			'top': thisMarginTop+(thisFLH*17.5)+'px'
+			'top': thisMarginTop+(thisFLH*16.8)+'px'
 	};
 	$('#right'+featureDisplay.index).css(cssObj);
 
@@ -366,13 +366,13 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
         'margin-left': margin+buttonWidth+'px',
         'width': displayWidth-buttonWidth+'px',
         'position':'absolute',
-        'top':thisMarginTop+(thisFLH*17.5)+'px'
+        'top':thisMarginTop+(thisFLH*16.9)+'px'
 	};
 	$('#slider'+featureDisplay.index).css(cssObj);
 
 	cssObj = {
 	     'margin-left': margin+margin+displayWidth+'px',
-	     'height': (thisFLH*16)+'px',
+	     'height': (thisFLH*15.5)+'px',
 	     'position':'absolute',
 	     'top': thisMarginTop+7+'px'
 	};
@@ -1486,47 +1486,45 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 
 var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
 	var blastFeatures = returned.response.matches;
-	var comparison = options.comparison;
+	var cmp = options.comparison;
 	
-	var featureDisplay1 = comparison.featureDisplay1;
-	var featureDisplay2 = comparison.featureDisplay2;
-	var canvasTop = featureDisplay1.marginTop+(featureDisplay1.frameLineHeight*16);
-	var canvasBtm = featureDisplay2.marginTop;
+	var fDisplay1 = cmp.featureDisplay1;
+	var fDisplay2 = cmp.featureDisplay2;
+	var canvasTop = fDisplay1.marginTop+(fDisplay1.frameLineHeight*16.9);
+	var canvasBtm = fDisplay2.marginTop;
 	
-	var baseInterval1 = (featureDisplay1.basesDisplayWidth/displayWidth)*screenInterval;
+	var baseInterval1 = (fDisplay1.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel1 = baseInterval1/screenInterval;
 	
-	var baseInterval2 = (featureDisplay2.basesDisplayWidth/displayWidth)*screenInterval;
+	var baseInterval2 = (fDisplay2.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel2 = baseInterval2/screenInterval;
 	
 	var canvasHgt = canvasBtm-canvasTop;
-	$('#comp'+comparison.index).html('');
+	$('#comp'+cmp.index).html('');
 	// adjust comparison canvas
 	var cssObj = {
 			'margin-top': canvasTop+'px',
 			'height': canvasHgt+'px',
 			'width': displayWidth+'px',
-			'background-color': '#CCCCCC'
 	};
-	$('#comp'+comparison.index).css(cssObj);
+	$('#comp'+cmp.index).css(cssObj);
 	
 	if(options.clearSelections) {
-		comparison.selectedMatches = [];
+		cmp.selectedMatches = [];
 	}
 	
 	for(var i=0; i<blastFeatures.length; i++ ) {
 		var match = blastFeatures[i];
-
 		var fmin1 = match.fmin1;
 		var fmax1 = match.fmax1;
 		var fmin2 = match.fmin2;
 		var fmax2 = match.fmax2;
 
-		var lpos1 = margin+((fmin1 - featureDisplay1.leftBase)/basePerPixel1) + 1;
-		var rpos1 = margin+((fmax1 - featureDisplay1.leftBase +1 )/basePerPixel1) - 1;
+		var lpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1) + 1;
+		var rpos1 = margin+((fmax1 - fDisplay1.leftBase +1 )/basePerPixel1) - 1;
 		
-		var lpos2 = margin+((fmin2 - featureDisplay2.leftBase)/basePerPixel2) + 1;
-		var rpos2 = margin+((fmax2 - featureDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		var lpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
+		var rpos2 = margin+((fmax2 - fDisplay2.leftBase +1 )/basePerPixel2) - 1;
 		
 		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
 		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
@@ -1545,15 +1543,14 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		       clickX <= match_left_x + 1 &&
 		       clickX >= match_right_x - 1) {
 		    	clicked = true;
-		    	
-		    	comparison.selectedMatches.push(match);
+		    	cmp.selectedMatches.push(match);
 		    	//debugLog('MATCH '+fmin1+'..'+fmax1+'  '+fmin2+'..'+fmax2+' '+match.score);
 		    }
 		} 
 
-		if(!clicked && comparison.selectedMatches != undefined) {
-			for(var j=0;j<comparison.selectedMatches.length ; j++) {
-				if(comparison.selectedMatches[j].match == match.match) {
+		if(!clicked && cmp.selectedMatches != undefined) {
+			for(var j=0;j<cmp.selectedMatches.length ; j++) {
+				if(cmp.selectedMatches[j].match == match.match) {
 					clicked = true;
 				}
 			}
@@ -1567,7 +1564,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		} else {
 			colour = '#0000FF';
 		}
-		$("#comp"+comparison.index).fillPolygon(Xpoints,Ypoints, {color: colour, stroke:'1'});
+		$("#comp"+cmp.index).fillPolygon(Xpoints,Ypoints, {color: colour, stroke:'1'});
 	}
 }
 
