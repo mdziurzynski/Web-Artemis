@@ -2,7 +2,7 @@
 // SCROLLING
 //
 var scrolling = 0;
-var timeoutTime = 60; // ms
+var timeoutTime = 160; // ms
 var lastLeftBase = -1;
 
 function scroll(direction, fDisplay) {

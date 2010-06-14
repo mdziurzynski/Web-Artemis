@@ -25,7 +25,6 @@ var baseInterval;
 var featureSelected = -1;
 
 var showStopCodons = true;
-var lockSeqs = true;
 var showGC = false;
 var showAG = false;
 var showOther = false;
@@ -231,26 +230,45 @@ function setScrollHandle(scrollbar, fDisplay) {
 	scrollbar.find('.ui-slider-handle').css({ width: handleSize+'%' });*/
 }
 
-function drawAndScroll(featureDisplay, lastLeftBase) {
-	drawAll(featureDisplay);
+function drawAndScroll(fDisplay, lastLeftBase) {
+	var diff = fDisplay.leftBase - lastLeftBase;
+	drawAll(fDisplay);
+	scrollDisplay(fDisplay, diff, -1);
+}
 
-	if(lockSeqs) {
-	  var diff = featureDisplay.leftBase - lastLeftBase;
-	  for(var i=1; i<count+1; i++) {
-		if(i != featureDisplay.index) {
-			var pos = $('#slider'+i).slider('value')+diff
-			if(pos > featureDisplayObjs[i-1].sequenceLength) {
-				pos = featureDisplayObjs[i-1].sequenceLength - featureDisplayObjs[i-1].basesDisplayWidth;
-			} else if(pos < 1) {
-				pos = 1;
-			}
-			
-			$('#slider'+i).slider('option', 'value', pos);
-			featureDisplayObjs[i-1].leftBase = pos;
-			drawAll(featureDisplayObjs[i-1]);
-		}
+function scrollDisplay(fDisplay, diff, comparisonIndex) {
+	if(fDisplay.comparison != undefined) {
+	  for(var i= 0; i<fDisplay.comparison.length; i++) {
+		  var comparison = fDisplay.comparison[i];
+		  if(comparison.lock && comparison.index != comparisonIndex) {
+			  var fDisplay1 = comparison.featureDisplay1;
+			  var fDisplay2 = comparison.featureDisplay2;
+			  
+			  if(fDisplay1.index != fDisplay.index) {
+				  updateDisplay(fDisplay1, diff);
+				  scrollDisplay(fDisplay1, diff, comparison.index);
+			  }
+			  if(fDisplay2.index != fDisplay.index) {
+				  updateDisplay(fDisplay2, diff);
+				  scrollDisplay(fDisplay2, diff, comparison.index);
+			  }
+		  }
 	  }
-	}	
+	}
+}
+
+function updateDisplay(fDisplay, diff) {
+	var ind = fDisplay.index;  
+	var pos = $('#slider'+ind).slider('value')+diff
+	if(pos > fDisplay.sequenceLength) {
+		pos = fDisplay.sequenceLength - fDisplay.basesDisplayWidth;
+	} else if(pos < 1) {
+		pos = 1;
+	}
+
+	$('#slider'+ind).slider('option', 'value', pos);
+	fDisplay.leftBase = pos;
+	drawAll(fDisplay);
 }
 
 function comparisonObj(featureDisplay1, featureDisplay2, index) {
@@ -266,14 +284,31 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	if(!featureDisplay2.comparison) {
 		featureDisplay2.comparison = [];
 	}
-	
-	
+
 	featureDisplay1.comparison[ featureDisplay1.comparison.length ] = this;
 	featureDisplay2.comparison[ featureDisplay2.comparison.length ] = this;
 	
 	this.selectedMatches = [];
 	
+	var self = this;
 	$('#comparisons').append('<div id="comp'+this.index+'" class="canvas"></div>');
+	
+	$('#comparisons').append('<div id="compMenu'+this.index+'"></div>');
+    $('#compMenu'+this.index).append('<ul id="myMenu'+this.index+'" class="contextMenu">' +
+     '<li><a href="#lock" id="lock'+this.index+'">UnLock</a></li></ul>');
+    
+    $('#comp'+this.index).contextMenu({
+        menu: 'myMenu'+self.index
+    },
+    function(action, el, pos) {
+    	if(self.lock) {
+        	self.lock = false;
+        	$('#lock'+self.index).html('Lock');
+        } else {
+        	self.lock = true;
+        	$('#lock'+self.index).html('UnLock');
+        }
+    });
 
 	drawComparison(featureDisplay1);
 }
@@ -404,15 +439,6 @@ function addEventHandlers(featureDisplay) {
 		$('#stopCodonToggle').click(function(event){
 			showStopCodons = !showStopCodons;
 			drawAll(featureDisplay);
-		});
-	
-		$('#lockCheckBox').click(function(event){
-			lockSeqs = !lockSeqs;
-			if(lockSeqs) {
-				$('#lockCheckBox').html("UnLock");
-			} else {
-				$('#lockCheckBox').html("Lock");
-			}
 		});
 
 	// graphs
