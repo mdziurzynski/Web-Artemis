@@ -498,6 +498,10 @@ function addEventHandlers(featureDisplay) {
 			var compId = $(event.target).parent().attr('id');
 			var index = parseInt(compId.replace("comp",""));
 			
+			var clearSelections = true;
+			if (event.shiftKey) {
+				clearSelections = false;
+			}
 			
 			// detect double clicks
 			var diff = 4000;
@@ -514,7 +518,7 @@ function addEventHandlers(featureDisplay) {
 			}
 
 			debugLog("CLICK time between clicks = "+diff);
-			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY, true);
+			drawComparison(featureDisplayObjs[index], event.pageX, event.pageY, clearSelections);
 		});
 	}
 	
@@ -1517,8 +1521,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		var fmax1 = match.fmax1;
 		var fmin2 = match.fmin2;
 		var fmax2 = match.fmax2;
-		
-		//debugLog(match.fmin1+".."+match.fmax1+"    "+match.match+"  "+(match.fmax1-match.fmin1));
+
 		var lpos1 = margin+((fmin1 - featureDisplay1.leftBase)/basePerPixel1) + 1;
 		var rpos1 = margin+((fmax1 - featureDisplay1.leftBase +1 )/basePerPixel1) - 1;
 		
@@ -1536,10 +1539,6 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		    var match_right_x =
 		    	rpos1 + ((rpos2 - rpos1) * ((options.clickY-canvasTop-margin) / canvasHgt));
 
-		    //debugLog('CANVAS HGT: '+(canvasBtm-canvasTop));
-		    //debugLog('CLICK POS : '+(options.clickY-canvasTop-margin));
-			//debugLog(lpos1+'..'+rpos1+'  '+lpos2+'..'+rpos2+' CLICK= '+options.clickX+'..'+(options.clickY-canvasTop-margin)+' MATCH= '+match_left_x+'..'+match_right_x);
-
 			var clickX = options.clickX - margin;
 		    if(clickX >= match_left_x - 1 &&
 		       clickX <= match_right_x + 1 ||
@@ -1550,7 +1549,9 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		    	comparison.selectedMatches.push(match);
 		    	//debugLog('MATCH '+fmin1+'..'+fmax1+'  '+fmin2+'..'+fmax2+' '+match.score);
 		    }
-		} else if(comparison.selectedMatches != undefined) {
+		} 
+
+		if(!clicked && comparison.selectedMatches != undefined) {
 			for(var j=0;j<comparison.selectedMatches.length ; j++) {
 				if(comparison.selectedMatches[j].match == match.match) {
 					clicked = true;
