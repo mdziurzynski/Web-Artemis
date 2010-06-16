@@ -295,19 +295,52 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
 	
 	$('#comparisons').append('<div id="compMenu'+this.index+'"></div>');
     $('#compMenu'+this.index).append('<ul id="myMenu'+this.index+'" class="contextMenu">' +
-     '<li><a href="#lock" id="lock'+this.index+'">UnLock</a></li></ul>');
+     '<li><a href="#lock" id="lock'+this.index+'">UnLock</a></li>'+
+     '<li><a href="#matches" id="matches'+this.index+'">Details</a></li>'+
+     '</ul>');
     
     $('#comp'+this.index).contextMenu({
         menu: 'myMenu'+self.index
     },
     function(action, el, pos) {
-    	if(self.lock) {
-        	self.lock = false;
-        	$('#lock'+self.index).html('Lock');
-        } else {
-        	self.lock = true;
-        	$('#lock'+self.index).html('UnLock');
-        }
+    	
+    	if(action == 'lock') {
+    		if(self.lock) {
+        		self.lock = false;
+        		$('#lock'+self.index).html('Lock');
+        	} else {
+        		self.lock = true;
+        		$('#lock'+self.index).html('UnLock');
+        	}
+    	} else if(action == 'matches') {
+    		
+    		var mId = self.selectedMatches[0].match.replace(/(:|\.)/g,'');
+    		
+    		$("div#matchProps").html("<div id=matchProps"+mId+"></div>");
+    	    $("div#matchProps"+mId).dialog({ height: 450 ,
+    			width:550, position: 'top', title: 'Selected Matches'});
+    	    
+    		for(var i=0; i<self.selectedMatches.length; i++) {
+    			var match = self.selectedMatches[i];
+
+    			var str1;
+    			if(match.f1strand == "1") {
+    				str1 = match.fmin1+".."+match.fmax1;
+    			} else {
+    				str1 = "complement("+match.fmin1+".."+match.fmax1+")";
+    			}
+    			
+    			var str12
+    			if(match.f2strand == "1") {
+    				str2 = match.fmin2+".."+match.fmax2;
+    			} else {
+    				str2 = "complement("+match.fmin2+".."+match.fmax2+")";
+    			}
+    			
+    			$("div#matchProps"+mId).append(str1+" " +str2+ "  "+ 
+    					                   match.score + '<br />');
+    		}
+    	}
     });
 
 	drawComparison(featureDisplay1);
@@ -536,7 +569,7 @@ function addEventHandlers(featureDisplay) {
 			}
 			last = event.timeStamp;
 			
-			if(diff < 2000) {
+			if(!event.shiftKey && diff < 1000) {
 				// double click
 				debugLog("DOUBLE CLICK ");
 				doubleClickComparison(featureDisplayObjs[index]);
@@ -1546,11 +1579,25 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		var fmin2 = match.fmin2;
 		var fmax2 = match.fmax2;
 
-		var lpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1) + 1;
-		var rpos1 = margin+((fmax1 - fDisplay1.leftBase +1 )/basePerPixel1) - 1;
-		
-		var lpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
-		var rpos2 = margin+((fmax2 - fDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		var lpos1; 
+		var rpos1;
+		if(match.f1strand == "1") {
+		  lpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1) + 1;
+		  rpos1 = margin+((fmax1 - fDisplay1.leftBase +1 )/basePerPixel1) - 1;
+		} else {
+		  lpos1 = margin+((fmax1 - fDisplay1.leftBase +1 )/basePerPixel1) - 1;
+		  rpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1) + 1;
+		}
+
+		var lpos2;
+		var rpos2;
+		if(match.f2strand == "1") {
+		  lpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
+		  rpos2 = margin+((fmax2 - fDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		} else {
+		  lpos2 = margin+((fmax2 - fDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		  rpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
+		}
 		
 		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
 		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
@@ -1585,12 +1632,18 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		var colour;
 		if(clicked) {
 			colour = '#FFFF00';
-		} else if( (fmin1 > fmax1 && fmin2 > fmax2) || (fmax1 > fmin1 && fmax2 > fmin2) ) {
+		} else if( (match.f1strand == "-1" && match.f2strand == "-1") ||
+			       (match.f1strand == "1"  && match.f2strand == "1") ) {
 			colour = '#FF0000';
 		} else {
 			colour = '#0000FF';
 		}
 		$("#comp"+cmp.index).fillPolygon(Xpoints,Ypoints, {color: colour, stroke:'1'});
+		/*colour = '#000000';
+		if(rpos2-lpos2 > 1 && rpos1-lpos1 > 1) {
+			$("#comp"+cmp.index).drawLine(lpos1, 0, lpos2, canvasBtm-canvasTop, {color: colour, stroke:'0.1'});
+			$("#comp"+cmp.index).drawLine(rpos1, 0, rpos2, canvasBtm-canvasTop, {color: colour, stroke:'0.1'});
+		}*/
 	}
 }
 
