@@ -812,10 +812,10 @@ function drawCodons(fDisplay, basePerPixel) {
 	  if(i+fDisplay.leftBase > fDisplay.sequenceLength) {
 		  break;
 	  }
-	  var fwdid = 'fwdbase'+i;
-	  var bwdid = 'bwdbase'+i;
-	  baseStr = baseStr+'<div class="base" id="'+fwdid+'" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>';
-	  baseStr = baseStr+'<div class="base" id="'+bwdid+'" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(fDisplay.sequence[i])+'</div>';
+
+	  baseStr = baseStr+
+	  	'<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>'+
+	  	'<div class="base" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(fDisplay.sequence[i])+'</div>';
 
 	  xpos += (1/basePerPixel);
   }
@@ -834,9 +834,9 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 	  }
 	  var frame = (fDisplay.leftBase-1+i) % 3;
 	  var yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-1;
-	  var fwdid = 'fwdAA1'+i;
-	  aaStr = aaStr + '<div class="aminoacid" id="'+fwdid+
-			  '" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
+	  
+	  aaStr = aaStr + '<div class="aminoacid" '+
+			  'style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
 			  getCodonTranslation(fDisplay.sequence[i], 
 					  			  fDisplay.sequence[i+1], 
 					  			  fDisplay.sequence[i+2])+'</div>';   
@@ -846,9 +846,9 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 
 	  var yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
 	  						((fDisplay.frameLineHeight*2)*frame)-1;
-	  var bwdid = 'bwdAA1'+i;
-	  aaStr = aaStr + '<div class="aminoacid" id="'+bwdid+
-	  		  '" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
+	  
+	  aaStr = aaStr + '<div class="aminoacid" '+
+	  		  'style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
 			  getCodonTranslation(complement(fDisplay.sequence[i+2]), 
 					              complement(fDisplay.sequence[i+1]), 
 					              complement(fDisplay.sequence[i]))+'</div>';
