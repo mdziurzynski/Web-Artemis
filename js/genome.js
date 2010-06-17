@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 2;
+var serviceType = 3;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
@@ -329,14 +329,16 @@ function comparisonObj(featureDisplay1, featureDisplay2, index) {
     			if(match.f1strand == "1") {
     				str1 = match.fmin1+".."+match.fmax1;
     			} else {
-    				str1 = "complement("+match.fmin1+".."+match.fmax1+")";
+    				var s = parseInt(match.fmin1)+1;
+    				str1 = "complement("+s+".."+match.fmax1+")";
     			}
     			
     			var str12
     			if(match.f2strand == "1") {
     				str2 = match.fmin2+".."+match.fmax2;
     			} else {
-    				str2 = "complement("+match.fmin2+".."+match.fmax2+")";
+    				var s = parseInt(match.fmin2)+1;
+    				str2 = "complement("+s+".."+match.fmax2+")";
     			}
     			
     			$("div#matchProps"+mId).append(str1+" " +str2+ "  "+ 
@@ -1588,21 +1590,21 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		var lpos1; 
 		var rpos1;
 		if(match.f1strand == "1") {
-		  lpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1) + 1;
-		  rpos1 = margin+((fmax1 - fDisplay1.leftBase +1 )/basePerPixel1) - 1;
+		  lpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1);
+		  rpos1 = margin+((fmax1 - fDisplay1.leftBase)/basePerPixel1);
 		} else {
-		  lpos1 = margin+((fmax1 - fDisplay1.leftBase +1 )/basePerPixel1) - 1;
-		  rpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1) + 1;
+		  lpos1 = margin+((fmax1 - fDisplay1.leftBase)/basePerPixel1);
+		  rpos1 = margin+((fmin1 - fDisplay1.leftBase)/basePerPixel1);
 		}
 
 		var lpos2;
 		var rpos2;
 		if(match.f2strand == "1") {
-		  lpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
-		  rpos2 = margin+((fmax2 - fDisplay2.leftBase)/basePerPixel2) - 1;
+		  lpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2);
+		  rpos2 = margin+((fmax2 - fDisplay2.leftBase)/basePerPixel2);
 		} else {
-		  lpos2 = margin+((fmax2 - fDisplay2.leftBase)/basePerPixel2) - 1;
-		  rpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
+		  lpos2 = margin+((fmax2 - fDisplay2.leftBase)/basePerPixel2);
+		  rpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2);
 		}
 		
 		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
