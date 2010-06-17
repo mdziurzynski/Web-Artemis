@@ -1023,8 +1023,11 @@ function drawArrow(featureDisplay, exon, ypos, basePerPixel) {
 
 function drawTicks(fDisplay) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
-	var nticks = fDisplay.basesDisplayWidth/baseInterval;
 	var basePerPixel  = baseInterval/screenInterval;
+	if(baseInterval < 20) {
+		baseInterval = 20;
+	}
+	var nticks = fDisplay.basesDisplayWidth/baseInterval;
 
 	var baseRemainder = (fDisplay.leftBase-1) % baseInterval;
 	var start = Math.round(Math.floor((fDisplay.leftBase-1)/baseInterval)*baseInterval);
@@ -1038,10 +1041,10 @@ function drawTicks(fDisplay) {
 	  xScreen -= ((fDisplay.leftBase-start-1)/basePerPixel);
 	}
 	
- 
+	var thisScreenInterval = baseInterval/basePerPixel;
 	$('#ticks'+fDisplay.index).html('');
 	for(var i=1; i< nticks+1; i++) {
-		xScreen+=screenInterval;
+		xScreen+=thisScreenInterval;
 		
 		if(xScreen >= displayWidth) {
 			break;
