@@ -1004,14 +1004,14 @@ function drawArrow(featureDisplay, exon, ypos, basePerPixel) {
 	
 	var frameLineHeight2 = featureDisplay.frameLineHeight/2;
 	if(exon.strand == 1) {
-	  var end = margin+((exon.end - featureDisplay.leftBase )/basePerPixel) + 1;
+	  var end = margin+((exon.end - featureDisplay.leftBase + 1)/basePerPixel);
 	  if(end > displayWidth) {
 		  return;
 	  }
 	  Xpoints = new Array(end, end+frameLineHeight2, end) ;
 	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+featureDisplay.frameLineHeight);
 	} else {
-	  var start = margin+((exon.start - featureDisplay.leftBase )/basePerPixel) - 1;
+	  var start = margin+((exon.start - featureDisplay.leftBase + 1)/basePerPixel);
 	  if(start > displayWidth) {
 		  return;
 	  }
@@ -1147,10 +1147,11 @@ function setupFeatureList(features, featureDisplay) {
 }
 
 function appendFeatureToList(feature) {
+	var s = parseInt(feature.start)+1;
 	$('#featureListTable').append('<tr>'+
 			'<td>'+feature.feature+'</td>'+
 			'<td>'+feature.type+'</td>'+
-			'<td>'+feature.start+'</td>'+
+			'<td>'+s+'</td>'+
 			'<td>'+feature.end+'</td>'+
 			'<td id="'+feature.feature+':PROPS"></td>'+
 			'</tr>');
