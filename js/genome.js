@@ -137,6 +137,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 
 	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" name="fDisplays" class="canvas"></div>');
 	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
+	$('#sequence').append('<div id="sequence'+this.index+'"></div>');
+	$('#translation').append('<div id="translation'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
 	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
 	$('#features').append('<div id="features'+this.index+'"></div>');
@@ -390,17 +392,17 @@ function drawComparison(featureDisplay, clickX, clickY, clearSelections) {
 		//?subject=Pk_strainH_chr09.embl&target=Pf3D7_10&score=1e-05&start=1&end=1000
 		//?blastpair.json?f2=Pk_strainH_chr09.embl&f1=Pf3D7_10&start1=1&end1=10000&start2=1&end2=10000&normscore=0.000000000001
 
-		var featureDisplay1 = comparison.featureDisplay1;
-		var featureDisplay2 = comparison.featureDisplay2;
+		var fDisplay1 = comparison.featureDisplay1;
+		var fDisplay2 = comparison.featureDisplay2;
 		
-		var start1 = featureDisplay1.leftBase;
-		var end1   = start1 + featureDisplay1.basesDisplayWidth;
+		var start1 = Math.floor(fDisplay1.leftBase);
+		var end1   = Math.ceil(start1 + fDisplay1.basesDisplayWidth);
 		
-		var start2 = featureDisplay2.leftBase;
-		var end2   = start2 + featureDisplay2.basesDisplayWidth;
+		var start2 = Math.floor(fDisplay2.leftBase);
+		var end2   = Math.ceil(start2 + fDisplay2.basesDisplayWidth);
 
-		var f1 = featureDisplay1.srcFeature;
-		var f2 = featureDisplay2.srcFeature;
+		var f1 = fDisplay1.srcFeature;
+		var f2 = fDisplay2.srcFeature;
 		var normscore = '1e-07';
 		var maxLength = 200;
 		
@@ -544,7 +546,7 @@ function addEventHandlers(featureDisplay) {
 		disablePopup();
 	 });
 	
-	$('#translation').click(function(event){
+	$('#translation'+featureDisplay.index).click(function(event){
 		var aminoacid = $(event.target).attr('id');
 		var bgColour = $(event.target).css('background-color');
 		$(event.target).css('background-color', '#FFFF00');
@@ -656,8 +658,8 @@ function drawAll(featureDisplay) {
         getSequence(featureDisplay);
       } else {
     	$('#stop_codons'+featureDisplay.index).html('');
-        $('#sequence').html('');
-        $('#translation').html('');
+        $('#sequence'+featureDisplay.index).html('');
+        $('#translation'+featureDisplay.index).html('');
       }
 
       drawFeatures(featureDisplay);
@@ -815,7 +817,7 @@ function drawCodons(fDisplay, basePerPixel) {
 
 	  xpos += (1/basePerPixel);
   }
-  $('#sequence').html(baseStr);
+  $('#sequence'+fDisplay.index).html(baseStr);
   //console.timeEnd('draw codons');
 }
 
@@ -852,7 +854,7 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 	  xpos += (1/basePerPixel);
   }
   
-  $('#translation').html(aaStr);
+  $('#translation'+fDisplay.index).html(aaStr);
   //console.timeEnd('draw aas');
 }
 
@@ -1019,40 +1021,40 @@ function drawArrow(featureDisplay, exon, ypos, basePerPixel) {
 }
 
 
-function drawTicks(featureDisplay) {
-	baseInterval = (featureDisplay.basesDisplayWidth/displayWidth)*screenInterval;
-	var nticks = featureDisplay.basesDisplayWidth/baseInterval;
+function drawTicks(fDisplay) {
+	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	var nticks = fDisplay.basesDisplayWidth/baseInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 
-	var baseRemainder = (featureDisplay.leftBase-1) % baseInterval;
-	var start = Math.round(Math.floor((featureDisplay.leftBase-1)/baseInterval)*baseInterval);
+	var baseRemainder = (fDisplay.leftBase-1) % baseInterval;
+	var start = Math.round(Math.floor((fDisplay.leftBase-1)/baseInterval)*baseInterval);
 	
 	var xScreen = margin-(1/basePerPixel);
-	if(baseRemainder > 0) {
-	  xScreen -= ((featureDisplay.leftBase-start-1)/basePerPixel);
+
+	if(start < 0) {
+	  xScreen += (-fDisplay.leftBase/basePerPixel);
+	  start = 1;
+	} else if(baseRemainder > 0) {
+	  xScreen -= ((fDisplay.leftBase-start-1)/basePerPixel);
 	}
  
-	$('#ticks'+featureDisplay.index).html('');
-	/*console.log('nticks='+nticks+' '+basePerPixel+
-			" basesDisplayWidth="+basesDisplayWidth+" displayWidth="+displayWidth+ 
-			" leftBasePosition="+leftBasePosition+
-			" baseRemainder="+baseRemainder+" xScreen="+xScreen+
-			" baseInterval="+baseInterval+"  1200%500="+1200%500+" start"+start);*/
-
+	$('#ticks'+fDisplay.index).html('');
 	for(var i=1; i< nticks+1; i++) {
 		xScreen+=screenInterval;
 		
 		if(xScreen >= displayWidth) {
 			break;
-		}
-		else if(xScreen < margin) {
+		} else if(xScreen < margin) {
 			continue;
 		}
-		var pos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*9)-14+"px "+xScreen+"px";
-		var thisTick = 'tick'+featureDisplay.index+i;
+		var pos = fDisplay.marginTop+(fDisplay.frameLineHeight*9)-14+"px "+xScreen+"px";
+		var thisTick = 'tick'+fDisplay.index+i;
 		
-		$('#ticks'+featureDisplay.index).append('<div class="tickClass" id='+thisTick+'></div>');
-		setTickCSS(pos, Math.round(i*baseInterval)+(start), '#'+thisTick);
+		var thisStart = Math.round(i*baseInterval)+(start);
+		if(thisStart >= 0 && thisStart <= fDisplay.sequenceLength) {
+			$('#ticks'+fDisplay.index).append('<div class="tickClass" id='+thisTick+'></div>');
+			setTickCSS(pos, thisStart, '#'+thisTick);
+		}
 	}
 }
 
@@ -1574,9 +1576,9 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	
 	for(var i=0; i<blastFeatures.length; i++ ) {
 		var match = blastFeatures[i];
-		var fmin1 = match.fmin1;
+		var fmin1 = parseInt(match.fmin1)+1;
 		var fmax1 = match.fmax1;
-		var fmin2 = match.fmin2;
+		var fmin2 = parseInt(match.fmin2)+1;
 		var fmax2 = match.fmax2;
 
 		var lpos1; 
@@ -1593,9 +1595,9 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		var rpos2;
 		if(match.f2strand == "1") {
 		  lpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
-		  rpos2 = margin+((fmax2 - fDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		  rpos2 = margin+((fmax2 - fDisplay2.leftBase)/basePerPixel2) - 1;
 		} else {
-		  lpos2 = margin+((fmax2 - fDisplay2.leftBase +1 )/basePerPixel2) - 1;
+		  lpos2 = margin+((fmax2 - fDisplay2.leftBase)/basePerPixel2) - 1;
 		  rpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2) + 1;
 		}
 		
@@ -1649,6 +1651,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 
 function isZoomedIn(fDisplay) {
 	var seqLen = fDisplay.sequenceLength;
+	
 	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-800) {
 		return true;
 	} 
@@ -1678,8 +1681,8 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	  drawAminoAcids(fDisplay, basePerPixel);
 	  returnedSequence = returned;
 	} else if(showStopCodons) {
-	  $('#sequence').html('');
-	  $('#translation').html('');
+	  $('#sequence'+fDisplay.index).html('');
+	  $('#translation'+fDisplay.index).html('');
       drawStopCodons(fDisplay, basePerPixel);
 	}
     //console.timeEnd('draw stop codons');  
