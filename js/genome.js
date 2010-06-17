@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 3;
+var serviceType = 2;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
@@ -1037,6 +1037,7 @@ function drawTicks(fDisplay) {
 	} else if(baseRemainder > 0) {
 	  xScreen -= ((fDisplay.leftBase-start-1)/basePerPixel);
 	}
+	
  
 	$('#ticks'+fDisplay.index).html('');
 	for(var i=1; i< nticks+1; i++) {
@@ -1051,7 +1052,7 @@ function drawTicks(fDisplay) {
 		var thisTick = 'tick'+fDisplay.index+i;
 		
 		var thisStart = Math.round(i*baseInterval)+(start);
-		if(thisStart >= 0 && thisStart <= fDisplay.sequenceLength) {
+		if(thisStart >= 0 && (fDisplay.firstTime || thisStart <= fDisplay.sequenceLength)) {
 			$('#ticks'+fDisplay.index).append('<div class="tickClass" id='+thisTick+'></div>');
 			setTickCSS(pos, thisStart, '#'+thisTick);
 		}
