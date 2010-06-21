@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 3;
+var serviceType = 2;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
@@ -555,8 +555,11 @@ function addEventHandlers(featureDisplay) {
 	 });
 	
 	if(count == 2) {
+		
+		// remove top menu
+		$('#menuHeader').html('');
+		//
 		var last;
-
 		$('#comparisons').click(function(event){
 			var compId = $(event.target).parent().attr('id');
 			var index = parseInt(compId.replace("comp",""));
@@ -1149,7 +1152,7 @@ function setupFeatureList(features, featureDisplay) {
 function appendFeatureToList(feature) {
 	var s = parseInt(feature.start)+1;
 	$('#featureListTable').append('<tr>'+
-			'<td>'+feature.feature+'</td>'+
+			'<td id="'+feature.feature+':LIST">'+feature.feature+'</td>'+
 			'<td>'+feature.type+'</td>'+
 			'<td>'+s+'</td>'+
 			'<td>'+feature.end+'</td>'+
@@ -1418,6 +1421,8 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 			if(featureprops[j].name == 'colour') {
 				var featureId = escapeId(featProps[i].feature);
 				$('#'+featureId).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
+				// colour feature list
+				$('#'+escapeId(featProps[i].feature+':LIST')).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 			}
 		}
 	}
