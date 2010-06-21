@@ -75,6 +75,12 @@ $(document).ready(function() {
 		basesDisplayWidth = parseInt(basesDisplayWidth);
 	}
 	
+	if(basesDisplayWidth > 50000) {
+	  showStopCodons = false;
+	} else if(basesDisplayWidth < 1000) {
+	  showStopCodons = true;
+	}
+	  
 	var hgt = arr["height"];
 	
 	var title = '';
@@ -93,7 +99,7 @@ $(document).ready(function() {
 				hgt = parseInt(hgt);
 			}
 				
-			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 16000, value, hgt, leftBase);
+			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 30000, value, hgt, leftBase);
 			featureDisplayObjs[count - 1] = obj;
 			ypos+=250;
 			
