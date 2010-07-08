@@ -1,38 +1,6 @@
 
 var maxBamHgt = 150;
 
-function bamObj(fDisplay) {
-	drawBam(fDisplay);
-}
-
-function drawBam(fDisplay) {
-	var serviceName = '/sams/sequences.json?';
-	handleAjaxCalling(serviceName, aSamSeqs,
-			{ fileID:1 }, fDisplay, { });
-}
-
-var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
-    $("#bam"+fDisplay.index).html('');
-	var samSeqs  = returned.response.sequences;
-	
-	var sequenceName = samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
-	debugLog(sequenceName);
-	
-	var start = fDisplay.leftBase;
-	var end = start + fDisplay.basesDisplayWidth;
-	
-	if(fDisplay.basesDisplayWidth > 4000) {
-		var step = Math.round(fDisplay.basesDisplayWidth/100);
-		var serviceName = '/sams/coverage.json?';
-		handleAjaxCalling(serviceName, aSamCoverage,
-			{ fileID:1, sequence:sequenceName, start:start, end:end, step:step }, fDisplay, { step:step });
-	} else {
-		var serviceName = '/sams/query.json?';
-		handleAjaxCalling(serviceName, aSamCall,
-			{ fileID:1, sequence:sequenceName, start:start, end:end }, fDisplay, { });
-	}
-};
-
 var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 	var coverage = returned.response.coverage.counts;
 	var step = options.step;
@@ -47,8 +15,7 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 		}
 	}
 	
-	for(var i=0; i<coverage.length-1; i++ ) {
-		
+	for(i=0; i<coverage.length-1; i++ ) {
 		var xpos1 = margin+Math.round( ((i*step)+(step/2)) /basePerPixel);
 		var ypos1 = fDisplay.marginTop-((coverage[i]/max)*maxBamHgt);
 		var xpos2 = margin+Math.round( (((i+1)*step)+(step/2)) /basePerPixel);
@@ -57,7 +24,7 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 		$("#bam"+fDisplay.index).drawLine(xpos1, ypos1, xpos2, ypos2,
 				{color:colour, stroke:'1'});
 	}
-}
+};
 
 var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 	var samRecords  = returned.response.records;
@@ -110,4 +77,32 @@ var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 		$("#bam"+fDisplay.index).drawLine(thisStart, ypos, thisEnd, ypos,
 				{color:colour, stroke:'1'});
 	}
+};
+
+var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
+    $("#bam"+fDisplay.index).html('');
+	var samSeqs  = returned.response.sequences;
+	
+	var sequenceName = samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
+	debugLog(sequenceName);
+	
+	var start = fDisplay.leftBase;
+	var end = start + fDisplay.basesDisplayWidth;
+	
+	if(fDisplay.basesDisplayWidth > 4000) {
+		var step = Math.round(fDisplay.basesDisplayWidth/100);
+		var serviceName = '/sams/coverage.json?';
+		handleAjaxCalling(serviceName, aSamCoverage,
+			{ fileID:1, sequence:sequenceName, start:start, end:end, step:step }, fDisplay, { step:step });
+	} else {
+		serviceName = '/sams/query.json?';
+		handleAjaxCalling(serviceName, aSamCall,
+			{ fileID:1, sequence:sequenceName, start:start, end:end }, fDisplay, { });
+	}
+};
+
+function drawBam(fDisplay) {
+	var serviceName = '/sams/sequences.json?';
+	handleAjaxCalling(serviceName, aSamSeqs,
+			{ fileID:1 }, fDisplay, { });
 }
