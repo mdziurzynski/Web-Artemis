@@ -137,6 +137,7 @@
 	<script type="text/javascript" src="js/graph.js"></script>
 	<script type="text/javascript" src="js/scrolling.js"></script>
 	<script type="text/javascript" src="js/featureCvTerm.js"></script>
+	<script type="text/javascript" src="js/bam.js"></script>
     <script type="text/javascript" src="js/genome.js"></script>
 		
 	<script type="text/javascript" src="js/popup.js"></script>
@@ -158,6 +159,12 @@
 					<a href="#ab">Stop codons</a>
 					<ul>
 						<li class="current"><a href="#" id="stopCodonToggle">show/hide</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="#ab">BAM</a>
+					<ul>
+						<li class="current"><a href="#" id="bamToggle">show/hide</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -209,6 +216,7 @@
 	<div class="bwdFrames"></div>
 	<div class="strands"></div>
 		
+	<div id="bam" class="holder"></div>
 	<div id="featureDisplays" class="holder"></div>
 	<div id="comparisons" class="holder"></div>
 	<div id="stop_codons" class="holder"></div>

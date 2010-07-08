@@ -3,15 +3,16 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 2;
+var serviceType = 6;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
                    "http://t81-omixed.internal.sanger.ac.uk:6667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:6668", // bigtest2
+                   "http://t81-omixed.internal.sanger.ac.uk:6669", // jython pathogens
                    "http://www.genedb.org/testservice",
                    "http://127.0.0.1:6666"]; 
-var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
+var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=8000&height=10
@@ -24,6 +25,7 @@ var screenInterval = 100;
 var baseInterval;
 var featureSelected = -1;
 
+var showBam = false;
 var showStopCodons = true;
 var showGC = false;
 var showAG = false;
@@ -140,7 +142,12 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.leftBase = leftBase;
 	this.sequence;
 	this.minimumDisplay = false;
-
+	
+	if(showBam) {
+	  this.marginTop = this.marginTop+maxBamHgt;
+	}
+	
+	$('#bam').append('<div id="bam'+this.index+'" name="bams" class="canvas"></div>');
 	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" name="fDisplays" class="canvas"></div>');
 	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
 	$('#sequence').append('<div id="sequence'+this.index+'"></div>');
@@ -475,13 +482,26 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 }
 
 //
-function addEventHandlers(featureDisplay) {
+function addEventHandlers(fDisplay) {
 	// show/hide stop codons
-	if(featureDisplay.index == 1) {
+	if(fDisplay.index == 1) {
 	
 		$('#stopCodonToggle').click(function(event){
 			showStopCodons = !showStopCodons;
-			drawAll(featureDisplay);
+			drawAll(fDisplay);
+		});
+		
+		$('#bamToggle').click(function(event){
+			showBam = !showBam;
+			if(showBam) {
+				fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
+			} else {
+				fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
+			}
+			$("#bam"+fDisplay.index).html('');
+			adjustFeatureDisplayPosition(false, fDisplay);
+			drawFrameAndStrand(fDisplay);
+			drawAll(fDisplay);
 		});
 
 	// graphs
@@ -493,10 +513,10 @@ function addEventHandlers(featureDisplay) {
 				}
 				showGC = false;
 			} else {
-				setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLineHeight);
 				showGC = true;	
 			}
-			drawAll(featureDisplay);
+			drawAll(fDisplay);
 		});
 	
 		$('#agGraphToggle').click(function(event){
@@ -507,10 +527,10 @@ function addEventHandlers(featureDisplay) {
 				}
 				showAG = false;
 			} else {
-				setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLineHeight);
 				showAG = true;	
 			}
-			drawAll(featureDisplay);
+			drawAll(fDisplay);
 		});
 	
 		$('#otherGraphToggle').click(function(event){
@@ -521,15 +541,15 @@ function addEventHandlers(featureDisplay) {
 				}
 				showOther = false;
 			} else {
-				setGraphCss(displayWidth, featureDisplay.marginTop, margin, featureDisplay.frameLineHeight);
+				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLineHeight);
 				showOther = true;
 			}
-			drawAll(featureDisplay);
+			drawAll(fDisplay);
 		});
 	}
 	
 	// popup
-	$('#features'+featureDisplay.index).mouseenter(function(event){
+	$('#features'+fDisplay.index).mouseenter(function(event){
 		var tgt = $(event.target);
 	    var x = event.pageX+10;
 		var y = event.pageY+10;
@@ -546,15 +566,15 @@ function addEventHandlers(featureDisplay) {
 	    }
 	 });
 	
-	$('#features'+featureDisplay.index).click(function(event){
-		handleFeatureClick($(event.target), featureDisplay);
+	$('#features'+fDisplay.index).click(function(event){
+		handleFeatureClick($(event.target), fDisplay);
 	 });
 	
-	$('#features'+featureDisplay.index).mouseout(function(event){
+	$('#features'+fDisplay.index).mouseout(function(event){
 		disablePopup();
 	 });
 	
-	$('#translation'+featureDisplay.index).click(function(event){
+	$('#translation'+fDisplay.index).click(function(event){
 		var aminoacid = $(event.target).attr('id');
 		var bgColour = $(event.target).css('background-color');
 		$(event.target).css('background-color', '#FFFF00');
@@ -595,7 +615,7 @@ function addEventHandlers(featureDisplay) {
 	}
 	
 	//scrolling
-	addScrollEventHandlers(featureDisplay);
+	addScrollEventHandlers(fDisplay);
 }
 
 //
@@ -659,6 +679,10 @@ function addFrameLine(selector, ypos, frame, featureDisplay) {
 function drawAll(featureDisplay) {
       $('#featureDisplay'+featureDisplay.index).html('');
       var showSequence = true;
+      
+      if(showBam && !featureDisplay.minimumDisplay) {
+          drawBam(featureDisplay);
+      }
       
       if(featureDisplay.minimumDisplay &&
     	$('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') <= featureDisplay.sequenceLength-800) {
@@ -760,7 +784,6 @@ function drawStopOnCanvas(stop, ypos, frameLineHeight, featureDisplay, basePerPi
 }
 
 function drawFwdStop(stop, frame, featureDisplay, basePerPixel) {
-
   var len=stop.length;
   var ypos = featureDisplay.marginTop+((featureDisplay.frameLineHeight*2)*frame);
 
@@ -880,7 +903,7 @@ function drawFeatures(featureDisplay) {
 	
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
-	var excludes = ['match_part'];
+	var excludes = ['match_part', 'direct_repeat', 'EST_match'];
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:featureDisplay.srcFeature, 
 		      start:featureDisplay.leftBase, end:end, 

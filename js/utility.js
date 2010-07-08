@@ -68,8 +68,9 @@ function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisp
 }
 
 function escapeId(myid) { 
-	   return myid.replace(/(:|\.)/g,'\\$1');
+	   return myid.replace(/(:|\.|\|)/g,'\\$1');
 }
+
 
 function debugLog(txt) {
 	if(!debug)
