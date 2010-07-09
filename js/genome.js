@@ -36,6 +36,7 @@ var compare = false;
 var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
+var useCanvas = false;
 
 var colour = [ 
     '255,255,255',
@@ -128,6 +129,13 @@ $(document).ready(function() {
 	
 	$('ul.sf-menu').superfish();
 	$(this).attr("title", title);
+	
+	if (!$('#sequence'+1).find('canvas').get(0))
+	  $('#sequence'+1).append("<canvas  width='"+$('#sequence'+1).css('width')+"' height='"+$('#sequence'+1).css('height')+"' style='position: absolute; top: 0; left: 0; z-index:1;'></canvas>");		
+	var canvas = $('#sequence'+1).find("canvas").get(0);
+	if(canvas.getContext) {
+	  useCanvas = true;
+	}
 });
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
@@ -151,7 +159,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#bam').append('<div id="bam'+this.index+'" name="bams" class="canvas"></div>');
 	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" name="fDisplays" class="canvas"></div>');
 	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
-	$('#sequence').append('<div id="sequence'+this.index+'"></div>');
+	$('#sequence').append('<div id="sequence'+this.index+'" name="sequences" class="canvas"></div>');
 	$('#translation').append('<div id="translation'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
 	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
@@ -833,27 +841,50 @@ function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
   $('#stop_codons'+featureDisplay.index).append(bwdStopsStr);
 }
 
+function getCanvasCtx(fDisplay) {
+	  var width = $('#sequence'+fDisplay.index).css('width').replace("px", "");
+	  var height = $('#sequence'+fDisplay.index).css('height').replace("px", "");
+
+	  if (!$('#sequence'+fDisplay.index).find('canvas').get(0))
+		 $('#sequence'+fDisplay.index).append("<canvas  width='"+$('#sequence'+fDisplay.index).css('width')+"' height='"+$('#sequence'+fDisplay.index).css('height')+"' style='position: absolute; top: 0; left: 0; z-index:1;'></canvas>");		
+	  var canvas = $('#sequence'+fDisplay.index).find("canvas").get(0);
+	  var ctx = canvas.getContext("2d");
+	  ctx.clearRect(0, 0, width, height);
+	  return ctx;
+}
+
 function drawCodons(fDisplay, basePerPixel) {
-  var yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-1;
+  console.time('draw codons');
+  
+  if(useCanvas) {
+	  var ctx = getCanvasCtx(fDisplay);
+	  var yposFwd = fDisplay.marginTop+(7*fDisplay.frameLineHeight);
+  } else {
+	  yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-1;
+  }
   var yposBwd = yposFwd+(fDisplay.frameLineHeight*3)-1;
   var xpos = margin;
   
-  //console.time('draw codons');
   var baseStr = '';
   for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
-
 	  if(i+fDisplay.leftBase > fDisplay.sequenceLength) {
 		  break;
 	  }
-
-	  baseStr = baseStr+
-	  	'<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>'+
-	  	'<div class="base" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(fDisplay.sequence[i])+'</div>';
-
+	  
+	  if(useCanvas) {
+		drawString(ctx, fDisplay.sequence[i], xpos, yposFwd, '#191970', 0,"sans-serif",11);
+	  	drawString(ctx, complement(fDisplay.sequence[i]), xpos, yposBwd, '#191970', 0,"sans-serif",11);
+	  } else {
+		baseStr = baseStr+
+	  	  '<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>'+
+	  	  '<div class="base" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(fDisplay.sequence[i])+'</div>';
+	  }
 	  xpos += (1/basePerPixel);
   }
-  $('#sequence'+fDisplay.index).html(baseStr);
-  //console.timeEnd('draw codons');
+  if(!useCanvas) {
+	  $('#sequence'+fDisplay.index).html(baseStr);
+  }
+  console.timeEnd('draw codons');
 }
 
 function drawAminoAcids(fDisplay, basePerPixel) {
