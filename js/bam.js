@@ -2,23 +2,16 @@
 var maxBamHgt = 150;
 
 var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
-	var coverage = returned.response.coverage.counts;
-	var step = options.step;
+	var coverage = returned.response.coverage;
+	var max = returned.response.max_count;
+	var window = options.window;
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
-	var max = -100;
-	
-	for(var i=0; i<coverage.length; i++ ) {
-		debugLog(coverage[i]);
-		if(coverage[i]>max) {
-			max = coverage[i];
-		}
-	}
 	
 	for(i=0; i<coverage.length-1; i++ ) {
-		var xpos1 = margin+Math.round( ((i*step)+(step/2)) /basePerPixel);
+		var xpos1 = margin+Math.round( ((i*window)+(window/2)) /basePerPixel);
 		var ypos1 = fDisplay.marginTop-((coverage[i]/max)*maxBamHgt);
-		var xpos2 = margin+Math.round( (((i+1)*step)+(step/2)) /basePerPixel);
+		var xpos2 = margin+Math.round( (((i+1)*window)+(window/2)) /basePerPixel);
 		var ypos2 = fDisplay.marginTop-((coverage[i+1]/max)*maxBamHgt);
 
 		$("#bam"+fDisplay.index).drawLine(xpos1, ypos1, xpos2, ypos2,
@@ -33,7 +26,7 @@ var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 	
 	var alignmentEnd   = samRecords.alignmentEnd;
 	var alignmentStart = samRecords.alignmentStart;
-	var name  = samRecords.readNames;
+	var name  = samRecords.readName;
 	var flags = samRecords.flags;
 	var ypos  = fDisplay.marginTop-10;
 	
@@ -90,10 +83,10 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 	var end = start + fDisplay.basesDisplayWidth;
 	
 	if(fDisplay.basesDisplayWidth > 4000) {
-		var step = Math.round(fDisplay.basesDisplayWidth/100);
+		var window = Math.round(fDisplay.basesDisplayWidth/100);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
-			{ fileID:1, sequence:sequenceName, start:start, end:end, step:step }, fDisplay, { step:step });
+			{ fileID:1, sequence:sequenceName, start:start, end:end, window:window }, fDisplay, { window:window });
 	} else {
 		serviceName = '/sams/query.json?';
 		handleAjaxCalling(serviceName, aSamCall,

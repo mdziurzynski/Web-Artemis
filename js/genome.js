@@ -3,7 +3,8 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 6;
+var serviceType = 2;
+var serviceTypeBam = 6;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot

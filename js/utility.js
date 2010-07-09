@@ -36,7 +36,14 @@ function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay,
 }
 
 function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisplay, options, async) {
-	var jsonUrl = webService[serviceType]+serviceName;
+	
+	if(serviceName.indexOf("sams") > 0 ) {
+		var jsonUrl = webService[serviceTypeBam]+serviceName;
+	} else {
+		var jsonUrl = webService[serviceType]+serviceName;
+	}
+	
+	
     debugLog(serviceName+" "+jsonUrl+ " async "+async);
     
     $.ajax({
