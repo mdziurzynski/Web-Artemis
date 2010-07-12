@@ -841,7 +841,7 @@ function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
   $('#stop_codons'+featureDisplay.index).append(bwdStopsStr);
 }
 
-function getCanvasCtx(fDisplay) {
+function getSequnceCanvasCtx(fDisplay, clearCanvas) {
 	  var width = $('#sequence'+fDisplay.index).css('width').replace("px", "");
 	  var height = $('#sequence'+fDisplay.index).css('height').replace("px", "");
 
@@ -849,15 +849,17 @@ function getCanvasCtx(fDisplay) {
 		 $('#sequence'+fDisplay.index).append("<canvas  width='"+$('#sequence'+fDisplay.index).css('width')+"' height='"+$('#sequence'+fDisplay.index).css('height')+"' style='position: absolute; top: 0; left: 0; z-index:1;'></canvas>");		
 	  var canvas = $('#sequence'+fDisplay.index).find("canvas").get(0);
 	  var ctx = canvas.getContext("2d");
-	  ctx.clearRect(0, 0, width, height);
+	  if(clearCanvas) {
+		  ctx.clearRect(0, 0, width, height);
+	  }
 	  return ctx;
 }
 
 function drawCodons(fDisplay, basePerPixel) {
   console.time('draw codons');
-  
+
   if(useCanvas) {
-	  var ctx = getCanvasCtx(fDisplay);
+	  var ctx = getSequnceCanvasCtx(fDisplay, true);
 	  var yposFwd = fDisplay.marginTop+(7*fDisplay.frameLineHeight);
   } else {
 	  yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-1;
@@ -872,8 +874,8 @@ function drawCodons(fDisplay, basePerPixel) {
 	  }
 	  
 	  if(useCanvas) {
-		drawString(ctx, fDisplay.sequence[i], xpos, yposFwd, '#191970', 0,"sans-serif",11);
-	  	drawString(ctx, complement(fDisplay.sequence[i]), xpos, yposBwd, '#191970', 0,"sans-serif",11);
+		drawString(ctx, fDisplay.sequence[i], xpos, yposFwd, '#191970', 0,"Courier New",14);
+	  	drawString(ctx, complement(fDisplay.sequence[i]), xpos, yposBwd, '#191970', 0,"Courier New",14);
 	  } else {
 		baseStr = baseStr+
 	  	  '<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>'+
@@ -889,7 +891,12 @@ function drawCodons(fDisplay, basePerPixel) {
 
 function drawAminoAcids(fDisplay, basePerPixel) {
   var xpos = margin;
-  //console.time('draw aas');
+  console.time('draw aas');
+  
+  if(useCanvas) {
+	  var ctx = getSequnceCanvasCtx(fDisplay, false);
+  }
+  
   var aaStr = '';
   for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
 	  
@@ -897,31 +904,41 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 		  break;
 	  }
 	  var frame = (fDisplay.leftBase-1+i) % 3;
+	  
+	  var aa = getCodonTranslation(fDisplay.sequence[i], 
+  			  fDisplay.sequence[i+1], 
+  			  fDisplay.sequence[i+2]);
 	  var yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-1;
 	  
-	  aaStr = aaStr + '<div class="aminoacid" '+
-			  'style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
-			  getCodonTranslation(fDisplay.sequence[i], 
-					  			  fDisplay.sequence[i+1], 
-					  			  fDisplay.sequence[i+2])+'</div>';   
-
+	  if(useCanvas) {
+		  drawString(ctx, aa, xpos, yposFwd+fDisplay.frameLineHeight, '#191970', 0,"Courier New",14);
+	  } else {
+		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+yposFwd+'px; margin-left:'+
+		  		xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';   
+	  }
+	  
   	  var reversePos = fDisplay.sequenceLength-(i+fDisplay.leftBase+1);
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
 	  var yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
 	  						((fDisplay.frameLineHeight*2)*frame)-1;
-	  
-	  aaStr = aaStr + '<div class="aminoacid" '+
-	  		  'style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+
-			  getCodonTranslation(complement(fDisplay.sequence[i+2]), 
-					              complement(fDisplay.sequence[i+1]), 
-					              complement(fDisplay.sequence[i]))+'</div>';
-
+	  aa = getCodonTranslation(complement(fDisplay.sequence[i+2]), 
+              complement(fDisplay.sequence[i+1]), 
+              complement(fDisplay.sequence[i]))
+              
+	  if(useCanvas) {
+		  drawString(ctx, aa, xpos, yposBwd+fDisplay.frameLineHeight, '#191970', 0,"Courier New",14);
+	  } else {
+		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+
+		  		yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';
+	  }
 	  xpos += (1/basePerPixel);
   }
   
-  $('#translation'+fDisplay.index).html(aaStr);
-  //console.timeEnd('draw aas');
+  if(!useCanvas) {
+	  $('#translation'+fDisplay.index).html(aaStr);
+  }
+  console.timeEnd('draw aas');
 }
 
 function drawFeatures(featureDisplay) {
