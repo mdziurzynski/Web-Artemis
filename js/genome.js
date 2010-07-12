@@ -131,7 +131,7 @@ $(document).ready(function() {
 	$(this).attr("title", title);
 	
 	if (!$('#sequence'+1).find('canvas').get(0))
-	  $('#sequence'+1).append("<canvas  width='"+$('#sequence'+1).css('width')+"' height='"+$('#sequence'+1).css('height')+"' style='position: absolute; top: 0; left: 0; z-index:1;'></canvas>");		
+	  $('#sequence'+1).append("<canvas></canvas>");		
 	var canvas = $('#sequence'+1).find("canvas").get(0);
 	if(canvas.getContext) {
 	  useCanvas = true;
@@ -163,7 +163,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#sequence').append('<div id="sequence'+this.index+'" name="sequences" class="canvas"></div>');
 	$('#translation').append('<div id="translation'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
-	$("#slider_container").append('<div id="slider'+this.index+'" style="z-index:2;"></div>');
+	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
 	$('#features').append('<div id="features'+this.index+'"></div>');
 	$('#ticks').append('<div id="ticks'+this.index+'"></div>');
 	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
