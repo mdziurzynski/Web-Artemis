@@ -136,6 +136,7 @@ $(document).ready(function() {
 	if(canvas.getContext) {
 	  useCanvas = true;
 	}
+	$('#sequence'+1).html('');
 });
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
@@ -200,7 +201,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		  } else if(basesInView < 1000) {
 			  showStopCodons = true;
 		  }
-		  	
+		  
 		  self.basesDisplayWidth = self.sequenceLength-ui.value;
 		  drawAll(self);
 		  
@@ -471,7 +472,7 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	     'top': thisMarginTop+7+'px'
 	};
 	$('#slider_vertical_container'+featureDisplay.index).css(cssObj);
-	$('#featureDisplay'+featureDisplay.index).css('margin-top', thisMarginTop-5+'px');
+	$('#featureDisplay'+featureDisplay.index).css('margin-top', thisMarginTop-margin+'px');
 
 	if(!drag) {
 		cssObj = {
@@ -714,22 +715,30 @@ function drawAll(featureDisplay) {
 	  }
 }
 
-
 function getSequence(fDisplay) {
-	var end = fDisplay.leftBase+fDisplay.basesDisplayWidth;
-
+	var start = fDisplay.leftBase;
+	var end = start+fDisplay.basesDisplayWidth;
+	
 	if(isZoomedIn(fDisplay)) {
-/*	  if(returnedSequence != undefined) {
-		  debugLog("HERE "+returnedSequence.response.sequence[0]);
-		  aSequence(featureDisplay, returnedSequence, {});
-		  return;
-	  }*/
-	  end+=2;
+	  if(returnedSequence) {
+		  var seq = returnedSequence.response.sequence[0];
+
+		  if(seq.start <= fDisplay.leftBase && seq.end >= end) {
+			  aSequence(fDisplay, returnedSequence, {});
+			  return;
+		  }
+	  }
+	  end = end + (fDisplay.basesDisplayWidth*8);
+	  start = start - (fDisplay.basesDisplayWidth*8);
+	  if(start < 1)
+		  start = 1;
+	} else {
+	  currentSeq = null;
 	}
 
 	var serviceName = '/regions/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
-			{ uniqueName:fDisplay.srcFeature, start:fDisplay.leftBase, end:end }, 
+			{ uniqueName:fDisplay.srcFeature, start:start, end:end }, 
 			fDisplay, {});
 }
 
@@ -842,12 +851,14 @@ function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
 }
 
 function getSequnceCanvasCtx(fDisplay, clearCanvas) {
-	  var width = $('#sequence'+fDisplay.index).css('width').replace("px", "");
-	  var height = $('#sequence'+fDisplay.index).css('height').replace("px", "");
+	  var width = $('#featureDisplay'+fDisplay.index).css('width').replace("px", "");
+	  var height = fDisplay.frameLineHeight*17;
 
-	  if (!$('#sequence'+fDisplay.index).find('canvas').get(0))
-		 $('#sequence'+fDisplay.index).append("<canvas  width='"+$('#sequence'+fDisplay.index).css('width')+"' height='"+$('#sequence'+fDisplay.index).css('height')+"' style='position: absolute; top: 0; left: 0; z-index:1;'></canvas>");		
-	  var canvas = $('#sequence'+fDisplay.index).find("canvas").get(0);
+	  if (!$('#featureDisplay'+fDisplay.index).find('canvas').get(0)) {
+		  $('#featureDisplay'+fDisplay.index).append("<canvas  width='"+$('#featureDisplay'+fDisplay.index).css('width')+"' height='"+$('#featureDisplay'+fDisplay.index).css('height')+"' style='position: absolute; top: 0; left: 0;'></canvas>");
+	  }
+	  
+	  var canvas = $('#featureDisplay'+fDisplay.index).find("canvas").get(0);
 	  var ctx = canvas.getContext("2d");
 	  if(clearCanvas) {
 		  ctx.clearRect(0, 0, width, height);
@@ -860,11 +871,12 @@ function drawCodons(fDisplay, basePerPixel) {
 
   if(useCanvas) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, true);
-	  var yposFwd = fDisplay.marginTop+(7*fDisplay.frameLineHeight);
+	  var yposFwd = margin+7*fDisplay.frameLineHeight;
   } else {
 	  yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-1;
   }
   var yposBwd = yposFwd+(fDisplay.frameLineHeight*3)-1;
+  
   var xpos = margin;
   
   var baseStr = '';
@@ -874,8 +886,8 @@ function drawCodons(fDisplay, basePerPixel) {
 	  }
 	  
 	  if(useCanvas) {
-		drawString(ctx, fDisplay.sequence[i], xpos, yposFwd, '#191970', 0,"Courier New",14);
-	  	drawString(ctx, complement(fDisplay.sequence[i]), xpos, yposBwd, '#191970', 0,"Courier New",14);
+		drawString(ctx, fDisplay.sequence[i], xpos, yposFwd, '#000000', 0,"Courier New",14);
+	  	drawString(ctx, complement(fDisplay.sequence[i]), xpos, yposBwd, '#000000', 0,"Courier New",14);
 	  } else {
 		baseStr = baseStr+
 	  	  '<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>'+
@@ -890,12 +902,12 @@ function drawCodons(fDisplay, basePerPixel) {
 }
 
 function drawAminoAcids(fDisplay, basePerPixel) {
-  var xpos = margin;
-  console.time('draw aas');
   
+  console.time('draw aas');
+  var xpos = margin;
   if(useCanvas) {
-	  var ctx = getSequnceCanvasCtx(fDisplay, false);
-  }
+	  var ctx = getSequnceCanvasCtx(fDisplay, false); 
+  } 
   
   var aaStr = '';
   for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
@@ -908,11 +920,13 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 	  var aa = getCodonTranslation(fDisplay.sequence[i], 
   			  fDisplay.sequence[i+1], 
   			  fDisplay.sequence[i+2]);
-	  var yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-1;
+	  
 	  
 	  if(useCanvas) {
-		  drawString(ctx, aa, xpos, yposFwd+fDisplay.frameLineHeight, '#191970', 0,"Courier New",14);
+		  var yposFwd = margin+(frame*(fDisplay.frameLineHeight*2))+fDisplay.frameLineHeight;
+		  drawString(ctx, aa, xpos, yposFwd, '#000000', 0,"Courier New",14);
 	  } else {
+		  yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-1;
 		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+yposFwd+'px; margin-left:'+
 		  		xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';   
 	  }
@@ -920,15 +934,18 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   	  var reversePos = fDisplay.sequenceLength-(i+fDisplay.leftBase+1);
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
-	  var yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
-	  						((fDisplay.frameLineHeight*2)*frame)-1;
+	  
 	  aa = getCodonTranslation(complement(fDisplay.sequence[i+2]), 
               complement(fDisplay.sequence[i+1]), 
               complement(fDisplay.sequence[i]))
               
 	  if(useCanvas) {
-		  drawString(ctx, aa, xpos, yposBwd+fDisplay.frameLineHeight, '#191970', 0,"Courier New",14);
+		  var yposBwd = margin+(fDisplay.frameLineHeight*11)+
+			((fDisplay.frameLineHeight*2)*frame)+fDisplay.frameLineHeight;
+		  drawString(ctx, aa, xpos, yposBwd, '#000000', 0,"Courier New",14);
 	  } else {
+		  yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
+			((fDisplay.frameLineHeight*2)*frame)-1;
 		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+
 		  		yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';
 	  }
@@ -952,7 +969,7 @@ function drawFeatures(featureDisplay) {
 	
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
-	var excludes = ['match_part', 'direct_repeat', 'EST_match'];
+	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region'];
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:featureDisplay.srcFeature, 
 		      start:featureDisplay.leftBase, end:end, 
@@ -1570,6 +1587,12 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	$('#features'+fDisplay.index).html(featureStr);
 	
 	if(!options.minDisplay) {
+		  if(isZoomedIn(fDisplay)) {
+			  $('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.3');
+		  } else {
+			  $('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.9');
+		  }
+		
 		if($('.feat').height() != fDisplay.frameLineHeight) {
 			var cssObj = {
 				'height':fDisplay.frameLineHeight+'px',
@@ -1751,7 +1774,9 @@ function isZoomedIn(fDisplay) {
 var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
 	//console.time('draw all');
-	var sequence = returned.response.sequence[0].dna.toUpperCase();
+	var start = returned.response.sequence[0].start;
+	
+	var sequence = returned.response.sequence[0].dna.substring(fDisplay.leftBase-start).toUpperCase();
 	fDisplay.sequence = sequence;
 	fDisplay.sequenceLength = returned.response.sequence[0].length;
 
