@@ -162,7 +162,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#sequence').append('<div id="sequence'+this.index+'" name="sequences" class="canvas"></div>');
 	$('#translation').append('<div id="translation'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
-	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
+	$("#slider_container").append('<div id="slider'+this.index+'" style="z-index:2;"></div>');
 	$('#features').append('<div id="features'+this.index+'"></div>');
 	$('#ticks').append('<div id="ticks'+this.index+'"></div>');
 	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
