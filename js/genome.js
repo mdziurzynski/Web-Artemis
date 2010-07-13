@@ -1764,7 +1764,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 function isZoomedIn(fDisplay) {
 	var seqLen = fDisplay.sequenceLength;
 	
-	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-200) {
+	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-160) {
 		return true;
 	} 
 	return false;
