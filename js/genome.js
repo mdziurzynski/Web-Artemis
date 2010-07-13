@@ -166,8 +166,13 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
 	$('#features').append('<div id="features'+this.index+'"></div>');
 	$('#ticks').append('<div id="ticks'+this.index+'"></div>');
+	
 	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
 	$('#buttons').append('<div id="right'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>');
+
+	$('#buttons').append('<div id="plus'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-plus"><span class="ui-icon ui-icon-circle-plus"></span></div>');
+	$('#buttons').append('<div id="minus'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-minus"><span class="ui-icon ui-icon-circle-minus"></span></div>');
+
 	$('#rightDraggableEdge').append('<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se"></div>');
 
 	var self = this;
@@ -194,19 +199,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		value: self.sequenceLength-self.basesDisplayWidth,
 		step: 100,
 		change: function(event, ui) {
-		  var basesInView = self.sequenceLength-ui.value;
-		
-		  if(basesInView > 50000) {
-			  showStopCodons = false;
-		  } else if(basesInView < 1000) {
-			  showStopCodons = true;
-		  }
-		  
-		  self.basesDisplayWidth = self.sequenceLength-ui.value;
-		  drawAll(self);
-		  
-		  // update .ui-slider-horizontal .ui-slider-handle
-		  setScrollHandle(scrollbar, self);
+			zoomOnce(self, scrollbar);
 		}
 	});
 	this.lastLeftBase = leftBase;
@@ -239,21 +232,6 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	addEventHandlers(self);
 }
 
-function setScrollHandle(scrollbar, fDisplay) {	
-	var slider = $('#slider'+fDisplay.index);
-	slider.slider('option', 'step', fDisplay.basesDisplayWidth/2);
-
-	// TODO slider scaling
-	// http://groups.google.com/group/jquery-ui/browse_thread/thread/1605420a9af60ab2
-	//
-	/*var handleSize = fDisplay.basesDisplayWidth/fDisplay.sequenceLength*100;
-	
-	if(handleSize > 5) {
-		handleSize = 5;
-	}
-	//debugLog("SLIDER WIDTH: "+scrollbar.find('.ui-slider-handle').css('width'));
-	scrollbar.find('.ui-slider-handle').css({ width: handleSize+'%' });*/
-}
 
 function drawAndScroll(fDisplay, lastLeftBase) {
 	var diff = fDisplay.leftBase - lastLeftBase;
@@ -455,6 +433,21 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 			'top': thisMarginTop+(thisFLH*16.8)+'px'
 	};
 	$('#right'+featureDisplay.index).css(cssObj);
+	
+	cssObj = {
+			'margin-left': margin+margin+displayWidth+'px',
+			'position':'absolute',
+			'top': thisMarginTop+'px'
+	};
+	$('#plus'+featureDisplay.index).css(cssObj);
+	
+	cssObj = {
+			'margin-left': margin+margin+displayWidth+'px',
+			'position':'absolute',
+			'top': thisMarginTop+(thisFLH*11)+'px'
+	};
+	$('#minus'+featureDisplay.index).css(cssObj);
+	
 
 	var buttonWidth = $('#left'+featureDisplay.index).width()+5;
 	cssObj = {
@@ -465,11 +458,12 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	};
 	$('#slider'+featureDisplay.index).css(cssObj);
 
+	var buttonHeight = $('#plus'+featureDisplay.index).height()+5;
 	cssObj = {
-	     'margin-left': margin+margin+displayWidth+'px',
-	     'height': (thisFLH*15.5)+'px',
+	     'margin-left': margin+margin+margin+displayWidth+'px',
+	     'height': (thisFLH*11)-(buttonHeight*1.2)+'px',
 	     'position':'absolute',
-	     'top': thisMarginTop+7+'px'
+	     'top': thisMarginTop+buttonHeight+'px'
 	};
 	$('#slider_vertical_container'+featureDisplay.index).css(cssObj);
 	$('#featureDisplay'+featureDisplay.index).css('margin-top', thisMarginTop-margin+'px');
@@ -626,6 +620,9 @@ function addEventHandlers(fDisplay) {
 		});
 	}
 	
+	//zoom
+	addZoomEventHandlers(fDisplay);
+
 	//scrolling
 	addScrollEventHandlers(fDisplay);
 }
@@ -1767,7 +1764,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 function isZoomedIn(fDisplay) {
 	var seqLen = fDisplay.sequenceLength;
 	
-	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-800) {
+	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-200) {
 		return true;
 	} 
 	return false;
