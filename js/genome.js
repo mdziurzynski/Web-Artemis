@@ -131,10 +131,11 @@ $(document).ready(function() {
 	$(this).attr("title", title);
 	
 	if (!$('#sequence'+1).find('canvas').get(0))
-	  $('#sequence'+1).append("<canvas></canvas>");		
+	  $('#sequence'+1).append("<canvas width='1px' height ='1px'></canvas>");		
 	var canvas = $('#sequence'+1).find("canvas").get(0);
 	if(canvas.getContext) {
 	  useCanvas = true;
+	  debugLog('USE CANVAS');
 	}
 	$('#sequence'+1).html('');
 });
@@ -157,7 +158,6 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	  this.marginTop = this.marginTop+maxBamHgt;
 	}
 	
-	$('#bam').append('<div id="bam'+this.index+'" name="bams" class="canvas"></div>');
 	$('#featureDisplays').append('<div id="featureDisplay'+this.index+'" name="fDisplays" class="canvas"></div>');
 	$('#stop_codons').append('<div id="stop_codons'+this.index+'"></div>');
 	$('#sequence').append('<div id="sequence'+this.index+'" name="sequences" class="canvas"></div>');
@@ -504,11 +504,13 @@ function addEventHandlers(fDisplay) {
 		$('#bamToggle').click(function(event){
 			showBam = !showBam;
 			if(showBam) {
+				$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
 				fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
 			} else {
+				$("#bam"+fDisplay.index).html('');
 				fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
 			}
-			$("#bam"+fDisplay.index).html('');
+
 			adjustFeatureDisplayPosition(false, fDisplay);
 			drawFrameAndStrand(fDisplay);
 			drawAll(fDisplay);
