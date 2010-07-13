@@ -22,7 +22,7 @@ function setScrollHandle(scrollbar, fDisplay) {
 
 function zoom(fDisplay, scrollbar, direction) {
     if (zooming > 0) {
-    	var step = Math.round(fDisplay.basesDisplayWidth/2)*direction;
+    	var step = Math.round(fDisplay.basesDisplayWidth/3)*direction;
     	var value = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value')+step;
 		if(value > fDisplay.sequenceLength-140) {
 			value = fDisplay.sequenceLength-140;
