@@ -138,6 +138,8 @@ $(document).ready(function() {
 	  debugLog('USE CANVAS');
 	}
 	$('#sequence'+1).html('');
+	
+	testAddFeatures();
 });
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
@@ -957,6 +959,53 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   console.timeEnd('draw aas');
 }
 
+//
+// Test code: to test adding extra features and giving them
+// a colour
+//
+function testAddFeatures() {
+	var jsonUrl  = 'http://t81-omixed.internal.sanger.ac.uk:6667'; 
+	var service1 = "/regions/locations.json?&region=Pf3D7_06&start=1&end=6627";
+	var service2 = "/features/properties.json?";
+	
+	// Get features and their locations
+	$.ajax({
+		  url: jsonUrl+service1,
+		  dataType: 'jsonp',
+		  success: function(returned1) {
+		
+		var features  = returned1.response.features;
+		var featureToColourList = new Array();
+		for(var i=0; i<features.length; i++ ) {
+		  if(features[i].type == "exon")
+			  featureToColourList.push(features[i].feature);
+		}
+		
+		// Get the feature colours
+		$.ajax({
+			  url: jsonUrl+service2,
+			  data: 'us='+featureToColourList,
+			  dataType: 'jsonp',
+			  success: function(returned2) {	
+			addFeatures(featureDisplayObjs[0].srcFeature, returned1);
+			aFeaturePropColours(featureDisplayObjs[index], returned2, {});
+	  	} } );
+  	} } );
+}
+
+//
+// Add extra features on to the feature display and feature list
+//
+function addFeatures(seqName, jsonFeatureObj) {
+	for(index=0;index<featureDisplayObjs.length; index++) {
+		if(featureDisplayObjs[index].srcFeature == seqName) {
+			aFeatureFlatten(featureDisplayObjs[index], jsonFeatureObj,
+					{append:true, minDisplay:featureDisplayObjs[index].minimumDisplay});
+			break;
+		}
+	}
+}
+
 function drawFeatures(featureDisplay) {
 	var end = parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth);
 	
@@ -1217,30 +1266,22 @@ function positionFeatureList(featureDisplay) {
 	$('#featureList').css(cssObj);
 }
 
-function setupFeatureList(features, featureDisplay) {
+function setupFeatureList(features, featureDisplay, append) {
 	positionFeatureList(featureDisplay);
-	$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
-	$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th><th>Properties</th></tr></thead>');
-	$('#featureListTable').append('<tbody>');
-	
-	for(var i=0; i<features.length; i++) {
-		var feature = features[i];
-		
-		appendFeatureToList(feature);
-		
-/*		for(var j=0; j<feature.features.length; j++) {
-			var kid = feature.features[j];
-			appendFeatureToList(kid);
-
-			for(var k=0; k<kid.features.length; k++) {
-				var kid2 = kid.features[k];
-				appendFeatureToList(kid2);
-			}
-		}*/
+	if(!append) {
+		$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
+		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th><th>Properties</th></tr></thead>');
+		$('#featureListTable').append('<tbody>');
 	}
 	
-	$('#featureListTable').append('</tbody>');
-	$('#featureListTable').tablesorter(); 
+	for(var i=0; i<features.length; i++) {
+		appendFeatureToList(features[i]);
+	}
+	
+	if(!append) {
+		$('#featureListTable').append('</tbody>');
+		$('#featureListTable').tablesorter(); 
+	}
 }
 
 function appendFeatureToList(feature) {
@@ -1523,7 +1564,6 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 };
 
 var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, options) {
-
 	var features  = returned.response.features;
 	var nfeatures = features.length;
 
@@ -1583,16 +1623,21 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			drawExons(fDisplay, exonMap[exonParent[i]], featureStr, basePerPixel);
 	}
 	
-	$('#features'+fDisplay.index).html(featureStr);
-	
+	if(options.append) {
+		$('#features'+fDisplay.index).append(featureStr);
+	} else {
+		$('#features'+fDisplay.index).html(featureStr);
+	}
+
 	if(!options.minDisplay) {
-		  if(isZoomedIn(fDisplay)) {
-			  $('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.3');
-		  } else {
-			  $('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.9');
-		  }
+		if(isZoomedIn(fDisplay)) {
+			$('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.3');
+		} else {
+			$('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.9');
+		}
 		
-		if($('.feat').height() != fDisplay.frameLineHeight) {
+		if($('.feat').height() != fDisplay.frameLineHeight ||
+				fDisplay, options.append ) {
 			var cssObj = {
 				'height':fDisplay.frameLineHeight+'px',
 				'line-height' : fDisplay.frameLineHeight+'px'
@@ -1600,14 +1645,17 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
 		}
 	
-		if(count < 2) {
-			setupFeatureList(features, fDisplay);
-		}
-		if(featureToColourList.length > 0 && featureToColourList.length < 500) {
-			var serviceName = '/features/properties.json?';
-			handleAjaxCalling(serviceName, aFeaturePropColours,
-				'us='+featureToColourList, 
-				fDisplay.leftBase, {});
+		if( count < 2 && 
+			featureToColourList.length > 0 && 
+			featureToColourList.length < 500 ) {
+			setupFeatureList(features, fDisplay, options.append);
+			
+			if(!options.append) {
+				var serviceName = '/features/properties.json?';
+				handleAjaxCalling(serviceName, aFeaturePropColours,
+					'us='+featureToColourList, 
+					fDisplay.leftBase, {});
+			}
 		}
 	}
 	return;
