@@ -139,7 +139,7 @@ $(document).ready(function() {
 	}
 	$('#sequence'+1).html('');
 	
-	testAddFeatures();
+	//testAddFeatures();
 });
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
@@ -1636,8 +1636,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			$('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.9');
 		}
 		
-		if($('.feat').height() != fDisplay.frameLineHeight ||
-				fDisplay, options.append ) {
+		if($('.feat').height() != fDisplay.frameLineHeight || options.append ) {
 			var cssObj = {
 				'height':fDisplay.frameLineHeight+'px',
 				'line-height' : fDisplay.frameLineHeight+'px'
