@@ -959,53 +959,6 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   console.timeEnd('draw aas');
 }
 
-//
-// Test code: to test adding extra features and giving them
-// a colour
-//
-function testAddFeatures() {
-	var jsonUrl  = 'http://t81-omixed.internal.sanger.ac.uk:6667'; 
-	var service1 = "/regions/locations.json?&region=Pf3D7_06&start=1&end=6627";
-	var service2 = "/features/properties.json?";
-	
-	// Get features and their locations
-	$.ajax({
-		  url: jsonUrl+service1,
-		  dataType: 'jsonp',
-		  success: function(returned1) {
-		
-		var features  = returned1.response.features;
-		var featureToColourList = new Array();
-		for(var i=0; i<features.length; i++ ) {
-		  if(features[i].type == "exon")
-			  featureToColourList.push(features[i].feature);
-		}
-		
-		// Get the feature colours
-		$.ajax({
-			  url: jsonUrl+service2,
-			  data: 'us='+featureToColourList,
-			  dataType: 'jsonp',
-			  success: function(returned2) {	
-			addFeatures(featureDisplayObjs[0].srcFeature, returned1);
-			aFeaturePropColours(featureDisplayObjs[index], returned2, {});
-	  	} } );
-  	} } );
-}
-
-//
-// Add extra features on to the feature display and feature list
-//
-function addFeatures(seqName, jsonFeatureObj) {
-	for(index=0;index<featureDisplayObjs.length; index++) {
-		if(featureDisplayObjs[index].srcFeature == seqName) {
-			aFeatureFlatten(featureDisplayObjs[index], jsonFeatureObj,
-					{append:true, minDisplay:featureDisplayObjs[index].minimumDisplay});
-			break;
-		}
-	}
-}
-
 function drawFeatures(featureDisplay) {
 	var end = parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth);
 	
@@ -1866,3 +1819,50 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     //console.timeEnd('draw all');
     return;
 };
+
+//
+//Test code: to test adding extra features and giving them
+//a colour
+//
+function testAddFeatures() {
+	var jsonUrl  = 'http://www.genedb.org/testservice'; 
+	var service1 = "/regions/locations.json?&region=Pf3D7_06&start=1&end=6627";
+	var service2 = "/features/properties.json?";
+	
+	// Get features and their locations
+	$.ajax({
+		  url: jsonUrl+service1,
+		  dataType: 'jsonp',
+		  success: function(returned1) {
+		
+		var features  = returned1.response.features;
+		var featureToColourList = new Array();
+		for(var i=0; i<features.length; i++ ) {
+		  if(features[i].type == "exon")
+			  featureToColourList.push(features[i].feature);
+		}
+		
+		// Get the feature colours
+		$.ajax({
+			  url: jsonUrl+service2,
+			  data: 'us='+featureToColourList,
+			  dataType: 'jsonp',
+			  success: function(returned2) {	
+			addFeatures(featureDisplayObjs[0].srcFeature, returned1);
+			aFeaturePropColours(featureDisplayObjs[index], returned2, {});
+	  	} } );
+	} } );
+}
+
+//
+//Add extra features on to the feature display and feature list
+//
+function addFeatures(seqName, jsonFeatureObj) {
+	for(index=0;index<featureDisplayObjs.length; index++) {
+		if(featureDisplayObjs[index].srcFeature == seqName) {
+			aFeatureFlatten(featureDisplayObjs[index], jsonFeatureObj,
+					{append:true, minDisplay:featureDisplayObjs[index].minimumDisplay});
+			break;
+		}
+	}
+}
