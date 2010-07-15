@@ -515,6 +515,29 @@ function addEventHandlers(fDisplay) {
 			drawFrameAndStrand(fDisplay);
 			drawAll(fDisplay);
 		});
+		
+		$('#basesOfFeature').click(function(event){
+			$('.feat, .featCDS, .featGene, .featGreen').each(
+					function( intIndex ){
+						if($( this ).css('borderLeftWidth') == '2px') {
+							
+							var feature = $( this ).attr("id");
+							debugLog("===> "+feature);
+							handleAjaxCalling('/features/coordinates.json?', 
+									function(featureDisplay, returned, options) { 
+								      var start = returned.response.coordinates[0].regions[0].fmin;
+								      var end = returned.response.coordinates[0].regions[0].fmax;
+
+								      var serviceName = '/regions/sequence.json?';
+								      handleAjaxCalling(serviceName, aDisplaySequence,
+												{ uniqueName:fDisplay.srcFeature, start:start, end:end }, 
+												fDisplay, { name:feature });
+								    }, 
+									{ features: feature }, {}, {});
+						}
+					}
+			);
+		});
 
 	// graphs
 		$('#gcGraphToggle').click(function(event){
@@ -579,7 +602,7 @@ function addEventHandlers(fDisplay) {
 	 });
 	
 	$('#features'+fDisplay.index).click(function(event){
-		handleFeatureClick($(event.target), fDisplay);
+		handleFeatureClick(event, fDisplay);
 	 });
 	
 	$('#features'+fDisplay.index).mouseout(function(event){
@@ -1196,16 +1219,25 @@ function getSrcFeatureList(taxonomyid, featureDisplay)
 			{ taxonID:taxonomyid }, featureDisplay, {});
 }
 
-function handleFeatureClick(tgt, featureDisplay) {
+function handleFeatureClick(event, featureDisplay) {
+	var tgt = $(event.target);
+	
+	if (! event.shiftKey ) {
+		$('.feat, .featCDS, .featGene, .featGreen').css('border-width', '1px');
+	}
+	
 	featureSelected = $(tgt).attr('id');
-
-	var width = $(tgt).css('borderLeftWidth');
-    if(width == '1px') {
-	  $(tgt).css('border-width', '2px');
-    } else {
-      $(tgt).css('border-width', '1px');
-    }
-    
+	//var width = $(tgt).css('borderLeftWidth');
+	if(featureSelected.match(/\d+$/g)) {
+		// select exons of same gene
+		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
+    	debugLog(wildcardSearchString);	
+    	var selId = "[id*=" + wildcardSearchString +"]";
+    	$(selId).each(function( intIndex ){ $( this ).css('border-width', '2px');});
+	} else {
+		$( "#"+featureSelected ).css('border-width', '2px');
+	}
+	
     var serviceName = '/features/heirarchy.json';
 	handleAjaxCalling(serviceName, aShowProperties,
 			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
@@ -1232,7 +1264,7 @@ function setupFeatureList(features, featureDisplay, append) {
 	positionFeatureList(featureDisplay);
 	if(!append) {
 		$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
-		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th><th>Properties</th></tr></thead>');
+		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th></tr></thead>');
 		$('#featureListTable').append('<tbody>');
 	}
 	
@@ -1253,7 +1285,7 @@ function appendFeatureToList(feature) {
 			'<td>'+feature.type+'</td>'+
 			'<td>'+s+'</td>'+
 			'<td>'+feature.end+'</td>'+
-			'<td id="'+feature.feature+':PROPS"></td>'+
+			//'<td id="'+feature.feature+':PROPS"></td>'+
 			'</tr>');
 }
 
@@ -1511,9 +1543,9 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 		var featureprops = featProps[i].props;
 		for(var j=0; j<featureprops.length; j++) {
 
-			if(featureprops[j].name == 'comment')
-				$('#'+escapeId(featProps[i].feature+":PROPS")).append(
-						featureprops[j].name+"="+featureprops[j].value+";<br />");
+			//if(featureprops[j].name == 'comment')
+			//	$('#'+escapeId(featProps[i].feature+":PROPS")).append(
+			//			featureprops[j].name+"="+featureprops[j].value+";<br />");
 			
 			if(featureprops[j].name == 'colour') {
 				var featureId = escapeId(featProps[i].feature);
@@ -1777,6 +1809,17 @@ function isZoomedIn(fDisplay) {
 		return true;
 	} 
 	return false;
+}
+
+var aDisplaySequence = function ajaxGetSequence(fDisplay, returned, options) {
+	var sequence = returned.response.sequence[0].dna.toUpperCase();
+	var name = "DISPSEQ"+escapeId(options.name);
+	$("div#properties").html("<div id='DISPSEQ"+options.name+"'></div>");
+	
+	for(var i=0; i<sequence.length; i+=59)
+	  $("#"+name).append(sequence.substring(i, i+59)+"<br />");
+    $("div#"+name).dialog({ height: 400 ,
+		width:480, position: 'top', title:options.name});
 }
 
 var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
