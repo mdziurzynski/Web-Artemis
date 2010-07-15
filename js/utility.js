@@ -28,6 +28,19 @@ function getUrlVars() {
     return vars;
 }
 
+function getSelectedFeatureIds() {
+	var IDs = $('.feat, .featCDS, .featGene, .featGreen')  // find ID's
+	  .map(function() { return this.id; }) // convert to set of IDs
+	  .get(); // convert to instance of Array (optional)
+	
+	var selectedFeatureIds = new Array();
+	for(var i=0; i<IDs.length; i++) {
+		if($("#"+escapeId(IDs[i])).css('borderLeftWidth') == '2px')
+			selectedFeatureIds.push(IDs[i]);
+	}
+	return selectedFeatureIds;
+}
+
 function sortFeatures(a, b){
 	//Compare "a" and "b" in some fashion, and return -1, 0, or 1
 	if( (a.start - b.start) > 0) {
