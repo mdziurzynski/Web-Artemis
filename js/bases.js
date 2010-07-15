@@ -22,6 +22,15 @@ function complement(base) {
     }
 }
 
+function reverseComplement (sequence) {
+  var revCompSeq = "";
+  for(var i = sequence.length - 1 ; i >= 0 ; --i) {
+	revCompSeq += complement(sequence[i]);
+  }
+
+  return revCompSeq;
+}
+
 function calculateStopCodons(featureDisplay, stops1, stops2, stops3, codon1, codon2, codon3, strand) {
 	var leftBase = featureDisplay.leftBase;
 	var sequence = featureDisplay.sequence;
