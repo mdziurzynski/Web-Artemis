@@ -18,7 +18,7 @@ var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=8000&height=10
 
-var debug = true;
+var debug = false;
 var margin = 5;
 var displayWidth = 1000;
 
@@ -66,17 +66,23 @@ $(document).ready(function() {
 	
 	if(!leftBase) {
 		leftBase = 1;
-	}
-	else {
+	} else {
 		leftBase = parseInt(leftBase);
 	}
 
 	var basesDisplayWidth = arr["width"];
 	if(!basesDisplayWidth) {
 		basesDisplayWidth = 8000;
-	}
-	else {
+	} else {
 		basesDisplayWidth = parseInt(basesDisplayWidth);
+	}
+	
+	var debugSetting = arr["debug"];
+	if(debugSetting) {
+		if(debugSetting == "true")
+			debug = true;
+		else
+			debug = false;
 	}
 	
 	if(basesDisplayWidth > 50000) {
@@ -98,8 +104,7 @@ $(document).ready(function() {
 
 			if(!hgt) {
 				hgt = 10;
-			}
-			else {
+			} else {
 				hgt = parseInt(hgt);
 			}
 				
@@ -119,8 +124,7 @@ $(document).ready(function() {
 	if(count == 0) {
 		if(!hgt) {
 			hgt = 12
-		}
-		else {
+		} else {
 			hgt = parseInt(hgt);
 		}
 		title = 'Pf3D7_01';
@@ -868,8 +872,9 @@ function getSequnceCanvasCtx(fDisplay, clearCanvas) {
 }
 
 function drawCodons(fDisplay, basePerPixel) {
-  console.time('draw codons');
-
+  if(window.console) 
+  		console.time('draw codons');
+	
   if(useCanvas) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, true);
 	  var yposFwd = margin+7*fDisplay.frameLineHeight;
@@ -899,12 +904,14 @@ function drawCodons(fDisplay, basePerPixel) {
   if(!useCanvas) {
 	  $('#sequence'+fDisplay.index).html(baseStr);
   }
-  console.timeEnd('draw codons');
+  if(window.console)
+	console.timeEnd('draw codons');
 }
 
 function drawAminoAcids(fDisplay, basePerPixel) {
+  if(window.console)
+	console.time('draw aas');
   
-  console.time('draw aas');
   var xpos = margin;
   if(useCanvas) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, false); 
@@ -956,7 +963,9 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   if(!useCanvas) {
 	  $('#translation'+fDisplay.index).html(aaStr);
   }
-  console.timeEnd('draw aas');
+  
+  if(window.console)
+	console.timeEnd('draw aas');
 }
 
 function drawFeatures(featureDisplay) {
