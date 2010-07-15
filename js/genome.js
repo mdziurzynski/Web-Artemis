@@ -517,26 +517,43 @@ function addEventHandlers(fDisplay) {
 		});
 		
 		$('#basesOfFeature').click(function(event){
-			$('.feat, .featCDS, .featGene, .featGreen').each(
-					function( intIndex ){
-						if($( this ).css('borderLeftWidth') == '2px') {
-							
-							var feature = $( this ).attr("id");
-							debugLog("===> "+feature);
-							handleAjaxCalling('/features/coordinates.json?', 
-									function(featureDisplay, returned, options) { 
-								      var start = returned.response.coordinates[0].regions[0].fmin;
-								      var end = returned.response.coordinates[0].regions[0].fmax;
-
-								      var serviceName = '/regions/sequence.json?';
-								      handleAjaxCalling(serviceName, aDisplaySequence,
-												{ uniqueName:fDisplay.srcFeature, start:start, end:end }, 
-												fDisplay, { name:feature });
-								    }, 
-									{ features: feature }, {}, {});
+			
+			var selectedFeatures = getSelectedFeatureIds();
+	    	for(var i=0; i<selectedFeatures.length; i++) {
+				var name = selectedFeatures[i];
+				
+				if(name.indexOf(":exon") > -1) {
+					debugLog("DISPLAY EXON");
+					
+					var serviceName = '/features/heirarchy.json';
+					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+					    var features = returned.response.heirarchy;
+					    var name = options.name;
+					    var exonsIds = new Array();
+					    
+						for(var i=0; i<features.length; i++ ) {
+							var nkids = features[i].children.length;
+							for(var j=0; j<nkids; j++ ) { 
+								var kid = features[i].children[j];
+								var exons = getFeatureExons(kid);
+								for(var k=0; k<exons.length; k++) {
+									if(name == exons[k].name) {
+										for(var l=0; l<exons.length; l++)
+											exonsIds.push(exons[l].name);
+									}
+								}
+							}
 						}
-					}
-			);
+						displaySequence(exonsIds, fDisplay);
+					},
+					{ features:name, root_on_genes:true }, fDisplay, { name:name });
+
+					
+					
+				} else {
+					displaySequence([ name ], fDisplay);
+				}
+	    	}
 		});
 
 	// graphs
@@ -1227,17 +1244,16 @@ function handleFeatureClick(event, featureDisplay) {
 	}
 	
 	featureSelected = $(tgt).attr('id');
-	//var width = $(tgt).css('borderLeftWidth');
 	if(featureSelected.match(/\d+$/g)) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
-    	debugLog(wildcardSearchString);	
     	var selId = "[id*=" + wildcardSearchString +"]";
     	$(selId).each(function( intIndex ){ $( this ).css('border-width', '2px');});
 	} else {
-		$( "#"+featureSelected ).css('border-width', '2px');
+		$( "#"+escapeId(featureSelected) ).css('border-width', '2px');
 	}
 	
+	debugLog(featureSelected);	
     var serviceName = '/features/heirarchy.json';
 	handleAjaxCalling(serviceName, aShowProperties,
 			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
@@ -1811,8 +1827,29 @@ function isZoomedIn(fDisplay) {
 	return false;
 }
 
-var aDisplaySequence = function ajaxGetSequence(fDisplay, returned, options) {
+function displaySequence(names, fDisplay) {
+
+	handleAjaxCalling('/features/coordinates.json?', 
+			function (featureDisplay, returned, options) { 
+	    var start = parseInt(returned.response.coordinates[0].regions[0].fmin)+1;
+	    var end = parseInt(returned.response.coordinates[0].regions[0].fmax)+1;
+	    var strand = returned.response.coordinates[0].regions[0].strand;
+		var name = options.names[0];
+		 
+	    debugLog("NO SEQUENCES "+options.names.length+" COORD "+name+" "+start+".."+end+" "+name);
+	    var serviceName = '/regions/sequence.json?';
+	    handleAjaxCalling(serviceName, aDisplaySequence,
+					{ uniqueName:featureDisplay.srcFeature, start:start, end:end }, 
+					featureDisplay, { name:name, strand:strand });
+	 }, { features: names }, fDisplay, { names:names });
+}
+
+var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 	var sequence = returned.response.sequence[0].dna.toUpperCase();
+	
+	if(options.strand == "-1") {
+		sequence = reverseComplement(sequence);
+	}
 	var name = "DISPSEQ"+escapeId(options.name);
 	$("div#properties").html("<div id='DISPSEQ"+options.name+"'></div>");
 	
