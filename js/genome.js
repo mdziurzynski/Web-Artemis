@@ -956,7 +956,8 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   
   var xpos = margin;
   if(useCanvas) {
-	  var ctx = getSequnceCanvasCtx(fDisplay, false); 
+	  var ctx = getSequnceCanvasCtx(fDisplay, false);
+	  xpos = xpos+margin;
   } 
   
   var aaStr = '';
@@ -1834,25 +1835,26 @@ function displaySequence(names, fDisplay) {
 	handleAjaxCalling('/features/coordinates.json?', 
 			function (featureDisplay, returned, options) {
 		var coords = returned.response.coordinates;
+		coords.sort( function sortfunction(a, b){ 
+			if(a.regions[0].fmin > b.regions[0].fmin)
+				return 1;
+			if(a.regions[0].fmin < b.regions[0].fmin)
+				return -1;
+			return 0;
+			} );
+		
 	    var start = parseInt(coords[0].regions[0].fmin)+1;
-	    var end = parseInt(coords[0].regions[0].fmax)+1;
+	    var end = parseInt(coords[coords.length-1].regions[0].fmax)+1;
 	    var name = options.names[0];
-	    
-	    for(var i=1; i<coords.length; i++) {
-	    	var thisStart = parseInt(coords[i].regions[0].fmin)+1;
-		    var thisEnd = parseInt(coords[i].regions[0].fmax)+1;
-		    if(thisStart < start) 
-		    	start = thisStart;
-		    if(thisEnd > end)
-		    	end = thisEnd;
-		    name += "-"+options.names[i];
-	    }
+	       
+	    for(var i=1; i<coords.length; i++)
+		   name += "-"+options.names[i];
 
 	    var strand = returned.response.coordinates[0].regions[0].strand;
 	    var serviceName = '/regions/sequence.json?';
 	    handleAjaxCalling(serviceName, aDisplaySequence,
 					{ uniqueName:featureDisplay.srcFeature, start:start, end:end }, 
-					featureDisplay, { name:name, strand:strand, coords:coords, suff:options.names[0] });
+					featureDisplay, { name:name, strand:strand, start:start, coords:coords, suff:options.names[0] });
 	 }, { features: names }, fDisplay, { names:names });
 	
 }
@@ -1865,7 +1867,18 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 		return;
 	}
 	
-    debugLog("NO SEQUENCES "+options.coords.length);
+    debugLog("No. SEQUENCES "+options.coords.length);
+    var coords = options.coords;
+    if(coords.length > 1) {
+    	var newSequence = "";
+    	var start = options.start;
+    	for(var i=0; i<coords.length; i++) {
+    		var thisStart = parseInt(coords[i].regions[0].fmin)+1-start;
+		    var thisEnd = parseInt(coords[i].regions[0].fmax)+1-start;
+    		newSequence += sequence.substring(thisStart, thisEnd);
+    	}
+    	sequence = newSequence;
+    }
     
 	if(options.strand == "-1") {
 		sequence = reverseComplement(sequence);
