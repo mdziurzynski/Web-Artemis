@@ -523,13 +523,14 @@ function addEventHandlers(fDisplay) {
 				var name = selectedFeatures[i];
 				
 				if(name.indexOf(":exon") > -1) {
-					debugLog("DISPLAY EXON");
 					
 					var serviceName = '/features/heirarchy.json';
 					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 					    var features = returned.response.heirarchy;
 					    var name = options.name;
 					    var exonsIds = new Array();
+					    var suff = escapeId(name);
+
 					    
 						for(var i=0; i<features.length; i++ ) {
 							var nkids = features[i].children.length;
@@ -545,6 +546,7 @@ function addEventHandlers(fDisplay) {
 							}
 						}
 						displaySequence(exonsIds, fDisplay);
+
 					},
 					{ features:name, root_on_genes:true }, fDisplay, { name:name });
 
@@ -1830,23 +1832,41 @@ function isZoomedIn(fDisplay) {
 function displaySequence(names, fDisplay) {
 
 	handleAjaxCalling('/features/coordinates.json?', 
-			function (featureDisplay, returned, options) { 
-	    var start = parseInt(returned.response.coordinates[0].regions[0].fmin)+1;
-	    var end = parseInt(returned.response.coordinates[0].regions[0].fmax)+1;
+			function (featureDisplay, returned, options) {
+		var coords = returned.response.coordinates;
+	    var start = parseInt(coords[0].regions[0].fmin)+1;
+	    var end = parseInt(coords[0].regions[0].fmax)+1;
+	    var name = options.names[0];
+	    
+	    for(var i=1; i<coords.length; i++) {
+	    	var thisStart = parseInt(coords[i].regions[0].fmin)+1;
+		    var thisEnd = parseInt(coords[i].regions[0].fmax)+1;
+		    if(thisStart < start) 
+		    	start = thisStart;
+		    if(thisEnd > end)
+		    	end = thisEnd;
+		    name += "-"+options.names[i];
+	    }
+
 	    var strand = returned.response.coordinates[0].regions[0].strand;
-		var name = options.names[0];
-		 
-	    debugLog("NO SEQUENCES "+options.names.length+" COORD "+name+" "+start+".."+end+" "+name);
 	    var serviceName = '/regions/sequence.json?';
 	    handleAjaxCalling(serviceName, aDisplaySequence,
 					{ uniqueName:featureDisplay.srcFeature, start:start, end:end }, 
-					featureDisplay, { name:name, strand:strand });
+					featureDisplay, { name:name, strand:strand, coords:coords, suff:options.names[0] });
 	 }, { features: names }, fDisplay, { names:names });
+	
 }
 
 var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 	var sequence = returned.response.sequence[0].dna.toUpperCase();
 	
+	if($('[id*=DISPSEQ'+options.suff+']').get(0)) {
+		// already displaying
+		return;
+	}
+	
+    debugLog("NO SEQUENCES "+options.coords.length);
+    
 	if(options.strand == "-1") {
 		sequence = reverseComplement(sequence);
 	}
@@ -1856,7 +1876,9 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 	for(var i=0; i<sequence.length; i+=59)
 	  $("#"+name).append(sequence.substring(i, i+59)+"<br />");
     $("div#"+name).dialog({ height: 400 ,
-		width:480, position: 'top', title:options.name});
+		width:480, position: 'top', 
+		title:options.name,
+		close: function(event, ui) { $("div#"+name).remove(); }});
 }
 
 var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
