@@ -977,11 +977,11 @@ function drawCodons(fDisplay, basePerPixel) {
 function drawAminoAcids(fDisplay, basePerPixel) {
   if(window.console)
 	console.time('draw aas');
-  
+ 
   var xpos = margin;
   if(useCanvas) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, false);
-	  xpos = xpos+margin;
+	  xpos += (1/basePerPixel);
   } 
   
   var aaStr = '';
@@ -1009,7 +1009,7 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   	  var reversePos = fDisplay.sequenceLength-(i+fDisplay.leftBase+1);
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
-	  
+	  // reverse strand
 	  aa = getCodonTranslation(complement(fDisplay.sequence[i+2]), 
               complement(fDisplay.sequence[i+1]), 
               complement(fDisplay.sequence[i]))
