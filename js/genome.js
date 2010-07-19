@@ -472,7 +472,12 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	     'top': thisMarginTop+buttonHeight+'px'
 	};
 	$('#slider_vertical_container'+featureDisplay.index).css(cssObj);
-	$('#featureDisplay'+featureDisplay.index).css('margin-top', thisMarginTop-margin+'px');
+	
+	cssObj = {
+			'margin-top': thisMarginTop-margin+'px',
+			'width': displayWidth+margin+'px'
+	};
+	$('#featureDisplay'+featureDisplay.index).css(cssObj);
 
 	if(!drag) {
 		cssObj = {
@@ -1152,11 +1157,11 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	 lastYpos = tmpPos;
 	}
 	
-	var lpos = margin+((exonL.end   - featureDisplay.leftBase )/basePerPixel) + 1;
+	var lpos = margin+((exonL.end - featureDisplay.leftBase + 1)/basePerPixel) + 1;
 	if(lpos > displayWidth) {
 	  return;
 	}
-	var rpos = margin+((exonR.start - featureDisplay.leftBase +1 )/basePerPixel) - 1;
+	var rpos = margin+((exonR.start - featureDisplay.leftBase + 1 )/basePerPixel) - 1;
 	var mid  = lpos+(rpos-lpos)/2;
 	
 	var ymid = ypos-4;
