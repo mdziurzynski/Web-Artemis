@@ -517,21 +517,15 @@ function addEventHandlers(fDisplay) {
 		});
 		
 		$('#basesOfFeature').click(function(event){
-			
 			var selectedFeatures = getSelectedFeatureIds();
 	    	for(var i=0; i<selectedFeatures.length; i++) {
 				var name = selectedFeatures[i];
-				
 				if(name.indexOf(":exon") > -1) {
-					
 					var serviceName = '/features/heirarchy.json';
 					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 					    var features = returned.response.heirarchy;
-					    var name = options.name;
 					    var exonsIds = new Array();
-					    var suff = escapeId(name);
 
-					    
 						for(var i=0; i<features.length; i++ ) {
 							var nkids = features[i].children.length;
 							for(var j=0; j<nkids; j++ ) { 
@@ -545,15 +539,45 @@ function addEventHandlers(fDisplay) {
 								}
 							}
 						}
-						displaySequence(exonsIds, fDisplay);
-
+						displaySequence(exonsIds, fDisplay, true);
 					},
 					{ features:name, root_on_genes:true }, fDisplay, { name:name });
-
-					
 					
 				} else {
-					displaySequence([ name ], fDisplay);
+					displaySequence([ name ], fDisplay, true);
+				}
+	    	}
+		});
+		
+		$('#aaOfFeature').click(function(event){
+			var selectedFeatures = getSelectedFeatureIds();
+	    	for(var i=0; i<selectedFeatures.length; i++) {
+				var name = selectedFeatures[i];
+				if(name.indexOf(":exon") > -1) {
+					var serviceName = '/features/heirarchy.json';
+					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+					    var features = returned.response.heirarchy;
+					    var exonsIds = new Array();
+
+						for(var i=0; i<features.length; i++ ) {
+							var nkids = features[i].children.length;
+							for(var j=0; j<nkids; j++ ) { 
+								var kid = features[i].children[j];
+								var exons = getFeatureExons(kid);
+								for(var k=0; k<exons.length; k++) {
+									if(name == exons[k].name) {
+										for(var l=0; l<exons.length; l++)
+											exonsIds.push(exons[l].name);
+									}
+								}
+							}
+						}
+						displaySequence(exonsIds, fDisplay, false);
+					},
+					{ features:name, root_on_genes:true }, fDisplay, { name:name });
+					
+				} else {
+					displaySequence([ name ], fDisplay, false);
 				}
 	    	}
 		});
@@ -1370,7 +1394,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
-		width:550, position: 'top', title:name});
+		width:550, position: 'top', title:name, show:'fast'});
 }
 
 var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned, options) {
@@ -1830,7 +1854,7 @@ function isZoomedIn(fDisplay) {
 	return false;
 }
 
-function displaySequence(names, fDisplay) {
+function displaySequence(names, fDisplay, asDNA) {
 
 	handleAjaxCalling('/features/coordinates.json?', 
 			function (featureDisplay, returned, options) {
@@ -1854,15 +1878,20 @@ function displaySequence(names, fDisplay) {
 	    var serviceName = '/regions/sequence.json?';
 	    handleAjaxCalling(serviceName, aDisplaySequence,
 					{ uniqueName:featureDisplay.srcFeature, start:start, end:end }, 
-					featureDisplay, { name:name, strand:strand, start:start, coords:coords, suff:options.names[0] });
-	 }, { features: names }, fDisplay, { names:names });
+					featureDisplay, { name:name, strand:strand, start:start, coords:coords, suff:options.names[0], asDNA:options.asDNA });
+	 }, { features: names }, fDisplay, { names:names, asDNA:asDNA });
 	
 }
 
 var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 	var sequence = returned.response.sequence[0].dna.toUpperCase();
+
+	var tag = "DISPAA";
+	if(options.asDNA) {
+		tag = "DISPDNA";
+	}
 	
-	if($('[id*=DISPSEQ'+options.suff+']').get(0)) {
+	if($('[id*='+tag+options.suff+']').get(0)) {
 		// already displaying
 		return;
 	}
@@ -1883,11 +1912,20 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 	if(options.strand == "-1") {
 		sequence = reverseComplement(sequence);
 	}
-	var name = "DISPSEQ"+escapeId(options.name);
-	$("div#properties").html("<div id='DISPSEQ"+options.name+"'></div>");
+
+	if(!options.asDNA) {
+		var phase = 0;
+		if(coords[0].regions[0].phase != "None") {
+		   phase = coords[0].regions[0].phase;
+	    }
+		sequence = getTranslation(sequence, phase);
+	}
 	
+	var name = tag+escapeId(options.name);
+	$("div#properties").html("<div id='"+tag+options.name+"'></div>");
 	for(var i=0; i<sequence.length; i+=59)
 	  $("#"+name).append(sequence.substring(i, i+59)+"<br />");
+
     $("div#"+name).dialog({ height: 400 ,
 		width:480, position: 'top', 
 		title:options.name,

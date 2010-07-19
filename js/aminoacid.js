@@ -54,4 +54,39 @@ function getIndexOfBase(base) {
   return 4;
 }
 
+function getTranslation(sequence, phase) {
+	var aa = "";
+	for(var i=phase;i<sequence.length; i+=3) {  
+		  var this_aa = getCodonTranslation(sequence[i], 
+	  			  sequence[i+1], 
+	  			  sequence[i+2]);
+		  if(i == sequence.length-3 && isStopCodon(this_aa))
+			  break;
+		  aa += this_aa;
+	}
+
+    // a very short feature
+    if(aa.length == 0) 
+      return amino_acids;
+
+    // handle /transl_except
+    //final AminoAcidSequence fixed_amino_acids =
+    //  fixTranslationExceptions();
+
+    //if(isCDS() && !isPartialCDS() && hasValidStartCodon()) {
+    //  // translation should always start with M
+    //  if(aa[0] != 'M')
+    //    final String aa = 'M' + aa.substring(1);
+    //}
+ 
+  return aa;
+}
+
+function isStopCodon(aa) {
+  if(aa == '#' || aa == '*' || aa == '+') 
+    return true;
+  else 
+    return false;
+}
+
 
