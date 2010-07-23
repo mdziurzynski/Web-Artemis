@@ -7,10 +7,10 @@ var serviceType = 2;
 var serviceTypeBam = 6;
 
 var webService = [ "http://127.0.0.1/testservice/",
-                   "http://t81-omixed.internal.sanger.ac.uk:6666", // public ro snapshot
-                   "http://t81-omixed.internal.sanger.ac.uk:6667", // live pathogens
-                   "http://t81-omixed.internal.sanger.ac.uk:6668", // bigtest2
-                   "http://t81-omixed.internal.sanger.ac.uk:6669", // jython pathogens
+                   "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
+                   "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
+                   "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
+                   "http://t81-omixed.internal.sanger.ac.uk:7000", // jython pathogens
                    "http://www.genedb.org/testservice",
                    "http://127.0.0.1:6666"]; 
 var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
