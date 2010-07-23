@@ -4,7 +4,7 @@
 // 2 - javascript served from a seperate server accessed anywhere
 // 
 var serviceType = 2;
-var serviceTypeBam = 6;
+var serviceTypeBam = 4;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
@@ -1259,13 +1259,13 @@ function getOrganismList(featureDisplay) {
 function getSrcFeatureList(taxonomyid, featureDisplay)
 {
 	$('#srcFeatureSelector').html('');
-	var jsonUrl = webService[serviceType]+'/regions/inorganism.json?taxonID='+taxonomyid;
+	var jsonUrl = webService[serviceType]+'/regions/inorganism.json?organism='+taxonomyid;
 
 	debugLog(jsonUrl);
 	
 	var serviceName = '/regions/inorganism.json';
 	handleAjaxCalling(serviceName, aSrcFeature,
-			{ taxonID:taxonomyid }, featureDisplay, {});
+			{ organism:taxonomyid }, featureDisplay, {});
 }
 
 function handleFeatureClick(event, featureDisplay) {
@@ -1418,7 +1418,8 @@ var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned, options)
 	
 	$('#srcFeatureSelector').change(function(event){
 		featureDisplay.srcFeature = $('#srcFeatureList option:selected')[0].value;
-		firstTime = true;
+		featureDisplay.firstTime = true;
+		returnedSequence = undefined;
 		drawAll(featureDisplay);
 	});
 };
@@ -1956,7 +1957,11 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 
     //console.time('draw stop codons');
     $('#stop_codons'+fDisplay.index).html('');
-
+    if (fDisplay.firstTime) {
+    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'max', (fDisplay.sequenceLength-140));
+    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'value', (fDisplay.sequenceLength-fDisplay.basesDisplayWidth));
+    }
+    
 	if(isZoomedIn(fDisplay)) {
 	  drawCodons(fDisplay, basePerPixel);
 	  drawAminoAcids(fDisplay, basePerPixel);
@@ -1969,9 +1974,6 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     //console.timeEnd('draw stop codons');  
 
     if (fDisplay.firstTime) {
-    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'max', (fDisplay.sequenceLength-140));
-    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'value', (fDisplay.sequenceLength-fDisplay.basesDisplayWidth));
-    			
     	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength);
     	$('#slider'+fDisplay.index).slider('option', 'step', fDisplay.basesDisplayWidth/2);
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
