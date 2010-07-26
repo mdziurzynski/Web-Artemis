@@ -962,13 +962,14 @@ function drawCodons(fDisplay, basePerPixel) {
 		  break;
 	  }
 	  
+	  var b = fDisplay.sequence.charAt(i);
 	  if(useCanvas) {
-		drawString(ctx, fDisplay.sequence[i], xpos, yposFwd, '#000000', 0,"Courier New",14);
-	  	drawString(ctx, complement(fDisplay.sequence[i]), xpos, yposBwd, '#000000', 0,"Courier New",14);
+		drawString(ctx, b, xpos, yposFwd, '#000000', 0,"Courier New",14);
+	  	drawString(ctx, complement(b), xpos, yposBwd, '#000000', 0,"Courier New",14);
 	  } else {
 		baseStr = baseStr+
-	  	  '<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+fDisplay.sequence[i]+'</div>'+
-	  	  '<div class="base" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(fDisplay.sequence[i])+'</div>';
+	  	  '<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+b+'</div>'+
+	  	  '<div class="base" style="margin-top:'+yposBwd+'px; margin-left:'+xpos+'px">'+complement(b)+'</div>';
 	  }
 	  xpos += (1/basePerPixel);
   }
@@ -997,11 +998,10 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 	  }
 	  var frame = (fDisplay.leftBase-1+i) % 3;
 	  
-	  var aa = getCodonTranslation(fDisplay.sequence[i], 
-  			  fDisplay.sequence[i+1], 
-  			  fDisplay.sequence[i+2]);
-	  
-	  
+	  var aa = getCodonTranslation(fDisplay.sequence.charAt(i), 
+  			  fDisplay.sequence.charAt(i+1), 
+  			  fDisplay.sequence.charAt(i+2));
+
 	  if(useCanvas) {
 		  var yposFwd = margin+(frame*(fDisplay.frameLineHeight*2))+fDisplay.frameLineHeight;
 		  drawString(ctx, aa, xpos, yposFwd, '#000000', 0,"Courier New",14);
@@ -1015,9 +1015,9 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   	  frame = 3 - ((reversePos+3)-1) % 3 -1;
 
 	  // reverse strand
-	  aa = getCodonTranslation(complement(fDisplay.sequence[i+2]), 
-              complement(fDisplay.sequence[i+1]), 
-              complement(fDisplay.sequence[i]))
+	  aa = getCodonTranslation(complement(fDisplay.sequence.charAt(i+2)), 
+              complement(fDisplay.sequence.charAt(i+1)), 
+              complement(fDisplay.sequence.charAt(i)))
               
 	  if(useCanvas) {
 		  var yposBwd = margin+(fDisplay.frameLineHeight*11)+
