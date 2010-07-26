@@ -537,13 +537,14 @@ function addEventHandlers(fDisplay) {
 								var kid = features[i].children[j];
 								var exons = getFeatureExons(kid);
 								for(var k=0; k<exons.length; k++) {
-									if(name == exons[k].name) {
+									if(options.name == exons[k].name) {
 										for(var l=0; l<exons.length; l++)
 											exonsIds.push(exons[l].name);
 									}
 								}
 							}
 						}
+
 						displaySequence(exonsIds, fDisplay, true);
 					},
 					{ features:name, root_on_genes:true }, fDisplay, { name:name });
@@ -570,7 +571,7 @@ function addEventHandlers(fDisplay) {
 								var kid = features[i].children[j];
 								var exons = getFeatureExons(kid);
 								for(var k=0; k<exons.length; k++) {
-									if(name == exons[k].name) {
+									if(options.name == exons[k].name) {
 										for(var l=0; l<exons.length; l++)
 											exonsIds.push(exons[l].name);
 									}
