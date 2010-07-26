@@ -762,32 +762,32 @@ function addFrameLine(selector, ypos, frame, featureDisplay) {
 	$('.'+frame).css(cssObj);
 }
 
-function drawAll(featureDisplay) {
-      $('#featureDisplay'+featureDisplay.index).html('');
+function drawAll(fDisplay) {
+      $('#featureDisplay'+fDisplay.index).html('');
       var showSequence = true;
       
-      if(showBam && !featureDisplay.minimumDisplay) {
-          drawBam(featureDisplay);
+      if(showBam && !fDisplay.minimumDisplay) {
+          drawBam(fDisplay);
       }
       
-      if(featureDisplay.minimumDisplay &&
-    	$('#slider_vertical_container'+featureDisplay.index).slider('option', 'value') <= featureDisplay.sequenceLength-800) {
+      if(fDisplay.minimumDisplay &&
+    	$('#slider_vertical_container'+fDisplay.index).slider('option', 'value') <= fDisplay.sequenceLength-800) {
     	  showSequence = false;
       }
       
-      if(showSequence && (featureDisplay.firstTime || showStopCodons || showGC || showAG || showOther)) {
-        getSequence(featureDisplay);
+      if(showSequence && (fDisplay.firstTime || showStopCodons || showGC || showAG || showOther)) {
+        getSequence(fDisplay);
       } else {
-    	$('#stop_codons'+featureDisplay.index).html('');
-        $('#sequence'+featureDisplay.index).html('');
-        $('#translation'+featureDisplay.index).html('');
+    	$('#stop_codons'+fDisplay.index).html('');
+        $('#sequence'+fDisplay.index).html('');
+        $('#translation'+fDisplay.index).html('');
       }
 
-      drawFeatures(featureDisplay);
-	  drawTicks(featureDisplay);
+      drawFeatures(fDisplay);
+	  drawTicks(fDisplay);
 	  
 	  if(compare) {
-		drawComparison(featureDisplay);
+		drawComparison(fDisplay);
 	  }
 }
 
@@ -1043,7 +1043,7 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 function drawFeatures(featureDisplay) {
 	var end = parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth);
 	
-	debugLog("start..end = "+featureDisplay.leftBase+".."+end);
+	//debugLog("start..end = "+featureDisplay.leftBase+".."+end);
 	if(end > featureDisplay.sequenceLength && 
 	   featureDisplay.leftBase < featureDisplay.sequenceLength) {
 		end = featureDisplay.sequenceLength;
@@ -1091,7 +1091,6 @@ function getFeaturePeptide(transcript) {
 	}
 	return -1;
 }
-
 
 
 function getSegmentFrameShift(exons, index, phase) {
@@ -1256,16 +1255,25 @@ function getOrganismList(featureDisplay) {
 			{ }, featureDisplay, {});
 }
 
-function getSrcFeatureList(taxonomyid, featureDisplay)
-{
-	$('#srcFeatureSelector').html('');
-	var jsonUrl = webService[serviceType]+'/regions/inorganism.json?organism='+taxonomyid;
+function setTranslation(fDisplay, organism_id) {
+	var serviceName = '/organisms/list.json';
+	handleAjaxCalling(serviceName, function(fDisplay, returned, options) { 
+		var organisms  = returned.response.organisms;
+		for(var i=0; i<organisms.length; i++) {
+			if(organism_id == organisms[i].organism_id)
+				setTranslationTable(organisms[i].translation_table);
+		}
+	    }, {  }, fDisplay, {  });
+}
 
-	debugLog(jsonUrl);
+function getSrcFeatureList(organism_id, featureDisplay, translation_table){
+	$('#srcFeatureSelector').html('');
+	//var jsonUrl = webService[serviceType]+'/regions/inorganism.json?organism=org:'+organism_id;
+	//debugLog(jsonUrl);
 	
 	var serviceName = '/regions/inorganism.json';
 	handleAjaxCalling(serviceName, aSrcFeature,
-			{ organism:taxonomyid }, featureDisplay, {});
+			{ organism:'org:'+organism_id }, featureDisplay, { translation_table:translation_table });
 }
 
 function handleFeatureClick(event, featureDisplay) {
@@ -1402,7 +1410,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 		width:550, position: 'top', title:name, show:'fast'});
 }
 
-var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned, options) {
+var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
@@ -1417,10 +1425,10 @@ var aSrcFeature = function ajaxGetSrcFeatures(featureDisplay, returned, options)
 	positionLists();
 	
 	$('#srcFeatureSelector').change(function(event){
-		featureDisplay.srcFeature = $('#srcFeatureList option:selected')[0].value;
-		featureDisplay.firstTime = true;
+		fDisplay.srcFeature = $('#srcFeatureList option:selected')[0].value;
+		fDisplay.firstTime = true;
 		returnedSequence = undefined;
-		drawAll(featureDisplay);
+		drawAll(fDisplay);
 	});
 };
 
@@ -1432,14 +1440,23 @@ var aOrganism = function ajaxGetOrganisms(featureDisplay, returned, options) {
 		var organism = organisms[i];
 		if(organism)
 		  $('#organismList').append(
-				  '<option value="'+organism.taxonomyid+'">'+organism.name+'</option>');
+				  '<option value="'+organism.organism_id+'">'+organism.name+'</option>');
 	}
-	
+
 	positionLists();
 	
 	$('#organismSelector').change(function(event){
-		var taxonomyid = $('#organismList option:selected')[0].value;
-		getSrcFeatureList(taxonomyid, featureDisplay);
+		var organism_id = $('#organismList option:selected')[0].value;
+	
+		var translation_table = 1;
+		for(var j=0; j<organisms.length; j++) {
+			debugLog(j+" "+organism_id+" "+organisms[j].organism_id );
+			if(organisms[j].organism_id == organism_id)
+				translation_table = organisms[j].translation_table;
+		}
+		
+		debugLog("Translation table = "+translation_table);
+		getSrcFeatureList(organism_id, featureDisplay, translation_table);
 	});
 };
 
@@ -1768,7 +1785,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	var cssObj = {
 			'margin-top': canvasTop+'px',
 			'height': canvasHgt+'px',
-			'width': displayWidth+'px',
+			'width': displayWidth+'px'
 	};
 	$('#comp'+cmp.index).css(cssObj);
 	
@@ -1946,6 +1963,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	var sequence = returned.response.sequence[0].dna.substring(fDisplay.leftBase-start).toUpperCase();
 	fDisplay.sequence = sequence;
 	fDisplay.sequenceLength = returned.response.sequence[0].length;
+	fDisplay.organism_id = returned.response.sequence[0].organism_id;
 
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
@@ -1978,6 +1996,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     	$('#slider'+fDisplay.index).slider('option', 'step', fDisplay.basesDisplayWidth/2);
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     	fDisplay.firstTime = false;
+    	setTranslation(fDisplay, fDisplay.organism_id);
 	}
 
     if(showGC || showAG || showOther) {
