@@ -198,8 +198,8 @@ function getTranslation(sequence, phase) {
 	var aa = "";
 	for(var i=phase;i<sequence.length; i+=3) {  
 		  var this_aa = getCodonTranslation(sequence.charAt(i), 
-	  			  sequence[i+1], 
-	  			  sequence[i+2]);
+	  			  sequence.charAt(i+1), 
+	  			  sequence.charAt(i+2));
 		  if(i == sequence.length-3 && isStopCodon(this_aa))
 			  break;
 		  aa += this_aa;
