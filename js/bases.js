@@ -25,7 +25,7 @@ function complement(base) {
 function reverseComplement (sequence) {
   var revCompSeq = "";
   for(var i = sequence.length - 1 ; i >= 0 ; --i) {
-	revCompSeq += complement(sequence[i]);
+	revCompSeq += complement(sequence.charAt(i));
   }
 
   return revCompSeq;
