@@ -197,7 +197,7 @@ function getIndexOfBase(base) {
 function getTranslation(sequence, phase) {
 	var aa = "";
 	for(var i=phase;i<sequence.length; i+=3) {  
-		  var this_aa = getCodonTranslation(sequence[i], 
+		  var this_aa = getCodonTranslation(sequence.charAt(i), 
 	  			  sequence[i+1], 
 	  			  sequence[i+2]);
 		  if(i == sequence.length-3 && isStopCodon(this_aa))
