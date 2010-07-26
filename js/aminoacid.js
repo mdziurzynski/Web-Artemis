@@ -71,7 +71,8 @@ translation_table[9][1] = new Array('C');
 var start_codons_10 = new Array('ATG');
 
 // 11. Bacterial and Plant Plastid 
-//translation_table_11 = 
+translation_table[10] = new Array(2);
+translation_table[10][0] = new Array();
 var start_codons_11 = new Array('ATG', 'GTG', 'TTG');
 
 // 12. Alternative Yeast Nuclear Code
@@ -128,6 +129,8 @@ function setTranslationTable(tableIndex) {
 	debugLog("setTranslationTable "+tableIndex);
 	tableIndex--;
 	codon_translation_array = translation_table_default;
+	if(tableIndex == 0)
+	  return;
 	
     for(var i = 0; i < translation_table[tableIndex][0].length; ++i) {
       var cod_plus_aa = translation_table[tableIndex][0][i];
@@ -137,7 +140,7 @@ function setTranslationTable(tableIndex) {
 
       debugLog(cod_plus_aa+" "+translation_table[tableIndex][1][i]+"  "+codon_index+"  "+
     		  codon_translation_array[codon_index]);
-      
+
       codon_translation_array[codon_index] = translation_table[tableIndex][1][i];
     }
 }
