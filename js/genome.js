@@ -496,7 +496,7 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 			'position': 'absolute',
 			'opacity':'0.4',
 		    'left': margin+displayWidth+'px',
-		    'top': thisMarginTop+(thisFLH*16)+'px'
+		    'top': thisMarginTop+(thisFLH*15.4)+'px'
 		};
 		$('#rightDraggableEdge'+featureDisplay.index).css(cssObj);
 	} else {
