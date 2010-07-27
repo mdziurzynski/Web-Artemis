@@ -1967,11 +1967,11 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
 	//console.time('draw all');
+	fDisplay.sequenceLength = returned.response.sequence[0].length;
 	var start = returned.response.sequence[0].start;
 	
 	var sequence = returned.response.sequence[0].dna.substring(fDisplay.leftBase-start).toUpperCase();
 	fDisplay.sequence = sequence;
-	fDisplay.sequenceLength = returned.response.sequence[0].length;
 	fDisplay.organism_id = returned.response.sequence[0].organism_id;
 
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
