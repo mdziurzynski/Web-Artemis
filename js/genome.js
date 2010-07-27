@@ -16,7 +16,7 @@ var webService = [ "http://127.0.0.1/testservice/",
 var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
 //
-// web-artemis/index.html?src=Pf3D7_04&base=200000&width=8000&height=10
+// web-artemis/index.html?src=Pf3D7_04&base=200000&width=1000&height=10&bases=5000
 
 var debug = false;
 var margin = 5;
@@ -69,8 +69,16 @@ $(document).ready(function() {
 	} else {
 		leftBase = parseInt(leftBase);
 	}
-
-	var basesDisplayWidth = arr["width"];
+	
+    var width = arr["width"];	
+    if(width) {
+    	displayWidth = parseInt(width);
+    } else {
+    	width = $(window).width();   // browser viewport width
+        displayWidth = width - (margin*12);
+    }
+    
+	var basesDisplayWidth = arr["bases"];
 	if(!basesDisplayWidth) {
 		basesDisplayWidth = 8000;
 	} else {
@@ -1052,7 +1060,7 @@ function drawFeatures(featureDisplay) {
 	
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
-	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region'];
+	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA'];
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:featureDisplay.srcFeature, 
 		      start:featureDisplay.leftBase, end:end, 
