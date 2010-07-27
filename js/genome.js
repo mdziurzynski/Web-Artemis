@@ -1060,7 +1060,7 @@ function drawFeatures(featureDisplay) {
 	
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
-	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA'];
+	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript'];
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:featureDisplay.srcFeature, 
 		      start:featureDisplay.leftBase, end:end, 
@@ -1325,7 +1325,7 @@ function positionFeatureList(featureDisplay) {
 	$('#featureList').css(cssObj);
 }
 
-function setupFeatureList(features, featureDisplay, append) {
+function setupFeatureList(features, exonMap, exonParent, featureDisplay, append) {
 	positionFeatureList(featureDisplay);
 	if(!append) {
 		$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
@@ -1334,12 +1334,45 @@ function setupFeatureList(features, featureDisplay, append) {
 	}
 	
 	for(var i=0; i<features.length; i++) {
-		appendFeatureToList(features[i]);
+		var feature = features[i];
+		if(feature.type != 'exon')
+		  appendFeatureToList(feature);
+		else {
+		  appendExonsToList(exonMap[feature.part_of]);
+		  exonMap[feature.part_of] = undefined;
+		}
 	}
 	
 	if(!append) {
 		$('#featureListTable').append('</tbody>');
 		$('#featureListTable').tablesorter(); 
+	}
+}
+
+function appendExonsToList(exons) {
+	if(exons != undefined) {
+		var fmin = parseInt(exons[0].start)+1;
+		var fmax = parseInt(exons[0].end);
+		var name = exons[0].feature;
+		
+		for(var j=1; j<exons.length; j++) {
+			var thisFmin = parseInt(exons[j].start)+1;
+			var thisFmax = parseInt(exons[j].end);
+			if(thisFmin < fmin)
+				fmin = thisFmin;
+			if(thisFmax > fmax)
+				fmax = thisFmax;
+
+			name += ','+exons[j].feature.match(/\d+$/);
+		}
+		
+		$('#featureListTable').append('<tr>'+
+				'<td id="'+exons[0].feature+':LIST">'+name+'</td>'+
+				'<td>CDS</td>'+
+				'<td>'+fmin+'</td>'+
+				'<td>'+fmax+'</td>'+
+				//'<td id="'+feature.feature+':PROPS"></td>'+
+				'</tr>');
 	}
 }
 
@@ -1716,7 +1749,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		if( count < 2 && 
 			featureToColourList.length > 0 && 
 			featureToColourList.length < 500 ) {
-			setupFeatureList(features, fDisplay, options.append);
+			setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
 			
 			if(!options.append) {
 				var serviceName = '/features/properties.json?';
