@@ -32,6 +32,7 @@ var showGC = false;
 var showAG = false;
 var showOther = false;
 var compare = false;
+var showFeatureList = true;
 
 var count = 0;
 var featureDisplayObjs = new Array();
@@ -83,6 +84,14 @@ $(document).ready(function() {
 		basesDisplayWidth = 8000;
 	} else {
 		basesDisplayWidth = parseInt(basesDisplayWidth);
+	}
+	
+	var listSetting = arr["featureList"];
+	if(listSetting) {
+		if(listSetting == "true")
+			showFeatureList = true;
+		else
+			showFeatureList = false;
 	}
 	
 	var debugSetting = arr["debug"];
@@ -1757,7 +1766,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		if( featureToColourList.length > 0 && 
 			featureToColourList.length < 500 ) {
 			
-			if( count < 2 )
+			if( count < 2 && showFeatureList )
 			  setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
 			
 			if(!options.append) {
