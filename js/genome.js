@@ -1664,7 +1664,7 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 			//if(featureprops[j].name == 'comment')
 			//	$('#'+escapeId(featProps[i].feature+":PROPS")).append(
 			//			featureprops[j].name+"="+featureprops[j].value+";<br />");
-			
+
 			if(featureprops[j].name == 'colour') {
 				var featureId = escapeId(featProps[i].feature);
 				$('#'+featureId).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
@@ -1754,10 +1754,11 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
 		}
 	
-		if( count < 2 && 
-			featureToColourList.length > 0 && 
+		if( featureToColourList.length > 0 && 
 			featureToColourList.length < 500 ) {
-			setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
+			
+			if( count < 2 )
+			  setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
 			
 			if(!options.append) {
 				var serviceName = '/features/properties.json?';
