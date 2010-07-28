@@ -86,16 +86,17 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 		var window = Math.round(fDisplay.basesDisplayWidth/100);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
-			{ fileID:1, sequence:sequenceName, start:start, end:end, window:window }, fDisplay, { window:window });
+			{ fileID:fDisplay.bamId, sequence:sequenceName, start:start, end:end, window:window }, fDisplay, { window:window });
 	} else {
 		serviceName = '/sams/query.json?';
 		handleAjaxCalling(serviceName, aSamCall,
-			{ fileID:1, sequence:sequenceName, start:start, end:end }, fDisplay, { });
+			{ fileID:fDisplay.bamId, sequence:sequenceName, start:start, end:end }, fDisplay, { });
 	}
 };
 
 function drawBam(fDisplay) {
 	var serviceName = '/sams/sequences.json?';
+	
 	handleAjaxCalling(serviceName, aSamSeqs,
-			{ fileID:1 }, fDisplay, { });
+			{ fileID:fDisplay.bamId }, fDisplay, { });
 }

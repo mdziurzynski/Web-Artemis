@@ -528,6 +528,9 @@ function addEventHandlers(fDisplay) {
 		
 		$('#bamFiles').click(function(event){
 			var tgt = $(event.target);
+			if($(tgt).attr('id') == "none")
+				return;
+	
 			showBam = !showBam;
 			if(showBam) {
 				$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
@@ -2095,6 +2098,9 @@ function setBamMenu(fDisplay) {
 		$('#bamFiles').html('<a href="#ab">BAM</a>');
 		
 		var bamStr = '<ul>';
+		if(bamFiles.length == 0)
+			bamStr += '<li class="current"><a href="#" id="none">None</a></li>';
+
 		for(var i=0; i<bamFiles.length; i++) {
 			bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].fileID+'</a></li>';
 		}
