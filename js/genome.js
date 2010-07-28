@@ -148,7 +148,10 @@ $(document).ready(function() {
 		new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
 	}
 	
-	$('ul.sf-menu').superfish();
+	$('ul.sf-menu').superfish({ 
+        animation: {height:'show'},   // slide-down effect without fade-in 
+        delay:     1200               // 1.2 second delay on mouseout 
+    });
 	$(this).attr("title", title);
 	
 	if (!$('#sequence'+1).find('canvas').get(0))
@@ -523,11 +526,14 @@ function addEventHandlers(fDisplay) {
 			drawAll(fDisplay);
 		});
 		
-		$('#bamToggle').click(function(event){
+		$('#bamFiles').click(function(event){
+			var tgt = $(event.target);
 			showBam = !showBam;
 			if(showBam) {
 				$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
+				$("#bam"+fDisplay.index).css('width', displayWidth+margin+'px');
 				fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
+				fDisplay.bamId = $(tgt).attr('id');
 			} else {
 				$("#bam"+fDisplay.index).html('');
 				fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
@@ -543,9 +549,9 @@ function addEventHandlers(fDisplay) {
 	    	for(var i=0; i<selectedFeatures.length; i++) {
 				var name = selectedFeatures[i];
 				if(name.indexOf(":exon") > -1) {
-					var serviceName = '/features/heirarchy.json';
+					var serviceName = '/features/hierarchy.json';
 					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-					    var features = returned.response.heirarchy;
+					    var features = returned.response.hierarchy;
 					    var exonsIds = new Array();
 
 						for(var i=0; i<features.length; i++ ) {
@@ -554,9 +560,9 @@ function addEventHandlers(fDisplay) {
 								var kid = features[i].children[j];
 								var exons = getFeatureExons(kid);
 								for(var k=0; k<exons.length; k++) {
-									if(options.name == exons[k].name) {
+									if(options.name == exons[k].uniquename) {
 										for(var l=0; l<exons.length; l++)
-											exonsIds.push(exons[l].name);
+											exonsIds.push(exons[l].uniquename);
 									}
 								}
 							}
@@ -577,9 +583,9 @@ function addEventHandlers(fDisplay) {
 	    	for(var i=0; i<selectedFeatures.length; i++) {
 				var name = selectedFeatures[i];
 				if(name.indexOf(":exon") > -1) {
-					var serviceName = '/features/heirarchy.json';
+					var serviceName = '/features/hierarchy.json';
 					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-					    var features = returned.response.heirarchy;
+					    var features = returned.response.hierarchy;
 					    var exonsIds = new Array();
 
 						for(var i=0; i<features.length; i++ ) {
@@ -588,9 +594,9 @@ function addEventHandlers(fDisplay) {
 								var kid = features[i].children[j];
 								var exons = getFeatureExons(kid);
 								for(var k=0; k<exons.length; k++) {
-									if(options.name == exons[k].name) {
+									if(options.name == exons[k].uniquename) {
 										for(var l=0; l<exons.length; l++)
-											exonsIds.push(exons[l].name);
+											exonsIds.push(exons[l].uniquename);
 									}
 								}
 							}
@@ -1315,7 +1321,7 @@ function handleFeatureClick(event, featureDisplay) {
 	}
 	
 	debugLog(featureSelected+" SELECTED ");
-    var serviceName = '/features/heirarchy.json';
+    var serviceName = '/features/hierarchy.json';
 	handleAjaxCalling(serviceName, aShowProperties,
 			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
 }
@@ -1410,7 +1416,7 @@ function appendFeatureToList(feature) {
 //
 
 var aShowProperties = function showProperties(featureDisplay, returned, options) {
-    var features = returned.response.heirarchy;
+    var features = returned.response.hierarchy;
     
     var featureStr = "&features="+options.featureSelected;
     var name = options.featureSelected;
@@ -1420,7 +1426,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 	for(var i=0; i<features.length; i++ ) {
 		var feature = features[i];
 		var nkids = feature.children.length;
-	  
+
 		if(nkids > 0) {
 			for(var j=0; j<nkids; j++ ) { 
 				var kid = feature.children[j];
@@ -1429,20 +1435,20 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 				
 				for(var k=0; k<nexons; k++) {
 					var exon = exons[k];
-					if(exon.name == featureSelected ||
-					   feature.name == featureSelected) {
+					if(exon.uniquename == featureSelected ||
+					   feature.uniquename == featureSelected) {
 
 						if(nkids == 1) {
-							name = feature.name;
+							name = feature.uniquename;
 						} else {
-							name = kid.name;
+							name = kid.uniquename;
 						}
-						featurePropertyList.push(feature.name);
-						featureStr += "&features="+feature.name;
+						featurePropertyList.push(feature.uniquename);
+						featureStr += "&features="+feature.uniquename;
 						var polypep = getFeaturePeptide(kid);
 						if(polypep != -1) {
-							featurePropertyList.push(polypep.name);
-							featureStr += "&features="+polypep.name;
+							featurePropertyList.push(polypep.uniquename);
+							featureStr += "&features="+polypep.uniquename;
 						}
 						break;
 					}
@@ -2069,6 +2075,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     	fDisplay.firstTime = false;
     	setTranslation(fDisplay, fDisplay.organism_id);
+    	setBamMenu(fDisplay);
 	}
 
     if(showGC || showAG || showOther) {
@@ -2079,6 +2086,24 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     //console.timeEnd('draw all');
     return;
 };
+
+function setBamMenu(fDisplay) {
+	var serviceName = '/sams/listfororganism.json?';
+	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+		
+		var bamFiles = returned.response.files;
+		$('#bamFiles').html('<a href="#ab">BAM</a>');
+		
+		var bamStr = '<ul>';
+		for(var i=0; i<bamFiles.length; i++) {
+			bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].fileID+'</a></li>';
+		}
+		bamStr += '</ul>';
+		$('#bamFiles').append(bamStr);
+		
+	},
+	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
+}
 
 //
 //Test code: to test adding extra features and giving them
