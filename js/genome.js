@@ -648,7 +648,10 @@ function addEventHandlers(fDisplay) {
 
 	    if( $(tgt).is(".featCDS") ) {
 	    	var currentId = $(tgt).attr('id');  
-	    	loadPopup("CDS<br />"+currentId,x,y);  
+	    	loadPopup("CDS<br />"+currentId,x,y);
+	    } else if( $(tgt).is(".featPseudo") ) {
+	    	var currentId = $(tgt).attr('id');  
+	    	loadPopup("Pseudogene<br />"+currentId,x,y);  
 	    } else if( $(tgt).is(".featGene") ) {
 	    	var currentId = $(tgt).attr('id');  
 	    	loadPopup("Gene<br />"+currentId,x,y);  
@@ -1060,7 +1063,7 @@ function drawFeatures(featureDisplay) {
 	
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
-	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript'];
+	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'gene', 'pseudogene'];
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:featureDisplay.srcFeature, 
 		      start:featureDisplay.leftBase, end:end, 
@@ -1075,7 +1078,7 @@ function getFeatureExons(transcript) {
 	{
 	  for(var i=0; i<nkids; i++) {
 		var kid = transcript.children[i];
-		if(kid.type == "exon") {
+		if(kid.type == "exon" || kid.type == 'pseudogenic_exon') {
 	       exons.push(kid);
 		}
       }	
@@ -1289,7 +1292,7 @@ function handleFeatureClick(event, featureDisplay) {
 	var tgt = $(event.target);
 	
 	if (! event.shiftKey ) {
-		$('.feat, .featCDS, .featGene, .featGreen').css('border-width', '1px');
+		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('border-width', '1px');
 	}
 	
 	featureSelected = $(tgt).attr('id');
@@ -1302,7 +1305,7 @@ function handleFeatureClick(event, featureDisplay) {
 		$( "#"+escapeId(featureSelected) ).css('border-width', '2px');
 	}
 	
-	debugLog(featureSelected);	
+	debugLog(featureSelected+" SELECTED ");
     var serviceName = '/features/heirarchy.json';
 	handleAjaxCalling(serviceName, aShowProperties,
 			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
@@ -1335,7 +1338,7 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 	
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
-		if(feature.type != 'exon')
+		if(feature.type != 'exon' && feature.type != 'pseudogenic_exon')
 		  appendFeatureToList(feature);
 		else {
 		  appendExonsToList(exonMap[feature.part_of]);
@@ -1366,9 +1369,15 @@ function appendExonsToList(exons) {
 			name += ','+exons[j].feature.match(/\d+$/);
 		}
 		
+		var type;
+		if(exons[0].type == 'exon')
+			type = "CDS";
+		else
+			type = "pseudogene";
+		
 		$('#featureListTable').append('<tr>'+
 				'<td id="'+exons[0].feature+':LIST">'+name+'</td>'+
-				'<td>CDS</td>'+
+				'<td>'+type+'</td>'+
 				'<td>'+fmin+'</td>'+
 				'<td>'+fmax+'</td>'+
 				//'<td id="'+feature.feature+':PROPS"></td>'+
@@ -1395,6 +1404,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
     var features = returned.response.heirarchy;
     
     var featureStr = "&features="+options.featureSelected;
+    var name = options.featureSelected;
 	var featurePropertyList = new Array();
 	featurePropertyList.push(options.featureSelected);
 
@@ -1687,11 +1697,9 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	for(var i=0; i<nfeatures; i++ ) {
 	  var feature = features[i];
 	  
-	  if(feature.type == "exon") {
+	  if(feature.type == "exon" || feature.type == "pseudogenic_exon") {
 		  featureToColourList.push(feature.feature);
-	  }
 
-	  if(feature.type == "exon") {  
 		  var exons = exonMap[feature.part_of];
 		  if(exons == undefined) {
 			  exons = new Array();
@@ -1733,9 +1741,9 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 
 	if(!options.minDisplay) {
 		if(isZoomedIn(fDisplay)) {
-			$('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.3');
+			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.3');
 		} else {
-			$('.feat, .featCDS, .featGene, .featGreen').css('opacity','0.9');
+			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.9');
 		}
 		
 		if($('.feat').height() != fDisplay.frameLineHeight || options.append ) {
@@ -1743,7 +1751,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 				'height':fDisplay.frameLineHeight+'px',
 				'line-height' : fDisplay.frameLineHeight+'px'
 			};
-			$('.feat, .featCDS, .featGene, .featGreen').css(cssObj);
+			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
 		}
 	
 		if( count < 2 && 
@@ -1789,7 +1797,13 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 				    		((fDisplay.frameLineHeight*2)*frame);
 		}
 
-		featureStr = drawFeature(fDisplay.leftBase, exon, featureStr, ypos, "featCDS", basePerPixel) ;
+		var classType;
+		if(exon.type == 'pseudogenic_exon')
+			classType = "featPseudo";
+		else
+			classType = "featCDS";		
+		
+		featureStr = drawFeature(fDisplay.leftBase, exon, featureStr, ypos, classType, basePerPixel) ;
 		var canvasTop = $('#featureDisplay'+fDisplay.index).css('margin-top').replace("px", "");
 		if(lastYpos > -1) {
 		   drawFeatureConnections(fDisplay, lastExon, exon, 
@@ -1936,8 +1950,14 @@ function displaySequence(names, fDisplay, asDNA) {
 	    var end = parseInt(coords[coords.length-1].regions[0].fmax)+1;
 	    var name = options.names[0];
 	       
-	    for(var i=1; i<coords.length; i++)
-		   name += "-"+options.names[i];
+	       
+	    for(var i=1; i<coords.length; i++) {
+	       if(options.names[i].indexOf("exon") > 0) {
+	    	 name += "-"+options.names[i].match(/\d+$/);
+	       } else {
+		     name += "-"+options.names[i];
+	       }
+	    }
 
 	    var strand = returned.response.coordinates[0].regions[0].strand;
 	    var serviceName = '/regions/sequence.json?';
