@@ -22,6 +22,14 @@ function getUrlVars() {
     for(var i = 0; i < hashes.length; i++)
     {
         hash = hashes[i].split('=');
+        
+        if(hash[1] != undefined ){
+          if(i == hashes.length-1 && hash[1].match(/\#$/)) {
+        	// strip terminating #
+        	hash[1] = hash[1].substring(0, hash[1].length-1);
+          }
+        }
+        
         vars.push(hash[0]);
         vars[hash[0]] = hash[1];
     }
