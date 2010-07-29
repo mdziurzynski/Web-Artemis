@@ -1717,7 +1717,6 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	  
 	  if(feature.type == "exon" || feature.type == "pseudogenic_exon") {
 		  featureToColourList.push(feature.feature);
-
 		  var exons = exonMap[feature.part_of];
 		  if(exons == undefined) {
 			  exons = new Array();
@@ -1742,6 +1741,8 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	  var className = "feat";
 	  if(feature.type == "gene") {
 		  className = "featGene";
+	  } else if(feature.type == "pseudogene") {
+		  className = "featPseudo";
 	  }
 	  featureStr = drawFeature(fDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
 	}
