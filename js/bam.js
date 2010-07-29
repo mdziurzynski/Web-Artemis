@@ -3,7 +3,7 @@ var maxBamHgt = 150;
 
 var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 	var coverage = returned.response.coverage;
-	var max = returned.response.max_count;
+	var max = returned.response.max;
 	var window = options.window;
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
