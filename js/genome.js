@@ -2103,7 +2103,7 @@ function setBamMenu(fDisplay) {
 			bamStr += '<li class="current"><a href="#" id="none">None</a></li>';
 
 		for(var i=0; i<bamFiles.length; i++) {
-			bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].fileID+'</a></li>';
+			bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].meta+'</a></li>';
 		}
 		bamStr += '</ul>';
 		$('#bamFiles').append(bamStr);
