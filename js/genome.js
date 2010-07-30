@@ -245,6 +245,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 					 'width': displayWidth+'px'
 			};
 			$('#featureDisplay'+self.index).css(cssObj);
+			setGraphCss(displayWidth, self.marginTop, margin, self.frameLineHeight);
 			
 			drawAll(self);
 			adjustFeatureDisplayPosition(true, self);
