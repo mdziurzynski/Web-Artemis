@@ -27,7 +27,7 @@ var baseInterval;
 var featureSelected = -1;
 
 var showBam = false;
-var showStopCodons = true;
+var showStopCodons = false;
 var showGC = false;
 var showAG = false;
 var showOther = false;
