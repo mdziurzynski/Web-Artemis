@@ -527,6 +527,40 @@ function addEventHandlers(fDisplay) {
 			drawAll(fDisplay);
 		});
 		
+		$('#gotoGene').click(function(event){
+			
+		    $("div#gotoGene").html("<div id='GO'></div>");
+		    $("div#GO").dialog({ height: 10 ,
+				width:250, position: 'left', title:'Enter Gene Name', show:'fast',
+				buttons: {
+				'Open': function() {
+				    var gotoFeature = $('#gotoFeature').val();
+					$(this).dialog('close');
+
+					var serviceName = '/features/coordinates.json';
+					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+					    var coords = returned.response.coordinates[0];
+
+					    fDisplay.srcFeature = coords.regions[0].region;
+					    fDisplay.leftBase = coords.regions[0].fmin;
+						fDisplay.firstTime = true;
+						returnedSequence = undefined;
+						drawAll(fDisplay);
+					},
+					{ features:gotoFeature }, fDisplay, {  });
+				},
+				Cancel: function() {
+					$(this).dialog('close');
+				}
+			}});
+		    
+		    $("div#GO").html('<input id="gotoFeature" type="text" value=""/>');
+		    $("#open").click(function(event){
+		    	$("div#GO").dialog( "close" );
+		    });
+
+		});
+		
 		$('#bamFiles').click(function(event){
 			var tgt = $(event.target);
 			if($(tgt).attr('id') == "none")
@@ -1774,11 +1808,11 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
 		}
 	
+		if( count < 2 && showFeatureList )
+			  setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
+		
 		if( featureToColourList.length > 0 && 
 			featureToColourList.length < 500 ) {
-			
-			if( count < 2 && showFeatureList )
-			  setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
 			
 			if(!options.append) {
 				var serviceName = '/features/properties.json?';
