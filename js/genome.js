@@ -27,7 +27,6 @@ var baseInterval;
 var featureSelected = -1;
 
 var showBam = false;
-var showStopCodons = false;
 var showGC = false;
 var showAG = false;
 var showOther = false;
@@ -179,6 +178,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.leftBase = leftBase;
 	this.sequence;
 	this.minimumDisplay = false;
+	this.showStopCodons = false;
 	
 	if(showBam) {
 	  this.marginTop = this.marginTop+maxBamHgt;
@@ -257,6 +257,28 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	drawAll(self);
 	getOrganismList(self);
 	addEventHandlers(self);
+	
+   
+	$('#featureDisplays').append('<div id="fDispMenu'+this.index+'"></div>');
+    $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:280px">' +
+    		'<li><a href="#gotoGene" id="gotoGene">Navigator</a></li>'+
+    		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
+    		'<li><a href="#" id="basesOfFeature">Bases of selected features</a></li>'+
+    		'<li><a href="#" id="aaOfFeature">Amino acids of selected features</a></li>'+
+    		'</ul>');
+		
+    
+    $('#sequence'+this.index).contextMenu({
+        menu: 'fDispMenus'+self.index
+    },
+    function(action, el, pos) {
+    	if(action == 'gotoGene') {
+    		navigate(self)
+    	} else if(action == 'stopCodonToggle') {
+    		self.showStopCodons = !self.showStopCodons;
+			drawAll(self);
+    	}
+    });
 }
 
 
@@ -496,9 +518,11 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	
 	cssObj = {
 			'margin-top': thisMarginTop-margin+'px',
-			'width': displayWidth+margin+'px'
+			'width': displayWidth+margin+'px',
+			'height':  (thisFLH*16.9)+'px'
 	};
 	$('#featureDisplay'+featureDisplay.index).css(cssObj);
+	$('#sequence'+featureDisplay.index).css(cssObj);
 
 	if(!drag) {
 		cssObj = {
@@ -523,29 +547,13 @@ function addEventHandlers(fDisplay) {
 	if(fDisplay.index == 1) {
 	
 		$('#stopCodonToggle').click(function(event){
-			showStopCodons = !showStopCodons;
+			fDisplay.showStopCodons = !fDisplay.showStopCodons;
 			drawAll(fDisplay);
 		});
 		
 		$('#gotoGene').click(function(event){
 			
-		    $("div#gotoGene").html("<div id='GO'></div>");
-		    $("div#GO").dialog({ height: 10 ,
-				width:450, position: 'left', title:'Navigator', show:'fast',
-				buttons: {
-				'Open': function() {
-		    	  navigate(fDisplay, this);
-				},
-				Cancel: function() {
-					$(this).dialog('close');
-				}
-			}});
-		    
-		    $("div#GO").html('<input type="radio" name="rdio" value="gene" checked="checked" />Gene Name:<input id="gotoFeature" type="text" value=""/><br />');
-		    $("div#GO").append('<input type="radio" name="rdio" value="base" />Base Number:<input id="gotoBase" type="text" value=""/>');
-		    $("#open").click(function(event){
-		    	$("div#GO").dialog( "close" );
-		    });
+		    navigate(fDisplay);
 
 		});
 		
@@ -834,7 +842,7 @@ function drawAll(fDisplay) {
     	  showSequence = false;
       }
       
-      if(showSequence && (fDisplay.firstTime || showStopCodons || showGC || showAG || showOther)) {
+      if(showSequence && (fDisplay.firstTime || isZoomedIn(fDisplay) || fDisplay.showStopCodons || showGC || showAG || showOther)) {
         getSequence(fDisplay);
       } else {
     	$('#stop_codons'+fDisplay.index).html('');
@@ -1443,38 +1451,54 @@ function appendFeatureToList(feature) {
 			'</tr>');
 }
 
-function navigate(fDisplay, dialogDiv) {
- 	if ($("input[@name='rdio']:checked").val() == 'gene'){
- 		var gotoFeature = $(dialogDiv).find('#gotoFeature').val();
- 		$(dialogDiv).dialog('close');
+function navigate(fDisplay) {
+	$("div#gotoGene").html("<div id='GO'></div>");
+    $("div#GO").dialog({ height: 10 ,
+		width:450, position: 'left', title:'Navigator', show:'fast',
+		buttons: {
+		'Go': function() {
+    	if ($("input[@name='rdio']:checked").val() == 'gene'){
+     		var gotoFeature = $(this).find('#gotoFeature').val();
+     		$(this).dialog('close');
 
- 		var serviceName = '/features/coordinates.json';
- 		handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
- 			var coords = returned.response.coordinates[0];
+     		var serviceName = '/features/coordinates.json';
+     		handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+     			var coords = returned.response.coordinates[0];
 
- 			if(coords == undefined) {
- 				alert(gotoFeature+" not found.");
- 				return;
- 			}
- 			fDisplay.srcFeature = coords.regions[0].region;
- 			fDisplay.leftBase = coords.regions[0].fmin;
- 			fDisplay.firstTime = true;
- 			returnedSequence = undefined;
- 			drawAll(fDisplay);
- 		},
- 		{ features:gotoFeature }, fDisplay, {  });
- 	} else {
- 		// goto base 
- 		var gotoBase = $(dialogDiv).find('#gotoBase').val();
- 		gotoBase = parseInt(gotoBase)-(fDisplay.basesDisplayWidth/2);
- 		debugLog($('#gotoBase').val()+"  "+gotoBase);
- 		if(gotoBase < 1)
- 			gotoBase = 1;
- 		
- 		fDisplay.leftBase = gotoBase;
- 		debugLog(fDisplay.leftBase);
- 		drawAll(fDisplay);
- 	}
+     			if(coords == undefined) {
+     				alert(gotoFeature+" not found.");
+     				return;
+     			}
+     			fDisplay.srcFeature = coords.regions[0].region;
+     			fDisplay.leftBase = coords.regions[0].fmin;
+     			fDisplay.firstTime = true;
+     			returnedSequence = undefined;
+     			drawAll(fDisplay);
+     		},
+     		{ features:gotoFeature }, fDisplay, {  });
+     	} else {
+     		// goto base 
+     		var gotoBase = $(this).find('#gotoBase').val();
+     		gotoBase = parseInt(gotoBase)-(fDisplay.basesDisplayWidth/2);
+     		debugLog($('#gotoBase').val()+"  "+gotoBase);
+     		if(gotoBase < 1)
+     			gotoBase = 1;
+     		
+     		fDisplay.leftBase = gotoBase;
+     		debugLog(fDisplay.leftBase);
+     		drawAll(fDisplay);
+     	}
+		},
+		Cancel: function() {
+			$(this).dialog('close');
+		}
+	}});
+    
+    $("div#GO").html('<input type="radio" name="rdio" value="gene" checked="checked" />Gene Name:<input id="gotoFeature" type="text" value=""/><br />');
+    $("div#GO").append('<input type="radio" name="rdio" value="base" />Base Number:<input id="gotoBase" type="text" value=""/>');
+    $("#open").click(function(event){
+    	$("div#GO").dialog( "close" );
+    });
 }
 
 //
@@ -2129,7 +2153,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	  drawCodons(fDisplay, basePerPixel);
 	  drawAminoAcids(fDisplay, basePerPixel);
 	  returnedSequence = returned;
-	} else if(showStopCodons) {
+	} else if(fDisplay.showStopCodons) {
 	  $('#sequence'+fDisplay.index).html('');
 	  $('#translation'+fDisplay.index).html('');
       drawStopCodons(fDisplay, basePerPixel);
