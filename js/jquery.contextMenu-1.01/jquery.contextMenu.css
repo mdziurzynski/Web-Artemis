@@ -8,12 +8,16 @@
 	padding: 0px;
 	margin: 0px;
 	display: none;
+	font-family:"Courier New",Monospace;
+	font-size: 12px;
+	font-weight:bold;
 }
 
 .contextMenu LI {
 	list-style: none;
 	padding: 0px;
 	margin: 0px;
+	background:		#BDD2FF;
 }
 
 .contextMenu A {
