@@ -556,9 +556,7 @@ function addEventHandlers(fDisplay) {
 		});
 		
 		$('#gotoGene').click(function(event){
-			
 		    navigate(fDisplay);
-
 		});
 		
 		$('#bamFiles').click(function(event){
@@ -1492,9 +1490,10 @@ function navigate(fDisplay) {
      		// goto base 
      		var gotoBase = $(this).find('#gotoBase').val();
      		gotoBase = parseInt(gotoBase)-(fDisplay.basesDisplayWidth/2);
-     		debugLog($('#gotoBase').val()+"  "+gotoBase);
+
      		if(gotoBase < 1)
      			gotoBase = 1;
+     		$(this).dialog('close');
      		
      		fDisplay.leftBase = gotoBase;
      		debugLog(fDisplay.leftBase);
