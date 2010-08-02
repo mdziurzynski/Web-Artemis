@@ -263,8 +263,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:280px">' +
     		'<li><a href="#gotoGene" id="gotoGene">Navigator</a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
-    		'<li><a href="#" id="basesOfFeature">Bases of selected features</a></li>'+
-    		'<li><a href="#" id="aaOfFeature">Amino acids of selected features</a></li>'+
+    		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features</a></li>'+
+    		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features</a></li>'+
     		'</ul>');
 		
     
@@ -277,6 +277,10 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     	} else if(action == 'stopCodonToggle') {
     		self.showStopCodons = !self.showStopCodons;
 			drawAll(self);
+    	} else if(action == 'showBaseOfSelected') {
+    		showBasesOfSelectedFeatures(self);
+    	} else if(action == 'showAAOfSelected') {
+    		showAminoAcidsOfSelectedFeatures(self);
     	}
     });
 }
@@ -579,76 +583,11 @@ function addEventHandlers(fDisplay) {
 		});
 		
 		$('#basesOfFeature').click(function(event){
-			var selectedFeatures = getSelectedFeatureIds();
-			if(selectedFeatures.length == 0)
-				alert("No features selected.");
-			
-	    	for(var i=0; i<selectedFeatures.length; i++) {
-				var name = selectedFeatures[i];
-				if(name.indexOf(":exon") > -1) {
-					var serviceName = '/features/hierarchy.json';
-					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-					    var features = returned.response.hierarchy;
-					    var exonsIds = new Array();
-
-						for(var i=0; i<features.length; i++ ) {
-							var nkids = features[i].children.length;
-							for(var j=0; j<nkids; j++ ) { 
-								var kid = features[i].children[j];
-								var exons = getFeatureExons(kid);
-								for(var k=0; k<exons.length; k++) {
-									if(options.name == exons[k].uniquename) {
-										for(var l=0; l<exons.length; l++)
-											exonsIds.push(exons[l].uniquename);
-									}
-								}
-							}
-						}
-
-						displaySequence(exonsIds, fDisplay, true);
-					},
-					{ features:name, root_on_genes:true }, fDisplay, { name:name });
-					
-				} else {
-					displaySequence([ name ], fDisplay, true);
-				}
-	    	}
+			showBasesOfSelectedFeatures(fDisplay);
 		});
 		
 		$('#aaOfFeature').click(function(event){
-			var selectedFeatures = getSelectedFeatureIds();
-			if(selectedFeatures.length == 0)
-				alert("No features selected.");
-			
-	    	for(var i=0; i<selectedFeatures.length; i++) {
-				var name = selectedFeatures[i];
-				if(name.indexOf(":exon") > -1) {
-					var serviceName = '/features/hierarchy.json';
-					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-					    var features = returned.response.hierarchy;
-					    var exonsIds = new Array();
-
-						for(var i=0; i<features.length; i++ ) {
-							var nkids = features[i].children.length;
-							for(var j=0; j<nkids; j++ ) { 
-								var kid = features[i].children[j];
-								var exons = getFeatureExons(kid);
-								for(var k=0; k<exons.length; k++) {
-									if(options.name == exons[k].uniquename) {
-										for(var l=0; l<exons.length; l++)
-											exonsIds.push(exons[l].uniquename);
-									}
-								}
-							}
-						}
-						displaySequence(exonsIds, fDisplay, false);
-					},
-					{ features:name, root_on_genes:true }, fDisplay, { name:name });
-					
-				} else {
-					displaySequence([ name ], fDisplay, false);
-				}
-	    	}
+			showAminoAcidsOfSelectedFeatures(fDisplay);
 		});
 
 	// graphs
@@ -1449,6 +1388,79 @@ function appendFeatureToList(feature) {
 			'<td>'+feature.end+'</td>'+
 			//'<td id="'+feature.feature+':PROPS"></td>'+
 			'</tr>');
+}
+
+function showAminoAcidsOfSelectedFeatures(fDisplay) {
+	var selectedFeatures = getSelectedFeatureIds();
+	if(selectedFeatures.length == 0)
+		alert("No features selected.");
+	
+	for(var i=0; i<selectedFeatures.length; i++) {
+		var name = selectedFeatures[i];
+		if(name.indexOf(":exon") > -1) {
+			var serviceName = '/features/hierarchy.json';
+			handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+			    var features = returned.response.hierarchy;
+			    var exonsIds = new Array();
+
+				for(var i=0; i<features.length; i++ ) {
+					var nkids = features[i].children.length;
+					for(var j=0; j<nkids; j++ ) { 
+						var kid = features[i].children[j];
+						var exons = getFeatureExons(kid);
+						for(var k=0; k<exons.length; k++) {
+							if(options.name == exons[k].uniquename) {
+								for(var l=0; l<exons.length; l++)
+									exonsIds.push(exons[l].uniquename);
+							}
+						}
+					}
+				}
+				displaySequence(exonsIds, fDisplay, false);
+			},
+			{ features:name, root_on_genes:true }, fDisplay, { name:name });
+			
+		} else {
+			displaySequence([ name ], fDisplay, false);
+		}
+	}
+}
+
+function showBasesOfSelectedFeatures(fDisplay) {
+	var selectedFeatures = getSelectedFeatureIds();
+	if(selectedFeatures.length == 0)
+		alert("No features selected.");
+	
+	for(var i=0; i<selectedFeatures.length; i++) {
+		var name = selectedFeatures[i];
+		if(name.indexOf(":exon") > -1) {
+			var serviceName = '/features/hierarchy.json';
+			handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+			    var features = returned.response.hierarchy;
+			    var exonsIds = new Array();
+
+				for(var i=0; i<features.length; i++ ) {
+					var nkids = features[i].children.length;
+					for(var j=0; j<nkids; j++ ) { 
+						var kid = features[i].children[j];
+						var exons = getFeatureExons(kid);
+						for(var k=0; k<exons.length; k++) {
+							if(options.name == exons[k].uniquename) {
+								for(var l=0; l<exons.length; l++)
+									exonsIds.push(exons[l].uniquename);
+							}
+						}
+					}
+				}
+
+				displaySequence(exonsIds, fDisplay, true);
+			},
+			{ features:name, root_on_genes:true }, fDisplay, { name:name });
+			
+		} else {
+			displaySequence([ name ], fDisplay, true);
+		}
+	}	
 }
 
 function navigate(fDisplay) {
