@@ -531,30 +531,18 @@ function addEventHandlers(fDisplay) {
 			
 		    $("div#gotoGene").html("<div id='GO'></div>");
 		    $("div#GO").dialog({ height: 10 ,
-				width:250, position: 'left', title:'Enter Gene Name', show:'fast',
+				width:450, position: 'left', title:'Navigator', show:'fast',
 				buttons: {
 				'Open': function() {
-				    var gotoFeature = $('#gotoFeature').val();
-					$(this).dialog('close');
-
-					var serviceName = '/features/coordinates.json';
-					handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-					    var coords = returned.response.coordinates[0];
-
-					    fDisplay.srcFeature = coords.regions[0].region;
-					    fDisplay.leftBase = coords.regions[0].fmin;
-						fDisplay.firstTime = true;
-						returnedSequence = undefined;
-						drawAll(fDisplay);
-					},
-					{ features:gotoFeature }, fDisplay, {  });
+		    	  navigate(fDisplay, this);
 				},
 				Cancel: function() {
 					$(this).dialog('close');
 				}
 			}});
 		    
-		    $("div#GO").html('<input id="gotoFeature" type="text" value=""/>');
+		    $("div#GO").html('<input type="radio" name="rdio" value="gene" checked="checked" />Gene Name:<input id="gotoFeature" type="text" value=""/><br />');
+		    $("div#GO").append('<input type="radio" name="rdio" value="base" />Base Number:<input id="gotoBase" type="text" value=""/>');
 		    $("#open").click(function(event){
 		    	$("div#GO").dialog( "close" );
 		    });
@@ -584,6 +572,9 @@ function addEventHandlers(fDisplay) {
 		
 		$('#basesOfFeature').click(function(event){
 			var selectedFeatures = getSelectedFeatureIds();
+			if(selectedFeatures.length == 0)
+				alert("No features selected.");
+			
 	    	for(var i=0; i<selectedFeatures.length; i++) {
 				var name = selectedFeatures[i];
 				if(name.indexOf(":exon") > -1) {
@@ -618,6 +609,9 @@ function addEventHandlers(fDisplay) {
 		
 		$('#aaOfFeature').click(function(event){
 			var selectedFeatures = getSelectedFeatureIds();
+			if(selectedFeatures.length == 0)
+				alert("No features selected.");
+			
 	    	for(var i=0; i<selectedFeatures.length; i++) {
 				var name = selectedFeatures[i];
 				if(name.indexOf(":exon") > -1) {
@@ -1449,6 +1443,40 @@ function appendFeatureToList(feature) {
 			'</tr>');
 }
 
+function navigate(fDisplay, dialogDiv) {
+ 	if ($("input[@name='rdio']:checked").val() == 'gene'){
+ 		var gotoFeature = $(dialogDiv).find('#gotoFeature').val();
+ 		$(dialogDiv).dialog('close');
+
+ 		var serviceName = '/features/coordinates.json';
+ 		handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+ 			var coords = returned.response.coordinates[0];
+
+ 			if(coords == undefined) {
+ 				alert(gotoFeature+" not found.");
+ 				return;
+ 			}
+ 			fDisplay.srcFeature = coords.regions[0].region;
+ 			fDisplay.leftBase = coords.regions[0].fmin;
+ 			fDisplay.firstTime = true;
+ 			returnedSequence = undefined;
+ 			drawAll(fDisplay);
+ 		},
+ 		{ features:gotoFeature }, fDisplay, {  });
+ 	} else {
+ 		// goto base 
+ 		var gotoBase = $(dialogDiv).find('#gotoBase').val();
+ 		gotoBase = parseInt(gotoBase)-(fDisplay.basesDisplayWidth/2);
+ 		debugLog($('#gotoBase').val()+"  "+gotoBase);
+ 		if(gotoBase < 1)
+ 			gotoBase = 1;
+ 		
+ 		fDisplay.leftBase = gotoBase;
+ 		debugLog(fDisplay.leftBase);
+ 		drawAll(fDisplay);
+ 	}
+}
+
 //
 // AJAX functions
 //
@@ -1856,7 +1884,7 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 		if(exon.type == 'pseudogenic_exon')
 			classType = "featPseudo";
 		else
-			classType = "featCDS";		
+			classType = "featCDS";
 		
 		featureStr = drawFeature(fDisplay.leftBase, exon, featureStr, ypos, classType, basePerPixel) ;
 		var canvasTop = $('#featureDisplay'+fDisplay.index).css('margin-top').replace("px", "");
