@@ -259,8 +259,9 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	addEventHandlers(self);
 	
    
-	$('#featureDisplays').append('<div id="fDispMenu'+this.index+'"></div>');
+	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:280px">' +
+    		'<li><a href="#editFeat" id="editFeat">Show Feature(s)</a></li>'+
     		'<li><a href="#gotoGene" id="gotoGene">Navigator</a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features</a></li>'+
@@ -272,14 +273,23 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
         menu: 'fDispMenus'+self.index
     },
     function(action, el, pos) {
-    	if(action == 'gotoGene') {
-    		navigate(self)
-    	} else if(action == 'stopCodonToggle') {
+    	if(action.match(/editFeat/)) {
+    		var selectedFeatures = getSelectedFeatureIds();
+    		if(selectedFeatures.length == 0)
+    			alert("No features selected.");
+    		
+    		for(var i=0; i<selectedFeatures.length; i++) {
+    			showFeature(selectedFeatures[i], self);
+    		}
+    		
+    	} else if(action.match(/gotoGene/)) {
+    		navigate(self);
+    	} else if(action.match(/stopCodonToggle/)) {
     		self.showStopCodons = !self.showStopCodons;
 			drawAll(self);
-    	} else if(action == 'showBaseOfSelected') {
+    	} else if(action.match(/showBaseOfSelected/)) {
     		showBasesOfSelectedFeatures(self);
-    	} else if(action == 'showAAOfSelected') {
+    	} else if(action.match(/showAAOfSelected/)) {
     		showAminoAcidsOfSelectedFeatures(self);
     	}
     });
@@ -637,20 +647,7 @@ function addEventHandlers(fDisplay) {
 		var tgt = $(event.target);
 	    var x = event.pageX+10;
 		var y = event.pageY+10;
-
-	    if( $(tgt).is(".featCDS") ) {
-	    	var currentId = $(tgt).attr('id');  
-	    	loadPopup("CDS<br />"+currentId,x,y);
-	    } else if( $(tgt).is(".featPseudo") ) {
-	    	var currentId = $(tgt).attr('id');  
-	    	loadPopup("Pseudogene<br />"+currentId,x,y);  
-	    } else if( $(tgt).is(".featGene") ) {
-	    	var currentId = $(tgt).attr('id');  
-	    	loadPopup("Gene<br />"+currentId,x,y);  
-	    } else if( $(event.target).is(".feat") ) {
-	    	var currentId = $(tgt).attr('id'); 
-	    	loadPopup(currentId,x,y);
-	    }
+		showPopupFeature(tgt, x, y);
 	 });
 	
 	$('#features'+fDisplay.index).click(function(event){
@@ -706,6 +703,39 @@ function addEventHandlers(fDisplay) {
 
 	//scrolling
 	addScrollEventHandlers(fDisplay);
+}
+
+function showPopupFeature(tgt, x, y) {
+    if( $(tgt).is(".featCDS") ) {
+    	var currentId = $(tgt).attr('id');  
+    	loadPopup("CDS<br />"+currentId,x,y);
+    } else if( $(tgt).is(".featPseudo") ) {
+    	var currentId = $(tgt).attr('id');  
+    	loadPopup("Pseudogene<br />"+currentId,x,y);  
+    } else if( $(tgt).is(".featGene") ) {
+    	var currentId = $(tgt).attr('id');  
+    	loadPopup("Gene<br />"+currentId,x,y);  
+    } else if( $(tgt).is(".feat") ) {
+    	var currentId = $(tgt).attr('id'); 
+    	loadPopup(currentId,x,y);
+    }
+}
+
+function showFeature(featureSelected, featureDisplay) {
+	if(featureSelected.match(/\d+$/g)) {
+		// select exons of same gene
+		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
+    	var selId = "[id*=" + wildcardSearchString +"]";
+    	$(selId).each(function( intIndex ){ $( this ).css('border-width', '2px');});
+	} else {
+		$( "#"+escapeId(featureSelected) ).css('border-width', '2px');
+	}
+	
+	debugLog(featureSelected+" SELECTED ");
+    var serviceName = '/features/hierarchy.json';
+	handleAjaxCalling(serviceName, aShowProperties,
+			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
+
 }
 
 //
@@ -1290,22 +1320,8 @@ function handleFeatureClick(event, featureDisplay) {
 	}
 	
 	featureSelected = $(tgt).attr('id');
-	if(featureSelected.match(/\d+$/g)) {
-		// select exons of same gene
-		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
-    	var selId = "[id*=" + wildcardSearchString +"]";
-    	$(selId).each(function( intIndex ){ $( this ).css('border-width', '2px');});
-	} else {
-		$( "#"+escapeId(featureSelected) ).css('border-width', '2px');
-	}
-	
-	debugLog(featureSelected+" SELECTED ");
-    var serviceName = '/features/hierarchy.json';
-	handleAjaxCalling(serviceName, aShowProperties,
-			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
+	showFeature(featureSelected, featureDisplay);
 }
-
-
 
 function positionFeatureList(featureDisplay) {
 	var ghgt = $('#graph').height();
