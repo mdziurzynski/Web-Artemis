@@ -1593,7 +1593,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
-		width:550, position: 'top', title:name, show:'fast'});
+		width:550, position: 'top', title:name, show:'fast',  close: function(event, ui) { $(this).remove(); } });
 }
 
 var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
