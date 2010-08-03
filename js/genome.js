@@ -1483,6 +1483,7 @@ function navigate(fDisplay) {
 	$("div#properties").html("<div id='GO'></div>");
     $("div#GO").dialog({ height: 150 ,
 		width:450, position: 'left', title:'Navigator', show:'fast',
+		close: function(event, ui) { $(this).remove(); },
 		buttons: {
 		'Go': function() {
     	if ($("input[@name='rdio']:checked").val() == 'gene'){
