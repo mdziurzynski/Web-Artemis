@@ -651,6 +651,21 @@ function addEventHandlers(fDisplay) {
 	 });
 	
 	$('#features'+fDisplay.index).click(function(event){
+		// detect double clicks
+		var diff = 4000;
+		if(last) {
+			diff = event.timeStamp - last;
+		}
+		last = event.timeStamp;
+		
+		if(!event.shiftKey && diff < 1000) {
+			// double click
+			debugLog("DOUBLE CLICK ");
+			var tgt = $(event.target);
+			centerOnFeature($(tgt).attr('id'), fDisplay);
+			return;
+		}
+		
 		handleFeatureClick(event, fDisplay);
 	 });
 	
@@ -1479,6 +1494,29 @@ function showBasesOfSelectedFeatures(fDisplay) {
 	}	
 }
 
+function centerOnFeature(featureSelected, fDisplay) {
+	var serviceName = '/features/coordinates.json';
+	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+			var coords = returned.response.coordinates[0];
+
+			if(coords == undefined) {
+				alert(gotoFeature+" not found.");
+				return;
+			}
+			var base = coords.regions[0].fmin-(fDisplay.basesDisplayWidth/2);
+			
+			if(base < 1)
+				base = 1;
+			
+			fDisplay.srcFeature = coords.regions[0].region;
+			fDisplay.leftBase = base;
+			fDisplay.firstTime = true;
+			returnedSequence = undefined;
+			drawAll(fDisplay);
+	},
+	{ features:featureSelected }, fDisplay, {  });
+}
+
 function navigate(fDisplay) {
 	$("div#properties").html("<div id='GO'></div>");
     $("div#GO").dialog({ height: 150 ,
@@ -1489,22 +1527,7 @@ function navigate(fDisplay) {
     	if ($("input[@name='rdio']:checked").val() == 'gene'){
      		var gotoFeature = $(this).find('#gotoFeature').val();
      		$(this).dialog('close');
-
-     		var serviceName = '/features/coordinates.json';
-     		handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-     			var coords = returned.response.coordinates[0];
-
-     			if(coords == undefined) {
-     				alert(gotoFeature+" not found.");
-     				return;
-     			}
-     			fDisplay.srcFeature = coords.regions[0].region;
-     			fDisplay.leftBase = coords.regions[0].fmin;
-     			fDisplay.firstTime = true;
-     			returnedSequence = undefined;
-     			drawAll(fDisplay);
-     		},
-     		{ features:gotoFeature }, fDisplay, {  });
+     		centerOnFeature(gotoFeature, fDisplay);
      	} else {
      		// goto base 
      		var gotoBase = $(this).find('#gotoBase').val();
