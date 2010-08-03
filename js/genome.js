@@ -33,6 +33,7 @@ var showOther = false;
 var compare = false;
 var showFeatureList = true;
 
+var clicks = 0;
 var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
@@ -651,22 +652,20 @@ function addEventHandlers(fDisplay) {
 	 });
 	
 	$('#features'+fDisplay.index).click(function(event){
-		// detect double clicks
-		var diff = 4000;
-		if(last) {
-			diff = event.timeStamp - last;
-		}
-		last = event.timeStamp;
-		
-		if(!event.shiftKey && diff < 1000) {
-			// double click
-			debugLog("DOUBLE CLICK ");
-			var tgt = $(event.target);
-			centerOnFeature($(tgt).attr('id'), fDisplay);
-			return;
-		}
-		
-		handleFeatureClick(event, fDisplay);
+		clicks++;
+	      if (clicks == 1) {
+	        setTimeout(function(){
+	          if(clicks == 1) {
+	        	debugLog("SINGLE CLICK ");
+	        	handleFeatureClick(event, fDisplay);
+	          } else {
+	        	debugLog("DOUBLE CLICK ");
+	        	var tgt = $(event.target);
+	  			centerOnFeature($(tgt).attr('id'), fDisplay);
+	          }
+	          clicks = 0;
+	        }, 500);
+	      }
 	 });
 	
 	$('#features'+fDisplay.index).mouseout(function(event){
@@ -736,7 +735,7 @@ function showPopupFeature(tgt, x, y) {
     }
 }
 
-function showFeature(featureSelected, featureDisplay) {
+function selectFeature(featureSelected) {
 	if(featureSelected.match(/\d+$/g)) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
@@ -745,7 +744,10 @@ function showFeature(featureSelected, featureDisplay) {
 	} else {
 		$( "#"+escapeId(featureSelected) ).css('border-width', '2px');
 	}
-	
+}
+
+function showFeature(featureSelected, featureDisplay) {
+	selectFeature(featureSelected);
 	debugLog(featureSelected+" SELECTED ");
     var serviceName = '/features/hierarchy.json';
 	handleAjaxCalling(serviceName, aShowProperties,
