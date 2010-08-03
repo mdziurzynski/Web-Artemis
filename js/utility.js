@@ -45,7 +45,8 @@ function getSelectedFeatureIds() {
 	for(var i=0; i<IDs.length; i++) {
 		if($("#"+escapeId(IDs[i])).css('borderLeftWidth') == '2px') {
 
-			if( $("#"+escapeId(IDs[i])).attr('class') == 'featCDS' ) {
+			if( $("#"+escapeId(IDs[i])).attr('class') == 'featCDS' ||
+				$("#"+escapeId(IDs[i])).attr('class') == 'featPseudo' ) {
 				// if CDS of same gene ignore
 				if(IDs[i].match(/exon:\d+$/)) {
 					var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
