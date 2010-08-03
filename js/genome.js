@@ -1056,11 +1056,13 @@ function drawFeatures(featureDisplay) {
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
 	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'gene', 'pseudogene'];
+	var currentTime = new Date().getTime();
+	
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:featureDisplay.srcFeature, 
 		      start:featureDisplay.leftBase, end:end, 
 		      exclude:excludes }, 
-			featureDisplay, { minDisplay:featureDisplay.minimumDisplay });
+			featureDisplay, { minDisplay:featureDisplay.minimumDisplay, startTime:currentTime });
 }
 
 function getFeatureExons(transcript) {
@@ -1885,6 +1887,16 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			}
 		}
 	}
+	
+	if(options.startTime) {
+	  var currentTime = new Date().getTime() - options.startTime;
+	  
+	  if(timeoutTime < currentTime-50 || timeoutTime > currentTime+50) {
+		  timeoutTime = currentTime;
+		  debugLog("ADJUST SCROLL TIMEOUT :: "+currentTime+"  ::  "+options.startTime);
+	  }
+	}
+	
 	return;
 };
 
