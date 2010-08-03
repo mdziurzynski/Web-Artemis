@@ -37,17 +37,41 @@ function getUrlVars() {
 }
 
 function getSelectedFeatureIds() {
-	var IDs = $('.feat, .featCDS, .featGene, .featGreen')  // find ID's
+	var IDs = $('.feat, .featCDS, .featGene, .featGreen, .featPseudo')  // find ID's
 	  .map(function() { return this.id; }) // convert to set of IDs
 	  .get(); // convert to instance of Array (optional)
 	
 	var selectedFeatureIds = new Array();
 	for(var i=0; i<IDs.length; i++) {
-		if($("#"+escapeId(IDs[i])).css('borderLeftWidth') == '2px')
+		if($("#"+escapeId(IDs[i])).css('borderLeftWidth') == '2px') {
+
+			if( $("#"+escapeId(IDs[i])).attr('class') == 'featCDS' ) {
+				// if CDS of same gene ignore
+				if(IDs[i].match(/exon:\d+$/)) {
+					var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
+					if(containsId(selectedFeatureIds, wildcardSearchString)) {
+						debugLog(wildcardSearchString+" FOUND ALREADY");
+						continue;
+					}
+				}
+			}
+
 			selectedFeatureIds.push(IDs[i]);
+		}
 	}
 	return selectedFeatureIds;
 }
+
+function containsId(arr, obj){
+	for(var i = 0; i < arr.length; i++) {
+	  
+	  if(arr[i].indexOf(obj) > -1){
+	     return true;
+	  }
+	}
+	return false;
+}
+
 
 function sortFeatures(a, b){
 	//Compare "a" and "b" in some fashion, and return -1, 0, or 1
