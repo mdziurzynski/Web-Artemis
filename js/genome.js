@@ -1480,8 +1480,8 @@ function showBasesOfSelectedFeatures(fDisplay) {
 }
 
 function navigate(fDisplay) {
-	$("div#gotoGene").html("<div id='GO'></div>");
-    $("div#GO").dialog({ height: 10 ,
+	$("div#properties").html("<div id='GO'></div>");
+    $("div#GO").dialog({ height: 150 ,
 		width:450, position: 'left', title:'Navigator', show:'fast',
 		buttons: {
 		'Go': function() {
