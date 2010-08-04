@@ -48,7 +48,7 @@ function zoomOnce(fDisplay, scrollbar) {
     var centerBase = fDisplay.leftBase + (fDisplay.basesDisplayWidth/2);   
     fDisplay.basesDisplayWidth = basesInView;
     var newLeftBase = Math.round(centerBase - (basesInView/2));
-    if(newLeftBase > 0) {
+    if(newLeftBase > 1 && fDisplay.leftBase > 1) {
     	fDisplay.leftBase = newLeftBase;
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     } else if( newLeftBase > fDisplay.sequenceLength-basesInView/2 ) {
