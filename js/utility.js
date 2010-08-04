@@ -1,3 +1,40 @@
+$.fn.single_double_click = function(single_click_callback, double_click_callback, fDisplay, timeout) {
+return this.each(function() {
+    var clicks = 0, self = this;
+    if ($.browser.msie) { // ie triggers dblclick instead of click if they are fast
+        $(this).bind("dblclick", function(event) {
+            clicks = 2;
+            double_click_callback.call(null, fDisplay, $(event.target).attr('id'));
+        });
+        $(this).bind("click", function(event) {
+            setTimeout(function() {
+                if (clicks != 2) {
+                    single_click_callback.call(null, fDisplay, event);
+                }
+                clicks = 0;
+            }, timeout || 300);
+        });
+    } else {
+        $(this).bind("click", function(event) {
+            clicks++;
+            if (clicks == 1) {
+                setTimeout(function() {
+                    if (clicks == 1) {
+                        single_click_callback.call(null, fDisplay, event);
+                    } else {
+                    	debugLog($(event.target).attr('id'));
+                    	debugLog(fDisplay);
+                        double_click_callback.call(null, fDisplay, $(event.target).attr('id'));
+                    }
+                    clicks = 0;
+                }, timeout || 300);
+            }
+        });
+    }
+});
+}
+
+
 function drawString(ctx, text, posX, posY, textColor, rotation, font, fontSize) {
 	var lines = text.split("\n");
 	if (!rotation) rotation = 0;
