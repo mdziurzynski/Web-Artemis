@@ -610,6 +610,16 @@ function addEventHandlers(fDisplay) {
 		$('#aaOfFeature').click(function(event){
 			showAminoAcidsOfSelectedFeatures(fDisplay);
 		});
+		
+		$('#fProperties').click(function(event){
+			var selectedFeatures = getSelectedFeatureIds();
+    		if(selectedFeatures.length == 0)
+    			alert("No features selected.");
+    		
+    		for(var i=0; i<selectedFeatures.length; i++) {
+    			showFeature(selectedFeatures[i], fDisplay);
+    		}
+		});
 
 	// graphs
 		$('#gcGraphToggle').click(function(event){
