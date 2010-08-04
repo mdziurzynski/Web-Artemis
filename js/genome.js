@@ -262,7 +262,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
    
 	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:280px">' +
-    		'<li><a href="#editFeat" id="editFeat">Show Feature(s)</a></li>'+
+    		'<li><a href="#editFeat" id="editFeat">Show feature properties</a></li>'+
     		'<li><a href="#gotoGene" id="gotoGene">Navigator</a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features</a></li>'+
@@ -479,6 +479,18 @@ function drawComparison(featureDisplay, clickX, clickY, clearSelections) {
 	}
 }
 
+function hideEndOfSequence(fDisplay) {
+	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel  = baseInterval/screenInterval;
+	var xpos = margin+((fDisplay.sequenceLength - fDisplay.leftBase + 1 )/basePerPixel);
+	var ypos = margin;
+	var width = (margin+(fDisplay.basesDisplayWidth/basePerPixel))-xpos;
+	var height = fDisplay.frameLineHeight*7;
+	$("#featureDisplay"+fDisplay.index).fillRect(xpos,ypos,width,height, {color: "#FFFFFF"});
+	ypos += fDisplay.frameLineHeight*9;
+	$("#featureDisplay"+fDisplay.index).fillRect(xpos,ypos,width,height, {color: "#FFFFFF"});
+}
+
 //
 function adjustFeatureDisplayPosition(drag, featureDisplay) {
 	var thisMarginTop = featureDisplay.marginTop;
@@ -652,7 +664,6 @@ function addEventHandlers(fDisplay) {
 	 });
 	
 	$('#features'+fDisplay.index).single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
-
 	$('#features'+fDisplay.index).mouseout(function(event){
 		disablePopup();
 	 });
@@ -732,12 +743,10 @@ function selectFeature(featureSelected) {
 }
 
 function showFeature(featureSelected, featureDisplay) {
-	selectFeature(featureSelected);
 	debugLog(featureSelected+" SELECTED ");
     var serviceName = '/features/hierarchy.json';
 	handleAjaxCalling(serviceName, aShowProperties,
 			{ features:featureSelected, root_on_genes:true }, featureDisplay, { featureSelected:featureSelected });
-
 }
 
 //
@@ -824,6 +833,10 @@ function drawAll(fDisplay) {
 	  
 	  if(compare) {
 		drawComparison(fDisplay);
+	  }
+	  
+	  if(fDisplay.leftBase+fDisplay.basesDisplayWidth > fDisplay.sequenceLength) {
+		  hideEndOfSequence(fDisplay);
 	  }
 }
 
@@ -1315,7 +1328,6 @@ function getSrcFeatureList(organism_id, featureDisplay, translation_table){
 }
 
 function handleFeatureClick(fDisplay, event) {
-	//var tgt = $(event.target);
 	//debugLog(arguments);
 
 	if (! event.shiftKey ) {
@@ -1323,7 +1335,8 @@ function handleFeatureClick(fDisplay, event) {
 	}
 	
 	featureSelected = $(event.target).attr('id');
-	showFeature(featureSelected, fDisplay);
+	selectFeature(featureSelected);
+	//showFeature(featureSelected, fDisplay);
 }
 
 function positionFeatureList(featureDisplay) {
