@@ -1510,7 +1510,7 @@ function centerOnFeature(fDisplay, featureSelected) {
 				alert(gotoFeature+" not found.");
 				return;
 			}
-			var base = coords.regions[0].fmin-(fDisplay.basesDisplayWidth/2);
+			var base = coords.regions[0].fmin-Math.round(fDisplay.basesDisplayWidth/2);
 			
 			if(base < 1)
 				base = 1;
