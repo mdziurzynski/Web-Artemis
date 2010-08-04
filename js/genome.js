@@ -1939,8 +1939,8 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	if(options.startTime) {
 	  var currentTime = new Date().getTime() - options.startTime;
 	  
-	  if(timeoutTime < currentTime-50 || timeoutTime > currentTime+50) {
-		  timeoutTime = currentTime;
+	  if(scrollTimeoutTime < currentTime-50 || scrollTimeoutTime > currentTime+50) {
+		  scrollTimeoutTime = currentTime;
 		  debugLog("ADJUST SCROLL TIMEOUT :: "+currentTime+"  ::  "+options.startTime);
 	  }
 	}
