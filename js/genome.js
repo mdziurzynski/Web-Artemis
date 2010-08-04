@@ -1581,6 +1581,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
     
     var featureStr = "&features="+options.featureSelected;
     var name = options.featureSelected;
+    var primary_name;
 	var featurePropertyList = new Array();
 	featurePropertyList.push(options.featureSelected);
 
@@ -1588,6 +1589,9 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 		var feature = features[i];
 		var nkids = feature.children.length;
 
+		if(feature.name)
+		  primary_name = feature.name;
+	    
 		if(nkids > 0) {
 			for(var j=0; j<nkids; j++ ) { 
 				var kid = feature.children[j];
@@ -1634,6 +1638,11 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 			featureStr, featureDisplay, {});
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
+    
+    if(primary_name) {
+		name += " :: "+primary_name;
+    }
+    
     $("div#DISP"+escapeId(featureSelected)).dialog({ height: 450 ,
 		width:550, position: 'top', title:name, show:'fast',  close: function(event, ui) { $(this).remove(); } });
 }
