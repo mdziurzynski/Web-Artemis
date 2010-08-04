@@ -716,18 +716,22 @@ function addEventHandlers(fDisplay) {
 }
 
 function showPopupFeature(tgt, x, y) {
+	var msg = "<p><i>right click  - show options<br />";
+	msg +=          "single click - select<br />";
+	msg +=          "double click - center</i></p>";
+	
     if( $(tgt).is(".featCDS") ) {
     	var currentId = $(tgt).attr('id');  
-    	loadPopup("CDS<br />"+currentId,x,y);
+    	loadPopup("CDS<br />"+currentId+msg,x,y);
     } else if( $(tgt).is(".featPseudo") ) {
     	var currentId = $(tgt).attr('id');  
-    	loadPopup("Pseudogene<br />"+currentId,x,y);  
+    	loadPopup("Pseudogene<br />"+currentId+msg,x,y);  
     } else if( $(tgt).is(".featGene") ) {
     	var currentId = $(tgt).attr('id');  
-    	loadPopup("Gene<br />"+currentId,x,y);  
+    	loadPopup("Gene<br />"+currentId+msg,x,y);  
     } else if( $(tgt).is(".feat") ) {
     	var currentId = $(tgt).attr('id'); 
-    	loadPopup(currentId,x,y);
+    	loadPopup(currentId+msg,x,y);
     }
 }
 
