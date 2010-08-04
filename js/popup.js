@@ -7,14 +7,14 @@ function loadPopup(txt,x,y){
  positionPopup(x,y);
 //loads popup only if it is disabled  
  $("#popupTxt").html(txt);
- $("#popupContact").fadeIn("slow");
+ $("#popupContact").fadeIn("fast");
 }
 
 //disabling popup with jQuery magic!  
 function disablePopup(){  
   //disables popup only if it is enabled  
-  $("#backgroundPopup").fadeOut("slow");  
-  $("#popupContact").fadeOut("slow");  
+  $("#backgroundPopup").fadeOut("fast");  
+  $("#popupContact").fadeOut("fast");  
 }  
 
 //centering popup  
