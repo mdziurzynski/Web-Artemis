@@ -651,23 +651,8 @@ function addEventHandlers(fDisplay) {
 		showPopupFeature(tgt, x, y);
 	 });
 	
-	$('#features'+fDisplay.index).click(function(event){
-		clicks++;
-	      if (clicks == 1) {
-	        setTimeout(function(){
-	          if(clicks == 1) {
-	        	debugLog("SINGLE CLICK ");
-	        	handleFeatureClick(event, fDisplay);
-	          } else {
-	        	debugLog("DOUBLE CLICK ");
-	        	var tgt = $(event.target);
-	  			centerOnFeature($(tgt).attr('id'), fDisplay);
-	          }
-	          clicks = 0;
-	        }, 500);
-	      }
-	 });
-	
+	$('#features'+fDisplay.index).single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
+
 	$('#features'+fDisplay.index).mouseout(function(event){
 		disablePopup();
 	 });
@@ -1329,15 +1314,16 @@ function getSrcFeatureList(organism_id, featureDisplay, translation_table){
 			{ organism:'org:'+organism_id }, featureDisplay, { translation_table:translation_table });
 }
 
-function handleFeatureClick(event, featureDisplay) {
-	var tgt = $(event.target);
-	
+function handleFeatureClick(fDisplay, event) {
+	//var tgt = $(event.target);
+	//debugLog(arguments);
+
 	if (! event.shiftKey ) {
 		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('border-width', '1px');
 	}
 	
-	featureSelected = $(tgt).attr('id');
-	showFeature(featureSelected, featureDisplay);
+	featureSelected = $(event.target).attr('id');
+	showFeature(featureSelected, fDisplay);
 }
 
 function positionFeatureList(featureDisplay) {
@@ -1496,7 +1482,9 @@ function showBasesOfSelectedFeatures(fDisplay) {
 	}	
 }
 
-function centerOnFeature(featureSelected, fDisplay) {
+function centerOnFeature(fDisplay, featureSelected) {
+	
+	//debugLog(arguments);
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 			var coords = returned.response.coordinates[0];
@@ -1529,7 +1517,7 @@ function navigate(fDisplay) {
     	if ($("input[@name='rdio']:checked").val() == 'gene'){
      		var gotoFeature = $(this).find('#gotoFeature').val();
      		$(this).dialog('close');
-     		centerOnFeature(gotoFeature, fDisplay);
+     		centerOnFeature(fDisplay, gotoFeature);
      	} else {
      		// goto base 
      		var gotoBase = $(this).find('#gotoBase').val();
