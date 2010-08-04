@@ -2,7 +2,7 @@
 // SCROLLING
 //
 var scrolling = 0;
-var timeoutTime = 160; // ms
+var scrollTimeoutTime = 160; // ms
 var lastLeftBase = -1;
 
 function scroll(direction, fDisplay) {
@@ -18,12 +18,12 @@ function scroll(direction, fDisplay) {
             	// scroll left
             	leftBase = Math.round(Math.floor(
             			leftBase - $('#slider'+fDisplay.index).slider('option', 'step')/4));
-            	if(leftBase == 0) {
+            	if(leftBase < 1) {
             		leftBase = 1;
             	}
             }
             
-        	if(leftBase < 1 || leftBase > fDisplay.sequenceLength) {
+        	if(leftBase < 1 || leftBase > fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2) {
         		return false;
         	}
         	
@@ -32,7 +32,7 @@ function scroll(direction, fDisplay) {
         	$('#slider'+fDisplay.index).slider('option', 'value', leftBase);
 
         	//var code2run = "scroll("+direction+"," +"featureDisplay)";
-            setTimeout(function() { scroll(direction, fDisplay); }, timeoutTime);
+            setTimeout(function() { scroll(direction, fDisplay); }, scrollTimeoutTime);
 
     }
     return false;
