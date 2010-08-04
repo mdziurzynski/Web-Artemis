@@ -1545,6 +1545,7 @@ function navigate(fDisplay) {
      		$(this).dialog('close');
      		
      		fDisplay.leftBase = gotoBase;
+     		$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
      		debugLog(fDisplay.leftBase);
      		drawAll(fDisplay);
      	}
