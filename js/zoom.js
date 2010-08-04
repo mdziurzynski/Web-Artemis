@@ -44,8 +44,18 @@ function zoomOnce(fDisplay, scrollbar) {
     } else if(basesInView < 1000) {
     	  showStopCodons = true;
     }
-    	  
+    
+    var centerBase = fDisplay.leftBase + (fDisplay.basesDisplayWidth/2);   
     fDisplay.basesDisplayWidth = basesInView;
+    var newLeftBase = Math.round(centerBase - (basesInView/2));
+    if(newLeftBase > 0) {
+    	fDisplay.leftBase = newLeftBase;
+    	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
+    } else if( newLeftBase > fDisplay.sequenceLength-basesInView/2 ) {
+    	newLeftBase = Math.round(fDisplay.sequenceLength-basesInView/2);
+    	fDisplay.leftBase = newLeftBase;
+    	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
+    }
     drawAll(fDisplay);
     	  
     // update .ui-slider-horizontal .ui-slider-handle
