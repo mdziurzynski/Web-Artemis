@@ -267,7 +267,6 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	getOrganismList(self);
 	addEventHandlers(self);
 	
-   
 	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:280px">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties</a></li>'+
@@ -690,7 +689,7 @@ function addEventHandlers(fDisplay) {
 	if(count == 2) {
 		
 		// remove top menu
-		$('#menuHeader').html('');
+		$('.sf-menu').html('');
 		//
 		var last;
 		$('#comparisons').click(function(event){
