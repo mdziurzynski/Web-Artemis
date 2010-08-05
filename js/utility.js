@@ -35,6 +35,7 @@ return this.each(function() {
 }
 
 
+
 function drawString(ctx, text, posX, posY, textColor, rotation, font, fontSize) {
 	var lines = text.split("\n");
 	if (!rotation) rotation = 0;
@@ -73,6 +74,39 @@ function getUrlVars() {
     return vars;
 }
 
+function getSelectedFeatureElements() {
+	var elmts = $('.feat, .featCDS, .featGene, .featGreen, .featPseudo')  // find ID's
+	  .map(function() { return this; }) // get element
+	  .get(); // convert to instance of Array (optional)
+	
+	var selectedElmts = new Array();
+	for(var i=0; i<elmts.length; i++) {
+
+		if( $(elmts[i]).css('borderLeftWidth') == '2px') {
+
+			if( $(elmts[i]).attr('class') == 'featCDS' ||
+				$(elmts[i]).attr('class') == 'featPseudo' ) {
+				// if CDS of same gene ignore
+				if(elmts[i].id.match(/exon:\d+$/)) {
+					var wildcardSearchString = elmts[i].id.replace(/:\d+$/g,'');
+					if(containsElement(selectedElmts, wildcardSearchString)) {
+						debugLog(wildcardSearchString+" FOUND ALREADY");
+						continue;
+					}
+				}
+			}
+
+			selectedElmts.push(elmts[i]);
+		}
+	}
+	return selectedElmts;
+}
+
+function findTrackByElement(elem) {
+	var parent = $(elem).parent();
+	return parent.attr('id').replace(/^features\d+_/,'');
+}
+
 function getSelectedFeatureIds() {
 	var IDs = $('.feat, .featCDS, .featGene, .featGreen, .featPseudo')  // find ID's
 	  .map(function() { return this.id; }) // convert to set of IDs
@@ -86,7 +120,8 @@ function getSelectedFeatureIds() {
 				$("#"+escapeId(IDs[i])).attr('class') == 'featPseudo' ) {
 				// if CDS of same gene ignore
 				if(IDs[i].match(/exon:\d+$/)) {
-					var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
+					var wildcardSearchString = IDs[i].replace(/:\d+$/g,'');
+					
 					if(containsId(selectedFeatureIds, wildcardSearchString)) {
 						debugLog(wildcardSearchString+" FOUND ALREADY");
 						continue;
@@ -104,6 +139,16 @@ function containsId(arr, obj){
 	for(var i = 0; i < arr.length; i++) {
 	  
 	  if(arr[i].indexOf(obj) > -1){
+	     return true;
+	  }
+	}
+	return false;
+}
+
+function containsElement(arr, obj){
+	for(var i = 0; i < arr.length; i++) {
+	  
+	  if(arr[i].id.indexOf(obj) > -1){
 	     return true;
 	  }
 	}
