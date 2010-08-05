@@ -145,7 +145,8 @@ $(document).ready(function() {
 			hgt = parseInt(hgt);
 		}
 		title = 'Pf3D7_01';
-		new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
+		var obj = new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
+		featureDisplayObjs[0] = obj;
 	}
 	
 	$('ul.sf-menu').superfish({ 
@@ -181,6 +182,13 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.minimumDisplay = false;
 	this.showStopCodons = false;
 	
+	// add tracks
+	this.tracks = new Array();
+	this.trackIndex = "track1";
+	this.tracks.push(this.trackIndex);
+	this.showFeatureFn = new Object();
+	this.showFeatureFn[this.trackIndex] = showFeature;
+	
 	if(showBam) {
 	  this.marginTop = this.marginTop+maxBamHgt;
 	}
@@ -191,7 +199,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#translation').append('<div id="translation'+this.index+'"></div>');
 	$("#slider_vertical_container").append('<div id="slider_vertical_container'+this.index+'"></div>');
 	$("#slider_container").append('<div id="slider'+this.index+'"></div>');
-	$('#features').append('<div id="features'+this.index+'"></div>');
+	$('#features').append('<div id="features'+this.index+'_'+this.trackIndex+'"></div>');
 	$('#ticks').append('<div id="ticks'+this.index+'"></div>');
 	
 	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
@@ -275,12 +283,13 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     },
     function(action, el, pos) {
     	if(action.match(/editFeat/)) {
-    		var selectedFeatures = getSelectedFeatureIds();
+    		var selectedFeatures = getSelectedFeatureElements();
     		if(selectedFeatures.length == 0)
     			alert("No features selected.");
-    		
+
     		for(var i=0; i<selectedFeatures.length; i++) {
-    			showFeature(selectedFeatures[i], self);
+    			var thisTrack = findTrackByElement(selectedFeatures[i]);
+    			self.showFeatureFn[thisTrack].call(null, selectedFeatures[i].id, self);
     		}
     		
     	} else if(action.match(/gotoGene/)) {
@@ -295,7 +304,6 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     	}
     });
 }
-
 
 function drawAndScroll(fDisplay, lastLeftBase) {
 	var diff = fDisplay.leftBase - lastLeftBase;
@@ -612,12 +620,13 @@ function addEventHandlers(fDisplay) {
 		});
 		
 		$('#fProperties').click(function(event){
-			var selectedFeatures = getSelectedFeatureIds();
+			var selectedFeatures = getSelectedFeatureElements();
     		if(selectedFeatures.length == 0)
     			alert("No features selected.");
     		
     		for(var i=0; i<selectedFeatures.length; i++) {
-    			showFeature(selectedFeatures[i], fDisplay);
+    			var thisTrack = findTrackByElement(selectedFeatures[i]);
+    			fDisplay.showFeatureFn[thisTrack].call(null, selectedFeatures[i].id, self);
     		}
 		});
 
@@ -665,18 +674,12 @@ function addEventHandlers(fDisplay) {
 		});
 	}
 	
-	// popup
-	$('#features'+fDisplay.index).mouseenter(function(event){
-		var tgt = $(event.target);
-	    var x = event.pageX+10;
-		var y = event.pageY+10;
-		showPopupFeature(tgt, x, y);
-	 });
 	
-	$('#features'+fDisplay.index).single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
-	$('#features'+fDisplay.index).mouseout(function(event){
-		disablePopup();
-	 });
+	$('#features'+fDisplay.index+'_track1').single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
+	
+	// popup
+	$('#features'+fDisplay.index+'_track1').popup_enter_out(showPopupFeature, disablePopup);
+	
 	
 	$('#translation'+fDisplay.index).click(function(event){
 		var aminoacid = $(event.target).attr('id');
@@ -725,7 +728,12 @@ function addEventHandlers(fDisplay) {
 	addScrollEventHandlers(fDisplay);
 }
 
-function showPopupFeature(tgt, x, y) {
+function showPopupFeature(event) {
+	
+	var tgt = $(event.target);
+	var x = event.pageX+10;
+	var y = event.pageY+10;
+	
 	var msg = "<p><i>right click  - show options<br />";
 	msg +=          "single click - select<br />";
 	msg +=          "double click - center</i></p>";
@@ -1920,9 +1928,9 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	}
 	
 	if(options.append) {
-		$('#features'+fDisplay.index).append(featureStr);
+		$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
 	} else {
-		$('#features'+fDisplay.index).html(featureStr);
+		$('#features'+fDisplay.index+'_track1').html(featureStr);
 	}
 
 	if(!options.minDisplay) {
@@ -2297,7 +2305,7 @@ function testAddFeatures() {
 	var jsonUrl  = 'http://www.genedb.org/testservice'; 
 	var service1 = "/regions/locations.json?&region=Pf3D7_06&start=1&end=6627";
 	var service2 = "/features/properties.json?";
-	
+
 	// Get features and their locations
 	$.ajax({
 		  url: jsonUrl+service1,
@@ -2317,7 +2325,9 @@ function testAddFeatures() {
 			  data: 'us='+featureToColourList,
 			  dataType: 'jsonp',
 			  success: function(returned2) {	
-			addFeatures(featureDisplayObjs[0].srcFeature, returned1);
+			addFeatures(featureDisplayObjs[0].srcFeature, returned1, "NEW_TRACK", handleFeatureClick, centerOnFeature, showPopupFeature, disablePopup, function () {
+				  alert("Feature Properties");
+				});
 			aFeaturePropColours(featureDisplayObjs[index], returned2, {});
 	  	} } );
 	} } );
@@ -2326,11 +2336,28 @@ function testAddFeatures() {
 //
 //Add extra features on to the feature display and feature list
 //
-function addFeatures(seqName, jsonFeatureObj) {
+// seqName - name of chromosome/contig 
+// jsonFeatureObj - json representation of features
+// trackIndex - index/name of new track
+// fnSingle/fnDouble - single, double click callbacks
+// mouseEnter/mouseOut - mouse enter, out callbacks
+function addFeatures(seqName, jsonFeatureObj, trackIndex, fnSingle, fnDouble, mouseEnter, mouseOut, fnFeatureProps) {
 	for(index=0;index<featureDisplayObjs.length; index++) {
 		if(featureDisplayObjs[index].srcFeature == seqName) {
-			aFeatureFlatten(featureDisplayObjs[index], jsonFeatureObj,
-					{append:true, minDisplay:featureDisplayObjs[index].minimumDisplay});
+			var fDisplay = featureDisplayObjs[index];
+			if( $.inArray(trackIndex, fDisplay.tracks) == -1 ) {
+				fDisplay.tracks.push(trackIndex);
+				$('#features').append('<div id="features'+
+						fDisplay.index+'_'+trackIndex+'"></div>');
+			}
+			fDisplay.trackIndex = trackIndex;
+			aFeatureFlatten(fDisplay, jsonFeatureObj,
+					{append:true, minDisplay:fDisplay.minimumDisplay});
+			
+			$('#features'+fDisplay.index+'_'+trackIndex).single_double_click(fnSingle, centerOnFeature, fDisplay, 500);
+			$('#features'+fDisplay.index+'_'+trackIndex).popup_enter_out(mouseEnter, mouseOut);
+			
+			fDisplay.showFeatureFn[trackIndex] = fnFeatureProps;
 			break;
 		}
 	}
