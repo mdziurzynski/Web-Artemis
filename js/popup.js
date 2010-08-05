@@ -2,6 +2,16 @@
 //0 means disabled; 1 means enabled;  
 var popupStatus = 0;
 
+$.fn.popup_enter_out = function(enter_callback, out_callback) {
+	    $(this).bind("mouseenter", function(event) {
+	    	enter_callback.call(null, event);
+        });
+	    
+	    $(this).bind("mouseout", function(event) {
+	    	out_callback.call(null, event);
+	    });
+}
+
 //loading popup with jQuery magic!  
 function loadPopup(txt,x,y){
  positionPopup(x,y);
@@ -33,3 +43,4 @@ $(document).keypress(function(e){
     disablePopup();
   }
 });
+
