@@ -2,7 +2,8 @@
 // ZOOMING
 //
 var zooming = 0;
-var zoomtimeoutTime = 450; // ms
+var ztimeoutTime = 450; // ms
+var zselectedFeatures = [];
 
 function setScrollHandle(scrollbar, fDisplay) {	
 	var slider = $('#slider'+fDisplay.index);
@@ -30,13 +31,13 @@ function zoom(fDisplay, scrollbar, direction) {
 
 	    $('#slider_vertical_container'+fDisplay.index).slider( "option", "value", value );
 	    
-    	zoomOnce(fDisplay, scrollbar);	
-    	setTimeout(function() { zoom(fDisplay, step, direction); }, zoomtimeoutTime);  
+    	zoomOnce(fDisplay, scrollbar, zselectedFeatures);	
+    	setTimeout(function() { zoom(fDisplay, step, direction); }, ztimeoutTime);  
     }
     return false;
 }
 
-function zoomOnce(fDisplay, scrollbar) {
+function zoomOnce(fDisplay, scrollbar, zFeatures) {
     var value = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value');
     var basesInView = fDisplay.sequenceLength-value;
     if(basesInView > 50000) {
@@ -56,6 +57,7 @@ function zoomOnce(fDisplay, scrollbar) {
     	fDisplay.leftBase = newLeftBase;
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     }
+    highlightFeatures = zFeatures;
     drawAll(fDisplay);
     	  
     // update .ui-slider-horizontal .ui-slider-handle
@@ -66,24 +68,28 @@ function addZoomEventHandlers(fDisplay) {
 	$('#plus'+fDisplay.index).mousedown(function(event){
 		fDisplay.minimumDisplay = true;
 	    zooming = 1;
+	    zselectedFeatures = getSelectedFeatureIds();
 		zoom(fDisplay, $('#slider'+fDisplay.index), 1);	
 	});
 	
 	$('#plus'+fDisplay.index).mouseup(function(event){
 		fDisplay.minimumDisplay = false;
 		zooming = 0;
+		highlightFeatures = zselectedFeatures;
 		drawAll(fDisplay);
 	});
 
 	$('#minus'+fDisplay.index).mousedown(function(event){
 		fDisplay.minimumDisplay = true;
 	    zooming = 1;
+	    zselectedFeatures = getSelectedFeatureIds();
 		zoom(fDisplay, $('#slider'+fDisplay.index), -1);	
 	});
 	
 	$('#minus'+fDisplay.index).mouseup(function(event){
 		fDisplay.minimumDisplay = false;
 		zooming = 0;
+		highlightFeatures = zselectedFeatures;
 		drawAll(fDisplay);
 	});	
 }
