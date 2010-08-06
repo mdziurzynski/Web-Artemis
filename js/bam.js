@@ -17,6 +17,7 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 		$("#bam"+fDisplay.index).drawLine(xpos1, ypos1, xpos2, ypos2,
 				{color:colour, stroke:'1'});
 	}
+	$('body').css('cursor','default');
 };
 
 var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
@@ -70,6 +71,7 @@ var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 		$("#bam"+fDisplay.index).drawLine(thisStart, ypos, thisEnd, ypos,
 				{color:colour, stroke:'1'});
 	}
+	$('body').css('cursor','default');
 };
 
 var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
@@ -97,6 +99,7 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 function drawBam(fDisplay) {
 	var serviceName = '/sams/sequences.json?';
 	
+	$('body').css('cursor','wait');
 	handleAjaxCalling(serviceName, aSamSeqs,
 			{ fileID:fDisplay.bamId }, fDisplay, { });
 }
