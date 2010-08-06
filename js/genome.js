@@ -2324,9 +2324,10 @@ function testAddFeatures() {
 			  data: 'us='+featureToColourList,
 			  dataType: 'jsonp',
 			  success: function(returned2) {	
-			addFeatures(featureDisplayObjs[0].srcFeature, returned1, "NEW_TRACK", handleFeatureClick, centerOnFeature, showPopupFeature, disablePopup, function () {
-				  alert("Feature Properties");
-				});
+			addFeatures(featureDisplayObjs[0].srcFeature, returned1, "NEW_TRACK_NAME", 
+					function (featureSelected, featureDisplay) {
+				  		alert("Show feature properties for "+featureSelected);
+					});
 			aFeaturePropColours(featureDisplayObjs[index], returned2, {});
 	  	} } );
 	} } );
@@ -2338,9 +2339,8 @@ function testAddFeatures() {
 // seqName - name of chromosome/contig 
 // jsonFeatureObj - json representation of features
 // trackIndex - index/name of new track
-// fnSingle/fnDouble - single, double click callbacks
-// mouseEnter/mouseOut - mouse enter, out callbacks
-function addFeatures(seqName, jsonFeatureObj, trackIndex, fnSingle, fnDouble, mouseEnter, mouseOut, fnFeatureProps) {
+// feature properties dialog callback
+function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 	for(index=0;index<featureDisplayObjs.length; index++) {
 		if(featureDisplayObjs[index].srcFeature == seqName) {
 			var fDisplay = featureDisplayObjs[index];
@@ -2353,8 +2353,8 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnSingle, fnDouble, mo
 			aFeatureFlatten(fDisplay, jsonFeatureObj,
 					{append:true, minDisplay:fDisplay.minimumDisplay});
 			
-			$('#features'+fDisplay.index+'_'+trackIndex).single_double_click(fnSingle, centerOnFeature, fDisplay, 500);
-			$('#features'+fDisplay.index+'_'+trackIndex).popup_enter_out(mouseEnter, mouseOut);
+			$('#features'+fDisplay.index+'_'+trackIndex).single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
+			$('#features'+fDisplay.index+'_'+trackIndex).popup_enter_out(showPopupFeature, disablePopup);
 			
 			fDisplay.showFeatureFn[trackIndex] = fnFeatureProps;
 			break;
