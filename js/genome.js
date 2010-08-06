@@ -1891,8 +1891,8 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	  
 	  if(scrollTimeoutTime < currentTime-50 || scrollTimeoutTime > currentTime+50) {
 		  scrollTimeoutTime = currentTime;	// scroll
-		  ztimeoutTime = currentTime;  		// zoom
-		  debugLog("ADJUST SCROLL TIMEOUT :: "+currentTime+"  ::  "+options.startTime);
+		  ztimeoutTime = currentTime*2;  		// zoom
+		  debugLog("ADJUST SCROLL TIMEOUT :: "+currentTime+"  ::  "+options.startTime+" zoom time="+ztimeoutTime);
 	  }
 	}
 	
