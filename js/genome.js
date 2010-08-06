@@ -594,19 +594,12 @@ function addEventHandlers(fDisplay) {
 			if($(tgt).attr('id') == "none")
 				return;
 	
-			showBam = !showBam;
-			if(showBam) {
-				$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
-				$("#bam"+fDisplay.index).css('width', displayWidth+margin+'px');
-				fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
-				fDisplay.bamId = $(tgt).attr('id');
+			if(!showBam) {
+				addBamDisplay(fDisplay, $(tgt).attr('id'));
 			} else {
-				$("#bam"+fDisplay.index).html('');
-				fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
+				removeBamDisplay(fDisplay);
 			}
 
-			adjustFeatureDisplayPosition(false, fDisplay);
-			drawFrameAndStrand(fDisplay);
 			drawAll(fDisplay);
 		});
 		
@@ -1672,6 +1665,12 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 		fDisplay.srcFeature = $('#srcFeatureList option:selected')[0].value;
 		fDisplay.firstTime = true;
 		returnedSequence = undefined;
+		
+		// remove bam display
+		if(showBam) {
+			removeBamDisplay(fDisplay);
+		}
+		
 		drawAll(fDisplay);
 	});
 };
@@ -2294,6 +2293,24 @@ function setBamMenu(fDisplay) {
 		
 	},
 	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
+}
+
+function addBamDisplay(fDisplay, bamId) {
+	showBam = true;
+	$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
+	$("#bam"+fDisplay.index).css('width', displayWidth+margin+'px');
+	fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
+	fDisplay.bamId = bamId;
+	adjustFeatureDisplayPosition(false, fDisplay);
+	drawFrameAndStrand(fDisplay);
+}
+
+function removeBamDisplay(fDisplay) {
+	showBam = false;
+	$("#bam"+fDisplay.index).html('');
+	fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
+	adjustFeatureDisplayPosition(false, fDisplay);
+	drawFrameAndStrand(fDisplay);
 }
 
 //
