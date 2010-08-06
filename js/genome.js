@@ -36,6 +36,7 @@ var showFeatureList = true;
 var clicks = 0;
 var count = 0;
 var featureDisplayObjs = new Array();
+var highlightFeatures = new Array();
 var returnedSequence;
 var useCanvas = false;
 
@@ -149,6 +150,9 @@ $(document).ready(function() {
 		featureDisplayObjs[0] = obj;
 	}
 	
+	if(showFeatureList)
+		featureListEvents(featureDisplayObjs[0]);
+	
 	$('ul.sf-menu').superfish({ 
         animation: {height:'show'},   // slide-down effect without fade-in 
         delay:     1200               // 1.2 second delay on mouseout 
@@ -234,7 +238,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		value: self.sequenceLength-self.basesDisplayWidth,
 		step: 100,
 		change: function(event, ui) {
-			zoomOnce(self, scrollbar);
+			zoomOnce(self, scrollbar, getSelectedFeatureIds());
 		}
 	});
 	this.lastLeftBase = leftBase;
@@ -749,16 +753,6 @@ function showPopupFeature(event) {
     }
 }
 
-function selectFeature(featureSelected) {
-	if(featureSelected.match(/\d+$/g)) {
-		// select exons of same gene
-		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
-    	var selId = "[id*=" + wildcardSearchString +"]";
-    	$(selId).each(function( intIndex ){ $( this ).css('border-width', '2px');});
-	} else {
-		$( "#"+escapeId(featureSelected) ).css('border-width', '2px');
-	}
-}
 
 function showFeature(featureSelected, featureDisplay) {
 	debugLog(featureSelected+" SELECTED ");
@@ -1350,11 +1344,11 @@ function handleFeatureClick(fDisplay, event) {
 	//debugLog(arguments);
 
 	if (! event.shiftKey ) {
-		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('border-width', '1px');
+		deselectAllFeatures(fDisplay)
 	}
 	
 	featureSelected = $(event.target).attr('id');
-	selectFeature(featureSelected);
+	selectFeature(featureSelected, fDisplay);
 	//showFeature(featureSelected, fDisplay);
 }
 
@@ -1439,9 +1433,8 @@ function centerOnFeature(fDisplay, featureSelected) {
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 			var coords = returned.response.coordinates[0];
-
 			if(coords == undefined) {
-				alert(gotoFeature+" not found.");
+				alert(featureSelected+" not found.");
 				return;
 			}
 			var base = coords.regions[0].fmin-Math.round(fDisplay.basesDisplayWidth/2);
@@ -1453,6 +1446,7 @@ function centerOnFeature(fDisplay, featureSelected) {
 			fDisplay.leftBase = base;
 			fDisplay.firstTime = true;
 			returnedSequence = undefined;
+			highlightFeatures.push(featureSelected);
 			drawAll(fDisplay);
 	},
 	{ features:featureSelected }, fDisplay, {  });
@@ -1886,11 +1880,18 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		}
 	}
 	
+	if(highlightFeatures.length > 0) {
+		for(var i=0; i<highlightFeatures.length; i++)
+			selectFeature(highlightFeatures[i], fDisplay);
+		highlightFeatures = [];
+	}
+	
 	if(options.startTime) {
 	  var currentTime = new Date().getTime() - options.startTime;
 	  
 	  if(scrollTimeoutTime < currentTime-50 || scrollTimeoutTime > currentTime+50) {
-		  scrollTimeoutTime = currentTime;
+		  scrollTimeoutTime = currentTime;	// scroll
+		  ztimeoutTime = currentTime;  		// zoom
 		  debugLog("ADJUST SCROLL TIMEOUT :: "+currentTime+"  ::  "+options.startTime);
 	  }
 	}
