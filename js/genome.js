@@ -267,6 +267,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	getOrganismList(self);
 	addEventHandlers(self);
 	
+	// feature display menu
 	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:300px">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
