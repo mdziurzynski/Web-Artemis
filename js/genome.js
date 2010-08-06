@@ -268,12 +268,12 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	addEventHandlers(self);
 	
 	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
-    $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:280px">' +
-    		'<li><a href="#editFeat" id="editFeat">Show feature properties</a></li>'+
-    		'<li><a href="#gotoGene" id="gotoGene">Navigator</a></li>'+
+    $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:300px">' +
+    		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
+    		'<li><a href="#gotoGene" id="gotoGene">Navigator... </a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
-    		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features</a></li>'+
-    		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features</a></li>'+
+    		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
+    		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
     		'</ul>');
 		
     
@@ -302,6 +302,9 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     		showAminoAcidsOfSelectedFeatures(self);
     	}
     });
+    
+    // graph menu   
+    setGraphMenu(self);
 }
 
 function drawAndScroll(fDisplay, lastLeftBase) {

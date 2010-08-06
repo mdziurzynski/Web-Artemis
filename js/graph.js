@@ -1,7 +1,7 @@
 
 var datasets;
 var graphId;
-var winSize;
+var winSize = -1;
 
 function getValue(sequence, start, end, bases) {
 	var gc = 0;
@@ -115,10 +115,12 @@ function drawContentGraphs(featureDisplay, showAG, showGC, showOther) {
 
 	var leftBase = featureDisplay.leftBase;
 	var sequence = featureDisplay.sequence;
+
+	if(winSize == -1) {
+		winSize = featureDisplay.basesDisplayWidth/80;
+	}
 	
-   	winSize = 55;
-   	var stepSize = featureDisplay.basesDisplayWidth/55;
-   	
+   	var stepSize = winSize/5;
    	datasets = new Array();
    	
    	if(showAG) {
@@ -155,7 +157,39 @@ function drawContentGraphs(featureDisplay, showAG, showGC, showOther) {
 }
 
 
-
+function setGraphMenu(fDisplay) {
+    $('#menuHeader').append('<div id="graphMenu'+this.index+'"></div>');
+    $('#graphMenu'+this.index).append('<ul id="graphMenus'+this.index+'" class="contextMenu" style="width:145px">' +
+    		'<li><a href="#winSize" id="winSize">Window size...</a></li>'+
+    		'</ul>');
+	
+	$('#graph').contextMenu({
+        menu: 'graphMenus'+self.index
+    },
+    function(action, el, pos) {
+    	if(action.match(/winSize/)) {
+    		debugLog("Change window size");
+    		$("div#properties").html("<div id='graphProps'></div>");
+    		$('div#graphProps').html('Window Size:<input id="graphWinSize" type="text" value="'+winSize+'"/><br />');
+    		
+    	    $("div#graphProps").dialog({ height: 150 ,
+    			width:450, position: 'left', title:'Graph Properties', show:'fast',
+    			close: function(event, ui) { $(this).remove(); },
+    			buttons: {
+    			'Set': function() {
+    	    	
+    	     		winSize = $(this).find('#graphWinSize').val();
+    	     		$(this).dialog('close');
+    	     		drawContentGraphs(fDisplay, showAG, showGC, showOther);
+    	     	
+    			},
+    			Cancel: function() {
+    				$(this).dialog('close');
+    			}
+    		}});
+    	}
+    });
+}
 
 
 function setGraphCss(displayWidth, marginTop, margin, frameLineHeight) {
