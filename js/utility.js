@@ -107,6 +107,22 @@ function findTrackByElement(elem) {
 	return parent.attr('id').replace(/^features\d+_/,'');
 }
 
+function deselectAllFeatures(fDisplay) {
+	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('border-width', '1px');
+}
+
+function selectFeature(featureSelected, fDisplay) {
+	if(featureSelected.match(/\d+$/g)) {
+		// select exons of same gene
+		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
+    	var selId = "[id*=" + wildcardSearchString +"]";
+    	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find(selId).each(
+    			function( intIndex ){ $( this ).css('border-width', '2px');});
+	} else {
+		$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ).css('border-width', '2px');
+	}
+}
+
 function getSelectedFeatureIds() {
 	var IDs = $('.feat, .featCDS, .featGene, .featGreen, .featPseudo')  // find ID's
 	  .map(function() { return this.id; }) // convert to set of IDs
