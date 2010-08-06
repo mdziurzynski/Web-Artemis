@@ -1,4 +1,23 @@
 
+function handleFeatureListClick(fDisplay, event) {
+	if (! event.shiftKey ) {
+		deselectAllFeatures(fDisplay)
+	}
+	
+	var name = $(event.target).attr('id').replace(/:LIST$/,'');
+	selectFeature(name, fDisplay);
+}
+
+function handleFeatureListDoubleClick(fDisplay, id) {
+	var name = id.replace(/:LIST$/,'');
+	centerOnFeature(fDisplay, name);
+}
+
+function featureListEvents(fDisplay) {
+	$('#featureList').single_double_click(handleFeatureListClick, handleFeatureListDoubleClick, fDisplay, 500);
+}
+
+
 function positionFeatureList(featureDisplay) {
 	var ghgt = $('#graph').height();
 	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt; 
@@ -31,7 +50,7 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 		  exonMap[feature.part_of] = undefined;
 		}
 	}
-	
+
 	if(!append) {
 		$('#featureListTable').append('</tbody>');
 		$('#featureListTable').tablesorter(); 
