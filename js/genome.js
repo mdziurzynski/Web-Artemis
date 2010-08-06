@@ -847,7 +847,7 @@ function drawAll(fDisplay) {
 		drawComparison(fDisplay);
 	  }
 	  
-	  if(fDisplay.leftBase+fDisplay.basesDisplayWidth > fDisplay.sequenceLength) {
+	  if(!fDisplay.firstTime && fDisplay.leftBase+fDisplay.basesDisplayWidth > fDisplay.sequenceLength) {
 		  hideEndOfSequence(fDisplay);
 	  }
 }
