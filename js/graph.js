@@ -60,19 +60,17 @@ function graphLoadData(datasets, leftBase, sequence) {
 		});
 }
 
-var aGraph = function ajaxGetGraph(featureDisplay, returned, options) {
+var aGraph = function ajaxGetGraph(fDisplay, returned, options) {
 	var tracks = returned.response.tracks;
-	var stepSize = featureDisplay.basesDisplayWidth/55;
+	var stepSize = fDisplay.basesDisplayWidth/55;
 	var stepSize2 = Math.round(stepSize/2);
 	
 	for(var i=0; i<tracks.length; i+=1) {
 		var trackPoints = new Array();
 		for(var j=0; j<tracks[i].data.length ; j+=1) { 
-			
 			trackPoints[j] = new Array(2);
-			trackPoints[j][0] = (j*55)+featureDisplay.leftBase;
+			trackPoints[j][0] = (j*winSize)+fDisplay.leftBase;
 			trackPoints[j][1] = tracks[i].data[j]*10000;
-		
 			//debugLog("Number of graph tracks = "+tracks.length+"; x, y ="+trackPoints[j][0]+","+trackPoints[j][1]);
 		}
 	
@@ -83,16 +81,16 @@ var aGraph = function ajaxGetGraph(featureDisplay, returned, options) {
 			color: "#FF00FF"
 		});
 	}
-   	graphLoadData(datasets, featureDisplay.leftBase, featureDisplay.sequence);
+   	graphLoadData(datasets, fDisplay.leftBase, fDisplay.sequence);
 };
 
-var aGraphId = function ajaxGetGraphId(featureDisplay, returned, options) {
+var aGraphId = function ajaxGetGraphId(fDisplay, returned, options) {
 	var plots = returned.response.plots;
 	var count = 0;
 	graphId = new Array();
 	
 	for(var i=0; i<plots.length; i+=1) {
-       if(plots[i].feature == featureDisplay.srcFeature) {
+       if(plots[i].feature == fDisplay.srcFeature) {
     	   graphId[count] = plots[i].id;
     	   count+=1;
        }
@@ -100,24 +98,24 @@ var aGraphId = function ajaxGetGraphId(featureDisplay, returned, options) {
 	
    	var serviceName = '/graphs/fixed_scaled.json?';
 	handleAjaxCalling(serviceName, aGraph,
-			{ id:graphId[0], start:featureDisplay.leftBase, end:featureDisplay.leftBase+featureDisplay.basesDisplayWidth, step:winSize, span:winSize }, 
-			featureDisplay, {});
+			{ id:graphId[0], start:fDisplay.leftBase, end:fDisplay.leftBase+fDisplay.basesDisplayWidth, step:winSize, span:winSize }, 
+			fDisplay, {});
 };
 
-function getGraphId(featureDisplay) {
+function getGraphId(fDisplay) {
    	var serviceName = '/graphs/list.json?';
    	handleAjaxCallingSync(serviceName, aGraphId,
-   		{}, featureDisplay, {}, false);
+   		{}, fDisplay, {}, false);
 }
 
-function drawContentGraphs(featureDisplay, showAG, showGC, showOther) {
+function drawContentGraphs(fDisplay, showAG, showGC, showOther) {
 	$("#graph").css('height', 150+'px');
 
-	var leftBase = featureDisplay.leftBase;
-	var sequence = featureDisplay.sequence;
+	var leftBase = fDisplay.leftBase;
+	var sequence = fDisplay.sequence;
 
 	if(winSize == -1) {
-		winSize = featureDisplay.basesDisplayWidth/80;
+		winSize = fDisplay.basesDisplayWidth/80;
 	}
 	
    	var stepSize = winSize/5;
@@ -142,7 +140,7 @@ function drawContentGraphs(featureDisplay, showAG, showGC, showOther) {
    	}
    	//
    	if(showOther) {
-   	  getGraphId(featureDisplay);
+   	  getGraphId(fDisplay);
    	}
    	
    	graphLoadData(datasets, leftBase, sequence);
@@ -202,4 +200,3 @@ function setGraphCss(displayWidth, marginTop, margin, frameLineHeight) {
 		};
   	$("#graph").css(cssObj);
 }
-
