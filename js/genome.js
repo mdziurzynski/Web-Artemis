@@ -676,6 +676,10 @@ function addEventHandlers(fDisplay) {
 	
 	
 	$('#features'+fDisplay.index+'_track1').single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
+	$('#sequence'+fDisplay.index).click(function(event){
+		deselectAllFeatures(fDisplay);
+	});
+
 	// popup
 	$('#features'+fDisplay.index+'_track1').popup_enter_out(showPopupFeature, disablePopup);
 	
