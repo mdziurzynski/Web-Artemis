@@ -9,7 +9,7 @@ return this.each(function() {
         $(this).bind("click", function(event) {
             setTimeout(function() {
                 if (clicks != 2) {
-                    single_click_callback.call(null, fDisplay, event);
+                    single_click_callback.call(null, fDisplay, event, $(event.target).attr('id'));
                 }
                 clicks = 0;
             }, timeout || 300);
@@ -20,7 +20,7 @@ return this.each(function() {
             if (clicks == 1) {
                 setTimeout(function() {
                     if (clicks == 1) {
-                        single_click_callback.call(null, fDisplay, event);
+                        single_click_callback.call(null, fDisplay, event, $(event.target).attr('id'));
                     } else {
                         double_click_callback.call(null, fDisplay, event, $(event.target).attr('id'));
                     }
@@ -107,6 +107,7 @@ function findTrackByElement(elem) {
 
 function deselectAllFeatures(fDisplay) {
 	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('border-width', '1px');
+	deSelectAllInList();
 }
 
 function selectFeature(featureSelected, fDisplay) {
@@ -119,6 +120,8 @@ function selectFeature(featureSelected, fDisplay) {
 	} else {
 		$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ).css('border-width', '2px');
 	}
+
+	selectInList(featureSelected);
 }
 
 function getSelectedFeatureIds() {

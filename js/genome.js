@@ -1339,17 +1339,17 @@ function getSrcFeatureList(organism_id, featureDisplay, translation_table){
 			{ organism:'org:'+organism_id }, featureDisplay, { translation_table:translation_table });
 }
 
-function handleFeatureClick(fDisplay, event) {
+function handleFeatureClick(fDisplay, event, featureSelected) {
 	//debugLog(arguments);
 
 	if (! event.shiftKey ) {
 		fDisplay.highlightFeatures = [];
 		deselectAllFeatures(fDisplay)
 	}
-	
-	var featureSelected = $(event.target).attr('id');
+
 	fDisplay.highlightFeatures.push(featureSelected);
 	selectFeature(featureSelected, fDisplay);
+
 	//showFeature(featureSelected, fDisplay);
 }
 
@@ -1431,7 +1431,7 @@ function showBasesOfSelectedFeatures(fDisplay) {
 function centerOnFeature(fDisplay, event, featureSelected) {	
 	//debugLog(arguments);
 	if(event != undefined)
-		handleFeatureClick(fDisplay, event);
+		handleFeatureClick(fDisplay, event, featureSelected);
 	
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
@@ -1790,7 +1790,7 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, ret
 				var featureId = escapeId(featProps[i].feature);
 				$('#'+featureId).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 				// colour feature list
-				$('#'+escapeId(featProps[i].feature+':LIST')).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
+				$('#'+escapeId(featProps[i].feature+':LIST')).children(":first").css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 			}
 		}
 	}

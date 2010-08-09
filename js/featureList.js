@@ -1,7 +1,7 @@
 
 function handleFeatureListClick(fDisplay, event) {
 	if (! event.shiftKey ) {
-		deselectAllFeatures(fDisplay)
+		deselectAllFeatures(fDisplay);
 	}
 
 	var name = getSelectedId(event);
@@ -24,7 +24,7 @@ function getSelectedId(event) {
 }
 
 function getFirstTd(event) {
-	return $(event.target.parentNode.children[0]);
+	return $(event.target.parentNode);
 }
 
 function featureListEvents(fDisplay) {
@@ -94,8 +94,8 @@ function appendExonsToList(exons) {
 		else
 			type = "pseudogene";
 		
-		$('#featureListTable').append('<tr>'+
-				'<td id="'+exons[0].feature+':LIST">'+name+'</td>'+
+		$('#featureListTable').append('<tr id="'+exons[0].feature+':LIST">'+
+				'<td>'+name+'</td>'+
 				'<td>'+type+'</td>'+
 				'<td>'+fmin+'</td>'+
 				'<td>'+fmax+'</td>'+
@@ -106,11 +106,41 @@ function appendExonsToList(exons) {
 
 function appendFeatureToList(feature) {
 	var s = parseInt(feature.start)+1;
-	$('#featureListTable').append('<tr>'+
-			'<td id="'+feature.feature+':LIST">'+feature.feature+'</td>'+
+	$('#featureListTable').append('<tr id="'+feature.feature+':LIST">'+
+			'<td>'+feature.feature+'</td>'+
 			'<td>'+feature.type+'</td>'+
 			'<td>'+s+'</td>'+
 			'<td>'+feature.end+'</td>'+
 			//'<td id="'+feature.feature+':PROPS"></td>'+
 			'</tr>');
+}
+
+function selectInList(featureSelected) {
+	if(featureSelected.match(/\d+$/g)) {
+		// select exons of same gene
+		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
+    	var selId = "[id*=" + wildcardSearchString +"]";
+    	$('table.#featureListTable > tbody').find(selId).children().each(function(index) {
+    	    if(index == 0)
+    	    	return;
+    	    $(this).css('background-color', 'rgb(200, 200, 200)' );
+    	});	
+    	
+	} else {
+		$('table.#featureListTable > tbody > tr#'+escapeId(featureSelected+':LIST')).children().each(function(index) {
+		    if(index == 0)
+		    	return;
+		    $(this).css('background-color', 'rgb(200, 200, 200)' );
+		});		
+	}
+}
+
+function deSelectAllInList() {
+	$('table.#featureListTable > tbody > tr').each(function(index) {
+	    $(this).children().each(function(index) {
+		    if(index == 0)
+		    	return;
+		    $(this).css('background-color', '#FFFFFF' );
+		});	
+	});	
 }
