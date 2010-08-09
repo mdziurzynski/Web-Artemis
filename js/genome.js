@@ -1427,8 +1427,7 @@ function showBasesOfSelectedFeatures(fDisplay) {
 	}	
 }
 
-function centerOnFeature(fDisplay, featureSelected) {
-	
+function centerOnFeature(fDisplay, event, featureSelected) {	
 	//debugLog(arguments);
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
@@ -1462,7 +1461,7 @@ function navigate(fDisplay) {
     	if ($("input[@name='rdio']:checked").val() == 'gene'){
      		var gotoFeature = $(this).find('#gotoFeature').val();
      		$(this).dialog('close');
-     		centerOnFeature(fDisplay, gotoFeature);
+     		centerOnFeature(fDisplay, undefined, gotoFeature);
      	} else {
      		// goto base 
      		var gotoBase = $(this).find('#gotoBase').val();

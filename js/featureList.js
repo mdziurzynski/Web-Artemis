@@ -3,14 +3,28 @@ function handleFeatureListClick(fDisplay, event) {
 	if (! event.shiftKey ) {
 		deselectAllFeatures(fDisplay)
 	}
-	
-	var name = $(event.target).attr('id').replace(/:LIST$/,'');
+
+	var name = getSelectedId(event);
 	selectFeature(name, fDisplay);
 }
 
-function handleFeatureListDoubleClick(fDisplay, id) {
-	var name = id.replace(/:LIST$/,'');
-	centerOnFeature(fDisplay, name);
+function handleFeatureListDoubleClick(fDisplay, event, featureSelected) {
+	var name = getSelectedId(event);
+	centerOnFeature(fDisplay, undefined, name);
+}
+
+function getSelectedId(event) {
+	var name;
+	if($(event.target).attr('id') == "") {
+		name = getFirstTd(event).attr('id').replace(/:LIST$/,'');
+	} else {
+		name = $(event.target).attr('id').replace(/:LIST$/,'');
+	}
+	return name;
+}
+
+function getFirstTd(event) {
+	return $(event.target.parentNode.children[0]);
 }
 
 function featureListEvents(fDisplay) {
