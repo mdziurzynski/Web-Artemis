@@ -10,7 +10,7 @@ function handleFeatureListClick(fDisplay, event) {
 
 function handleFeatureListDoubleClick(fDisplay, event, featureSelected) {
 	var name = getSelectedId(event);
-	centerOnFeature(fDisplay, undefined, name);
+	centerOnFeature(fDisplay, event, name);
 }
 
 function getSelectedId(event) {
