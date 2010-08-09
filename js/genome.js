@@ -24,7 +24,6 @@ var displayWidth = 1000;
 
 var screenInterval = 100;
 var baseInterval;
-var featureSelected = -1;
 
 var showBam = false;
 var showGC = false;
@@ -36,7 +35,6 @@ var showFeatureList = true;
 var clicks = 0;
 var count = 0;
 var featureDisplayObjs = new Array();
-var highlightFeatures = new Array();
 var returnedSequence;
 var useCanvas = false;
 
@@ -186,6 +184,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.minimumDisplay = false;
 	this.showStopCodons = false;
 	
+	this.highlightFeatures = new Array();
+	
 	// add tracks
 	this.tracks = new Array();
 	this.trackIndex = "track1";
@@ -238,7 +238,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		value: self.sequenceLength-self.basesDisplayWidth,
 		step: 100,
 		change: function(event, ui) {
-			zoomOnce(self, scrollbar, getSelectedFeatureIds());
+			zoomOnce(self, scrollbar);
 		}
 	});
 	this.lastLeftBase = leftBase;
@@ -676,7 +676,6 @@ function addEventHandlers(fDisplay) {
 	
 	
 	$('#features'+fDisplay.index+'_track1').single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
-	
 	// popup
 	$('#features'+fDisplay.index+'_track1').popup_enter_out(showPopupFeature, disablePopup);
 	
@@ -1344,10 +1343,12 @@ function handleFeatureClick(fDisplay, event) {
 	//debugLog(arguments);
 
 	if (! event.shiftKey ) {
+		fDisplay.highlightFeatures = [];
 		deselectAllFeatures(fDisplay)
 	}
 	
-	featureSelected = $(event.target).attr('id');
+	var featureSelected = $(event.target).attr('id');
+	fDisplay.highlightFeatures.push(featureSelected);
 	selectFeature(featureSelected, fDisplay);
 	//showFeature(featureSelected, fDisplay);
 }
@@ -1429,6 +1430,9 @@ function showBasesOfSelectedFeatures(fDisplay) {
 
 function centerOnFeature(fDisplay, event, featureSelected) {	
 	//debugLog(arguments);
+	if(event != undefined)
+		handleFeatureClick(fDisplay, event);
+	
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 			var coords = returned.response.coordinates[0];
@@ -1445,7 +1449,7 @@ function centerOnFeature(fDisplay, event, featureSelected) {
 			fDisplay.leftBase = base;
 			fDisplay.firstTime = true;
 			returnedSequence = undefined;
-			highlightFeatures.push(featureSelected);
+			fDisplay.highlightFeatures.push(featureSelected);
 			drawAll(fDisplay);
 	},
 	{ features:featureSelected }, fDisplay, {  });
@@ -1496,6 +1500,7 @@ function navigate(fDisplay) {
 var aShowProperties = function showProperties(featureDisplay, returned, options) {
     var features = returned.response.hierarchy;
     
+    var featureSelected = options.featureSelected; 
     var featureStr = "&features="+options.featureSelected;
     var name = options.featureSelected;
     var primary_name;
@@ -1540,19 +1545,19 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 	}
 
 	handleAjaxCalling('/features/properties.json?', aFeatureProps,
-		'us='+featurePropertyList, -1, {});
+		'us='+featurePropertyList, -1, { featureSelected: featureSelected});
 	
 	handleAjaxCalling('/features/pubs.json?', aFeaturePubs,
-			featureStr, -1, {});
+			featureStr, -1, {featureSelected: featureSelected});
 	
 	handleAjaxCalling('/features/dbxrefs.json?', aFeatureDbXRefs,
-			featureStr, -1, {});
+			featureStr, -1, {featureSelected: featureSelected});
 
 	handleAjaxCalling('/features/terms.json?', aFeatureCvTerms,
-			featureStr, -1, {});
+			featureStr, -1, {featureSelected: featureSelected});
 	
 	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
-			featureStr, featureDisplay, {});
+			featureStr, featureDisplay, {featureSelected: featureSelected});
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     
@@ -1635,7 +1640,7 @@ function positionLists() {
 }
 
 var aFeatureCvTerms = function ajaxGetFeatureCvTerms(featureDisplay, returned, options) {
-	showFeatureCvTerm(returned.response.features, featureSelected);
+	showFeatureCvTerm(returned.response.features, options.featureSelected);
 };
 
 var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options) {
@@ -1645,6 +1650,7 @@ var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options
 	if(!orthologues || orthologues.length == 0)
 		return;
 	
+	var featureSelected = options.featureSelected;
 	var clusters = new Array();
 	var count = 0;
 	
@@ -1673,7 +1679,7 @@ var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options
 	var serviceName = '/features/clusters.json?';
 	handleAjaxCalling(serviceName, aCluster,
 		'orthologues='+clusters, 
-		featureDisplay, {});
+		featureDisplay, {featureSelected: featureSelected});
 };
 
 var aCluster = function ajaxGetClusters(featureDisplay, returned, options) {
@@ -1683,6 +1689,7 @@ var aCluster = function ajaxGetClusters(featureDisplay, returned, options) {
 	if(!clusters || clusters.length == 0)
 		return;
 	
+	var featureSelected = options.featureSelected;
 	$("div#DISP"+escapeId(featureSelected)).append(
 			   "<br /><strong>Clusters : </strong><br />");
 	for(var i=0; i<clusters.length; i++) {	
@@ -1704,8 +1711,10 @@ function openMe(gene, midDisplay) {
 	handleAjaxCalling('/features/coordinates.json?', 
 			function(featureDisplay, returned, options) { 
 		      var src  = returned.response.coordinates[0].regions[0].region; 
-		      var base = parseInt(returned.response.coordinates[0].regions[0].fmin)-midDisplay;
-		      window.open('?&src='+src+'&base='+base);
+		      var base = Math.round(parseInt(returned.response.coordinates[0].regions[0].fmin)-midDisplay);
+		      
+		      debugLog(base + " " + midDisplay + "  "+ returned.response.coordinates[0].regions[0].fmin);
+		      window.open('?&src='+src+'&base='+base+'&bases='+midDisplay*2);
 		    }, 
 			{ features: gene}, {}, {});
 }
@@ -1713,6 +1722,7 @@ function openMe(gene, midDisplay) {
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
 var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, options) {
 	
+	var featureSelected = options.featureSelected;
 	var featProps  = returned.response.features;
     for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].props;
@@ -1725,6 +1735,7 @@ var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, optio
 };
 
 var aFeaturePubs = function ajaxGetFeaturePubs(featureDisplay, returned, options) {
+	var featureSelected = options.featureSelected;
 	var featPubs  = returned.response.features;
 	if(!featPubs || featPubs.length == 0)
 		return;
@@ -1742,6 +1753,7 @@ var aFeaturePubs = function ajaxGetFeaturePubs(featureDisplay, returned, options
 
 
 var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(featureDisplay, returned, options) {
+	var featureSelected = options.featureSelected;
 	var featDbXRefs  = returned.response.features;
 	if(!featDbXRefs || featDbXRefs.length == 0)
 		return;
@@ -1879,10 +1891,10 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		}
 	}
 	
-	if(highlightFeatures.length > 0) {
-		for(var i=0; i<highlightFeatures.length; i++)
-			selectFeature(highlightFeatures[i], fDisplay);
-		highlightFeatures = [];
+	if(fDisplay.highlightFeatures.length > 0) {
+		for(var i=0; i<fDisplay.highlightFeatures.length; i++)
+			selectFeature(fDisplay.highlightFeatures[i], fDisplay);
+		//highlightFeatures = [];
 	}
 	
 	if(options.startTime) {
