@@ -679,7 +679,7 @@ function addEventHandlers(fDisplay) {
 	$('#sequence'+fDisplay.index).click(function(event){
 		deselectAllFeatures(fDisplay);
 	});
-
+	
 	// popup
 	$('#features'+fDisplay.index+'_track1').popup_enter_out(showPopupFeature, disablePopup);
 	
@@ -724,6 +724,7 @@ function addEventHandlers(fDisplay) {
 		});
 	}
 	
+	addSelectionEventHandlers(fDisplay);
 	//zoom
 	addZoomEventHandlers(fDisplay);
 
@@ -1233,38 +1234,35 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	if(ypos > lastYpos) {
 	  ymid = lastYpos-4;
 	}
-	var Xpoints = new Array(lpos, mid, rpos) ;
-	var Ypoints = new Array(lastYpos+4, ymid, ypos+4);
+	var Xpts = new Array(lpos, mid, rpos) ;
+	var Ypts = new Array(lastYpos+4, ymid, ypos+4);
 	
-	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpoints,Ypoints, {color: colour, stroke:'1'});
+	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpts,Ypts, {color: colour, stroke:'1'});
 }
 
-function drawArrow(featureDisplay, exon, ypos, basePerPixel) {
-	if(featureDisplay.minimumDisplay)
+function drawArrow(fDisplay, exon, ypos, basePerPixel) {
+	if(fDisplay.minimumDisplay)
 		return;
 	
-	var Xpoints;
-	var Ypoints;
-	ypos++;
+	var Xpts, Ypts;
 	
-	var frameLineHeight2 = featureDisplay.frameLineHeight/2;
+	var flh2 = fDisplay.frameLineHeight/2;
 	if(exon.strand == 1) {
-	  var end = margin+((exon.end - featureDisplay.leftBase + 1)/basePerPixel);
+	  var end = margin+((exon.end - fDisplay.leftBase + 1)/basePerPixel);
 	  if(end > displayWidth) {
 		  return;
 	  }
-	  Xpoints = new Array(end, end+frameLineHeight2, end) ;
-	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+featureDisplay.frameLineHeight);
+	  Xpts = new Array(end, end+flh2, end) ;
 	} else {
-	  var start = margin+((exon.start - featureDisplay.leftBase + 1)/basePerPixel);
+	  var start = margin+((exon.start - fDisplay.leftBase + 1)/basePerPixel);
 	  if(start > displayWidth) {
 		  return;
 	  }
-	  Xpoints = new Array(start, start-frameLineHeight2, start) ;
-	  Ypoints = new Array(ypos, ypos+frameLineHeight2, ypos+featureDisplay.frameLineHeight);
+	  Xpts = new Array(start, start-flh2, start);
 	}
+	Ypts = new Array(ypos, ypos+flh2, ypos+fDisplay.frameLineHeight);
 
-	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpoints,Ypoints, {color:'#020202', stroke:'1'});
+	$("#featureDisplay"+fDisplay.index).drawPolyline(Xpts,Ypts, {color:'#020202', stroke:'1'});
 }
 
 
@@ -1865,21 +1863,22 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		$('#features'+fDisplay.index+'_track1').html(featureStr);
 	}
 
+	
+	if($('.feat').height() != fDisplay.frameLineHeight-2 || options.append ) {
+		var cssObj = {
+			'height':fDisplay.frameLineHeight-2+'px',
+			'line-height' : fDisplay.frameLineHeight-2+'px'
+		};
+		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
+	}
+	
 	if(!options.minDisplay) {
 		if(isZoomedIn(fDisplay)) {
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.3');
 		} else {
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.9');
 		}
-		
-		if($('.feat').height() != fDisplay.frameLineHeight || options.append ) {
-			var cssObj = {
-				'height':fDisplay.frameLineHeight+'px',
-				'line-height' : fDisplay.frameLineHeight+'px'
-			};
-			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
-		}
-	
+
 		if( count < 2 && showFeatureList )
 			  setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
 		
@@ -2020,8 +2019,8 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		  rpos2 = margin+((fmin2 - fDisplay2.leftBase)/basePerPixel2);
 		}
 		
-		var Xpoints = new Array(lpos1, rpos1, rpos2, lpos2) ;
-		var Ypoints = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
+		var Xpts = new Array(lpos1, rpos1, rpos2, lpos2) ;
+		var Ypts = new Array(0, 0, canvasBtm-canvasTop, canvasBtm-canvasTop);
 		
 		var clicked = false;
 		if(options.clickX != undefined) {
@@ -2059,7 +2058,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 		} else {
 			colour = '#0000FF';
 		}
-		$("#comp"+cmp.index).fillPolygon(Xpoints,Ypoints, {color: colour, stroke:'1'});
+		$("#comp"+cmp.index).fillPolygon(Xpts,Ypts, {color: colour, stroke:'1'});
 		/*colour = '#000000';
 		if(rpos2-lpos2 > 1 && rpos1-lpos1 > 1) {
 			$("#comp"+cmp.index).drawLine(lpos1, 0, lpos2, canvasBtm-canvasTop, {color: colour, stroke:'0.1'});
