@@ -10,7 +10,7 @@ function addSelectionEventHandlers(fDisplay) {
 	        return false;
 	    });
 
-	    $(this).one('mouseup', function() {
+	    $(this).mouseup(function() {
 	        $(this).unbind('mouseup, mousemove');
 	    });
 
@@ -49,9 +49,17 @@ function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
     	$('#selection'+fDisplay.index).css('background','#ffff00');
     	$('#selectionFrame'+fDisplay.index).css(cssObj);
     	$('#selectionFrame'+fDisplay.index).css('background','#FFB5C5');
+    	$('#selectionFrame'+fDisplay.index).mouseup(function() {
+    		$('#sequence'+fDisplay.index).trigger('mouseup');
+	    });
+    	$('#selection'+fDisplay.index).mouseup(function() {
+    		$('#sequence'+fDisplay.index).trigger('mouseup');
+	    });
     }
     
 	var width = end_x - start_x;
+	debugLog('width '+width);
+	
     if(width < 0) {
     	width = -width;
     	start_x = end_x - margin;
@@ -59,17 +67,19 @@ function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
     	start_x = start_x - margin;
     }
 
-    var pixPerBase  = (displayWidth/fDisplay.basesDisplayWidth);
-    var basePos = Math.round(start_x/pixPerBase);
-    var realBasePos = basePos + fDisplay.leftBase - 1;
 
+    var pixPerBase  = (displayWidth/fDisplay.basesDisplayWidth);
+    var basePos = Math.round(start_x/pixPerBase) - 1;
+    var realBasePos = basePos + fDisplay.leftBase - 1;
+   
+    
     var baseWidth = Math.round(width/pixPerBase);
     if(start_y < fDisplay.marginTop+(flh*6) ||
        start_y > fDisplay.marginTop+(flh*11)) {
     	baseWidth += 3-baseWidth%3;
     }
     var realEndBasePos = basePos + baseWidth + fDisplay.leftBase - 2;
-    
+
     if(start_y < fDisplay.marginTop+(flh*2)) {
     	basePos = basePos - (realBasePos%3);
     	var frame = 0;
