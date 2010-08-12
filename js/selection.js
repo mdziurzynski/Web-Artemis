@@ -123,12 +123,12 @@ function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
     $('#selection'+fDisplay.index).css({
 		'margin-left': start_x+'px',
 		'margin-top': ypos+'px',
-    	'width':width+'px',
+    	'width':width+'px'
     });
     
     $('#selectionFrame'+fDisplay.index).css({
 		'margin-left': start_x+'px',
 		'margin-top': yposFrame+'px',
-    	'width':width+'px',
+    	'width':width+'px'
     });
 }
