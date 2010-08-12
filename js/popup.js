@@ -18,6 +18,10 @@ function loadPopup(txt,x,y){
 //loads popup only if it is disabled  
  $("#popupTxt").html(txt);
  $("#popupContact").fadeIn("fast");
+ 
+ setTimeout(function(){ 
+	 disablePopup(); 
+  }, 8000 ); 
 }
 
 //disabling popup with jQuery magic!  
