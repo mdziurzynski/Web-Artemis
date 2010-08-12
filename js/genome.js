@@ -220,7 +220,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	var scrollbar = $('#slider'+this.index).slider( {
 		animate: true,
 		min : 1,
-		max : self.sequenceLength,
+		max : self.sequenceLength-100,
 		step : self.basesDisplayWidth/2,
 		start: function(event, ui) {
 			lastLeftBase = parseInt(ui.value);
@@ -883,7 +883,7 @@ function getSequence(fDisplay) {
 			fDisplay, {});
 }
 
-function drawStopCodons(featureDisplay, basePerPixel) {
+function drawStopCodons(fDisplay, basePerPixel) {
     var fwdStops1 = new Array();
     var fwdStops2 = new Array();
     var fwdStops3 = new Array();
@@ -893,39 +893,39 @@ function drawStopCodons(featureDisplay, basePerPixel) {
     var bwdStops3 = new Array();
 
     //console.time('calculate stop codons');  
-    calculateStopCodons(featureDisplay, fwdStops1, fwdStops2, fwdStops3, 'TAG', 'TAA', 'TGA', 1);
-    calculateStopCodons(featureDisplay, bwdStops1, bwdStops2, bwdStops3, 'CTA', 'TTA', 'TCA', -1);
+    calculateStopCodons(fDisplay, fwdStops1, fwdStops2, fwdStops3, 'TAG', 'TAA', 'TGA', 1);
+    calculateStopCodons(fDisplay, bwdStops1, bwdStops2, bwdStops3, 'CTA', 'TTA', 'TCA', -1);
     //console.timeEnd('calculate stop codons');
 	
 	var nstops = fwdStops1.length + fwdStops2.length + fwdStops3.length +
 				 bwdStops1.length + bwdStops2.length + bwdStops3.length; 
 	if(nstops > 3000) {
-		var canvasTop = $('#featureDisplay'+featureDisplay.index).css('margin-top').replace("px", "");
-		var mTop = featureDisplay.marginTop;
-		var flh  = featureDisplay.frameLineHeight;
+		var canvasTop = $('#featureDisplay'+fDisplay.index).css('margin-top').replace("px", "");
+		var mTop = fDisplay.marginTop;
+		var flh  = fDisplay.frameLineHeight;
 		
-		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh, featureDisplay, basePerPixel);
-		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh, featureDisplay, basePerPixel);
-		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh, featureDisplay, basePerPixel);
+		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh, fDisplay, basePerPixel);
+		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh, fDisplay, basePerPixel);
+		drawStopOnCanvas(fwdStops3, mTop+((flh*2)*2+1)-canvasTop, flh, fDisplay, basePerPixel);
 	
-		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh, featureDisplay, basePerPixel);
-		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh, featureDisplay, basePerPixel);
-		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh, featureDisplay, basePerPixel);
+		drawStopOnCanvas(bwdStops1, mTop+(flh*10)+flh+((flh*2)*0+1)-canvasTop, flh, fDisplay, basePerPixel);
+		drawStopOnCanvas(bwdStops2, mTop+(flh*10)+flh+((flh*2)*1+1)-canvasTop, flh, fDisplay, basePerPixel);
+		drawStopOnCanvas(bwdStops3, mTop+(flh*10)+flh+((flh*2)*2+1)-canvasTop, flh, fDisplay, basePerPixel);
 	} else {
 		//console.time('draw fwd stop codons');
-		drawFwdStop(fwdStops1, 0, featureDisplay, basePerPixel);
-		drawFwdStop(fwdStops2, 1, featureDisplay, basePerPixel);
-		drawFwdStop(fwdStops3, 2, featureDisplay, basePerPixel);
+		drawFwdStop(fwdStops1, 0, fDisplay, basePerPixel);
+		drawFwdStop(fwdStops2, 1, fDisplay, basePerPixel);
+		drawFwdStop(fwdStops3, 2, fDisplay, basePerPixel);
 		//console.timeEnd('draw fwd stop codons');
 	
 		//console.time('draw bwd stop codons');  
-		drawBwdStop(bwdStops1, 0, featureDisplay, basePerPixel);
-		drawBwdStop(bwdStops2, 1, featureDisplay, basePerPixel);
-		drawBwdStop(bwdStops3, 2, featureDisplay, basePerPixel);
+		drawBwdStop(bwdStops1, 0, fDisplay, basePerPixel);
+		drawBwdStop(bwdStops2, 1, fDisplay, basePerPixel);
+		drawBwdStop(bwdStops3, 2, fDisplay, basePerPixel);
 		//console.timeEnd('draw bwd stop codons');
 		
-		if($('.bases').height() != featureDisplay.frameLineHeight) {
-		  $('.bases').css({'height' : featureDisplay.frameLineHeight+'px'});
+		if($('.bases').height() != fDisplay.frameLineHeight) {
+		  $('.bases').css({'height' : fDisplay.frameLineHeight+'px'});
 		}
 	}
 };
@@ -2175,7 +2175,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	
 	debugLog("getSequence() sequence length = "+fDisplay.sequenceLength);
 	if((fDisplay.sequenceLength-fDisplay.sequenceLength) != 0) {
-      $('#slider'+fDisplay.index).slider('option', 'max', seqLen);
+      $('#slider'+fDisplay.index).slider('option', 'max', seqLen-100);
 	}
 
     //console.time('draw stop codons');
@@ -2197,7 +2197,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     //console.timeEnd('draw stop codons');  
 
     if (fDisplay.firstTime) {
-    	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength);
+    	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2);
     	$('#slider'+fDisplay.index).slider('option', 'step', fDisplay.basesDisplayWidth/2);
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     	fDisplay.firstTime = false;
