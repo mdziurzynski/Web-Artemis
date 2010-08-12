@@ -67,12 +67,10 @@ function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
     	start_x = start_x - margin;
     }
 
-
     var pixPerBase  = (displayWidth/fDisplay.basesDisplayWidth);
     var basePos = Math.round(start_x/pixPerBase) - 1;
     var realBasePos = basePos + fDisplay.leftBase - 1;
-   
-    
+  
     var baseWidth = Math.round(width/pixPerBase);
     if(start_y < fDisplay.marginTop+(flh*6) ||
        start_y > fDisplay.marginTop+(flh*11)) {
@@ -102,13 +100,13 @@ function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
     		frame = 2 - ((fDisplay.sequenceLength-realEndBasePos) % 3);
     	}
     } else if(start_y < fDisplay.marginTop+(flh*13)) {
-    	basePos = basePos - (3-(fDisplay.sequenceLength - realBasePos - 1)%3) -1;
+    	basePos = basePos - (3-(fDisplay.sequenceLength - realBasePos - 2)%3);
     	frame = 0;
     } else if(start_y < fDisplay.marginTop+(flh*15)) {
-    	basePos = basePos - (3-(fDisplay.sequenceLength - realBasePos)%3) -1;
+    	basePos = basePos - (3-(fDisplay.sequenceLength - realBasePos - 1)%3);
     	frame = 1;
     } else if(start_y < fDisplay.marginTop+(flh*17)) {
-    	basePos = basePos - (3-(fDisplay.sequenceLength - realBasePos + 1)%3) -1;
+    	basePos = basePos - (3-(fDisplay.sequenceLength - realBasePos)%3);
     	frame = 2;
     }
     
