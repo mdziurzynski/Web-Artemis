@@ -56,7 +56,8 @@ function zoomOnce(fDisplay, scrollbar) {
     	fDisplay.leftBase = newLeftBase;
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     }
-    
+	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2);
+	
     // update .ui-slider-horizontal .ui-slider-handle
     setScrollHandle(scrollbar, fDisplay);	
     drawAll(fDisplay);
