@@ -1039,7 +1039,7 @@ function drawCodons(fDisplay, basePerPixel) {
 	  xpos += (1/basePerPixel);
   }
   if(!useCanvas) {
-	  $('#sequence'+fDisplay.index).html(baseStr);
+	  $('#translation'+fDisplay.index).html(baseStr);
   }
   if(window.console)
 	console.timeEnd('draw codons');
@@ -1098,7 +1098,7 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   }
   
   if(!useCanvas) {
-	  $('#translation'+fDisplay.index).html(aaStr);
+	  $('#translation'+fDisplay.index).append(aaStr);
   }
   
   if(window.console)
