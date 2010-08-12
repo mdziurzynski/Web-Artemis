@@ -58,8 +58,6 @@ function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
     }
     
 	var width = end_x - start_x;
-	debugLog('width '+width);
-	
     if(width < 0) {
     	width = -width;
     	start_x = end_x - margin;
