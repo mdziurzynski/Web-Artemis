@@ -1430,6 +1430,10 @@ function showBasesOfSelectedFeatures(fDisplay) {
 	}	
 }
 
+function centerOnFeatureByDisplayIndex(index, featureSelected) {
+	centerOnFeature(featureDisplayObjs[index-1], undefined, featureSelected);
+}
+
 function centerOnFeature(fDisplay, event, featureSelected) {	
 	//debugLog(arguments);
 	if(event != undefined)
@@ -1455,44 +1459,6 @@ function centerOnFeature(fDisplay, event, featureSelected) {
 			drawAll(fDisplay);
 	},
 	{ features:featureSelected }, fDisplay, {  });
-}
-
-function navigate(fDisplay) {
-	$("div#properties").html("<div id='GO'></div>");
-    $("div#GO").dialog({ height: 150 ,
-		width:450, position: 'left', title:'Find', show:'fast',
-		close: function(event, ui) { $(this).remove(); },
-		buttons: {
-		'Go': function() {
-    	if ($("input[@name='rdio']:checked").val() == 'gene'){
-     		var gotoFeature = $(this).find('#gotoFeature').val();
-     		$(this).dialog('close');
-     		centerOnFeature(fDisplay, undefined, gotoFeature);
-     	} else {
-     		// goto base 
-     		var gotoBase = $(this).find('#gotoBase').val();
-     		gotoBase = parseInt(gotoBase)-(fDisplay.basesDisplayWidth/2);
-
-     		if(gotoBase < 1)
-     			gotoBase = 1;
-     		$(this).dialog('close');
-     		
-     		fDisplay.leftBase = gotoBase;
-     		$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
-     		debugLog(fDisplay.leftBase);
-     		drawAll(fDisplay);
-     	}
-		},
-		Cancel: function() {
-			$(this).dialog('close');
-		}
-	}});
-    
-    $("div#GO").html('<input type="radio" name="rdio" value="gene" checked="checked" />Gene Name:<input id="gotoFeature" type="text" value=""/><br />');
-    $("div#GO").append('<input type="radio" name="rdio" value="base" />Base Number:<input id="gotoBase" type="text" value=""/>');
-    $("#open").click(function(event){
-    	$("div#GO").dialog( "close" );
-    });
 }
 
 //
