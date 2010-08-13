@@ -275,7 +275,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:300px">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
-    		'<li><a href="#gotoGene" id="gotoGene">Navigator... </a></li>'+
+    		'<li><a href="#gotoGene" id="gotoGene">Find... </a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
     		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
@@ -1460,7 +1460,7 @@ function centerOnFeature(fDisplay, event, featureSelected) {
 function navigate(fDisplay) {
 	$("div#properties").html("<div id='GO'></div>");
     $("div#GO").dialog({ height: 150 ,
-		width:450, position: 'left', title:'Navigator', show:'fast',
+		width:450, position: 'left', title:'Find', show:'fast',
 		close: function(event, ui) { $(this).remove(); },
 		buttons: {
 		'Go': function() {
