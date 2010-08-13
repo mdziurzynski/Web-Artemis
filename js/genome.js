@@ -1010,14 +1010,14 @@ function getSequnceCanvasCtx(fDisplay, clearCanvas) {
 function drawCodons(fDisplay, basePerPixel) {
   if(window.console) 
   		console.time('draw codons');
-	
+
   if(useCanvas) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, true);
-	  var yposFwd = margin+7*fDisplay.frameLineHeight;
+	  var yposFwd = margin+7*fDisplay.frameLineHeight-2;
   } else {
-	  yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-1;
+	  yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-2;
   }
-  var yposBwd = yposFwd+(fDisplay.frameLineHeight*3)-1;
+  var yposBwd = yposFwd+(fDisplay.frameLineHeight*3);
   
   var xpos = margin;
   
@@ -1054,7 +1054,7 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, false);
 	  xpos += (1/basePerPixel);
   } 
-  
+
   var aaStr = '';
   for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
 	  
@@ -1068,10 +1068,10 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   			  fDisplay.sequence.charAt(i+2));
 
 	  if(useCanvas) {
-		  var yposFwd = margin+(frame*(fDisplay.frameLineHeight*2))+fDisplay.frameLineHeight;
+		  var yposFwd = margin+(frame*(fDisplay.frameLineHeight*2))+fDisplay.frameLineHeight-2;
 		  drawString(ctx, aa, xpos, yposFwd, '#000000', 0,"Courier New",14);
 	  } else {
-		  yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-1;
+		  yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-2;
 		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+yposFwd+'px; margin-left:'+
 		  		xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';   
 	  }
@@ -1086,11 +1086,11 @@ function drawAminoAcids(fDisplay, basePerPixel) {
               
 	  if(useCanvas) {
 		  var yposBwd = margin+(fDisplay.frameLineHeight*11)+
-			((fDisplay.frameLineHeight*2)*frame)+fDisplay.frameLineHeight;
+			((fDisplay.frameLineHeight*2)*frame)+fDisplay.frameLineHeight-2;
 		  drawString(ctx, aa, xpos, yposBwd, '#000000', 0,"Courier New",14);
 	  } else {
 		  yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
-			((fDisplay.frameLineHeight*2)*frame)-1;
+			((fDisplay.frameLineHeight*2)*frame)-2;
 		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+
 		  		yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';
 	  }
@@ -1546,6 +1546,9 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 		}
 	}
 
+	handleAjaxCalling('/features/synonyms.json?', aFeatureSynonyms,
+			featureStr, -1, {featureSelected: featureSelected});
+	
 	handleAjaxCalling('/features/properties.json?', aFeatureProps,
 		'us='+featurePropertyList, -1, { featureSelected: featureSelected});
 	
@@ -1734,6 +1737,26 @@ var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, optio
 						featureprops[j].name+"="+featureprops[j].value+"<br />");
 		}
 	}
+};
+
+var aFeatureSynonyms = function ajaxGetFeatureProps(featureDisplay, returned, options) {
+	var featureSelected = options.featureSelected;
+	var featSyns  = returned.response.results;
+	if(!featSyns || featSyns.length == 0)
+		return;
+	
+	$("div#DISP"+escapeId(featureSelected)).append(
+			   "<br /><strong>Synonyms : </strong><br />");
+	
+    for(var i=0; i<featSyns.length; i++) {	
+		var featuresyns= featSyns[i].synonyms;
+		for(var j=0; j<featuresyns.length; j++) {
+			$("div#DISP"+escapeId(featureSelected)).append(
+					featuresyns[j].type+":"+featuresyns[j].synonym+'; ');
+		}
+	}
+    
+	$("div#DISP"+escapeId(featureSelected)).append("<br /><br />");
 };
 
 var aFeaturePubs = function ajaxGetFeaturePubs(featureDisplay, returned, options) {
