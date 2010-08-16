@@ -1431,13 +1431,18 @@ function showBasesOfSelectedFeatures(fDisplay) {
 }
 
 function centerOnFeatureByDisplayIndex(index, featureSelected) {
-	centerOnFeature(featureDisplayObjs[index-1], undefined, featureSelected);
+	centerOnFeature(featureDisplayObjs[index-1], undefined, featureSelected, undefined);
 }
 
-function centerOnFeature(fDisplay, event, featureSelected) {	
+function centerOnFeature(fDisplay, event, featureSelected, region) {	
 	//debugLog(arguments);
 	if(event != undefined)
 		handleFeatureClick(fDisplay, event, featureSelected);
+	
+	var inputObj = { features:featureSelected };
+	if(region != undefined) {
+		inputObj.region = region;
+	}
 	
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
@@ -1456,9 +1461,9 @@ function centerOnFeature(fDisplay, event, featureSelected) {
 			fDisplay.firstTime = true;
 			returnedSequence = undefined;
 			fDisplay.highlightFeatures.push(featureSelected);
+			document.title = fDisplay.srcFeature;
 			drawAll(fDisplay);
-	},
-	{ features:featureSelected }, fDisplay, {  });
+	}, inputObj, fDisplay, {  });
 }
 
 //
@@ -1718,7 +1723,11 @@ var aFeatureSynonyms = function ajaxGetFeatureProps(featureDisplay, returned, op
 		var featuresyns= featSyns[i].synonyms;
 		for(var j=0; j<featuresyns.length; j++) {
 			$("div#DISP"+escapeId(featureSelected)).append(
-					featuresyns[j].type+":"+featuresyns[j].synonym+'; ');
+					featuresyns[j].type+":"+featuresyns[j].synonym);
+			if(featuresyns[j].is_current == 'False')
+				$("div#DISP"+escapeId(featureSelected)).append(' (not current); ');
+			else
+				$("div#DISP"+escapeId(featureSelected)).append('; ');
 		}
 	}
     
