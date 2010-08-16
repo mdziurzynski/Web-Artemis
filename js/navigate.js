@@ -3,15 +3,25 @@ function navigate(fDisplay) {
     $("div#GO").dialog({ height: 285 ,
 		width:450, position: 'center', title:'Find', show:'fast',
 		close: function(event, ui) { $(this).remove(); },
+		open: function(event, ui) { setCheckBoxStatus(); },
 		buttons: {
 		'Go': function() {
     	if ($(":radio[@name='rdio']:checked").val() == 'gene'){
-     		var gotoFeature = $(this).find('#gotoFeature').val();
+     		var gotoFeature = $(this).find('#gotoFeature').val();   		
+     		if( $(":checkbox[name='region']").is(':checked') )
+     			centerOnFeature(fDisplay, undefined, gotoFeature, fDisplay.srcFeature);
+     		else
+     			centerOnFeature(fDisplay, undefined, gotoFeature);
      		$(this).dialog('close');
-     		centerOnFeature(fDisplay, undefined, gotoFeature);
     	} else if($(":radio[@name='rdio']:checked").val() == 'syn') {
     		
     		$(this).css('cursor','wait');
+    		
+     		var regex = $(":checkbox[name='regex']").is(':checked'); 
+     		var inputObj = { 'term':$(this).find('#getSyn').val() }; 
+     		//inputObj = { 'regex':regex, 'term':$(this).find('#getSyn').val() };
+     		//setRegion(fDisplay, inputObj);
+     		
      		handleAjaxCalling('/features/withnamelike.json?', 
      				function (fDisplay, returned, options) {
      			$(options.goDialog).css('cursor','default');
@@ -30,8 +40,7 @@ function navigate(fDisplay) {
      		        	f.uniquename+'</a><br />';
      			}
      			setSearchResultWindow(l);
-     		 }, { 'term':$(this).find('#getSyn').val() }, 
-     		 fDisplay, { 'goDialog':$(this) });
+     		 }, inputObj, fDisplay, { 'goDialog':$(this) });
 
      	} else if($(":radio[@name='rdio']:checked").val() == 'base') {
      		// goto base 
@@ -50,7 +59,10 @@ function navigate(fDisplay) {
      		drawAll(fDisplay);
      	} else if($(":radio[@name='rdio']:checked").val() == 'qual'){
      		
-     		var regex = $(":checkbox[name='qualRegEx']").is(':checked'); 
+     		var regex = $(":checkbox[name='regex']").is(':checked'); 
+     		var inputObj = { 'regex':regex, 'value':$(this).find('#getQual').val() };
+     		setRegion(fDisplay, inputObj);
+     		
      		handleAjaxCalling('/features/withproperty.json?', 
      				function (fDisplay, returned, options) {
 
@@ -69,11 +81,13 @@ function navigate(fDisplay) {
      		        	f.feature+"</a> "+f.term+'='+f.value+'<br />';
      			}
      			setSearchResultWindow(l);
-     		 }, { 'regex':regex, 'value':$(this).find('#getQual').val(), 'region':fDisplay.srcFeature }, 
-     		 fDisplay, { 'goDialog':$(this) });
+     		 }, inputObj, fDisplay, { 'goDialog':$(this) });
      	} else if($(":radio[@name='rdio']:checked").val() == 'cvs') {
 
-     		var regex = $(":checkbox[name='cvRegEx']").is(':checked');
+     		var regex = $(":checkbox[name='regex']").is(':checked');
+     		var inputObj = {  'regex':regex, 'term':$(this).find('#getCv').val() };
+     		setRegion(fDisplay, inputObj);
+     		
      		handleAjaxCalling('/features/withterm.json?', 
      				function (fDisplay, returned, options) {
      			var features = returned.response.features;
@@ -91,8 +105,7 @@ function navigate(fDisplay) {
      		        	f.feature+"</a> "+f.term+' ('+f.cv+')<br />';
      			}
      			setSearchResultWindow(l);
-     		 }, {  'regex':regex, 'term':$(this).find('#getCv').val(), 'region':fDisplay.srcFeature }, 
-     		 fDisplay, { 'goDialog':$(this) });
+     		 }, inputObj, fDisplay, { 'goDialog':$(this) });
      	}
 		},
 		Cancel: function() {
@@ -102,20 +115,26 @@ function navigate(fDisplay) {
     
     var searchTable = 
     	'<table>'+
-    	'<tr><td><input type="radio" name="rdio" value="gene" checked="checked" />Gene Name:</td>'+
-    	    '<td><input id="gotoFeature" type="text" value="" onclick="$(\'input[value=gene]:radio\').attr(\'checked\', true);"/></td></tr>' +
-    	'<tr><td><input type="radio" name="rdio" value="syn" />Synonym:</td>'+
-    	    '<td><input id="getSyn" type="text" value="" onclick="$(\'input[value=syn]:radio\').attr(\'checked\', true);"/></td></tr>' +
+		'<tr><td><input type="radio" name="rdio" value="gene" checked="checked" />Gene Name:</td>'+
+	    '<td><input id="gotoFeature" type="text" value="" onclick="$(\'input[value=gene]:radio\').attr(\'checked\', true); setCheckBoxStatus();"/></td></tr>' +
+	    
     	'<tr><td><input type="radio" name="rdio" value="base" />Base Number:</td>'+
-    		'<td><input id="gotoBase" type="text" value=""/ onclick="$(\'input[value=base]:radio\').attr(\'checked\', true);"></td><tr/>' +
+    		'<td><input id="gotoBase" type="text" value=""/ onclick="$(\'input[value=base]:radio\').attr(\'checked\', true); setCheckBoxStatus();"></td><tr/>' +
+        
+	    '<tr><td><input type="radio" name="rdio" value="syn" />Synonym:</td>'+
+	    '<td><input id="getSyn" type="text" value="" onclick="$(\'input[value=syn]:radio\').attr(\'checked\', true); setCheckBoxStatus()"/></td></tr>' +
+
     	'<tr><td><input type="radio" name="rdio" value="qual" />Qualifier Text:</td>'+
-    		'<td><input id="getQual" type="text" value="" onclick="$(\'input[value=qual]:radio\').attr(\'checked\', true);"/></td><tr/>' +
-    	'<tr><td></td>'+
-    		'<td><input type="checkbox" name="qualRegEx" checked="true" />using wildcard</td><tr/>' +
+    		'<td><input id="getQual" type="text" value="" onclick="$(\'input[value=qual]:radio\').attr(\'checked\', true); setCheckBoxStatus()"/></td><tr/>' +
+
     	'<tr><td><input type="radio" name="rdio" value="cvs" />Controlled Vocabulary Text:</td>'+
-    		'<td><input id="getCv" type="text" value="" onclick="$(\'input[value=cvs]:radio\').attr(\'checked\', true);"/></td><tr/>' +
-    		'<tr><td></td>'+
-    		'<td><input type="checkbox" name="cvRegEx" checked="true" />using wildcard</td><tr/>' +
+    		'<td><input id="getCv" type="text" value="" onclick="$(\'input[value=cvs]:radio\').attr(\'checked\', true); setCheckBoxStatus()"/></td><tr/>' +
+
+        '<tr></tr>'+
+            
+        '<tr><td><input type="checkbox" name="region" checked="true" />only within '+fDisplay.srcFeature+'</td>'+
+    		'<td><input type="checkbox" name="regex" checked="true" />using wildcard</td><tr/>' +
+    		
     	'</table>';
     
     $("div#GO").html(searchTable);
@@ -123,6 +142,25 @@ function navigate(fDisplay) {
     $("#open").click(function(event){
     	$("div#GO").dialog( "close" );
     });
+}
+
+function setRegion(fDisplay, inputObj) {
+ 	if( $(":checkbox[name='region']").is(':checked') )
+ 		inputObj.region = fDisplay.srcFeature;
+}
+
+function setCheckBoxStatus() {
+    if ($('input[value=gene]:radio').is(':checked') || $('input[value=base]:radio').is(':checked') ) {
+    	 $(":checkbox[name='regex']").attr('disabled', true);
+    } else {
+    	$(":checkbox[name='regex']").removeAttr('disabled');
+    }
+    
+    if ($('input[value=base]:radio').is(':checked') ) {
+   	 	$(":checkbox[name='region']").attr('disabled', true);
+    } else {
+   		$(":checkbox[name='region']").removeAttr('disabled');
+    }
 }
 
 function setSearchResultWindow (res) {
