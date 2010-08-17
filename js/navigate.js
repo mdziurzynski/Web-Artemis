@@ -18,9 +18,8 @@ function navigate(fDisplay) {
     		$(this).css('cursor','wait');
     		
      		var regex = $(":checkbox[name='regex']").is(':checked'); 
-     		var inputObj = { 'term':$(this).find('#getSyn').val() }; 
-     		//inputObj = { 'regex':regex, 'term':$(this).find('#getSyn').val() };
-     		//setRegion(fDisplay, inputObj);
+     		var inputObj = { 'regex':regex, 'term':$(this).find('#getSyn').val() };
+     		setRegion(fDisplay, inputObj);
      		
      		handleAjaxCalling('/features/withnamelike.json?', 
      				function (fDisplay, returned, options) {
