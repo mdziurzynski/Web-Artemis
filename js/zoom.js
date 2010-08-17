@@ -11,13 +11,11 @@ function setScrollHandle(scrollbar, fDisplay) {
 	// TODO slider scaling
 	// http://groups.google.com/group/jquery-ui/browse_thread/thread/1605420a9af60ab2
 	//
-	/*var handleSize = fDisplay.basesDisplayWidth/fDisplay.sequenceLength*100;
-	
-	if(handleSize > 5) {
-		handleSize = 5;
-	}
-	//debugLog("SLIDER WIDTH: "+scrollbar.find('.ui-slider-handle').css('width'));
-	scrollbar.find('.ui-slider-handle').css({ width: handleSize+'%' });*/
+    /*var remainder = fDisplay.sequenceLength - (fDisplay.basesDisplayWidth/2);
+	var proportion = remainder / (parseInt(fDisplay.sequenceLength) + parseInt(fDisplay.basesDisplayWidth/2));
+	var sliderWidth = $('#slider'+fDisplay.index).width();
+	var handleSize = sliderWidth - (proportion * sliderWidth);
+	$('#slider'+fDisplay.index).find('.ui-slider-handle').css({ width: handleSize });*/
 }
 
 function zoom(fDisplay, scrollbar, direction) {
