@@ -126,12 +126,12 @@ var start_codons_23 = new Array('ATT', 'ATG', 'GTG');
 var codon_translation_array = translation_table_default;
 
 function setTranslationTable(tableIndex) {
-	debugLog("setTranslationTable "+tableIndex);
+	debugLog("TRANSLATION TABLE translation_table = "+tableIndex);
 	tableIndex--;
 	codon_translation_array = translation_table_default;
-	if(tableIndex == 0)
-	  return;
-	
+	if(tableIndex == 0 || isNaN(tableIndex))
+		return;
+
     for(var i = 0; i < translation_table[tableIndex][0].length; ++i) {
       var cod_plus_aa = translation_table[tableIndex][0][i];
       var codon_index = getIndexOfBase(cod_plus_aa.charAt(0)) * 16 +
