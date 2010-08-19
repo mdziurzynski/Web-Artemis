@@ -54,18 +54,10 @@ function drawString(ctx, text, posX, posY, textColor, rotation, font, fontSize) 
 //Read a page's GET URL variables and return them as an associative array
 function getUrlVars() {
     var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split("#")[0].split('&');
     for(var i = 0; i < hashes.length; i++)
     {
         hash = hashes[i].split('=');
-        
-        if(hash[1] != undefined ){
-          if(i == hashes.length-1 && hash[1].match(/\#$/)) {
-        	// strip terminating #
-        	hash[1] = hash[1].substring(0, hash[1].length-1);
-          }
-        }
-        
         vars.push(hash[0]);
         vars[hash[0]] = hash[1];
     }
