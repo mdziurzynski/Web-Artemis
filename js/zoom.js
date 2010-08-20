@@ -27,7 +27,7 @@ function zoom(fDisplay, scrollbar, direction) {
 
 	    $('#slider_vertical_container'+fDisplay.index).slider( "option", "value", value );
 
-    	zoomOnce(fDisplay, scrollbar);	
+    	//zoomOnce(fDisplay, scrollbar);	
     	setTimeout(function() { zoom(fDisplay, step, direction); }, ztimeoutTime);  
     }
     return false;
@@ -56,9 +56,12 @@ function zoomOnce(fDisplay, scrollbar) {
 
 	$('#slider'+fDisplay.index).slider('option', { 
 		'max': fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2,
-		'step': fDisplay.basesDisplayWidth/4,
+		'step': Math.round(fDisplay.basesDisplayWidth/4),
 		'value': fDisplay.leftBase});
 	
+	/*debugLog("step="+$('#slider'+fDisplay.index).slider('option', 'step')+
+			" value="+$('#slider'+fDisplay.index).slider('option', 'value')+
+			" leftBase="+newLeftBase);*/
     // update .ui-slider-horizontal .ui-slider-handle
     setScrollHandle(scrollbar, fDisplay);	
 }
