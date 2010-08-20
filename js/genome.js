@@ -37,6 +37,8 @@ var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
+var excludes = ['gene', 'pseudogene', 'match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript'];
+var includes = ['exon', 'pseudogenic_exon', 'repeat_region', 'polypeptide_motif	'];
 
 var colour = [ 
     '255,255,255',
@@ -83,6 +85,11 @@ $(document).ready(function() {
 		basesDisplayWidth = 8000;
 	} else {
 		basesDisplayWidth = parseInt(basesDisplayWidth);
+	}
+	
+	var excludeFeatures = arr["exclude"];
+	if(excludeFeatures) {
+		excludes = excludeFeatures.split(',');
 	}
 	
 	var listSetting = arr["featureList"];
@@ -276,6 +283,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:300px">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
     		'<li><a href="#gotoGene" id="gotoGene">Find... </a></li>'+
+    		'<li><a href="#excludeFeature" id="excludeFeature">Features to include/exclude... </a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
     		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
@@ -305,6 +313,63 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     		showBasesOfSelectedFeatures(self);
     	} else if(action.match(/showAAOfSelected/)) {
     		showAminoAcidsOfSelectedFeatures(self);
+    	} else if(action.match(/excludeFeature/)) {
+
+    		$("div#properties").html("<div id='excludeList'></div>");
+    	    $("div#excludeList").dialog({ height: 385 ,
+    			width:450, position: 'center', title:'Drag Features Between Include/Exclude Lists',
+    			close: function(event, ui) { $(this).remove(); },
+    			buttons: {
+    			'Save': function() {
+    				excludes = [];
+
+    				$('ul#exclude').find('li').each(function() { 
+    					excludes.push(this.innerHTML); 
+    				})
+    				
+    				for(var i=0;i<excludes.length; i++)
+    					debugLog("EXCLUDE: "+excludes[i]);
+    				
+    				includes = [];
+
+    				$('ul#include').find('li').each(function() { 
+    					includes.push(this.innerHTML); 
+    				})
+    				
+    				for(var i=0;i<includes.length; i++)
+    					debugLog("INCLUDE: "+includes[i]);
+    				
+    				$(this).dialog('close');
+    			},
+    			Cancel: function() {
+    				$(this).dialog('close');
+    			}
+    		}});
+
+
+    	    $("div#excludeList").append('<ul id="include" class="droptrue">');
+    	    $("ul#include").append('<lh>Include:</lh>');
+    	    for(var i=0; i<includes.length; i++)
+    	    	$("ul#include").append('<li class="ui-state-default">'+includes[i]+'</li>');
+
+    	    $("div#excludeList").append('</ul');
+    		
+    	    $("div#excludeList").append('<ul id="exclude" class="droptrue">');
+    	    $("ul#exclude").append('<lh>Exclude:</lh>');
+    	    for(var i=0; i<excludes.length;i++)
+    	    	$("ul#exclude").append('<li class="ui-state-default">'+excludes[i]+'</li>');
+    	    $("div#excludeList").append('</ul');
+
+    	    
+    	    $("ul.droptrue").sortable({
+    			connectWith: 'ul'
+    		});
+
+    		$("ul.dropfalse").sortable({
+    			connectWith: 'ul',
+    			dropOnEmpty: false
+    		});
+    		$("#exclude, #include").disableSelection();
     	}
     });
     
@@ -1116,7 +1181,6 @@ function drawFeatures(featureDisplay) {
 	
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
-	var excludes = ['match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'gene', 'pseudogene'];
 	var currentTime = new Date().getTime();
 	
 	handleAjaxCalling(serviceName, aFeatureFlatten,

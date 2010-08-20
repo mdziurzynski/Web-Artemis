@@ -1,7 +1,7 @@
 function navigate(fDisplay) {
 	$("div#properties").html("<div id='GO'></div>");
     $("div#GO").dialog({ height: 285 ,
-		width:450, position: 'center', title:'Find', show:'fast',
+		width:450, position: 'center', title:'Find',
 		close: function(event, ui) { $(this).remove(); },
 		open: function(event, ui) { setCheckBoxStatus(); },
 		buttons: {
