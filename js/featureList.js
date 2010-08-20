@@ -33,9 +33,11 @@ function featureListEvents(fDisplay) {
 
 
 function positionFeatureList(featureDisplay) {
-	var ghgt = $('#graph').height();
+	var ghgt = 0;
+	if($('#graph').children().length > 0)
+		ghgt = $('#graph').height();
+
 	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt; 
-	
     var cssObj = {
 			 'margin-left': margin+'px',
 			 'margin-right': margin+'px',
