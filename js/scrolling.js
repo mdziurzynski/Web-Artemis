@@ -28,7 +28,6 @@ function scroll(direction, fDisplay) {
         	}
         	
         	fDisplay.leftBase = leftBase;
-        	drawAll(fDisplay);
         	$('#slider'+fDisplay.index).slider('option', 'value', leftBase);
 
         	//var code2run = "scroll("+direction+"," +"featureDisplay)";
