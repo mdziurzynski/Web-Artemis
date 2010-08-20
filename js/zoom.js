@@ -6,7 +6,6 @@ var ztimeoutTime = 450; // ms
 
 function setScrollHandle(scrollbar, fDisplay) {	
 	var slider = $('#slider'+fDisplay.index);
-	slider.slider('option', 'step', fDisplay.basesDisplayWidth/2);
 
 	// TODO slider scaling
 	// http://groups.google.com/group/jquery-ui/browse_thread/thread/1605420a9af60ab2
@@ -27,7 +26,7 @@ function zoom(fDisplay, scrollbar, direction) {
 		}
 
 	    $('#slider_vertical_container'+fDisplay.index).slider( "option", "value", value );
-	    
+
     	zoomOnce(fDisplay, scrollbar);	
     	setTimeout(function() { zoom(fDisplay, step, direction); }, ztimeoutTime);  
     }
@@ -43,22 +42,25 @@ function zoomOnce(fDisplay, scrollbar) {
     	  showStopCodons = true;
     }
     
-    var centerBase = fDisplay.leftBase + (fDisplay.basesDisplayWidth/2);   
+    var centerBase = fDisplay.leftBase + (fDisplay.basesDisplayWidth/2); 
     fDisplay.basesDisplayWidth = basesInView;
     var newLeftBase = Math.round(centerBase - (basesInView/2));
+
+      
     if(newLeftBase > 1 && fDisplay.leftBase > 1) {
     	fDisplay.leftBase = newLeftBase;
-    	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     } else if( newLeftBase > fDisplay.sequenceLength-basesInView/2 ) {
     	newLeftBase = Math.round(fDisplay.sequenceLength-basesInView/2);
     	fDisplay.leftBase = newLeftBase;
-    	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     }
-	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2);
+
+	$('#slider'+fDisplay.index).slider('option', { 
+		'max': fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2,
+		'step': fDisplay.basesDisplayWidth/4,
+		'value': fDisplay.leftBase});
 	
     // update .ui-slider-horizontal .ui-slider-handle
     setScrollHandle(scrollbar, fDisplay);	
-    drawAll(fDisplay);
 }
 
 function addZoomEventHandlers(fDisplay) {
