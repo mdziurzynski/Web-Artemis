@@ -190,6 +190,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.sequence;
 	this.minimumDisplay = false;
 	this.showStopCodons = false;
+	this.nodraw = false;
 	
 	this.highlightFeatures = new Array();
 	
@@ -233,6 +234,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 			lastLeftBase = parseInt(ui.value);
 	    },
 		change : function(ev, ui) {
+	    	if(self.firstTime || self.nodraw)
+	    		return;
 			self.leftBase = parseInt(ui.value);
 			drawAndScroll(self, lastLeftBase);
 		}
@@ -245,6 +248,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		value: self.sequenceLength-self.basesDisplayWidth,
 		step: 100,
 		change: function(event, ui) {
+    		if(self.firstTime || self.nodraw)
+    			return;
 			zoomOnce(self, scrollbar);
 		}
 	});
@@ -385,7 +390,7 @@ function drawAndScroll(fDisplay, lastLeftBase) {
 
 function scrollDisplay(fDisplay, diff, comparisonIndex) {
 	if(fDisplay.comparison != undefined) {
-	  for(var i= 0; i<fDisplay.comparison.length; i++) {
+	  for(var i = comparisonIndex+1; i<fDisplay.comparison.length; i++) {
 		  var comparison = fDisplay.comparison[i];
 		  if(comparison.lock && comparison.index != comparisonIndex) {
 			  var fDisplay1 = comparison.featureDisplay1;
@@ -413,9 +418,11 @@ function updateDisplay(fDisplay, diff) {
 		pos = 1;
 	}
 
-	$('#slider'+ind).slider('option', 'value', pos);
 	fDisplay.leftBase = pos;
+	fDisplay.nodraw = true;
+	$('#slider'+ind).slider('option', 'value', pos);
 	drawAll(fDisplay);
+	fDisplay.nodraw = false;
 }
 
 function comparisonObj(featureDisplay1, featureDisplay2, index) {
@@ -513,13 +520,13 @@ function doubleClickComparison(featureDisplay) {
 			
 			if(fDisplay1.srcFeature == centerMatch.f1) {
 				fDisplay1.leftBase = Math.round(center1 - (fDisplay1.basesDisplayWidth/2));
-				drawAll(fDisplay1);
+				//drawAll(fDisplay1);
 				$('#slider'+fDisplay1.index).slider('option', 'value', fDisplay1.leftBase);
 			}
 			
 			if(fDisplay2.srcFeature == centerMatch.f2) {
 				fDisplay2.leftBase = Math.round(center2 - (fDisplay2.basesDisplayWidth/2));
-				drawAll(fDisplay2);
+				//drawAll(fDisplay2);
 				$('#slider'+fDisplay2.index).slider('option', 'value', fDisplay2.leftBase);
 			}
 		}
