@@ -7,17 +7,16 @@ var lastLeftBase = -1;
 
 function scroll(direction, fDisplay) {
     if (scrolling == 1) {
-    	
     	var leftBase = $('#slider'+fDisplay.index).slider('option', 'value');
             if(direction == 1) {
             	// scroll right
             	leftBase = Math.round(Math.floor(
-            			leftBase + $('#slider'+fDisplay.index).slider('option', 'step')/4));
+            			leftBase + $('#slider'+fDisplay.index).slider('option', 'step')));
             }
             else {
             	// scroll left
             	leftBase = Math.round(Math.floor(
-            			leftBase - $('#slider'+fDisplay.index).slider('option', 'step')/4));
+            			leftBase - $('#slider'+fDisplay.index).slider('option', 'step')));
             	if(leftBase < 1) {
             		leftBase = 1;
             	}
