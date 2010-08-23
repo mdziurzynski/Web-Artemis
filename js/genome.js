@@ -1646,6 +1646,7 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 			removeBamDisplay(fDisplay);
 		}
 		drawAll(fDisplay);
+		document.title = fDisplay.srcFeature;
 	});
 	$('body').css('cursor','default');
 };
