@@ -229,7 +229,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		animate: true,
 		min : 1,
 		max : self.sequenceLength-100,
-		step : self.basesDisplayWidth/10,
+		step : 1,
 		start: function(event, ui) {
 			lastLeftBase = parseInt(ui.value);
 	    },
