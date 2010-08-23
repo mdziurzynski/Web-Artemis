@@ -38,10 +38,6 @@ function zoomOnce(fDisplay, scrollbar) {
 	var val = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value');
     fDisplay.basesDisplayWidth = fDisplay.sequenceLength - val;
     var newLeftBase = Math.round(centerBase - (fDisplay.basesDisplayWidth/2));
-
-    var step = Math.round(fDisplay.basesDisplayWidth/10);
-    var times = Math.round(newLeftBase/step);
-    newLeftBase = times*step;
     
     if( newLeftBase > fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2 ) {
     	newLeftBase = Math.round(fDisplay.sequenceLength-basesInView/2);
@@ -56,7 +52,7 @@ function zoomOnce(fDisplay, scrollbar) {
 
 	$('#slider'+fDisplay.index).slider('option', { 
 		'max': fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2,
-		'step': step,
+		'step': 1,
 		'value': fDisplay.leftBase});
 	
 	/*debugLog("step="+$('#slider'+fDisplay.index).slider('option', 'step')+
