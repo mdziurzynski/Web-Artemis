@@ -19,7 +19,7 @@ function setScrollHandle(scrollbar, fDisplay) {
 
 function zoom(fDisplay, scrollbar, direction) {
     if (zooming > 0) {
-    	var step = Math.round(fDisplay.basesDisplayWidth/3)*direction;
+    	var step = Math.round(fDisplay.basesDisplayWidth/4)*direction;
     	var value = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value')+step;
 		if(value > fDisplay.sequenceLength-140) {
 			value = fDisplay.sequenceLength-140;
@@ -34,34 +34,35 @@ function zoom(fDisplay, scrollbar, direction) {
 }
 
 function zoomOnce(fDisplay, scrollbar) {
-    var value = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value');
-    var basesInView = fDisplay.sequenceLength-value;
-    if(basesInView > 50000) {
-    	  showStopCodons = false;
-    } else if(basesInView < 1000) {
-    	  showStopCodons = true;
-    }
-    
-    var centerBase = fDisplay.leftBase + (fDisplay.basesDisplayWidth/2); 
-    fDisplay.basesDisplayWidth = basesInView;
-    var newLeftBase = Math.round(centerBase - (basesInView/2));
+    var centerBase = parseInt(fDisplay.leftBase) + parseInt(Math.round(fDisplay.basesDisplayWidth/2)); 
+	var val = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value');
+    fDisplay.basesDisplayWidth = fDisplay.sequenceLength - val;
+    var newLeftBase = Math.round(centerBase - (fDisplay.basesDisplayWidth/2));
 
-      
-    if(newLeftBase > 1 && fDisplay.leftBase > 1) {
-    	fDisplay.leftBase = newLeftBase;
-    } else if( newLeftBase > fDisplay.sequenceLength-basesInView/2 ) {
+    var step = Math.round(fDisplay.basesDisplayWidth/10);
+    var times = Math.round(newLeftBase/step);
+    newLeftBase = times*step;
+    
+    if( newLeftBase > fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2 ) {
     	newLeftBase = Math.round(fDisplay.sequenceLength-basesInView/2);
-    	fDisplay.leftBase = newLeftBase;
+    }
+    fDisplay.leftBase = newLeftBase;
+
+    if(fDisplay.basesDisplayWidth > 50000) {
+  	  showStopCodons = false;
+    } else if(fDisplay.basesDisplayWidth < 1000) {
+  	  showStopCodons = true;
     }
 
 	$('#slider'+fDisplay.index).slider('option', { 
 		'max': fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2,
-		'step': Math.round(fDisplay.basesDisplayWidth/4),
+		'step': step,
 		'value': fDisplay.leftBase});
 	
 	/*debugLog("step="+$('#slider'+fDisplay.index).slider('option', 'step')+
 			" value="+$('#slider'+fDisplay.index).slider('option', 'value')+
-			" leftBase="+newLeftBase);*/
+			" leftBase="+newLeftBase+" "+
+			" center="+ ($('#slider'+fDisplay.index).slider('option', 'value')+(fDisplay.basesDisplayWidth/2)));*/
     // update .ui-slider-horizontal .ui-slider-handle
     setScrollHandle(scrollbar, fDisplay);	
 }
