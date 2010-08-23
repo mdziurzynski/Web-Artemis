@@ -38,7 +38,7 @@ var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
 var excludes = ['gene', 'pseudogene', 'match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript'];
-var includes = ['exon', 'pseudogenic_exon', 'repeat_region', 'polypeptide_motif	'];
+var includes = ['exon', 'pseudogenic_exon', 'repeat_region', 'gap', 'contig', 'ncRNA', 'polypeptide_motif	'];
 
 var colour = [ 
     '255,255,255',
@@ -336,8 +336,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     					excludes.push(this.innerHTML); 
     				})
     				
-    				for(var i=0;i<excludes.length; i++)
-    					debugLog("EXCLUDE: "+excludes[i]);
+    				/*for(var i=0;i<excludes.length; i++)
+    					debugLog("EXCLUDE: "+excludes[i]);*/
     				
     				includes = [];
 
@@ -345,9 +345,10 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     					includes.push(this.innerHTML); 
     				})
     				
-    				for(var i=0;i<includes.length; i++)
-    					debugLog("INCLUDE: "+includes[i]);
+    				/*for(var i=0;i<includes.length; i++)
+    					debugLog("INCLUDE: "+includes[i]);*/
     				
+    				drawAll(self);
     				$(this).dialog('close');
     			},
     			Cancel: function() {
