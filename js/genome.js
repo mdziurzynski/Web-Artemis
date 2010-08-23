@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 2;
+var serviceType = 5;
 var serviceTypeBam = 4;
 
 var webService = [ "http://127.0.0.1/testservice/",
@@ -37,7 +37,7 @@ var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
-var excludes = ['gene', 'pseudogene', 'match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript'];
+var excludes = ['gene', 'pseudogene', 'match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
 var includes = ['exon', 'pseudogenic_exon', 'repeat_region', 'gap', 'contig', 'ncRNA', 'polypeptide_motif	'];
 
 var colour = [ 
@@ -1271,14 +1271,30 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
 	if(startFeature > margin+displayWidth)   
 		return featureStr;
     endFeature = margin+displayWidth;
-    extra += 'border-right: none';
+    extra += 'border-right: none;';
   }
 
   var pos = 'margin-top:'+ypos+"px; margin-left:"+startFeature+"px";
-  var width = (endFeature-startFeature)+"px";
+  var width = endFeature-startFeature;
 
+  if(feature.is_fmax_partial == "True") {
+	  if(feature.strand == 1)
+		  extra += 'border-right-style:double; border-right-width: 10px;';
+	  else
+		  extra += 'border-left-style:double; border-left-width: 10px;';
+	  width -= 10;
+  }
+  
+  if(feature.is_fmin_partial == "True") {
+	  if(feature.strand == 1)
+		  extra += 'border-left-style:double; border-left-width: 10px;';
+	  else
+		  extra += 'border-right-style:double; border-right-width: 10px;';
+	  width -= 10;
+  }
+  
   featureStr = featureStr + 
-	'<div id='+feature.feature+' class="'+className+'" style="width:'+width+'; '+pos+';'+extra+'"></div>';
+	'<div id='+feature.feature+' class="'+className+'" style="width:'+width+'px; '+pos+';'+extra+'"></div>';
   return featureStr;
 }
 
