@@ -11,12 +11,12 @@ function scroll(direction, fDisplay) {
             if(direction == 1) {
             	// scroll right
             	leftBase = Math.round(Math.floor(
-            			leftBase + $('#slider'+fDisplay.index).slider('option', 'step')));
+            			leftBase + fDisplay.basesDisplayWidth/6));
             }
             else {
             	// scroll left
             	leftBase = Math.round(Math.floor(
-            			leftBase - $('#slider'+fDisplay.index).slider('option', 'step')));
+            			leftBase - fDisplay.basesDisplayWidth/6));
             	if(leftBase < 1) {
             		leftBase = 1;
             	}
