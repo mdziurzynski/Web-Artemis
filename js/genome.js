@@ -229,13 +229,14 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 		animate: true,
 		min : 1,
 		max : self.sequenceLength-100,
-		step : self.basesDisplayWidth/2,
+		step : self.basesDisplayWidth/10,
 		start: function(event, ui) {
 			lastLeftBase = parseInt(ui.value);
 	    },
 		change : function(ev, ui) {
 	    	if(self.firstTime || self.nodraw)
 	    		return;
+
 			self.leftBase = parseInt(ui.value);
 			drawAndScroll(self, lastLeftBase);
 		}
@@ -271,7 +272,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 			};
 			$('#featureDisplay'+self.index).css(cssObj);
 			setGraphCss(displayWidth, self.marginTop, margin, self.frameLineHeight);
-			
+
 			drawAll(self);
 			adjustFeatureDisplayPosition(true, self);
 			drawFrameAndStrand(self);
@@ -411,7 +412,9 @@ function scrollDisplay(fDisplay, diff, comparisonIndex) {
 
 function updateDisplay(fDisplay, diff) {
 	var ind = fDisplay.index;  
-	var pos = $('#slider'+ind).slider('value')+diff
+	var pos = $('#slider'+ind).slider('value')+diff;
+	
+	debugLog("diff= "+diff+" pos="+pos);
 	if(pos > fDisplay.sequenceLength) {
 		pos = fDisplay.sequenceLength - fDisplay.basesDisplayWidth;
 	} else if(pos < 1) {
@@ -679,7 +682,6 @@ function addEventHandlers(fDisplay) {
 			} else {
 				removeBamDisplay(fDisplay);
 			}
-
 			drawAll(fDisplay);
 		});
 		
@@ -896,7 +898,7 @@ function addFrameLine(selector, ypos, frame, featureDisplay) {
 }
 
 function drawAll(fDisplay) {
-      $('#featureDisplay'+fDisplay.index).html('');
+	  $('#featureDisplay'+fDisplay.index).html('');
       var showSequence = true;
       
       if(showBam && !fDisplay.minimumDisplay) {
@@ -1639,7 +1641,6 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 		if(showBam) {
 			removeBamDisplay(fDisplay);
 		}
-		
 		drawAll(fDisplay);
 	});
 	$('body').css('cursor','default');
@@ -2267,7 +2268,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 
     if (fDisplay.firstTime) {
     	$('#slider'+fDisplay.index).slider('option', 'max', fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2);
-    	$('#slider'+fDisplay.index).slider('option', 'step', fDisplay.basesDisplayWidth/2);
+    	$('#slider'+fDisplay.index).slider('option', 'step', fDisplay.basesDisplayWidth/10);
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     	fDisplay.firstTime = false;
     	setTranslation(fDisplay, fDisplay.organism_id);
