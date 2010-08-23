@@ -238,7 +238,10 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	    		return;
 
 			self.leftBase = parseInt(ui.value);
-			drawAndScroll(self, lastLeftBase);
+			if(ev.originalEvent == undefined)
+				drawAll(self, lastLeftBase);
+			else
+				drawAndScroll(self, lastLeftBase);
 		}
 	});
 
