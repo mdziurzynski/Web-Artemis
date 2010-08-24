@@ -137,9 +137,11 @@ function selectNextRow(fDisplay) {
 	    if( $(cell).css('background-color') == 'rgb(200, 200, 200)' ) {
 	    	deselectAllFeatures(fDisplay);
 	    	selectFromList($(rows[i]).next(), fDisplay);
+	    	$('#featureList').animate({scrollTop:i*$(rows[i]).height()}, 200);
 	    	return;
 	    }
 	}
+
 }
 
 function selectPrevRow(fDisplay) {
@@ -151,6 +153,7 @@ function selectPrevRow(fDisplay) {
 	    		return;
 	    	deselectAllFeatures(fDisplay);
 	    	selectFromList($(rows[i]).prev(), fDisplay);
+	    	$('#featureList').animate({scrollTop:i*$(rows[i]).height()}, 200);
 	    	return;
 	    }
 	}
