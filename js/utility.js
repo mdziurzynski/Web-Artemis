@@ -110,10 +110,14 @@ function selectFeature(featureSelected, fDisplay) {
     	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find(selId).each(
     			function( intIndex ){ $( this ).css('border-width', '2px');});
 	} else {
-		$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ).css('border-width', '2px');
+		selectFeatureExact(featureSelected, fDisplay);
 	}
 
 	selectInList(featureSelected);
+}
+
+function selectFeatureExact(featureSelected, fDisplay) {
+	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ).css('border-width', '2px');
 }
 
 function getSelectedFeatureIds() {
