@@ -136,8 +136,7 @@ function selectNextRow(fDisplay) {
 		var cell = $(rows[i]).children()[1];
 	    if( $(cell).css('background-color') == 'rgb(200, 200, 200)' ) {
 	    	deselectAllFeatures(fDisplay);
-	    	selectFromList($(rows[i]).next(), fDisplay);
-	    	$('#featureList').animate({scrollTop:i*$(rows[i]).height()}, 200);
+	    	selectFromList($(rows[i]).next(), i, fDisplay);
 	    	return;
 	    }
 	}
@@ -152,15 +151,14 @@ function selectPrevRow(fDisplay) {
 	    	if(i == 0)
 	    		return;
 	    	deselectAllFeatures(fDisplay);
-	    	selectFromList($(rows[i]).prev(), fDisplay);
-	    	$('#featureList').animate({scrollTop:i*$(rows[i]).height()}, 200);
+	    	selectFromList($(rows[i]).prev(), i, fDisplay);
 	    	return;
 	    }
 	}
 }
 
 // select the given table row and associated feature
-function selectFromList(tr, fDisplay) {
+function selectFromList(tr, rowIndex, fDisplay) {
 	var td = $(tr).children()[0];
 	var name = $(tr).attr('id').replace(/:LIST$/,'');
 
@@ -170,6 +168,7 @@ function selectFromList(tr, fDisplay) {
 		selectFeatureExact(name, fDisplay);
 		selectInListExact(name);
 	}
+	showRow(tr);
 }
 
 function selectInList(featureSelected) {
@@ -178,8 +177,10 @@ function selectInList(featureSelected) {
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
     	var selId = "[id*=" + wildcardSearchString +"]";
     	$('table.#featureListTable > tbody').find(selId).children().each(function(index) {
-    	    if(index == 0)
+    	    if(index == 0) {
+    	    	showRow($(this).parent());
     	    	return;
+    	    }
     	    $(this).css('background-color', 'rgb(200, 200, 200)' );
     	});	
     	
@@ -190,10 +191,17 @@ function selectInList(featureSelected) {
 
 function selectInListExact(featureSelected) {
 	$('table.#featureListTable > tbody > tr#'+escapeId(featureSelected+':LIST')).children().each(function(index) {
-	    if(index == 0)
+	    if(index == 0) {
+	    	showRow($(this).parent());
 	    	return;
+	    }
 	    $(this).css('background-color', 'rgb(200, 200, 200)' );
 	});	
+}
+
+function showRow(tr) {
+	var rowIndex = $(tr).index();
+	$('#featureList').animate({scrollTop:rowIndex*$(tr).height()}, 200);
 }
 
 function deSelectAllInList() {
