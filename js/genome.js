@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 5;
+var serviceType = 2;
 var serviceTypeBam = 4;
 
 var webService = [ "http://127.0.0.1/testservice/",
@@ -301,93 +301,96 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     		'</ul>');
 		
     
-    $('#sequence'+this.index).contextMenu({
-        menu: 'fDispMenus'+self.index
-    },
-    function(action, el, pos) {
-    	if(action.match(/editFeat/)) {
-    		var selectedFeatures = getSelectedFeatureElements();
-    		if(selectedFeatures.length == 0)
-    			alert("No features selected.");
-
-    		for(var i=0; i<selectedFeatures.length; i++) {
-    			var thisTrack = findTrackByElement(selectedFeatures[i]);
-    			self.showFeatureFn[thisTrack].call(null, selectedFeatures[i].id, self);
-    		}
-    		
-    	} else if(action.match(/gotoGene/)) {
-    		navigate(self);
-    	} else if(action.match(/stopCodonToggle/)) {
-    		self.showStopCodons = !self.showStopCodons;
-			drawAll(self);
-    	} else if(action.match(/showBaseOfSelected/)) {
-    		showBasesOfSelectedFeatures(self);
-    	} else if(action.match(/showAAOfSelected/)) {
-    		showAminoAcidsOfSelectedFeatures(self);
-    	} else if(action.match(/excludeFeature/)) {
-
-    		$("div#properties").html("<div id='excludeList'></div>");
-    	    $("div#excludeList").dialog({ height: 385 ,
-    			width:450, position: 'center', title:'Drag Features Between Include/Exclude Lists',
-    			close: function(event, ui) { $(this).remove(); },
-    			buttons: {
-    			'Save': function() {
-    				excludes = [];
-
-    				$('ul#exclude').find('li').each(function() { 
-    					excludes.push(this.innerHTML); 
-    				})
-    				
-    				/*for(var i=0;i<excludes.length; i++)
-    					debugLog("EXCLUDE: "+excludes[i]);*/
-    				
-    				includes = [];
-
-    				$('ul#include').find('li').each(function() { 
-    					includes.push(this.innerHTML); 
-    				})
-    				
-    				/*for(var i=0;i<includes.length; i++)
-    					debugLog("INCLUDE: "+includes[i]);*/
-    				
-    				drawAll(self);
-    				$(this).dialog('close');
-    			},
-    			Cancel: function() {
-    				$(this).dialog('close');
-    			}
-    		}});
-
-
-    	    $("div#excludeList").append('<ul id="include" class="droptrue">');
-    	    $("ul#include").append('<lh>Include:</lh>');
-    	    for(var i=0; i<includes.length; i++)
-    	    	$("ul#include").append('<li class="ui-state-default">'+includes[i]+'</li>');
-
-    	    $("div#excludeList").append('</ul');
-    		
-    	    $("div#excludeList").append('<ul id="exclude" class="droptrue">');
-    	    $("ul#exclude").append('<lh>Exclude:</lh>');
-    	    for(var i=0; i<excludes.length;i++)
-    	    	$("ul#exclude").append('<li class="ui-state-default">'+excludes[i]+'</li>');
-    	    $("div#excludeList").append('</ul');
-
-    	    
-    	    $("ul.droptrue").sortable({
-    			connectWith: 'ul'
-    		});
-
-    		$("ul.dropfalse").sortable({
-    			connectWith: 'ul',
-    			dropOnEmpty: false
-    		});
-    		$("#exclude, #include").disableSelection();
-    	}
-    });
+    $('#sequence'+this.index).contextMenu({menu: 'fDispMenus'+self.index}, 
+    		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
+    $('#features'+this.index+'_'+this.trackIndex).contextMenu({menu: 'fDispMenus'+self.index},
+    		onShowMenu(event, menu)
+    		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
     
     // graph menu   
     setGraphMenu(self);
 }
+
+var rightClickMenu = function(action, el, pos, self) {
+	if(action.match(/editFeat/)) {
+		var selectedFeatures = getSelectedFeatureElements();
+		if(selectedFeatures.length == 0)
+			alert("No features selected.");
+
+		for(var i=0; i<selectedFeatures.length; i++) {
+			var thisTrack = findTrackByElement(selectedFeatures[i]);
+			self.showFeatureFn[thisTrack].call(null, selectedFeatures[i].id, self);
+		}
+		
+	} else if(action.match(/gotoGene/)) {
+		navigate(self);
+	} else if(action.match(/stopCodonToggle/)) {
+		self.showStopCodons = !self.showStopCodons;
+		drawAll(self);
+	} else if(action.match(/showBaseOfSelected/)) {
+		showBasesOfSelectedFeatures(self);
+	} else if(action.match(/showAAOfSelected/)) {
+		showAminoAcidsOfSelectedFeatures(self);
+	} else if(action.match(/excludeFeature/)) {
+
+		$("div#properties").html("<div id='excludeList'></div>");
+	    $("div#excludeList").dialog({ height: 385 ,
+			width:450, position: 'center', title:'Drag Features Between Include/Exclude Lists',
+			close: function(event, ui) { $(this).remove(); },
+			buttons: {
+			'Save': function() {
+				excludes = [];
+
+				$('ul#exclude').find('li').each(function() { 
+					excludes.push(this.innerHTML); 
+				})
+				
+				/*for(var i=0;i<excludes.length; i++)
+					debugLog("EXCLUDE: "+excludes[i]);*/
+				
+				includes = [];
+
+				$('ul#include').find('li').each(function() { 
+					includes.push(this.innerHTML); 
+				})
+				
+				/*for(var i=0;i<includes.length; i++)
+					debugLog("INCLUDE: "+includes[i]);*/
+				
+				drawAll(self);
+				$(this).dialog('close');
+			},
+			Cancel: function() {
+				$(this).dialog('close');
+			}
+		}});
+
+
+	    $("div#excludeList").append('<ul id="include" class="droptrue">');
+	    $("ul#include").append('<lh>Include:</lh>');
+	    for(var i=0; i<includes.length; i++)
+	    	$("ul#include").append('<li class="ui-state-default">'+includes[i]+'</li>');
+
+	    $("div#excludeList").append('</ul');
+		
+	    $("div#excludeList").append('<ul id="exclude" class="droptrue">');
+	    $("ul#exclude").append('<lh>Exclude:</lh>');
+	    for(var i=0; i<excludes.length;i++)
+	    	$("ul#exclude").append('<li class="ui-state-default">'+excludes[i]+'</li>');
+	    $("div#excludeList").append('</ul');
+
+	    
+	    $("ul.droptrue").sortable({
+			connectWith: 'ul'
+		});
+
+		$("ul.dropfalse").sortable({
+			connectWith: 'ul',
+			dropOnEmpty: false
+		});
+		$("#exclude, #include").disableSelection();
+	}
+};
 
 function drawAndScroll(fDisplay, lastLeftBase) {
 	var diff = fDisplay.leftBase - lastLeftBase;
