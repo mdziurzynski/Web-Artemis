@@ -73,8 +73,8 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 				   cvName = 'GO';
 			   }
 		   }
-		   
-		   if(cvName != 'GO') {
+
+		   if(cvName != 'GO' && cvName != 'annotation_change') {
 			   if(!ccHead) {
 				   ccHead = true;
 				   $("div#DISP"+escapeId(featureSelected)).append(
