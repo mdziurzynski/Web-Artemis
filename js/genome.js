@@ -303,8 +303,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     
     $('#sequence'+this.index).contextMenu({menu: 'fDispMenus'+self.index}, 
     		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
-    $('#features'+this.index+'_'+this.trackIndex).contextMenu({menu: 'fDispMenus'+self.index},
-    		onShowMenu(event, menu)
+    $('#features'+this.index+'_'+this.trackIndex).contextMenu({menu: 'fDispMenus'+self.index}, 
     		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
     
     // graph menu   
