@@ -29,6 +29,16 @@ function getFirstTd(event) {
 
 function featureListEvents(fDisplay) {
 	$('#featureList').single_double_click(handleFeatureListClick, handleFeatureListDoubleClick, fDisplay, 500);
+	
+	$(document).keydown(function (e) {
+		    if(e.which == $.ui.keyCode.DOWN) {
+		    	selectNextRow(fDisplay);
+		        return false;
+		    } else if(e.which == $.ui.keyCode.UP) {
+		    	selectPrevRow(fDisplay);
+		        return false;
+		    }
+	});
 }
 
 
@@ -37,25 +47,28 @@ function positionFeatureList(featureDisplay) {
 	if($('#graph').children().length > 0)
 		ghgt = $('#graph').height();
 
-	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt; 
+	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt;
+	var hgt = $(document).height() - top;
     var cssObj = {
 			 'margin-left': margin+'px',
 			 'margin-right': margin+'px',
 			 'position':'absolute',
 			 'width': displayWidth+'px',
-			 'top': top+'px'
+			 'top': top+'px',
+			 'overflow': 'auto', 'height': hgt+'px'
 	};
 	
 	$('#featureList').css(cssObj);
 }
 
 function setupFeatureList(features, exonMap, exonParent, featureDisplay, append) {
-	positionFeatureList(featureDisplay);
+	
 	if(!append) {
 		$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
 		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th></tr></thead>');
 		$('#featureListTable').append('<tbody>');
 	}
+	positionFeatureList(featureDisplay);
 	
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
@@ -117,6 +130,45 @@ function appendFeatureToList(feature) {
 			'</tr>');
 }
 
+function selectNextRow(fDisplay) {
+	var rows = $('table.#featureListTable > tbody > tr');
+	for(var i=0; i<rows.length-1; i++) {
+		var cell = $(rows[i]).children()[1];
+	    if( $(cell).css('background-color') == 'rgb(200, 200, 200)' ) {
+	    	deselectAllFeatures(fDisplay);
+	    	selectFromList($(rows[i]).next(), fDisplay);
+	    	return;
+	    }
+	}
+}
+
+function selectPrevRow(fDisplay) {
+	var rows = $('table.#featureListTable > tbody > tr');
+	for(var i=0; i<rows.length; i++) {
+		var cell = $(rows[i]).children()[1];
+	    if( $(cell).css('background-color') == 'rgb(200, 200, 200)' ) {
+	    	if(i == 0)
+	    		return;
+	    	deselectAllFeatures(fDisplay);
+	    	selectFromList($(rows[i]).prev(), fDisplay);
+	    	return;
+	    }
+	}
+}
+
+// select the given table row and associated feature
+function selectFromList(tr, fDisplay) {
+	var td = $(tr).children()[0];
+	var name = $(tr).attr('id').replace(/:LIST$/,'');
+
+	if($(td).text().match(/(\d+,)+\d+$/))
+		selectFeature(name, fDisplay);
+	else {
+		selectFeatureExact(name, fDisplay);
+		selectInListExact(name);
+	}
+}
+
 function selectInList(featureSelected) {
 	if(featureSelected.match(/\d+$/g)) {
 		// select exons of same gene
@@ -129,12 +181,16 @@ function selectInList(featureSelected) {
     	});	
     	
 	} else {
-		$('table.#featureListTable > tbody > tr#'+escapeId(featureSelected+':LIST')).children().each(function(index) {
-		    if(index == 0)
-		    	return;
-		    $(this).css('background-color', 'rgb(200, 200, 200)' );
-		});		
+		selectInListExact(featureSelected);		
 	}
+}
+
+function selectInListExact(featureSelected) {
+	$('table.#featureListTable > tbody > tr#'+escapeId(featureSelected+':LIST')).children().each(function(index) {
+	    if(index == 0)
+	    	return;
+	    $(this).css('background-color', 'rgb(200, 200, 200)' );
+	});	
 }
 
 function deSelectAllInList() {
