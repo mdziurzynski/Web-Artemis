@@ -37,8 +37,8 @@ var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
-var excludes = ['gene', 'pseudogene', 'match_part', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
-var includes = ['exon', 'pseudogenic_exon', 'repeat_region', 'gap', 'contig', 'ncRNA', 'polypeptide_motif	'];
+var excludes = ['gene', 'pseudogene', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
+var includes = ['exon', 'pseudogenic_exon', 'gap', 'contig', 'ncRNA', 'polypeptide_motif	'];
 
 var colour = [ 
     '255,255,255',
@@ -84,7 +84,7 @@ $(document).ready(function() {
     
 	var basesDisplayWidth = arr["bases"];
 	if(!basesDisplayWidth) {
-		basesDisplayWidth = 8000;
+		basesDisplayWidth = 16000;
 	} else {
 		basesDisplayWidth = parseInt(basesDisplayWidth);
 	}
