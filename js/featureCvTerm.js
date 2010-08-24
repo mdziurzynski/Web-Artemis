@@ -102,7 +102,13 @@ function showFeatureProps(featurecvterm, featureSelected) {
 
 function showFeatureDbXRefs(featuredbxrefs, featureSelected) {
 	for(var k=0; k<featuredbxrefs.length; k++) {
-		$("div#DISP"+escapeId(featureSelected)).append(
+		if(featuredbxrefs[k].database == 'PlasmoDB') {
+			$("div#DISP"+escapeId(featureSelected)).append(
+				   '<a href="javascript:void(0)" onclick="window.open(\'http://plasmodb.org/plasmodb/servlet/sv?page=gene&source_id='+
+				   featuredbxrefs[k].accession+'\');">'+
+				   featuredbxrefs[k].database+":"+featuredbxrefs[k].accession+'</a>; ');
+		} else
+			$("div#DISP"+escapeId(featureSelected)).append(
 				featuredbxrefs[k].database+":"+featuredbxrefs[k].accession+'; ');
 	}
 }
