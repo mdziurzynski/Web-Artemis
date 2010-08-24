@@ -70,6 +70,8 @@ $(document).ready(function() {
 		leftBase = 1;
 	} else {
 		leftBase = parseInt(leftBase);
+		if(leftBase < 1)
+			leftBase = 1;
 	}
 	
     var width = arr["width"];	
