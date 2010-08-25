@@ -40,7 +40,7 @@ function zoomOnce(fDisplay, scrollbar) {
     var newLeftBase = Math.round(centerBase - (fDisplay.basesDisplayWidth/2));
     
     if( newLeftBase > fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2 )
-    	newLeftBase = Math.round(fDisplay.sequenceLength-basesInView/2);
+    	newLeftBase = Math.round(fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2);
 
     if(newLeftBase < 1)
     	newLeftBase = 1;
