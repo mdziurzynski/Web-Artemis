@@ -54,10 +54,9 @@ function positionFeatureList(featureDisplay, nrows) {
 			 'width': displayWidth+'px',
 			 'top': top+'px'
 	};
-	
 	$('#featureList').css(cssObj);
 	
-	var hgt = $(document).height() - top - $('#featureListTable').find('thead').height();
+	var hgt = $(window).height() - top - ($('#featureListTable').find('thead').height()*2);
 	if(hgt < nrows*$('#featureListTable').find('tr').height())
 	   $('#featureListTable').find('tbody').css({'overflow': 'auto', 'height': hgt+'px'});
 }
@@ -68,23 +67,26 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 		$('#featureList').html('');
 		return;
 	}
-	
+
 	if(!append) {
 		$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
 		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th></tr></thead>');
 		$('#featureListTable').append('<tbody>');
 	}
-	positionFeatureList(featureDisplay, features.length);
 	
+	var nrows = 0;
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
-		if(feature.type != 'exon' && feature.type != 'pseudogenic_exon')
+		if(feature.type != 'exon' && feature.type != 'pseudogenic_exon') {
 		  appendFeatureToList(feature);
-		else {
+		  nrows++;
+		} else {
 		  appendExonsToList(exonMap[feature.part_of]);
 		  exonMap[feature.part_of] = undefined;
+		  nrows++;
 		}
 	}
+	positionFeatureList(featureDisplay, nrows);
 
 	if(!append) {
 		$('#featureListTable').append('</tbody>');
