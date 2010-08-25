@@ -291,7 +291,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	
 	// feature display menu
 	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
-    $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:300px">' +
+    $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
     		'<li><a href="#gotoGene" id="gotoGene">Find... </a></li>'+
     		'<li><a href="#excludeFeature" id="excludeFeature">Features to include/exclude... </a></li>'+
