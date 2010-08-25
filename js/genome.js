@@ -847,34 +847,34 @@ function showFeature(featureSelected, featureDisplay) {
 }
 
 //
-function drawFrameAndStrand(featureDisplay){
-	var ypos = featureDisplay.marginTop;
-	var thisFLH = featureDisplay.frameLineHeight;
+function drawFrameAndStrand(fDisplay){
+	var ypos = fDisplay.marginTop;
+	var thisFLH = fDisplay.frameLineHeight;
 	
 	for(var i=0;i<3; i++)
 	{
-	  var name = 'fwdFrame'+i+featureDisplay.index;
+	  var name = 'fwdFrame'+i+fDisplay.index;
 	  $('.'+name).html('');
-	  addFrameLine('.fwdFrames',ypos,name, featureDisplay);
+	  addFrameLine('.fwdFrames',ypos,name, fDisplay);
 	  ypos+=thisFLH*2;
 	}
 	
-	addStrandLine('.strands', ypos, 'fwdStrand'+featureDisplay.index, featureDisplay);
+	addStrandLine('.strands', ypos, 'fwdStrand'+fDisplay.index, fDisplay);
 	ypos+=thisFLH*3;
-	addStrandLine('.strands', ypos, 'bwdStrand'+featureDisplay.index, featureDisplay);
+	addStrandLine('.strands', ypos, 'bwdStrand'+fDisplay.index, fDisplay);
 	
 	ypos+=thisFLH*2;
 	for(var i=0;i<3; i++)
 	{
-	  var name = 'bwdFrame'+i+featureDisplay.index;
+	  var name = 'bwdFrame'+i+fDisplay.index;
 	  $('.'+name).html('');
-	  addFrameLine('.bwdFrames',ypos,name, featureDisplay);
+	  addFrameLine('.bwdFrames',ypos,name, fDisplay);
 	  ypos+=thisFLH*2;
 	}
 }
 
-function addStrandLine(selector, ypos, strand, featureDisplay) {
-	var thisFLH = featureDisplay.frameLineHeight;
+function addStrandLine(selector, ypos, strand, fDisplay) {
+	var thisFLH = fDisplay.frameLineHeight;
 	var cssObj = {
 		'height':thisFLH+'px',
 		'line-height' : thisFLH+'px',
@@ -889,10 +889,10 @@ function addStrandLine(selector, ypos, strand, featureDisplay) {
 	$('.'+strand).css(cssObj);
 }
 
-function addFrameLine(selector, ypos, frame, featureDisplay) {
+function addFrameLine(selector, ypos, frame, fDisplay) {
 	var cssObj = {
-		'height':featureDisplay.frameLineHeight+'px',
-		'line-height' : featureDisplay.frameLineHeight+'px',
+		'height':fDisplay.frameLineHeight+'px',
+		'line-height' : fDisplay.frameLineHeight+'px',
 		'width':displayWidth+'px',
 		'margin-left': margin+'px',
 		'margin-top': ypos+'px',
@@ -1012,20 +1012,20 @@ function drawStopCodons(fDisplay, basePerPixel) {
 };
 
 
-function drawStopOnCanvas(stop, ypos, frameLineHeight, featureDisplay, basePerPixel) {
+function drawStopOnCanvas(stop, ypos, frameLineHeight, fDisplay, basePerPixel) {
 	var len=stop.length;
 	var colour = '#000000';
 	for(var i=0; i<len; i++ ) {
 		var position1 = stop[i];
 		var stopPosition1 = margin+Math.round(stop[i]/basePerPixel);
-		$("#featureDisplay"+featureDisplay.index).drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
+		$("#featureDisplay"+fDisplay.index).drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
 				{color: colour, stroke:'1'});
 	}
 }
 
-function drawFwdStop(stop, frame, featureDisplay, basePerPixel) {
+function drawFwdStop(stop, frame, fDisplay, basePerPixel) {
   var len=stop.length;
-  var ypos = featureDisplay.marginTop+((featureDisplay.frameLineHeight*2)*frame);
+  var ypos = fDisplay.marginTop+((fDisplay.frameLineHeight*2)*frame);
 
   var fwdStopsStr = '';
   for(var i=0; i<len; i+=2 )
@@ -1044,13 +1044,13 @@ function drawFwdStop(stop, frame, featureDisplay, basePerPixel) {
 	fwdStopsStr = fwdStopsStr + '<div id=fs'+position1+' class="bases" style="width:'+width+'; margin:'+pos+'"></div>';
   }
   
-  $('#stop_codons'+featureDisplay.index).append(fwdStopsStr);
+  $('#stop_codons'+fDisplay.index).append(fwdStopsStr);
 }
 
-function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
+function drawBwdStop(stop, frame, fDisplay, basePerPixel) {
   var len=stop.length;
-  var ypos = featureDisplay.marginTop+(featureDisplay.frameLineHeight*10)+
-  			featureDisplay.frameLineHeight+((featureDisplay.frameLineHeight*2)*frame);
+  var ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*10)+
+  				fDisplay.frameLineHeight+((fDisplay.frameLineHeight*2)*frame);
 
   var bwdStopsStr = '';
   for(var i=0; i<len; i+=2 )
@@ -1069,7 +1069,7 @@ function drawBwdStop(stop, frame, featureDisplay, basePerPixel) {
 	bwdStopsStr = bwdStopsStr + '<div id=bs'+position1+' class="bases" style="width:'+width+'; margin:'+pos+'"></div>';
   }
   //return bwdStopsStr;
-  $('#stop_codons'+featureDisplay.index).append(bwdStopsStr);
+  $('#stop_codons'+fDisplay.index).append(bwdStopsStr);
 }
 
 function getSequnceCanvasCtx(fDisplay, clearCanvas) {
@@ -1186,13 +1186,13 @@ function drawAminoAcids(fDisplay, basePerPixel) {
 	console.timeEnd('draw aas');
 }
 
-function drawFeatures(featureDisplay) {
-	var end = parseInt(featureDisplay.leftBase)+parseInt(featureDisplay.basesDisplayWidth);
+function drawFeatures(fDisplay) {
+	var end = parseInt(fDisplay.leftBase)+parseInt(fDisplay.basesDisplayWidth);
 	
 	//debugLog("start..end = "+featureDisplay.leftBase+".."+end);
-	if(end > featureDisplay.sequenceLength && 
-	   featureDisplay.leftBase < featureDisplay.sequenceLength) {
-		end = featureDisplay.sequenceLength;
+	if(end > fDisplay.sequenceLength && 
+			fDisplay.leftBase < fDisplay.sequenceLength && !fDisplay.firstTime) {
+		end = fDisplay.sequenceLength;
 	}
 	
 	//var serviceName = '/regions/featureloc.json?';
@@ -1200,10 +1200,10 @@ function drawFeatures(featureDisplay) {
 	var currentTime = new Date().getTime();
 	
 	handleAjaxCalling(serviceName, aFeatureFlatten,
-			{ region:featureDisplay.srcFeature, 
-		      start:featureDisplay.leftBase, end:end, 
+			{ region:fDisplay.srcFeature, 
+		      start:fDisplay.leftBase, end:end, 
 		      exclude:excludes }, 
-			featureDisplay, { minDisplay:featureDisplay.minimumDisplay, startTime:currentTime });
+		      fDisplay, { minDisplay:fDisplay.minimumDisplay, startTime:currentTime });
 }
 
 function getFeatureExons(transcript) {
@@ -1311,8 +1311,8 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
   return featureStr;
 }
 
-function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, colour, basePerPixel) {
-	if(featureDisplay.minimumDisplay)
+function drawFeatureConnections(fDisplay, lastExon, exon, lastYpos, ypos, colour, basePerPixel) {
+	if(fDisplay.minimumDisplay)
 		return;
 	
 	var exonL,exonR;
@@ -1328,11 +1328,11 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	 lastYpos = tmpPos;
 	}
 	
-	var lpos = margin+((exonL.end - featureDisplay.leftBase + 1)/basePerPixel) + 1;
+	var lpos = margin+((exonL.end - fDisplay.leftBase + 1)/basePerPixel) + 1;
 	if(lpos > displayWidth) {
 	  return;
 	}
-	var rpos = margin+((exonR.start - featureDisplay.leftBase + 1 )/basePerPixel) - 1;
+	var rpos = margin+((exonR.start - fDisplay.leftBase + 1 )/basePerPixel) - 1;
 	var mid  = lpos+(rpos-lpos)/2;
 	
 	var ymid = ypos-4;
@@ -1342,7 +1342,7 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	var Xpts = new Array(lpos, mid, rpos) ;
 	var Ypts = new Array(lastYpos+4, ymid, ypos+4);
 	
-	$("#featureDisplay"+featureDisplay.index).drawPolyline(Xpts,Ypts, {color: colour, stroke:'1'});
+	$("#featureDisplay"+fDisplay.index).drawPolyline(Xpts,Ypts, {color: colour, stroke:'1'});
 }
 
 function drawArrow(fDisplay, exon, ypos, basePerPixel) {
@@ -1418,10 +1418,10 @@ function setTickCSS(offset, number, selector) {
 }
 
 
-function getOrganismList(featureDisplay) {
+function getOrganismList(fDisplay) {
 	var serviceName = '/organisms/list.json';
 	handleAjaxCalling(serviceName, aOrganism,
-			{ }, featureDisplay, {});
+			{ }, fDisplay, {});
 }
 
 function setTranslation(fDisplay, organism_id) {
@@ -1435,7 +1435,7 @@ function setTranslation(fDisplay, organism_id) {
 	    }, {  }, fDisplay, {  });
 }
 
-function getSrcFeatureList(organism_id, featureDisplay, translation_table){
+function getSrcFeatureList(organism_id, fDisplay, translation_table){
 	$('#srcFeatureSelector').html('');
 	//var jsonUrl = webService[serviceType]+'/regions/inorganism.json?organism=org:'+organism_id;
 	//debugLog(jsonUrl);
@@ -1443,7 +1443,7 @@ function getSrcFeatureList(organism_id, featureDisplay, translation_table){
 	var serviceName = '/regions/inorganism.json';
 	$('body').css('cursor','wait');
 	handleAjaxCalling(serviceName, aSrcFeature,
-			{ organism:'org:'+organism_id }, featureDisplay, { translation_table:translation_table });
+			{ organism:'org:'+organism_id }, fDisplay, { translation_table:translation_table });
 }
 
 function handleFeatureClick(fDisplay, event, featureSelected) {
@@ -1575,7 +1575,7 @@ function centerOnFeature(fDisplay, event, featureSelected, region) {
 // AJAX functions
 //
 
-var aShowProperties = function showProperties(featureDisplay, returned, options) {
+var aShowProperties = function showProperties(fDisplay, returned, options) {
     var features = returned.response.hierarchy;
     
     var featureSelected = options.featureSelected; 
@@ -1638,7 +1638,7 @@ var aShowProperties = function showProperties(featureDisplay, returned, options)
 			featureStr, -1, {featureSelected: featureSelected});
 	
 	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
-			featureStr, featureDisplay, {featureSelected: featureSelected});
+			featureStr, fDisplay, {featureSelected: featureSelected});
         
     $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
     
@@ -1679,7 +1679,7 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 	$('body').css('cursor','default');
 };
 
-var aOrganism = function ajaxGetOrganisms(featureDisplay, returned, options) {
+var aOrganism = function ajaxGetOrganisms(fDisplay, returned, options) {
 	var organisms  = returned.response.organisms;
 	$('#organismSelector').html('<select id="organismList"></select>');
 	$('#organismList').append('<option value="Organism:">Organism:</option>');
@@ -1703,7 +1703,7 @@ var aOrganism = function ajaxGetOrganisms(featureDisplay, returned, options) {
 		}
 		
 		debugLog("Translation table = "+translation_table);
-		getSrcFeatureList(organism_id, featureDisplay, translation_table);
+		getSrcFeatureList(organism_id, fDisplay, translation_table);
 	});
 };
 
@@ -1720,13 +1720,13 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureCvTerms = function ajaxGetFeatureCvTerms(featureDisplay, returned, options) {
+var aFeatureCvTerms = function ajaxGetFeatureCvTerms(fDisplay, returned, options) {
 	showFeatureCvTerm(returned.response.features, options.featureSelected);
 };
 
-var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options) {
+var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
 	var orthologues = returned.response.features;
-	var midDisplay = featureDisplay.basesDisplayWidth/2;
+	var midDisplay = fDisplay.basesDisplayWidth/2;
 	
 	if(!orthologues || orthologues.length == 0)
 		return;
@@ -1760,12 +1760,12 @@ var aOrthologues = function ajaxGetOrthologues(featureDisplay, returned, options
 	var serviceName = '/features/clusters.json?';
 	handleAjaxCalling(serviceName, aCluster,
 		'orthologues='+clusters, 
-		featureDisplay, {featureSelected: featureSelected});
+		fDisplay, {featureSelected: featureSelected});
 };
 
-var aCluster = function ajaxGetClusters(featureDisplay, returned, options) {
+var aCluster = function ajaxGetClusters(fDisplay, returned, options) {
 	var clusters = returned.response.clusters;
-	var midDisplay = featureDisplay.basesDisplayWidth/2;
+	var midDisplay = fDisplay.basesDisplayWidth/2;
 	
 	if(!clusters || clusters.length == 0)
 		return;
@@ -1801,7 +1801,7 @@ function openMe(gene, midDisplay) {
 }
 
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
-var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, options) {
+var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 	
 	var featureSelected = options.featureSelected;
 	var featProps  = returned.response.features;
@@ -1815,7 +1815,7 @@ var aFeatureProps = function ajaxGetFeatureProps(featureDisplay, returned, optio
 	}
 };
 
-var aFeatureSynonyms = function ajaxGetFeatureProps(featureDisplay, returned, options) {
+var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options) {
 	var featureSelected = options.featureSelected;
 	var featSyns  = returned.response.results;
 	if(!featSyns || featSyns.length == 0)
@@ -1839,7 +1839,7 @@ var aFeatureSynonyms = function ajaxGetFeatureProps(featureDisplay, returned, op
 	$("div#DISP"+escapeId(featureSelected)).append("<br /><br />");
 };
 
-var aFeaturePubs = function ajaxGetFeaturePubs(featureDisplay, returned, options) {
+var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, returned, options) {
 	var featureSelected = options.featureSelected;
 	var featPubs  = returned.response.features;
 	if(!featPubs || featPubs.length == 0)
@@ -1857,7 +1857,7 @@ var aFeaturePubs = function ajaxGetFeaturePubs(featureDisplay, returned, options
 };
 
 
-var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(featureDisplay, returned, options) {
+var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(fDisplay, returned, options) {
 	var featureSelected = options.featureSelected;
 	var featDbXRefs  = returned.response.features;
 	if(!featDbXRefs || featDbXRefs.length == 0)
@@ -1881,7 +1881,7 @@ function containsString(anArray, aStr) {
 	return false;
 }
 
-var aFeaturePropColours = function ajaxGetFeaturePropColours(featureDisplay, returned, options) {
+var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, returned, options) {
 	var featProps  = returned.response.features;
 	for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].props;
@@ -2064,7 +2064,6 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 	}
 	return featureStr;
 }
-
 
 var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
 	var blastFeatures = returned.response.matches;
