@@ -116,14 +116,19 @@ function selectFeature(featureSelected, fDisplay) {
 	selectInList(featureSelected);
 }
 
+function isPartial(el) {
+	if($(el).css('border-right-style') == 'double' || $(el).css('border-left-style') == 'double' )
+		return true;
+	return false;
+}
+
 function setBorder(el, size) {
 	// check for partial
-	if($(el).css('border-right-style') == 'double' || $(el).css('border-left-style') == 'double' ) {
+	if(isPartial(el)) {
 		$(el).css('border-top-width', size);
 		$(el).css('border-bottom-width', size);
-	} else {
+	} else
 		$(el).css('border-width', size);
-	}
 }
 
 function selectFeatureExact(featureSelected, fDisplay) {
