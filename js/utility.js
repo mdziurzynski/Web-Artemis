@@ -98,7 +98,7 @@ function findTrackByElement(elem) {
 }
 
 function deselectAllFeatures(fDisplay) {
-	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('border-width', '1px');
+	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find('.feat, .featCDS, .featPseudo, .featGene, .featGreen').each(function( intIndex ){ setBorder(this, '1px'); });
 	deSelectAllInList();
 }
 
@@ -108,7 +108,7 @@ function selectFeature(featureSelected, fDisplay) {
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
     	var selId = "[id*=" + wildcardSearchString +"]";
     	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find(selId).each(
-    			function( intIndex ){ $( this ).css('border-width', '2px');});
+    			function( intIndex ){ setBorder(this, '2px'); });
 	} else {
 		selectFeatureExact(featureSelected, fDisplay);
 	}
@@ -116,8 +116,18 @@ function selectFeature(featureSelected, fDisplay) {
 	selectInList(featureSelected);
 }
 
+function setBorder(el, size) {
+	// check for partial
+	if($(el).css('border-right-style') == 'double' || $(el).css('border-left-style') == 'double' ) {
+		$(el).css('border-top-width', size);
+		$(el).css('border-bottom-width', size);
+	} else {
+		$(el).css('border-width', size);
+	}
+}
+
 function selectFeatureExact(featureSelected, fDisplay) {
-	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ).css('border-width', '2px');
+	setBorder( $('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ), '2px' );
 }
 
 function getSelectedFeatureIds() {
