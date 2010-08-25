@@ -38,7 +38,7 @@ var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
 var excludes = ['gene', 'pseudogene', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
-var includes = ['exon', 'pseudogenic_exon', 'gap', 'contig', 'ncRNA', 'polypeptide_motif'];
+var includes = ['exon', 'pseudogenic_exon', 'gap', 'contig', 'ncRNA', 'five_prime_UTR', 'three_prime_UTR', 'polypeptide_motif'];
 
 var colour = [ 
     '255,255,255',
@@ -332,8 +332,8 @@ var rightClickMenu = function(action, el, pos, self) {
 		showAminoAcidsOfSelectedFeatures(self);
 	} else if(action.match(/excludeFeature/)) {
 
-		$("div#properties").html("<div id='excludeList'></div>");
-	    $("div#excludeList").dialog({ height: 385 ,
+		$("div#properties").html("<div id='exList'></div>");
+	    $("div#exList").dialog({ height: 385 ,
 			width:450, position: 'center', title:'Drag Features Between Include/Exclude Lists',
 			close: function(event, ui) { $(this).remove(); },
 			buttons: {
@@ -364,19 +364,18 @@ var rightClickMenu = function(action, el, pos, self) {
 			}
 		}});
 
-
-	    $("div#excludeList").append('<ul id="include" class="droptrue">');
+	    $("div#exList").append('<ul id="include" class="droptrue">');
 	    $("ul#include").append('<lh>Include:</lh>');
 	    for(var i=0; i<includes.length; i++)
 	    	$("ul#include").append('<li class="ui-state-default">'+includes[i]+'</li>');
 
-	    $("div#excludeList").append('</ul');
+	    $("div#exList").append('</ul');
 		
-	    $("div#excludeList").append('<ul id="exclude" class="droptrue">');
+	    $("div#exList").append('<ul id="exclude" class="droptrue">');
 	    $("ul#exclude").append('<lh>Exclude:</lh>');
 	    for(var i=0; i<excludes.length;i++)
 	    	$("ul#exclude").append('<li class="ui-state-default">'+excludes[i]+'</li>');
-	    $("div#excludeList").append('</ul');
+	    $("div#exList").append('</ul');
 
 	    
 	    $("ul.droptrue").sortable({
@@ -590,64 +589,64 @@ function hideEndOfSequence(fDisplay) {
 }
 
 //
-function adjustFeatureDisplayPosition(drag, featureDisplay) {
-	var thisMarginTop = featureDisplay.marginTop;
-	var thisFLH = featureDisplay.frameLineHeight;
+function adjustFeatureDisplayPosition(drag, fDisplay) {
+	var thisMarginTop = fDisplay.marginTop;
+	var thisFLH = fDisplay.frameLineHeight;
 	
 	var cssObj = {
 			 'margin-left': margin+'px',
 			 'position':'absolute',
 			 'top': thisMarginTop+(thisFLH*16.8)+'px'
 	};
-	$('#left'+featureDisplay.index).css(cssObj);
+	$('#left'+fDisplay.index).css(cssObj);
 
 	cssObj = {
 			'margin-left': margin+displayWidth+'px',
 			'position':'absolute',
 			'top': thisMarginTop+(thisFLH*16.8)+'px'
 	};
-	$('#right'+featureDisplay.index).css(cssObj);
+	$('#right'+fDisplay.index).css(cssObj);
 	
 	cssObj = {
 			'margin-left': margin+margin+displayWidth+'px',
 			'position':'absolute',
 			'top': thisMarginTop+'px'
 	};
-	$('#plus'+featureDisplay.index).css(cssObj);
+	$('#plus'+fDisplay.index).css(cssObj);
 	
 	cssObj = {
 			'margin-left': margin+margin+displayWidth+'px',
 			'position':'absolute',
 			'top': thisMarginTop+(thisFLH*11)+'px'
 	};
-	$('#minus'+featureDisplay.index).css(cssObj);
+	$('#minus'+fDisplay.index).css(cssObj);
 	
 
-	var buttonWidth = $('#left'+featureDisplay.index).width()+5;
+	var buttonWidth = $('#left'+fDisplay.index).width()+5;
 	cssObj = {
         'margin-left': margin+buttonWidth+'px',
         'width': displayWidth-buttonWidth+'px',
         'position':'absolute',
         'top':thisMarginTop+(thisFLH*16.9)+'px'
 	};
-	$('#slider'+featureDisplay.index).css(cssObj);
+	$('#slider'+fDisplay.index).css(cssObj);
 
-	var buttonHeight = $('#plus'+featureDisplay.index).height()+5;
+	var buttonHeight = $('#plus'+fDisplay.index).height()+5;
 	cssObj = {
 	     'margin-left': margin+margin+margin+displayWidth+'px',
 	     'height': (thisFLH*11)-(buttonHeight*1.2)+'px',
 	     'position':'absolute',
 	     'top': thisMarginTop+buttonHeight+'px'
 	};
-	$('#slider_vertical_container'+featureDisplay.index).css(cssObj);
+	$('#slider_vertical_container'+fDisplay.index).css(cssObj);
 	
 	cssObj = {
 			'margin-top': thisMarginTop-margin+'px',
 			'width': displayWidth+margin+'px',
 			'height':  (thisFLH*16.9)+'px'
 	};
-	$('#featureDisplay'+featureDisplay.index).css(cssObj);
-	$('#sequence'+featureDisplay.index).css(cssObj);
+	$('#featureDisplay'+fDisplay.index).css(cssObj);
+	$('#sequence'+fDisplay.index).css(cssObj);
 
 	if(!drag) {
 		cssObj = {
@@ -660,9 +659,9 @@ function adjustFeatureDisplayPosition(drag, featureDisplay) {
 		    'left': margin+displayWidth+'px',
 		    'top': thisMarginTop+(thisFLH*15.4)+'px'
 		};
-		$('#rightDraggableEdge'+featureDisplay.index).css(cssObj);
+		$('#rightDraggableEdge'+fDisplay.index).css(cssObj);
 	} else {
-		$('#rightDraggableEdge'+featureDisplay.index).css('top',thisMarginTop+(thisFLH*16)+'px');
+		$('#rightDraggableEdge'+fDisplay.index).css('top',thisMarginTop+(thisFLH*16)+'px');
 	}
 }
 
