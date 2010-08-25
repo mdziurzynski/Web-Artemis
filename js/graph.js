@@ -171,19 +171,16 @@ function setGraphMenu(fDisplay) {
     		$('div#graphProps').html('Window Size:<input id="graphWinSize" type="text" value="'+winSize+'"/><br />');
     		
     	    $("div#graphProps").dialog({ height: 150 ,
-    			width:450, position: 'left', title:'Graph Properties', show:'fast',
+    			width:450, position: 'left', title:'Graph Properties',
     			close: function(event, ui) { $(this).remove(); },
     			buttons: {
     			'Set': function() {
-    	    	
     	     		winSize = $(this).find('#graphWinSize').val();
     	     		$(this).dialog('close');
     	     		drawContentGraphs(fDisplay, showAG, showGC, showOther);
     	     	
     			},
-    			Cancel: function() {
-    				$(this).dialog('close');
-    			}
+    			'Cancel': function() { $(this).dialog('close'); }
     		}});
     	}
     });
