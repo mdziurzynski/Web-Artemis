@@ -80,7 +80,7 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 		if(feature.type != 'exon' && feature.type != 'pseudogenic_exon') {
 		  appendFeatureToList(feature);
 		  nrows++;
-		} else {
+		} else if(exonMap[feature.part_of] != undefined) {
 		  appendExonsToList(exonMap[feature.part_of]);
 		  exonMap[feature.part_of] = undefined;
 		  nrows++;
@@ -95,36 +95,34 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 }
 
 function appendExonsToList(exons) {
-	if(exons != undefined) {
-		var fmin = parseInt(exons[0].start)+1;
-		var fmax = parseInt(exons[0].end);
-		var name = exons[0].feature;
-		
-		for(var j=1; j<exons.length; j++) {
-			var thisFmin = parseInt(exons[j].start)+1;
-			var thisFmax = parseInt(exons[j].end);
-			if(thisFmin < fmin)
-				fmin = thisFmin;
-			if(thisFmax > fmax)
-				fmax = thisFmax;
+	var fmin = parseInt(exons[0].start)+1;
+	var fmax = parseInt(exons[0].end);
+	var name = exons[0].feature;
+	
+	for(var j=1; j<exons.length; j++) {
+		var thisFmin = parseInt(exons[j].start)+1;
+		var thisFmax = parseInt(exons[j].end);
+		if(thisFmin < fmin)
+			fmin = thisFmin;
+		if(thisFmax > fmax)
+			fmax = thisFmax;
 
-			name += ','+exons[j].feature.match(/\d+$/);
-		}
-		
-		var type;
-		if(exons[0].type == 'exon')
-			type = "CDS";
-		else
-			type = "pseudogene";
-		
-		$('#featureListTable').append('<tr id="'+exons[0].feature+':LIST">'+
-				'<td>'+name+'</td>'+
-				'<td>'+type+'</td>'+
-				'<td>'+fmin+'</td>'+
-				'<td>'+fmax+'</td>'+
-				//'<td id="'+feature.feature+':PROPS"></td>'+
-				'</tr>');
+		name += ','+exons[j].feature.match(/\d+$/);
 	}
+		
+	var type;
+	if(exons[0].type == 'exon')
+		type = "CDS";
+	else
+		type = "pseudogene";
+	
+	$('#featureListTable').append('<tr id="'+exons[0].feature+':LIST">'+
+			'<td>'+name+'</td>'+
+			'<td>'+type+'</td>'+
+			'<td>'+fmin+'</td>'+
+			'<td>'+fmax+'</td>'+
+			//'<td id="'+feature.feature+':PROPS"></td>'+
+			'</tr>');
 }
 
 function appendFeatureToList(feature) {
