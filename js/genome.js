@@ -815,7 +815,6 @@ function addEventHandlers(fDisplay) {
 }
 
 function showPopupFeature(event) {
-	
 	var tgt = $(event.target);
 	var x = event.pageX+10;
 	var y = event.pageY+10;
@@ -824,18 +823,19 @@ function showPopupFeature(event) {
 	msg +=          "single click - select<br />";
 	msg +=          "double click - center</i></p>";
 	
-    if( $(tgt).is(".featCDS") ) {
-    	var currentId = $(tgt).attr('id');  
-    	loadPopup("CDS<br />"+currentId+msg,x,y);
+	var currentId = $(tgt).attr('id');
+	var txt = '';
+	if(isPartial(tgt))
+		txt = 'Partial ';
+
+    if( $(tgt).is(".featCDS") ) { 
+    	loadPopup(txt+"CDS<br />"+currentId+msg,x,y);
     } else if( $(tgt).is(".featPseudo") ) {
-    	var currentId = $(tgt).attr('id');  
-    	loadPopup("Pseudogene<br />"+currentId+msg,x,y);  
+    	loadPopup(txt+"Pseudogene<br />"+currentId+msg,x,y);  
     } else if( $(tgt).is(".featGene") ) {
-    	var currentId = $(tgt).attr('id');  
-    	loadPopup("Gene<br />"+currentId+msg,x,y);  
-    } else if( $(tgt).is(".feat") ) {
-    	var currentId = $(tgt).attr('id'); 
-    	loadPopup(currentId+msg,x,y);
+    	loadPopup(txt+"Gene<br />"+currentId+msg,x,y);  
+    } else if( $(tgt).is(".feat") ) {	
+    	loadPopup(txt+currentId+msg,x,y);
     }
 }
 
@@ -1265,10 +1265,13 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
   var startFeature = margin+((feature.start - leftBase + 1)/basePerPixel);
   var endFeature   = margin+((feature.end - leftBase + 1)/basePerPixel);
   var extra = '';
+  var bdrLft = true;
+  var bdrRgt = true;
   
   if(startFeature < margin) {
     startFeature = margin;
     extra = 'border-left: none;';
+    bdrLft = false;
   }
   
   if(endFeature > margin+displayWidth) {
@@ -1276,25 +1279,32 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
 		return featureStr;
     endFeature = margin+displayWidth;
     extra += 'border-right: none;';
+    bdrRgt = false;
   }
 
   var pos = 'margin-top:'+ypos+"px; margin-left:"+startFeature+"px";
   var width = endFeature-startFeature;
 
+  // set border for partial features
+  var sz = Math.ceil(width/10);
   if(feature.is_fmax_partial == "True") {
-	  if(feature.strand == 1)
-		  extra += 'border-right-style:double; border-right-width: 10px;';
+	  width -= sz;
+	  if(feature.strand == 1 && bdrRgt)
+		  extra += 'border-right-style:double; border-right-width: '+sz+'px;';
+	  else if(feature.strand == -1 && bdrLft)
+		  extra += 'border-left-style:double; border-left-width: '+sz+'px;';
 	  else
-		  extra += 'border-left-style:double; border-left-width: 10px;';
-	  width -= 10;
+		  width += sz;
   }
-  
+
   if(feature.is_fmin_partial == "True") {
-	  if(feature.strand == 1)
-		  extra += 'border-left-style:double; border-left-width: 10px;';
+	  width -= sz;
+	  if(feature.strand == 1 && bdrLft)
+		  extra += 'border-left-style:double; border-left-width: '+sz+'px;';
+	  else if(feature.strand == -1 && bdrRgt)
+		  extra += 'border-right-style:double; border-right-width: '+sz+'px;';
 	  else
-		  extra += 'border-right-style:double; border-right-width: 10px;';
-	  width -= 10;
+		  width += sz;
   }
   
   featureStr = featureStr + 
@@ -1306,8 +1316,7 @@ function drawFeatureConnections(featureDisplay, lastExon, exon, lastYpos, ypos, 
 	if(featureDisplay.minimumDisplay)
 		return;
 	
-	var exonL;
-	var exonR;
+	var exonL,exonR;
 	
 	if(exon.strand == 1) {
 	 exonL = lastExon;
