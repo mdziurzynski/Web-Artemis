@@ -41,34 +41,40 @@ function featureListEvents(fDisplay) {
 	});
 }
 
-
-function positionFeatureList(featureDisplay) {
+function positionFeatureList(featureDisplay, nrows) {
 	var ghgt = 0;
 	if($('#graph').children().length > 0)
 		ghgt = $('#graph').height();
 
 	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt;
-	var hgt = $(document).height() - top;
     var cssObj = {
 			 'margin-left': margin+'px',
 			 'margin-right': margin+'px',
 			 'position':'absolute',
 			 'width': displayWidth+'px',
-			 'top': top+'px',
-			 'overflow': 'auto', 'height': hgt+'px'
+			 'top': top+'px'
 	};
 	
 	$('#featureList').css(cssObj);
+	
+	var hgt = $(document).height() - top - $('#featureListTable').find('thead').height();
+	if(hgt < nrows*$('#featureListTable').find('tr').height())
+	   $('#featureListTable').find('tbody').css({'overflow': 'auto', 'height': hgt+'px'});
 }
 
 function setupFeatureList(features, exonMap, exonParent, featureDisplay, append) {
+	
+	if(features.length < 1) {
+		$('#featureList').html('');
+		return;
+	}
 	
 	if(!append) {
 		$('#featureList').html('<table id="featureListTable" class="tablesorter" cellspacing="1"></table>');
 		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th></tr></thead>');
 		$('#featureListTable').append('<tbody>');
 	}
-	positionFeatureList(featureDisplay);
+	positionFeatureList(featureDisplay, features.length);
 	
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
@@ -201,7 +207,8 @@ function selectInListExact(featureSelected) {
 
 function showRow(tr) {
 	var rowIndex = $(tr).index();
-	$('#featureList').animate({scrollTop:rowIndex*$(tr).height()}, 200);
+	$('#featureListTable').find('tbody').animate({scrollTop:rowIndex*$(tr).height()}, 200);
+	//$('#featureListTable').find('tbody').scrollTop(rowIndex*$(tr).height());
 }
 
 function deSelectAllInList() {
