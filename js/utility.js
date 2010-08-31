@@ -4,7 +4,7 @@ return this.each(function() {
     if ($.browser.msie) { // ie triggers dblclick instead of click if they are fast
         $(this).bind("dblclick", function(event) {
             clicks = 2;
-            double_click_callback.call(null, fDisplay, event, $(event.target).attr('id'));
+            double_click_callback.call(null, fDisplay, event, $(event.target).attr('id'), fDisplay.srcFeature);
         });
         $(this).bind("click", function(event) {
             setTimeout(function() {
@@ -22,7 +22,7 @@ return this.each(function() {
                     if (clicks == 1) {
                         single_click_callback.call(null, fDisplay, event, $(event.target).attr('id'));
                     } else {
-                        double_click_callback.call(null, fDisplay, event, $(event.target).attr('id'));
+                        double_click_callback.call(null, fDisplay, event, $(event.target).attr('id'), fDisplay.srcFeature);
                     }
                     clicks = 0;
                 }, timeout || 300);
