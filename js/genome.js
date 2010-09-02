@@ -181,7 +181,7 @@ $(document).ready(function() {
 	hide : function(arguments) { 
 		if(this.selector == '.contextMenu') 
 			disablePopup(); 
-		return originalHideMethod.apply( this, arguments ); }
+		return originalHideMethod.apply( this ); }
 	}); 
 	//testAddFeatures();
 });
