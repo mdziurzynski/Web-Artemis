@@ -175,6 +175,14 @@ $(document).ready(function() {
 	}
 	$('#sequence'+1).html('');
 	
+	// Override the core hide() method
+	var originalHideMethod = jQuery.fn.hide;
+	jQuery.fn.extend({
+	hide : function(arguments) { 
+		if(this.selector == '.contextMenu') 
+			disablePopup(); 
+		return originalHideMethod.apply( this, arguments ); }
+	}); 
 	//testAddFeatures();
 });
 
@@ -288,24 +296,22 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	drawAll(self);
 	getOrganismList(self);
 	addEventHandlers(self);
-	
+
 	// feature display menu
-	$('#menuHeader').append('<div id="fDispMenu'+this.index+'"></div>');
-    $('#fDispMenu'+this.index).append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:290px;">' +
+	$('#menuHeader').append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
     		'<li><a href="#gotoGene" id="gotoGene">Find... </a></li>'+
-    		'<li><a href="#excludeFeature" id="excludeFeature">Features to include/exclude... </a></li>'+
+    		'<li><a href="#excludeFeature" id="excludeFeature">Features to show/hide... </a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
     		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
     		'</ul>');
-		
-    
+
     $('#sequence'+this.index).contextMenu({menu: 'fDispMenus'+self.index}, 
     		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
     $('#features'+this.index+'_'+this.trackIndex).contextMenu({menu: 'fDispMenus'+self.index}, 
     		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
-    
+
     // graph menu   
     setGraphMenu(self);
 }
@@ -334,7 +340,7 @@ var rightClickMenu = function(action, el, pos, self) {
 
 		$("div#properties").html("<div id='exList'></div>");
 	    $("div#exList").dialog({ height: 385 ,
-			width:450, position: 'center', title:'Drag Features Between Include/Exclude Lists',
+			width:450, position: 'center', title:'Drag Features Between Show/Hide Lists',
 			close: function(event, ui) { $(this).remove(); },
 			buttons: {
 			'Save': function() {
@@ -365,14 +371,14 @@ var rightClickMenu = function(action, el, pos, self) {
 		}});
 
 	    $("div#exList").append('<ul id="include" class="droptrue">');
-	    $("ul#include").append('<lh>Include:</lh>');
+	    $("ul#include").append('<lh>Show:</lh>');
 	    for(var i=0; i<includes.length; i++)
 	    	$("ul#include").append('<li class="ui-state-default">'+includes[i]+'</li>');
 
 	    $("div#exList").append('</ul');
 		
 	    $("div#exList").append('<ul id="exclude" class="droptrue">');
-	    $("ul#exclude").append('<lh>Exclude:</lh>');
+	    $("ul#exclude").append('<lh>Hide:</lh>');
 	    for(var i=0; i<excludes.length;i++)
 	    	$("ul#exclude").append('<li class="ui-state-default">'+excludes[i]+'</li>');
 	    $("div#exList").append('</ul');
