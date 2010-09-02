@@ -12,11 +12,11 @@ $.fn.popup_enter_out = function(enter_callback, out_callback) {
 	    });
 }
 
-//loading popup with jQuery magic!  
+//loading popup
 function loadPopup(txt,x,y){
  positionPopup(x,y);
 //loads popup only if it is disabled  
- $("#popupTxt").html(txt);
+ $("#popupContact").html(txt);
  $("#popupContact").fadeIn("fast");
  
  setTimeout(function(){ 
@@ -24,10 +24,8 @@ function loadPopup(txt,x,y){
   }, 8000 ); 
 }
 
-//disabling popup with jQuery magic!  
 function disablePopup(){  
   //disables popup only if it is enabled  
-  $("#backgroundPopup").fadeOut("fast");  
   $("#popupContact").fadeOut("fast");  
 }  
 
