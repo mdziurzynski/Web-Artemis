@@ -33,11 +33,7 @@ function disablePopup(){
 
 //centering popup  
 function positionPopup(x,y){  
-	$("#popupContact").css({  
-		 "position": "absolute",  
-		 "top": y,  
-		 "left": x  
-		 });
+	$("#popupContact").css({ "top": y,  "left": x });
 }
 
 //CLOSING POPUP
