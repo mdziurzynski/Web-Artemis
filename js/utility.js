@@ -98,7 +98,9 @@ function findTrackByElement(elem) {
 }
 
 function deselectAllFeatures(fDisplay) {
-	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find('.feat, .featCDS, .featPseudo, .featGene, .featGreen').each(function( intIndex ){ setBorder(this, '1px'); });
+	for(var i=0;i<fDisplay.tracks.length; i++) {
+		$('#features'+fDisplay.index+'_'+fDisplay.tracks[i]).find('.feat, .featCDS, .featPseudo, .featGene, .featGreen').each(function( intIndex ){ setBorder(this, '1px'); });
+  	}
 	deSelectAllInList();
 }
 
@@ -107,8 +109,11 @@ function selectFeature(featureSelected, fDisplay) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
     	var selId = "[id*=" + wildcardSearchString +"]";
-    	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find(selId).each(
+    	
+    	for(var i=0;i<fDisplay.tracks.length; i++) {
+    	  $('#features'+fDisplay.index+'_'+fDisplay.tracks[i]).find(selId).each(
     			function( intIndex ){ setBorder(this, '2px'); });
+    	}
 	} else {
 		selectFeatureExact(featureSelected, fDisplay);
 	}
@@ -131,8 +136,10 @@ function setBorder(el, size) {
 		$(el).css('border-width', size);
 }
 
-function selectFeatureExact(featureSelected, fDisplay) {
-	setBorder( $('#features'+fDisplay.index+'_'+fDisplay.trackIndex).find( "#"+escapeId(featureSelected) ), '2px' );
+function selectFeatureExact(featureSelected, fDisplay) {	
+	for(var i=0;i<fDisplay.tracks.length; i++) {
+		setBorder( $('#features'+fDisplay.index+'_'+fDisplay.tracks[i]).find( "#"+escapeId(featureSelected) ), '2px' );
+  	}
 }
 
 function getSelectedFeatureIds() {
