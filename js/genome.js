@@ -2018,7 +2018,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		//highlightFeatures = [];
 	}
 	
-	if(options.startTime) {
+	if(options != undefined && options.startTime) {
 	  var currentTime = new Date().getTime() - options.startTime;
 	  
 	  if(scrollTimeoutTime < currentTime-50 || scrollTimeoutTime > currentTime+50) {
