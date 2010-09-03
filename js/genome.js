@@ -224,11 +224,11 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#features').append('<div id="features'+this.index+'_'+this.trackIndex+'"></div>');
 	$('#ticks').append('<div id="ticks'+this.index+'"></div>');
 	
-	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
-	$('#buttons').append('<div id="right'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-triangle-e"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>');
+	$('#buttons').append('<div id="left'+this.index+'" class="ui-state-default ui-corner-all" title="left scroll"><span class="ui-icon ui-icon-circle-triangle-w"></span></div>');
+	$('#buttons').append('<div id="right'+this.index+'" class="ui-state-default ui-corner-all" title="right scroll"><span class="ui-icon ui-icon-circle-triangle-e"></span></div>');
 
-	$('#buttons').append('<div id="plus'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-plus"><span class="ui-icon ui-icon-circle-plus"></span></div>');
-	$('#buttons').append('<div id="minus'+this.index+'" class="ui-state-default ui-corner-all" title=".ui-icon-circle-minus"><span class="ui-icon ui-icon-circle-minus"></span></div>');
+	$('#buttons').append('<div id="plus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom in"><span class="ui-icon ui-icon-circle-plus"></span></div>');
+	$('#buttons').append('<div id="minus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom out"><span class="ui-icon ui-icon-circle-minus"></span></div>');
 
 	$('#rightDraggableEdge').append('<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se"></div>');
 
