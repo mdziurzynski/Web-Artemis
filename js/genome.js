@@ -1982,7 +1982,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 
 	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
 	
-	if($('.feat').height() != fDisplay.frameLineHeight-2 || options.append ) {
+	if($('.feat').height() != fDisplay.frameLineHeight-2 || (options != undefined && options.append) ) {
 		var cssObj = {
 			'height':fDisplay.frameLineHeight-2+'px',
 			'line-height' : fDisplay.frameLineHeight-2+'px'
@@ -1990,7 +1990,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
 	}
 	
-	if(!options.minDisplay) {
+	if(!fDisplay.minDisplay) {
 		if(isZoomedIn(fDisplay)) {
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.3');
 		} else {
