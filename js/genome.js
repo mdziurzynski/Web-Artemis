@@ -1990,7 +1990,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
 	}
 	
-	if(!fDisplay.minDisplay) {
+	if(options != undefined && !options.minDisplay) {
 		if(isZoomedIn(fDisplay)) {
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.3');
 		} else {
