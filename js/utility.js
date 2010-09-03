@@ -118,7 +118,8 @@ function selectFeature(featureSelected, fDisplay) {
 		selectFeatureExact(featureSelected, fDisplay);
 	}
 
-	selectInList(featureSelected);
+	if(!fDisplay.minimumDisplay)
+		selectInList(featureSelected);
 }
 
 function isPartial(el) {
