@@ -1209,7 +1209,7 @@ function drawFeatures(fDisplay) {
 			{ region:fDisplay.srcFeature, 
 		      start:fDisplay.leftBase, end:end, 
 		      exclude:excludes }, 
-		      fDisplay, { minDisplay:fDisplay.minimumDisplay, startTime:currentTime });
+		      fDisplay, { append:false, minDisplay:fDisplay.minimumDisplay, startTime:currentTime });
 }
 
 function getFeatureExons(transcript) {
@@ -1628,6 +1628,16 @@ var aShowProperties = function showProperties(fDisplay, returned, options) {
 		}
 	}
 
+	$("div#properties").html(
+			"<div id='DISP"+featureSelected+"'>"+
+				"<div id='DISP_SYN"+featureSelected+"'></div>"+
+				"<div id='DISP_PRODUCT"+featureSelected+"'></div>"+
+				"<div id='DISP_PROP"+featureSelected+"'></div>"+
+				"<div id='DISP_PUB"+featureSelected+"'></div>"+
+				"<div id='DISP_DBX"+featureSelected+"'></div>"+
+				"<div id='DISP_CV"+featureSelected+"'></div>"+
+				"<div id='DISP_ORTHO"+featureSelected+"'></div>"+
+			"</div>");
 	handleAjaxCalling('/features/synonyms.json?', aFeatureSynonyms,
 			featureStr, -1, {featureSelected: featureSelected});
 	
@@ -1645,9 +1655,7 @@ var aShowProperties = function showProperties(fDisplay, returned, options) {
 	
 	handleAjaxCalling('/features/orthologues.json?', aOrthologues,
 			featureStr, fDisplay, {featureSelected: featureSelected});
-        
-    $("div#properties").html("<div id='DISP"+featureSelected+"'></div>");
-    
+
     if(primary_name) {
 		name += " :: "+primary_name;
     }
@@ -1748,12 +1756,12 @@ var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
 		   if(featureOrthologues[j].orthotype == 'polypeptide') {
 			   
 			 if(count == 0)
-				$("div#DISP"+escapeId(featureSelected)).append(
+				$("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   "<br /><strong>Orthologues : </strong><br />");
 				
 			 count++;
 		     var featureOrthologue = featureOrthologues[j].ortho;
-		     $("div#DISP"+escapeId(featureSelected)).append(
+		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   featureOrthologue+'\','+midDisplay+');">'+
 				   featureOrthologue+"</a> ("+featureOrthologues[j].orthoproduct+")<br />");
@@ -1777,7 +1785,7 @@ var aCluster = function ajaxGetClusters(fDisplay, returned, options) {
 		return;
 	
 	var featureSelected = options.featureSelected;
-	$("div#DISP"+escapeId(featureSelected)).append(
+	$("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 			   "<br /><strong>Clusters : </strong><br />");
 	for(var i=0; i<clusters.length; i++) {	
 		var featureCluster = clusters[i].cluster;
@@ -1785,7 +1793,7 @@ var aCluster = function ajaxGetClusters(fDisplay, returned, options) {
 			   
 		   if(featureCluster[j].subject_type == 'polypeptide') {
 		     var subject = featureCluster[j].subject;
-		     $("div#DISP"+escapeId(featureSelected)).append(
+		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   subject+'\','+midDisplay+');">'+
 				   subject+"</a><br />");
@@ -1815,7 +1823,7 @@ var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 		var featureprops = featProps[i].props;
 		for(var j=0; j<featureprops.length; j++) {
 			if(!containsString(propertyFilter, featureprops[j].name))
-				$("div#DISP"+escapeId(featureSelected)).append(
+				$("div#DISP_PROP"+escapeId(featureSelected)).append(
 						featureprops[j].name+"="+featureprops[j].value+"<br />");
 		}
 	}
@@ -1827,22 +1835,22 @@ var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options)
 	if(!featSyns || featSyns.length == 0)
 		return;
 	
-	$("div#DISP"+escapeId(featureSelected)).append(
+	$("div#DISP_SYN"+escapeId(featureSelected)).append(
 			   "<br /><strong>Synonyms : </strong><br />");
 	
     for(var i=0; i<featSyns.length; i++) {	
 		var featuresyns= featSyns[i].synonyms;
 		for(var j=0; j<featuresyns.length; j++) {
-			$("div#DISP"+escapeId(featureSelected)).append(
+			$("div#DISP_SYN"+escapeId(featureSelected)).append(
 					featuresyns[j].type+":"+featuresyns[j].synonym);
 			if(featuresyns[j].is_current == 'False')
-				$("div#DISP"+escapeId(featureSelected)).append(' (not current); ');
+				$("div#DISP_SYN"+escapeId(featureSelected)).append(' (not current); ');
 			else
-				$("div#DISP"+escapeId(featureSelected)).append('; ');
+				$("div#DISP_SYN"+escapeId(featureSelected)).append('; ');
 		}
 	}
     
-	$("div#DISP"+escapeId(featureSelected)).append("<br /><br />");
+	$("div#DISP_SYN"+escapeId(featureSelected)).append("<br /><br />");
 };
 
 var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, returned, options) {
@@ -1851,15 +1859,15 @@ var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, returned, options) {
 	if(!featPubs || featPubs.length == 0)
 		return;
 	
-	$("div#DISP"+escapeId(featureSelected)).append(
+	$("div#DISP_PUB"+escapeId(featureSelected)).append(
 			   "<br /><strong>Literature : </strong><br />");
 	
     for(var i=0; i<featPubs.length; i++) {	
 		var featurepubs = featPubs[i].pubs;
-		showFeaturePubs(featurepubs, featureSelected);
+		showFeaturePubs(featurepubs, featureSelected, "DISP_PUB");
 	}
     
-	$("div#DISP"+escapeId(featureSelected)).append("<br />");
+	$("div#DISP_PUB"+escapeId(featureSelected)).append("<br />");
 };
 
 
@@ -1869,14 +1877,14 @@ var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(fDisplay, returned, options
 	if(!featDbXRefs || featDbXRefs.length == 0)
 		return;
 	
-	$("div#DISP"+escapeId(featureSelected)).append(
+	$("div#DISP_DBX"+escapeId(featureSelected)).append(
 			   "<br /><strong>DbXRefs : </strong><br />");
 	
     for(var i=0; i<featDbXRefs.length; i++) {	
-		showFeatureDbXRefs(featDbXRefs[i].dbxrefs, featureSelected);
+		showFeatureDbXRefs(featDbXRefs[i].dbxrefs, featureSelected, "DISP_DBX");
 	}
     
-	$("div#DISP"+escapeId(featureSelected)).append("<br />");
+	$("div#DISP_DBX"+escapeId(featureSelected)).append("<br />");
 };
 
 function containsString(anArray, aStr) {
@@ -1966,12 +1974,13 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			drawExons(fDisplay, exonMap[exonParent[i]], featureStr, basePerPixel);
 	}
 	
-	if(options.append) {
+/*	if(options.append) {
 		$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
 	} else {
 		$('#features'+fDisplay.index+'_track1').html(featureStr);
-	}
+	}*/
 
+	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
 	
 	if($('.feat').height() != fDisplay.frameLineHeight-2 || options.append ) {
 		var cssObj = {
@@ -2418,9 +2427,12 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 			aFeatureFlatten(fDisplay, jsonFeatureObj,
 					{append:true, minDisplay:fDisplay.minimumDisplay});
 			
+			var self = fDisplay;
 			$('#features'+fDisplay.index+'_'+trackIndex).single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
 			$('#features'+fDisplay.index+'_'+trackIndex).popup_enter_out(showPopupFeature, disablePopup);
-			
+		    $('#features'+fDisplay.index+'_'+trackIndex).contextMenu({menu: 'fDispMenus'+self.index}, 
+		    		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
+		    
 			fDisplay.showFeatureFn[trackIndex] = fnFeatureProps;
 			break;
 		}

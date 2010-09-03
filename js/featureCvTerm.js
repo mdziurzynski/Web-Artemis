@@ -13,8 +13,8 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 		for(var j=0; j<featurecvterms.length; j++) {
 		   var cvName = featurecvterms[j].cv;
 		   if(cvName == product_cv) {
-			   $("div#DISP"+escapeId(featureSelected)).append(
-				   "<br /><strong>Product : </strong><br />"+featurecvterms[j].cvterm+"<br />");
+			   $("div#DISP_PRODUCT"+escapeId(featureSelected)).append(
+				   "<strong>Product : </strong><br />"+featurecvterms[j].cvterm+"<br /><br />");
 		   }
 		   
 		   for(var k=0; k<go.length; k++) {
@@ -27,7 +27,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 	
 	// GO
 	if(goHead) {
-		   $("div#DISP"+escapeId(featureSelected)).append(
+		   $("div#DISP_CV"+escapeId(featureSelected)).append(
 				   "<br /><strong>Gene Ontology : </strong><br />");
 	}
 
@@ -47,14 +47,14 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 		   }
 
 		   if(cvName == 'GO') {
-			   $("div#DISP"+escapeId(featureSelected)).append(
+			   $("div#DISP_CV"+escapeId(featureSelected)).append(
 					   '<a href="javascript:void(0)" onclick="window.open(\'http://www.genedb.org/cgi-bin/amigo/term-details.cgi?term=GO:'+
 							   featurecvterms[j].accession+'\');">GO:'+
 					   featurecvterms[j].accession+'</a>'+aspect+'; '+featurecvterms[j].cvterm+'; ');
-			   showFeatureProps(featurecvterms[j], featureSelected);
-			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
-			   showFeaturePubs(featurecvterms[j].pubs, featureSelected);
-			   $("div#DISP"+escapeId(featureSelected)).append("<br />");
+			   showFeatureProps(featurecvterms[j], featureSelected, "DISP_CV");
+			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected, "DISP_CV");
+			   showFeaturePubs(featurecvterms[j].pubs, featureSelected, "DISP_CV");
+			   $("div#DISP_CV"+escapeId(featureSelected)).append("<br />");
 		   }
 		}
 	}
@@ -77,53 +77,53 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 		   if(cvName != 'GO' && cvName != 'annotation_change') {
 			   if(!ccHead) {
 				   ccHead = true;
-				   $("div#DISP"+escapeId(featureSelected)).append(
+				   $("div#DISP_CV"+escapeId(featureSelected)).append(
 				   "<br /><strong>Controlled Curation : </strong><br />");
 			   }
-			   $("div#DISP"+escapeId(featureSelected)).append(
+			   $("div#DISP_CV"+escapeId(featureSelected)).append(
 				   cvName+"="+featurecvterms[j].cvterm+'; ');
 
-			   showFeatureProps(featurecvterms[j], featureSelected);
-			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected);
-			   showFeaturePubs(featurecvterms[j].pubs, featureSelected);
-			   $("div#DISP"+escapeId(featureSelected)).append("<br />");
+			   showFeatureProps(featurecvterms[j], featureSelected, "DISP_CV");
+			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected, "DISP_CV");
+			   showFeaturePubs(featurecvterms[j].pubs, featureSelected, "DISP_CV");
+			   $("div#DISP_CV"+escapeId(featureSelected)).append("<br />");
 		   }
 		}
     }
 }
 
-function showFeatureProps(featurecvterm, featureSelected) {
+function showFeatureProps(featurecvterm, featureSelected, prefix) {
 	var featureCvTermProps = featurecvterm.props;
 	for(var k=0; k<featureCvTermProps.length; k++) {
-		   $("div#DISP"+escapeId(featureSelected)).append(
+		   $("div#"+prefix+escapeId(featureSelected)).append(
 				   featureCvTermProps[k].proptype+"="+featureCvTermProps[k].prop+"; ");
 	}	
 }
 
-function showFeatureDbXRefs(featuredbxrefs, featureSelected) {
+function showFeatureDbXRefs(featuredbxrefs, featureSelected, prefix) {
 	for(var k=0; k<featuredbxrefs.length; k++) {
 		if(featuredbxrefs[k].database == 'PlasmoDB') {
-			$("div#DISP"+escapeId(featureSelected)).append(
+			$("div#"+prefix+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="window.open(\'http://plasmodb.org/plasmodb/servlet/sv?page=gene&source_id='+
 				   featuredbxrefs[k].accession+'\');">'+
 				   featuredbxrefs[k].database+":"+featuredbxrefs[k].accession+'</a>; ');
 		} else
-			$("div#DISP"+escapeId(featureSelected)).append(
+			$("div#"+prefix+escapeId(featureSelected)).append(
 				featuredbxrefs[k].database+":"+featuredbxrefs[k].accession+'; ');
 	}
 }
 
 
-function showFeaturePubs(pubs, featureSelected) {
+function showFeaturePubs(pubs, featureSelected, prefix) {
 
 	for(var k=0; k<pubs.length; k++) {
 		   if(pubs[k].database == 'PMID') {
-			   $("div#DISP"+escapeId(featureSelected)).append(
+			   $("div#"+prefix+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="window.open(\'http://www.ncbi.nlm.nih.gov/pubmed/'+
 				   pubs[k].accession+'\');">'+
 				   pubs[k].database+":"+pubs[k].accession+'</a>; ');
 		   } else
-			   $("div#DISP"+escapeId(featureSelected)).append(
+			   $("div#"+prefix+escapeId(featureSelected)).append(
 					   pubs[k].database+":"+pubs[k].accession+';');
 	}
 }
