@@ -245,7 +245,7 @@ function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisp
   	if(xhr.status == "408") {
   		//
   		// timeout repeat call
-  		handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay);
+  		handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay, options);
   	} else {
   		alert(xhr.status+"\n"+thrownError);
   	}
