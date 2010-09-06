@@ -61,130 +61,6 @@ var colour = [
     '255,191,191'
 ];
 
-$(document).ready(function() {
-
-	var arr = getUrlVars();
-	var leftBase = arr["base"];
-	
-	if(!leftBase) {
-		leftBase = 1;
-	} else {
-		leftBase = parseInt(leftBase);
-		if(leftBase < 1)
-			leftBase = 1;
-	}
-	
-    var width = arr["width"];	
-    if(width) {
-    	displayWidth = parseInt(width);
-    } else {
-    	width = $(window).width();   // browser viewport width
-        displayWidth = width - (margin*12);
-    }
-    
-	var basesDisplayWidth = arr["bases"];
-	if(!basesDisplayWidth) {
-		basesDisplayWidth = 16000;
-	} else {
-		basesDisplayWidth = parseInt(basesDisplayWidth);
-	}
-	
-	var excludeFeatures = arr["exclude"];
-	if(excludeFeatures) {
-		excludes = excludeFeatures.split(',');
-	}
-	
-	var listSetting = arr["featureList"];
-	if(listSetting) {
-		if(listSetting == "true")
-			showFeatureList = true;
-		else
-			showFeatureList = false;
-	}
-	
-	var debugSetting = arr["debug"];
-	if(debugSetting) {
-		if(debugSetting == "true")
-			debug = true;
-		else
-			debug = false;
-	}
-	
-	if(basesDisplayWidth > 50000) {
-	  showStopCodons = false;
-	} else if(basesDisplayWidth < 1000) {
-	  showStopCodons = true;
-	}
-	  
-	var hgt = arr["height"];
-	
-	var title = '';
-	var ypos = 40;
-	var lastObj;
-	var compCount = 0;
-	for(var i in arr) {
-		var value = arr[i];
-		if(i.indexOf("src") > -1) {
-			title+=value+' ';
-
-			if(!hgt) {
-				hgt = 10;
-			} else {
-				hgt = parseInt(hgt);
-			}
-				
-			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 30000, value, hgt, leftBase);
-			featureDisplayObjs[count - 1] = obj;
-			ypos+=250;
-			
-			if(count > 1) {
-				compare = true;
-				new comparisonObj(lastObj, obj, compCount);
-				compCount++;
-			}
-			lastObj = obj;
-		}
-	}
-
-	if(count == 0) {
-		if(!hgt) {
-			hgt = 12
-		} else {
-			hgt = parseInt(hgt);
-		}
-		title = 'Pf3D7_01';
-		var obj = new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
-		featureDisplayObjs[0] = obj;
-	}
-	
-	if(showFeatureList)
-		featureListEvents(featureDisplayObjs[0]);
-	
-	$('ul.sf-menu').superfish({ 
-        animation: {height:'show'},   // slide-down effect without fade-in 
-        delay:     1200               // 1.2 second delay on mouseout 
-    });
-	$(this).attr("title", title);
-	
-	if (!$('#sequence'+1).find('canvas').get(0))
-	  $('#sequence'+1).append("<canvas width='1px' height ='1px'></canvas>");		
-	var canvas = $('#sequence'+1).find("canvas").get(0);
-	if(canvas.getContext) {
-	  useCanvas = true;
-	  debugLog('USE CANVAS');
-	}
-	$('#sequence'+1).html('');
-	
-	// Override the core hide() method
-	var originalHideMethod = jQuery.fn.hide;
-	jQuery.fn.extend({
-	hide : function(arguments) { 
-		if(this.selector == '.contextMenu') 
-			disablePopup(); 
-		return originalHideMethod.apply( this ); }
-	}); 
-	//testAddFeatures();
-});
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
 		                   srcFeature, frameLineHeight, leftBase) {
@@ -2438,3 +2314,130 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 		}
 	}
 }
+
+// put at the end of the script for ie 
+$(document).ready(function() {
+
+	var arr = getUrlVars();
+	var leftBase = arr["base"];
+	
+	if(!leftBase) {
+		leftBase = 1;
+	} else {
+		leftBase = parseInt(leftBase);
+		if(leftBase < 1)
+			leftBase = 1;
+	}
+	
+    var width = arr["width"];	
+    if(width) {
+    	displayWidth = parseInt(width);
+    } else {
+    	width = $(window).width();   // browser viewport width
+        displayWidth = width - (margin*12);
+    }
+    
+	var basesDisplayWidth = arr["bases"];
+	if(!basesDisplayWidth) {
+		basesDisplayWidth = 16000;
+	} else {
+		basesDisplayWidth = parseInt(basesDisplayWidth);
+	}
+	
+	var excludeFeatures = arr["exclude"];
+	if(excludeFeatures) {
+		excludes = excludeFeatures.split(',');
+	}
+	
+	var listSetting = arr["featureList"];
+	if(listSetting) {
+		if(listSetting == "true")
+			showFeatureList = true;
+		else
+			showFeatureList = false;
+	}
+	
+	var debugSetting = arr["debug"];
+	if(debugSetting) {
+		if(debugSetting == "true")
+			debug = true;
+		else
+			debug = false;
+	}
+	
+	if(basesDisplayWidth > 50000) {
+	  showStopCodons = false;
+	} else if(basesDisplayWidth < 1000) {
+	  showStopCodons = true;
+	}
+	  
+	var hgt = arr["height"];
+	
+	var title = '';
+	var ypos = 40;
+	var lastObj;
+	var compCount = 0;
+	for(var i in arr) {
+		var value = arr[i];
+		if(i.indexOf("src") > -1) {
+			title+=value+' ';
+
+			if(!hgt) {
+				hgt = 10;
+			} else {
+				hgt = parseInt(hgt);
+			}
+				
+			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 30000, value, hgt, leftBase);
+			featureDisplayObjs[count - 1] = obj;
+			ypos+=250;
+			
+			if(count > 1) {
+				compare = true;
+				new comparisonObj(lastObj, obj, compCount);
+				compCount++;
+			}
+			lastObj = obj;
+		}
+	}
+
+	if(count == 0) {
+		if(!hgt) {
+			hgt = 12
+		} else {
+			hgt = parseInt(hgt);
+		}
+		title = 'Pf3D7_01';
+		var obj = new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
+		featureDisplayObjs[0] = obj;
+	}
+	
+	if(showFeatureList)
+		featureListEvents(featureDisplayObjs[0]);
+	
+	$('ul.sf-menu').superfish({ 
+        animation: {height:'show'},   // slide-down effect without fade-in 
+        delay:     1200               // 1.2 second delay on mouseout 
+    });
+	$(this).attr("title", title);
+	
+	if (!$('#sequence'+1).find('canvas').get(0))
+	  $('#sequence'+1).append("<canvas width='1px' height ='1px'></canvas>");		
+	var canvas = $('#sequence'+1).find("canvas").get(0);
+	if(canvas.getContext) {
+	  useCanvas = true;
+	  debugLog('USE CANVAS');
+	}
+	$('#sequence'+1).html('');
+	
+	// Override the core hide() method
+	var originalHideMethod = jQuery.fn.hide;
+	jQuery.fn.extend({
+	hide : function(arguments) { 
+		if(this.selector == '.contextMenu') 
+			disablePopup(); 
+		return originalHideMethod.apply( this ); }
+	}); 
+	//testAddFeatures();
+});
+
