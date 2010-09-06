@@ -176,7 +176,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	// feature display menu
 	$('#menuHeader').append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
-    		'<li><a href="#gotoGene" id="gotoGene">Find... </a></li>'+
+    		'<li><a href="#gotoGene">Find... </a></li>'+
     		'<li><a href="#excludeFeature" id="excludeFeature">Features to show/hide... </a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
