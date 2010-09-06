@@ -2208,6 +2208,8 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 };
 
 function setBamMenu(fDisplay) {
+	if(serviceTypeBam < 0)
+		return;
 	var serviceName = '/sams/listfororganism.json?';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 		
