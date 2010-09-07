@@ -207,8 +207,10 @@ function selectInListExact(featureSelected) {
 
 function showRow(tr) {
 	var rowIndex = $(tr).index();
-	$('#featureListTable').find('tbody').animate({scrollTop:rowIndex*$(tr).height()}, 200);
-	//$('#featureListTable').find('tbody').scrollTop(rowIndex*$(tr).height());
+	if ( $.browser.msie ) 
+        $('#featureListTable').find('tbody').scrollTop(rowIndex*$(tr).height());
+	else
+		$('#featureListTable').find('tbody').animate({scrollTop:rowIndex*$(tr).height()}, 200);
 }
 
 function deSelectAllInList() {
