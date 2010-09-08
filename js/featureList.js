@@ -57,8 +57,12 @@ function positionFeatureList(featureDisplay, nrows) {
 	$('#featureList').css(cssObj);
 	
 	var hgt = $(window).height() - top - ($('#featureListTable').find('thead').height()*2);
-	if(hgt < nrows*$('#featureListTable').find('tr').height())
-	   $('#featureListTable').find('tbody').css({'overflow': 'auto', 'height': hgt+'px'});
+	if(hgt < nrows*$('#featureListTable').find('tr').height()) {
+		if( $.browser.mozilla ) 
+			$('#featureListTable').find('tbody').css({'overflow': 'auto', 'height': hgt+'px'});
+		else
+			$('#featureList').css({'overflow': 'auto', 'height': hgt+'px'});
+	}
 }
 
 function setupFeatureList(features, exonMap, exonParent, featureDisplay, append) {
@@ -207,10 +211,10 @@ function selectInListExact(featureSelected) {
 
 function showRow(tr) {
 	var rowIndex = $(tr).index();
-	if ( $.browser.msie ) 
-        $('#featureListTable').find('tbody').scrollTop(rowIndex*$(tr).height());
-	else
+	if ( $.browser.mozilla )
 		$('#featureListTable').find('tbody').animate({scrollTop:rowIndex*$(tr).height()}, 200);
+	else
+        $('#featureList').scrollTop(rowIndex*$(tr).height());
 }
 
 function deSelectAllInList() {
