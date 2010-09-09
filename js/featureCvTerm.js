@@ -28,7 +28,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 	// GO
 	if(goHead) {
 		   $("div#DISP_CV"+escapeId(featureSelected)).append(
-				   "<br /><strong>Gene Ontology : </strong><br />");
+				   "<strong>Gene Ontology : </strong><br />");
 	}
 
 	for(var i=0; i<featureCvTerms.length; i++) {	
