@@ -1492,6 +1492,7 @@ var aShowProperties = function showProperties(fDisplay, returned, options) {
 						}
 						featurePropertyList.push(feature.uniquename);
 						featureStr += "&features="+feature.uniquename;
+						featureStr += "&features="+kid.uniquename;
 						var polypep = getFeaturePeptide(kid);
 						if(polypep != -1) {
 							featurePropertyList.push(polypep.uniquename);
@@ -1725,7 +1726,7 @@ var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options)
 		return;
 	
 	$("div#DISP_SYN"+escapeId(featureSelected)).append(
-			   "<br /><strong>Synonyms : </strong><br />");
+			   "<strong>Synonyms : </strong><br />");
 	
     for(var i=0; i<featSyns.length; i++) {	
 		var featuresyns= featSyns[i].synonyms;
