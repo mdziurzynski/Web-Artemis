@@ -216,7 +216,7 @@ var rightClickMenu = function(action, el, pos, self) {
 
 		$("div#properties").html("<div id='exList'></div>");
 	    $("div#exList").dialog({ height: 385 ,
-			width:450, position: 'center', title:'Drag Features Between Show/Hide Lists',
+			width:480, position: 'center', title:'Drag Features Between Show/Hide Lists',
 			close: function(event, ui) { $(this).remove(); },
 			buttons: {
 			'Save': function() {
@@ -1695,12 +1695,25 @@ var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 	
 	var featureSelected = options.featureSelected;
 	var featProps  = returned.response.features;
+	if(!featProps || featProps.length == 0)
+		return;
+	
+	$("div#DISP_PROP"+escapeId(featureSelected)).append(
+	   "<strong>Notes : </strong><br />");
+	
+	var setColour = false;
     for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].props;
 		for(var j=0; j<featureprops.length; j++) {
-			if(!containsString(propertyFilter, featureprops[j].name))
+			if(!containsString(propertyFilter, featureprops[j].name)) {
+				if( featureprops[j].name == 'colour' ) {
+					if(setColour)
+						continue;
+					setColour = true;
+				}
 				$("div#DISP_PROP"+escapeId(featureSelected)).append(
 						featureprops[j].name+"="+featureprops[j].value+"<br />");
+			}
 		}
 	}
 };
