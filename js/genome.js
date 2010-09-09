@@ -1717,6 +1717,7 @@ var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 			}
 		}
 	}
+    $("div#DISP_PROP"+escapeId(featureSelected)).append("<br />");
 };
 
 var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options) {
@@ -1750,14 +1751,14 @@ var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, returned, options) {
 		return;
 	
 	$("div#DISP_PUB"+escapeId(featureSelected)).append(
-			   "<br /><strong>Literature : </strong><br />");
+			   "<strong>Literature : </strong><br />");
 	
     for(var i=0; i<featPubs.length; i++) {	
 		var featurepubs = featPubs[i].pubs;
 		showFeaturePubs(featurepubs, featureSelected, "DISP_PUB");
 	}
     
-	$("div#DISP_PUB"+escapeId(featureSelected)).append("<br />");
+	$("div#DISP_PUB"+escapeId(featureSelected)).append("<br /><br />");
 };
 
 
@@ -1768,13 +1769,13 @@ var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(fDisplay, returned, options
 		return;
 	
 	$("div#DISP_DBX"+escapeId(featureSelected)).append(
-			   "<br /><strong>DbXRefs : </strong><br />");
+			   "<strong>DbXRefs : </strong><br />");
 	
     for(var i=0; i<featDbXRefs.length; i++) {	
 		showFeatureDbXRefs(featDbXRefs[i].dbxrefs, featureSelected, "DISP_DBX");
 	}
     
-	$("div#DISP_DBX"+escapeId(featureSelected)).append("<br />");
+	$("div#DISP_DBX"+escapeId(featureSelected)).append("<br /><br />");
 };
 
 function containsString(anArray, aStr) {
