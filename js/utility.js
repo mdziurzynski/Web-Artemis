@@ -137,6 +137,12 @@ function setBorder(el, size) {
 		$(el).css('border-width', size);
 }
 
+function isHiddenFeature(name, fDisplay) {
+	if($.inArray(name, fDisplay.hideFeatures) > -1)
+		return true;
+	return false;
+}
+
 function selectFeatureExact(featureSelected, fDisplay) {	
 	for(var i=0;i<fDisplay.tracks.length; i++) {
 		setBorder( $('#features'+fDisplay.index+'_'+fDisplay.tracks[i]).find( "#"+escapeId(featureSelected) ), '2px' );
