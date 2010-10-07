@@ -79,6 +79,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.nodraw = false;
 	
 	this.highlightFeatures = new Array();
+	this.hideFeatures = new Array();
 	
 	// add tracks
 	this.tracks = new Array();
@@ -181,6 +182,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
     		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
+    		'<li><a href="#hideSelected" id="hideSelectedFeature">Hide/Show seleceted features</a></li>'+
     		'</ul>');
 
     $('#sequence'+this.index).contextMenu({menu: 'fDispMenus'+self.index}, 
@@ -212,6 +214,8 @@ var rightClickMenu = function(action, el, pos, self) {
 		showBasesOfSelectedFeatures(self);
 	} else if(action.match(/showAAOfSelected/)) {
 		showAminoAcidsOfSelectedFeatures(self);
+	} else if(action.match(/hideSelected/)) {
+		hideSelectedFeatures(self);
 	} else if(action.match(/excludeFeature/)) {
 
 		$("div#properties").html("<div id='exList'></div>");
@@ -580,6 +584,10 @@ function addEventHandlers(fDisplay) {
 		
 		$('#aaOfFeature').click(function(event){
 			showAminoAcidsOfSelectedFeatures(fDisplay);
+		});
+		
+		$('#hideSelectedFeature').click(function(event){
+			hideSelectedFeatures(fDisplay);
 		});
 		
 		$('#fProperties').click(function(event){
@@ -1343,6 +1351,10 @@ function handleFeatureClick(fDisplay, event, featureSelected) {
 }
 
 
+function hideSelectedFeatures(fDisplay) {
+	fDisplay.hideFeatures = getSelectedFeatureIds();
+	drawAll(fDisplay);
+}
 
 function showAminoAcidsOfSelectedFeatures(fDisplay) {
 	var selectedFeatures = getSelectedFeatureIds();
@@ -1857,8 +1869,11 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	  } else if(feature.type == "pseudogene") {
 		  className = "featPseudo";
 	  }
-	  featureStr = drawFeature(fDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
-	}
+	  
+	  if(!isHiddenFeature(feature.feature, fDisplay)) {
+		  featureStr = drawFeature(fDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
+	  }
+    }
 
 	for(var i=0; i<exonParent.length; i++) {
 		featureStr = 
@@ -1925,11 +1940,16 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 	var sequenceLength = fDisplay.sequenceLength;
 	if(exons != undefined) {
+	
+	  if(isHiddenFeature(exons[0].feature, fDisplay)) {
+		  return featureStr;
+	  }
+	  
 	  var lastExon = 0;
 	  var lastYpos = -1;
 	  var colour = '#666666';
 	  var ypos = 0;
-		  
+
 	  for(var k=0; k<exons.length; k++) {
 	    var exon = exons[k];
 
