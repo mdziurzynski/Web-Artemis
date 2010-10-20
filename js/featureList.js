@@ -103,6 +103,10 @@ function appendExonsToList(exons) {
 	var fmax = parseInt(exons[0].end);
 	var name = exons[0].feature;
 	
+	if(exons[0].feature.indexOf(':exon') > 0)
+		name = exons[0].feature.split(':exon')[0];
+	
+	
 	for(var j=1; j<exons.length; j++) {
 		var thisFmin = parseInt(exons[j].start)+1;
 		var thisFmax = parseInt(exons[j].end);
@@ -111,7 +115,7 @@ function appendExonsToList(exons) {
 		if(thisFmax > fmax)
 			fmax = thisFmax;
 
-		name += ','+exons[j].feature.match(/\d+$/);
+		//name += ','+exons[j].feature.match(/\d+$/);
 	}
 		
 	var type;
@@ -172,7 +176,8 @@ function selectFromList(tr, rowIndex, fDisplay) {
 	var td = $(tr).children()[0];
 	var name = $(tr).attr('id').replace(/:LIST$/,'');
 
-	if($(td).text().match(/(\d+,)+\d+$/))
+	//if($(td).text().match(/(\d+,)+\d+$/))
+	if(name.match(/(exon:\d+)$/))
 		selectFeature(name, fDisplay);
 	else {
 		selectFeatureExact(name, fDisplay);
