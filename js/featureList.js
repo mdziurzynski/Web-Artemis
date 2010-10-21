@@ -106,6 +106,9 @@ function appendExonsToList(exons) {
 	if(exons[0].feature.indexOf(':exon') > 0)
 		name = exons[0].feature.split(':exon')[0];
 	
+	if(exons[0].feature.indexOf(':mRNA') > 0)
+		name = exons[0].feature.split(':mRNA')[0];
+	
 	
 	for(var j=1; j<exons.length; j++) {
 		var thisFmin = parseInt(exons[j].start)+1;
