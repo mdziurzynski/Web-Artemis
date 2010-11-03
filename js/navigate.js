@@ -36,7 +36,7 @@ function navigate(fDisplay) {
      				var f = features[i];
      				l = l + '<a href="javascript:void(0)" onclick="centerOnFeatureByDisplayIndex('+
      					fDisplay.index+',\''+f.uniquename+'\');">'+
-     		        	f.uniquename+'</a><br />';
+     		        	f.uniquename+'</a> '+f.name+'<br />';
      			}
      			setSearchResultWindow(l);
      		 }, inputObj, fDisplay, { 'goDialog':$(this) });
