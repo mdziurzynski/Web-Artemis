@@ -2268,16 +2268,19 @@ function setBamMenu(fDisplay) {
 function addBamDisplay(fDisplay, bamId) {
 	showBam = true;
 	$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
-	$("#bam"+fDisplay.index).css('width', displayWidth+margin+'px');
+	var hgt = fDisplay.marginTop-10;
+	$("#bam"+fDisplay.index).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px', 'margin-top': hgt+'px' });
+
 	fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
 	fDisplay.bamId = bamId;
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
+    addBamMenu(fDisplay);
 }
 
 function removeBamDisplay(fDisplay) {
 	showBam = false;
-	$("#bam"+fDisplay.index).html('');
+	$("#bam"+fDisplay.index).remove();
 	fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
