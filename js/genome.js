@@ -88,6 +88,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.showFeatureFn = new Object();
 	this.showFeatureFn[this.trackIndex] = showFeature;
 	
+	this.bamIdArr = new Array();
 	if(showBam) {
 	  this.marginTop = this.marginTop+maxBamHgt;
 	}
@@ -570,11 +571,12 @@ function addEventHandlers(fDisplay) {
 			if($(tgt).attr('id') == "none")
 				return;
 	
-			if(!showBam) {
-				addBamDisplay(fDisplay, $(tgt).attr('id'));
+			if($.inArray($(tgt).attr('id'), fDisplay.bamIdArr) > -1) {
+				removeBamDisplay(fDisplay, $(tgt).attr('id'));
 			} else {
-				removeBamDisplay(fDisplay);
+				addBamDisplay(fDisplay, $(tgt).attr('id'));
 			}
+			
 			drawAll(fDisplay);
 		});
 		
@@ -798,7 +800,7 @@ function drawAll(fDisplay) {
 	  $('#featureDisplay'+fDisplay.index).html('');
       var showSequence = true;
       
-      if(showBam && !fDisplay.minimumDisplay) {
+      if(!fDisplay.minimumDisplay) {
           drawBam(fDisplay);
       }
       
@@ -2266,29 +2268,38 @@ function setBamMenu(fDisplay) {
 }
 
 function addBamDisplay(fDisplay, bamId) {
-	showBam = true;
-	$('#bam').append('<div id="bamscroll'+fDisplay.index+'"></div>');
-	$('#bamscroll'+fDisplay.index).append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
+	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll"></div>');
+	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
 	var hgt = fDisplay.marginTop-10;
 	
-	$("#bam"+fDisplay.index).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
-	$('#bamscroll'+fDisplay.index).css( 
-			{ 'position': 'absolute', 'overflow': 'auto', 'margin-top': hgt+'px' , 'height': '250px', 'width': displayWidth+margin+20+'px', 'border': '1px solid #666','background-color': '#ccc'});
+	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
+	$('#bamscroll'+bamId).css( 
+			{ 'margin-top': hgt+'px' , 'height': bamViewPortHgt+'px', 'width': displayWidth+margin+20+'px', 'border': '1px solid #666','background-color': '#ccc'});
 
-	$("#bamscroll"+fDisplay.index).scrollTop(maxBamHgt);
-	fDisplay.marginTop = fDisplay.marginTop+250;
-	fDisplay.bamId = bamId;
+	$("#bamscroll"+bamId).scrollTop(maxBamHgt);
+	fDisplay.marginTop = fDisplay.marginTop+bamViewPortHgt;
+	fDisplay.bamIdArr.push( bamId );
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
-    addBamMenu(fDisplay);
+    addBamMenu(fDisplay, bamId);
 }
 
-function removeBamDisplay(fDisplay) {
-	showBam = false;
-	var hgt = $('#bamscroll'+fDisplay.index).height();
+function removeBamDisplay(fDisplay, bamId) {
+	var hgt = $('#bamscroll'+bamId).height();
+	fDisplay.bamIdArr = $.grep(fDisplay.bamIdArr, function(val) { return val != bamId; });
+	
+	var top = $("#bam"+bamId).css('margin-top').replace("px", "");
+	
+	$("#bam"+bamId).remove();
+	$("#bamscroll"+bamId).remove();
+	
+	$('.bamScroll').each(function(index) {
+	    var thisTop = $(this).css('margin-top').replace("px", "");
+	    if(thisTop < top) {
+	    	$(this).css({'margin-top': thisTop-hgt+'px'});
+	    }
+	 });
 
-	$("#bam"+fDisplay.index).remove();
-	$("#bamscroll"+fDisplay.index).remove();
 	fDisplay.marginTop = fDisplay.marginTop-hgt;
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
