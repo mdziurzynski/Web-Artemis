@@ -2267,11 +2267,16 @@ function setBamMenu(fDisplay) {
 
 function addBamDisplay(fDisplay, bamId) {
 	showBam = true;
-	$('#bam').append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
+	$('#bam').append('<div id="bamscroll'+fDisplay.index+'"></div>');
+	$('#bamscroll'+fDisplay.index).append('<div id="bam'+fDisplay.index+'" class="canvas"></div>');
 	var hgt = fDisplay.marginTop-10;
-	$("#bam"+fDisplay.index).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px', 'margin-top': hgt+'px' });
+	
+	$("#bam"+fDisplay.index).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
+	$('#bamscroll'+fDisplay.index).css( 
+			{ 'position': 'absolute', 'overflow': 'auto', 'margin-top': hgt+'px' , 'height': '250px', 'width': displayWidth+margin+20+'px', 'border': '1px solid #666','background-color': '#ccc'});
 
-	fDisplay.marginTop = fDisplay.marginTop+maxBamHgt;
+	$("#bamscroll"+fDisplay.index).scrollTop(maxBamHgt);
+	fDisplay.marginTop = fDisplay.marginTop+250;
 	fDisplay.bamId = bamId;
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
@@ -2280,8 +2285,11 @@ function addBamDisplay(fDisplay, bamId) {
 
 function removeBamDisplay(fDisplay) {
 	showBam = false;
+	var hgt = $('#bamscroll'+fDisplay.index).height();
+
 	$("#bam"+fDisplay.index).remove();
-	fDisplay.marginTop = fDisplay.marginTop-maxBamHgt;
+	$("#bamscroll"+fDisplay.index).remove();
+	fDisplay.marginTop = fDisplay.marginTop-hgt;
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
 }

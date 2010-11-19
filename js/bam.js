@@ -1,5 +1,5 @@
 
-var maxBamHgt = 350;
+var maxBamHgt = 500;
 var step = 3;
 var isStack  = true;
 var isStrand = false;
@@ -14,9 +14,9 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 	
 	for(i=0; i<coverage.length-1; i++ ) {
 		var xpos1 = margin+Math.round( ((i*window)+(window/2)) /basePerPixel);
-		var ypos1 = fDisplay.marginTop-((coverage[i]/max)*maxBamHgt);
+		var ypos1 = maxBamHgt-((coverage[i]/max)*maxBamHgt);
 		var xpos2 = margin+Math.round( (((i+1)*window)+(window/2)) /basePerPixel);
-		var ypos2 = fDisplay.marginTop-((coverage[i+1]/max)*maxBamHgt);
+		var ypos2 = maxBamHgt-((coverage[i+1]/max)*maxBamHgt);
 
 		$("#bam"+fDisplay.index).drawLine(xpos1, ypos1, xpos2, ypos2,
 				{color:colour, stroke:'1'});
@@ -66,7 +66,7 @@ function drawStack(fDisplay, samRecords) {
 	var alignmentStart = samRecords.alignmentStart;
 	var name  = samRecords.readName;
 	var flags = samRecords.flags;
-	var ypos  = fDisplay.marginTop-10;
+	var ypos  = maxBamHgt-1;
 
     var lastEndAtZero = -100;
     var lastStart = -1;
@@ -96,7 +96,7 @@ function drawStack(fDisplay, samRecords) {
 				continue;
 			}
 			if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt) {
-				ypos=fDisplay.marginTop-10;
+				ypos=maxBamHgt-1;
 				lastEndAtZero = thisEnd;
 			} else {
 				ypos=ypos-step;
@@ -115,8 +115,8 @@ function drawStrandView(fDisplay, samRecords) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	
-	var bamTop = $("#bam"+fDisplay.index).css('margin-top').replace("px", "");
-	var midPt = Math.round((fDisplay.marginTop-bamTop)/2);
+	//var bamTop = $("#bam"+fDisplay.index).css('margin-top').replace("px", "");
+	var midPt = Math.round(maxBamHgt/2);
 	
 	drawStrand(fDisplay, samRecords, -step, true, basePerPixel, midPt); // fwd
 	drawStrand(fDisplay, samRecords, step, false, basePerPixel, midPt); // rev
@@ -164,8 +164,8 @@ function drawStrand(fDisplay, samRecords, thisStep, isNegStrand, basePerPixel, m
 				colour = '#000000';
 			}
 
-			if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt ||
-					(fDisplay.marginTop-ypos) < 10) {
+			if(thisStart > lastEndAtZero+1 || (maxBamHgt-ypos) > maxBamHgt ||
+					(maxBamHgt-ypos) < 10) {
 				ypos = midPt+thisStep;
 				lastEndAtZero = thisEnd;
 			} else {
@@ -203,11 +203,13 @@ var rightClickBamMenu = function(action, el, pos, self) {
 		isStrand = false;
 		isStack = true;
 		$("#bam"+self.index).html('');
+		$("#bamscroll"+self.index).scrollTop(maxBamHgt);
 		drawStack(self, samRecords);
 	} else if(action.match(/strand/)) {
 		isStrand = true;
 		isStack = false;
 		$("#bam"+self.index).html('');
+		$("#bamscroll"+self.index).scrollTop( $("#bamscroll"+self.index).height()/2 );
 		drawStrandView(self, samRecords);
 	} 
 };
