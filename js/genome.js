@@ -574,7 +574,7 @@ function addEventHandlers(fDisplay) {
 			if($.inArray($(tgt).attr('id'), fDisplay.bamIdArr) > -1) {
 				removeBamDisplay(fDisplay, $(tgt).attr('id'));
 			} else {
-				addBamDisplay(fDisplay, $(tgt).attr('id'));
+				addBamDisplay(fDisplay, $(tgt));
 			}
 			
 			drawAll(fDisplay);
@@ -2267,15 +2267,29 @@ function setBamMenu(fDisplay) {
 	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
 }
 
-function addBamDisplay(fDisplay, bamId) {
-	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll"></div>');
+function addBamDisplay(fDisplay, tgt) {
+	var bamId = $(tgt).attr('id');
+	debugLog($(tgt));
+	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).attr('text')+'"></div></div>');
+	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
+	
 	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
 	var hgt = fDisplay.marginTop-10;
 	
 	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
-	$('#bamscroll'+bamId).css( 
-			{ 'margin-top': hgt+'px' , 'height': bamViewPortHgt+'px', 'width': displayWidth+margin+20+'px', 'border': '1px solid #666','background-color': '#ccc'});
-
+	$('#bamscroll'+bamId).css({ 
+		'margin-top': hgt+'px', 
+		'height': bamViewPortHgt+'px', 
+		'width': displayWidth+margin+20+'px', 
+		'border': '1px solid #666',
+		'background-color': '#ccc'});
+	
+	$('#bamClose'+bamId).css({
+		'margin-left': '0px', 
+		'position':'absolute', 
+		'margin-top': hgt+'px', 
+		'border': '1px solid #666'});
+	
 	$("#bamscroll"+bamId).scrollTop(maxBamHgt);
 	fDisplay.marginTop = fDisplay.marginTop+bamViewPortHgt;
 	fDisplay.bamIdArr.push( bamId );
@@ -2288,12 +2302,13 @@ function removeBamDisplay(fDisplay, bamId) {
 	var hgt = $('#bamscroll'+bamId).height();
 	fDisplay.bamIdArr = $.grep(fDisplay.bamIdArr, function(val) { return val != bamId; });
 	
-	var top = $("#bam"+bamId).css('margin-top').replace("px", "");
+	var top = $("#bamscroll"+bamId).css('margin-top').replace("px", "");
 	
 	$("#bam"+bamId).remove();
+	$('#bamClose'+bamId).remove();
 	$("#bamscroll"+bamId).remove();
-	
-	$('.bamScroll').each(function(index) {
+
+	$('.bamscroll').each(function(index) {
 	    var thisTop = $(this).css('margin-top').replace("px", "");
 	    if(thisTop < top) {
 	    	$(this).css({'margin-top': thisTop-hgt+'px'});
