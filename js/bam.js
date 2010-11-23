@@ -181,15 +181,21 @@ function drawStrand(fDisplay, samRecords, thisStep, isNegStrand, basePerPixel, m
 	}	
 }
 
-function drawBam(fDisplay) {
+function drawBam(fDisplay, bamId) {
 	var serviceName = '/sams/sequences.json?';
 	
-	for(i=0; i<fDisplay.bamIdArr.length; i++) {
-		if(i ==  1) {
-			$('body').css('cursor','wait');
+	if(bamId == undefined) {
+		for(i=0; i<fDisplay.bamIdArr.length; i++) {
+			if(i ==  1) {
+				$('body').css('cursor','wait');
+			}
+			handleAjaxCalling(serviceName, aSamSeqs,
+					{ fileID:fDisplay.bamIdArr[i] }, fDisplay, { bamId : fDisplay.bamIdArr[i] });
 		}
+	} else {
+		$('body').css('cursor','wait');
 		handleAjaxCalling(serviceName, aSamSeqs,
-			{ fileID:fDisplay.bamIdArr[i] }, fDisplay, { bamId : fDisplay.bamIdArr[i] });
+				{ fileID:bamId }, fDisplay, { bamId : bamId });
 	}
 }
 
@@ -219,4 +225,76 @@ var rightClickBamMenu = function(action, el, pos, self, bamId) {
 	} 
 };
 
+function adjustHeight(fDisplay, hgt) {
+	$('#ticks'+fDisplay.index).find('.tickClass').each(function(index) {
+	    var thisTop = parseInt($(this).css('margin-top').replace("px", ""));
+	    $(this).css({'margin-top': thisTop+hgt+'px'});
+	 });
+	
+	$('div[id*=features'+fDisplay.index+']').find('[class*=feat]').each(function(index) {
+		var thisTop = parseInt($(this).css('margin-top').replace("px", ""));
+	    $(this).css({'margin-top': thisTop+hgt+'px'});
+	 });
+	
+	var thisTop = parseInt($('#featureList').css('top').replace("px", ""));
+    $('#featureList').css({'top': thisTop+hgt+'px'});
+}
 
+function addBamDisplay(fDisplay, tgt) {
+	var bamId = $(tgt).attr('id');
+	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).attr('text')+'"></div></div>');
+	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
+	
+	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
+	var hgt = fDisplay.marginTop-10;
+	
+	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
+	$('#bamscroll'+bamId).css({ 
+		'margin-top': hgt+'px', 
+		'height': bamViewPortHgt+'px', 
+		'width': displayWidth+margin+20+'px', 
+		'border': '1px solid #666',
+		'background-color': '#ccc'});
+	
+	$('#bamClose'+bamId).css({
+		'margin-left': '0px', 
+		'position':'absolute', 
+		'margin-top': hgt+'px', 
+		'border': '1px solid #666'});
+	
+	$('#bamClose'+bamId).click(function() {
+		removeBamDisplay(fDisplay, bamId);
+	});
+	
+	$("#bamscroll"+bamId).scrollTop(maxBamHgt);
+	fDisplay.marginTop = fDisplay.marginTop+bamViewPortHgt;
+	fDisplay.bamIdArr.push( bamId );
+	adjustFeatureDisplayPosition(false, fDisplay);
+	drawFrameAndStrand(fDisplay);
+    addBamMenu(fDisplay, bamId);
+    drawBam(fDisplay, bamId); 
+    adjustHeight(fDisplay, $('#bamscroll'+bamId).height())
+}
+
+function removeBamDisplay(fDisplay, bamId) {
+	var hgt = $('#bamscroll'+bamId).height();
+	// remove bam ID from array of current bam's
+	fDisplay.bamIdArr = $.grep(fDisplay.bamIdArr, function(val) { return val != bamId; });
+	
+	var top = $("#bamscroll"+bamId).css('margin-top').replace("px", "");
+	$("#bam"+bamId).remove();
+	$('#bamClose'+bamId).remove();
+	$("#bamscroll"+bamId).remove();
+
+	$('.bamscroll').each(function(index) {
+	    var thisTop = $(this).css('margin-top').replace("px", "");
+	    if(thisTop < top) {
+	    	$(this).css({'margin-top': thisTop-hgt+'px'});
+	    }
+	 });
+
+	fDisplay.marginTop = fDisplay.marginTop-hgt;
+	adjustFeatureDisplayPosition(false, fDisplay);
+	drawFrameAndStrand(fDisplay);
+    adjustHeight(fDisplay, -hgt)
+}

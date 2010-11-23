@@ -4,16 +4,17 @@
 // 2 - javascript served from a seperate server accessed anywhere
 // 
 var serviceType = 2;
-var serviceTypeBam = 4;
+var serviceTypeBam = 5;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
                    "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
                    "http://t81-omixed.internal.sanger.ac.uk:7000", // jython pathogens
+                   "http://t81-omixed.internal.sanger.ac.uk:8080/crawl/",  // java tomcat
                    "http://www.genedb.org/testservice",
                    "http://127.0.0.1:6666"]; 
-var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
+var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=1000&height=10&bases=5000
@@ -577,7 +578,7 @@ function addEventHandlers(fDisplay) {
 				addBamDisplay(fDisplay, $(tgt));
 			}
 			
-			drawAll(fDisplay);
+			//drawAll(fDisplay);
 		});
 		
 		$('#basesOfFeature').click(function(event){
@@ -2267,58 +2268,7 @@ function setBamMenu(fDisplay) {
 	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
 }
 
-function addBamDisplay(fDisplay, tgt) {
-	var bamId = $(tgt).attr('id');
-	debugLog($(tgt));
-	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).attr('text')+'"></div></div>');
-	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
-	
-	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
-	var hgt = fDisplay.marginTop-10;
-	
-	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
-	$('#bamscroll'+bamId).css({ 
-		'margin-top': hgt+'px', 
-		'height': bamViewPortHgt+'px', 
-		'width': displayWidth+margin+20+'px', 
-		'border': '1px solid #666',
-		'background-color': '#ccc'});
-	
-	$('#bamClose'+bamId).css({
-		'margin-left': '0px', 
-		'position':'absolute', 
-		'margin-top': hgt+'px', 
-		'border': '1px solid #666'});
-	
-	$("#bamscroll"+bamId).scrollTop(maxBamHgt);
-	fDisplay.marginTop = fDisplay.marginTop+bamViewPortHgt;
-	fDisplay.bamIdArr.push( bamId );
-	adjustFeatureDisplayPosition(false, fDisplay);
-	drawFrameAndStrand(fDisplay);
-    addBamMenu(fDisplay, bamId);
-}
 
-function removeBamDisplay(fDisplay, bamId) {
-	var hgt = $('#bamscroll'+bamId).height();
-	fDisplay.bamIdArr = $.grep(fDisplay.bamIdArr, function(val) { return val != bamId; });
-	
-	var top = $("#bamscroll"+bamId).css('margin-top').replace("px", "");
-	
-	$("#bam"+bamId).remove();
-	$('#bamClose'+bamId).remove();
-	$("#bamscroll"+bamId).remove();
-
-	$('.bamscroll').each(function(index) {
-	    var thisTop = $(this).css('margin-top').replace("px", "");
-	    if(thisTop < top) {
-	    	$(this).css({'margin-top': thisTop-hgt+'px'});
-	    }
-	 });
-
-	fDisplay.marginTop = fDisplay.marginTop-hgt;
-	adjustFeatureDisplayPosition(false, fDisplay);
-	drawFrameAndStrand(fDisplay);
-}
 
 //
 //Test code: to test adding extra features and giving them
