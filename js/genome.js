@@ -88,8 +88,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.tracks.push(this.trackIndex);
 	this.showFeatureFn = new Object();
 	this.showFeatureFn[this.trackIndex] = showFeature;
-	
-	this.bamIdArr = new Array();
+
 	if(showBam) {
 	  this.marginTop = this.marginTop+maxBamHgt;
 	}
@@ -572,7 +571,7 @@ function addEventHandlers(fDisplay) {
 			if($(tgt).attr('id') == "none")
 				return;
 	
-			if($.inArray($(tgt).attr('id'), fDisplay.bamIdArr) > -1) {
+			if(isBamVisible($(tgt).attr('id'))) {
 				removeBamDisplay(fDisplay, $(tgt).attr('id'));
 			} else {
 				addBamDisplay(fDisplay, $(tgt));

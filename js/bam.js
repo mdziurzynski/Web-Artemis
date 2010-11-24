@@ -2,9 +2,40 @@
 var maxBamHgt = 550;
 var bamViewPortHgt = 150;
 var step = 3;
-var isStack  = true;
-var isStrand = false;
-var samRecords;
+var bamObjs = new Array();
+
+function bamObj(bamId, samRecords) {
+	this.bamId = bamId;
+	this.isStack  = true;
+	this.isStrand = false;
+	this.samRecords = samRecords;
+}
+
+function isBamVisible(bamId) {
+	for(i=0; i<bamObjs.length; i++) {
+		if(bamObjs[i].bamId == bamId)
+			return true;
+	}
+	return false;
+}
+
+function getBamObj(bamId) {
+	for(i=0; i<bamObjs.length; i++) {
+		if(bamObjs[i].bamId == bamId)
+			return bamObjs[i];
+	}
+	return null;
+}
+
+function removeBamObj(bamId) {
+	var tmp = new Array();
+	for(i=0; i<bamObjs.length; i++) {
+		if(bamObjs[i].bamId != bamId) {
+			tmp.push(bamObjs[i]);
+		}
+	}
+	bamObjs = tmp;
+}
 
 var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 	var coverage = returned.response.coverage;
@@ -26,13 +57,20 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 };
 
 var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
-	samRecords  = returned.response.records;
-
-	if(isStack) {
-		drawStack(fDisplay, samRecords, options.bamId);
+	var samRecords  = returned.response.records;
+	
+	var thisBam = getBamObj(options.bamId);
+	if(thisBam == null) {
+		thisBam = new bamObj(options.bamId, samRecords);
+		bamObjs.push(thisBam);
+	} else {
+		thisBam.samRecords = samRecords;
 	}
-	else if(isStrand) {
-		drawStrandView(fDisplay, samRecords, options.bamId);
+	
+	if(thisBam.isStack) {
+		drawStack(fDisplay, thisBam);
+	} else if(thisBam.isStrand) {
+		drawStrandView(fDisplay, thisBam);
 	}
 
 	$('body').css('cursor','default');
@@ -59,14 +97,14 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 	}
 };
 
-function drawStack(fDisplay, samRecords, bamId) {
+function drawStack(fDisplay, thisBam) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	
-	var alignmentEnd   = samRecords.alignmentEnd;
-	var alignmentStart = samRecords.alignmentStart;
-	var name  = samRecords.readName;
-	var flags = samRecords.flags;
+	var alignmentEnd   = thisBam.samRecords.alignmentEnd;
+	var alignmentStart = thisBam.samRecords.alignmentStart;
+	var name  = thisBam.samRecords.readName;
+	var flags = thisBam.samRecords.flags;
 	var ypos  = maxBamHgt-1;
 
     var lastEndAtZero = -100;
@@ -75,7 +113,7 @@ function drawStack(fDisplay, samRecords, bamId) {
     var properPair = true;
     
     var colour = '#000000';
-	for(var i=0; i<samRecords.alignmentStart.length; i++ ) {
+	for(var i=0; i<thisBam.samRecords.alignmentStart.length; i++ ) {
 		var thisStart = alignmentStart[i]-fDisplay.leftBase;
 		var thisEnd   = alignmentEnd[i]-fDisplay.leftBase;
 		var thisName  = name[i];
@@ -106,21 +144,21 @@ function drawStack(fDisplay, samRecords, bamId) {
 			
 		thisStart = margin+Math.round(thisStart/basePerPixel);
 		thisEnd   = margin+Math.round(thisEnd/basePerPixel);	
-		$("#bam"+bamId).drawLine(thisStart, ypos, thisEnd, ypos,
+		$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
 				{color:colour, stroke:'1'});
 	}	
 }
 
 
-function drawStrandView(fDisplay, samRecords, bamId) {
+function drawStrandView(fDisplay, thisBam) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	
 	//var bamTop = $("#bam"+fDisplay.index).css('margin-top').replace("px", "");
 	var midPt = Math.round(maxBamHgt/2);
 	
-	drawStrand(fDisplay, samRecords, -step, true, basePerPixel, midPt, bamId); // fwd
-	drawStrand(fDisplay, samRecords, step, false, basePerPixel, midPt, bamId); // rev
+	drawStrand(fDisplay, thisBam.samRecords, -step, true, basePerPixel, midPt, thisBam.bamId); // fwd
+	drawStrand(fDisplay, thisBam.samRecords, step, false, basePerPixel, midPt, thisBam.bamId); // rev
 }
 
 function drawStrand(fDisplay, samRecords, thisStep, isNegStrand, basePerPixel, midPt, bamId) {
@@ -185,12 +223,12 @@ function drawBam(fDisplay, bamId) {
 	var serviceName = '/sams/sequences.json?';
 	
 	if(bamId == undefined) {
-		for(i=0; i<fDisplay.bamIdArr.length; i++) {
+		for(i=0; i<bamObjs.length; i++) {
 			if(i ==  1) {
 				$('body').css('cursor','wait');
 			}
 			handleAjaxCalling(serviceName, aSamSeqs,
-					{ fileID:fDisplay.bamIdArr[i] }, fDisplay, { bamId : fDisplay.bamIdArr[i] });
+					{ fileID:bamObjs[i].bamId }, fDisplay, { bamId : bamObjs[i].bamId });
 		}
 	} else {
 		$('body').css('cursor','wait');
@@ -210,18 +248,20 @@ function addBamMenu(fDisplay, bamId) {
 }
 
 var rightClickBamMenu = function(action, el, pos, self, bamId) {
+	var thisBam = getBamObj(bamId);
+	
 	if(action.match(/stack/)) {
-		isStrand = false;
-		isStack = true;
+		thisBam.isStrand = false;
+		thisBam.isStack = true;
 		$("#bam"+bamId).html('');
 		$("#bamscroll"+bamId).scrollTop(maxBamHgt);
-		drawStack(self, samRecords, bamId);
+		drawStack(self, thisBam);
 	} else if(action.match(/strand/)) {
-		isStrand = true;
-		isStack = false;
+		thisBam.isStrand = true;
+		thisBam.isStack = false;
 		$("#bam"+bamId).html('');	
 		$("#bamscroll"+bamId).scrollTop( (maxBamHgt-bamViewPortHgt)/2 );
-		drawStrandView(self, samRecords, bamId);
+		drawStrandView(self, thisBam);
 	} 
 };
 
@@ -268,7 +308,7 @@ function addBamDisplay(fDisplay, tgt) {
 	
 	$("#bamscroll"+bamId).scrollTop(maxBamHgt);
 	fDisplay.marginTop = fDisplay.marginTop+bamViewPortHgt;
-	fDisplay.bamIdArr.push( bamId );
+	
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
     addBamMenu(fDisplay, bamId);
@@ -279,8 +319,8 @@ function addBamDisplay(fDisplay, tgt) {
 function removeBamDisplay(fDisplay, bamId) {
 	var hgt = $('#bamscroll'+bamId).height();
 	// remove bam ID from array of current bam's
-	fDisplay.bamIdArr = $.grep(fDisplay.bamIdArr, function(val) { return val != bamId; });
-	
+	removeBamObj(bamId);
+
 	var top = $("#bamscroll"+bamId).css('margin-top').replace("px", "");
 	$("#bam"+bamId).remove();
 	$('#bamClose'+bamId).remove();
