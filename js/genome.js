@@ -4,7 +4,7 @@
 // 2 - javascript served from a seperate server accessed anywhere
 // 
 var serviceType = 2;
-var serviceTypeBam = 5;
+var serviceTypeBam = 2;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
@@ -2254,11 +2254,13 @@ function setBamMenu(fDisplay) {
 		$('#bamFiles').html('<a href="#ab">BAM</a>');
 		
 		var bamStr = '<ul>';
-		if(bamFiles.length == 0)
+		if(bamFiles == undefined || bamFiles.length == 0)
 			bamStr += '<li class="current"><a href="#" id="none">None</a></li>';
 
-		for(var i=0; i<bamFiles.length; i++) {
-			bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].meta+'</a></li>';
+		if(bamFiles != undefined) {
+			for(var i=0; i<bamFiles.length; i++) {
+				bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].meta+'</a></li>';
+			}
 		}
 		bamStr += '</ul>';
 		$('#bamFiles').append(bamStr);

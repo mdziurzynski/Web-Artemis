@@ -4,11 +4,11 @@ var bamViewPortHgt = 150;
 var step = 3;
 var bamObjs = new Array();
 
-function bamObj(bamId, samRecords) {
+function bamObj(bamId) {
 	this.bamId = bamId;
 	this.isStack  = true;
 	this.isStrand = false;
-	this.samRecords = samRecords;
+	this.flag = 4; // filter unmapped reads
 }
 
 function isBamVisible(bamId) {
@@ -58,14 +58,8 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 
 var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 	var samRecords  = returned.response.records;
-	
 	var thisBam = getBamObj(options.bamId);
-	if(thisBam == null) {
-		thisBam = new bamObj(options.bamId, samRecords);
-		bamObjs.push(thisBam);
-	} else {
-		thisBam.samRecords = samRecords;
-	}
+	thisBam.samRecords = samRecords;
 	
 	if(thisBam.isStack) {
 		drawStack(fDisplay, thisBam);
@@ -78,9 +72,9 @@ var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 
 var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
     $("#bam"+options.bamId).html('');
-	var samSeqs  = returned.response.sequences;
-	
+	var samSeqs  = returned.response.sequences;	
 	var sequenceName = samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
+	var thisBam = getBamObj(options.bamId);
 	
 	var start = fDisplay.leftBase;
 	var end = start + fDisplay.basesDisplayWidth;
@@ -89,11 +83,11 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 		var window = Math.round(fDisplay.basesDisplayWidth/100);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
-			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window }, fDisplay, { window:window, bamId:options.bamId });
+			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window, filter:thisBam.flag }, fDisplay, { window:window, bamId:options.bamId });
 	} else {
 		serviceName = '/sams/query.json?';
 		handleAjaxCalling(serviceName, aSamCall,
-			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end }, fDisplay, { bamId:options.bamId });
+			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, filter:thisBam.flag }, fDisplay, { bamId:options.bamId });
 	}
 };
 
@@ -148,7 +142,6 @@ function drawStack(fDisplay, thisBam) {
 				{color:colour, stroke:'1'});
 	}	
 }
-
 
 function drawStrandView(fDisplay, thisBam) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
@@ -222,8 +215,17 @@ function drawStrand(fDisplay, samRecords, thisStep, isNegStrand, basePerPixel, m
 function drawBam(fDisplay, bamId) {
 	var serviceName = '/sams/sequences.json?';
 	
+	var thisBam = getBamObj(bamId);
+	if(thisBam == null) {
+		thisBam = new bamObj(bamId);
+		bamObjs.push(thisBam);
+	}
+	
 	if(bamId == undefined) {
 		for(i=0; i<bamObjs.length; i++) {
+			if(bamObjs[i].bamId == undefined)
+				continue;
+			
 			if(i ==  1) {
 				$('body').css('cursor','wait');
 			}
@@ -241,6 +243,7 @@ function addBamMenu(fDisplay, bamId) {
 	$('#menuHeader').append('<ul id="bamMenus'+bamId+'" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#stack">Stack View</a></li>'+
     		'<li><a href="#strand">Strand Stack View</a></li>'+
+    		'<li><a href="#filter">Filter By Flags...</a></li>'+
    		'</ul>');
 
     $('#bam'+bamId).contextMenu({menu: 'bamMenus'+bamId}, 
@@ -249,7 +252,7 @@ function addBamMenu(fDisplay, bamId) {
 
 var rightClickBamMenu = function(action, el, pos, self, bamId) {
 	var thisBam = getBamObj(bamId);
-	
+
 	if(action.match(/stack/)) {
 		thisBam.isStrand = false;
 		thisBam.isStack = true;
@@ -262,7 +265,9 @@ var rightClickBamMenu = function(action, el, pos, self, bamId) {
 		$("#bam"+bamId).html('');	
 		$("#bamscroll"+bamId).scrollTop( (maxBamHgt-bamViewPortHgt)/2 );
 		drawStrandView(self, thisBam);
-	} 
+	} else if(action.match(/filter/)) {
+		filterFlagsDisplay(self, thisBam);
+	}
 };
 
 function adjustHeight(fDisplay, hgt) {
