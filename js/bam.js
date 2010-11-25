@@ -57,10 +57,12 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 };
 
 var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
-	var samRecords  = returned.response.records;
 	var thisBam = getBamObj(options.bamId);
-	thisBam.samRecords = samRecords;
-	
+	thisBam.samRecords = returned.response.records;
+	drawReadDisplay(fDisplay, thisBam);
+}
+
+function drawReadDisplay(fDisplay, thisBam) {	
 	if(thisBam.isStack) {
 		drawStack(fDisplay, thisBam);
 	} else if(thisBam.isStrand) {
@@ -136,10 +138,7 @@ function drawStack(fDisplay, thisBam) {
 			}
 		}
 			
-		thisStart = margin+Math.round(thisStart/basePerPixel);
-		thisEnd   = margin+Math.round(thisEnd/basePerPixel);	
-		$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
-				{color:colour, stroke:'1'});
+		drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, i);
 	}	
 }
 
@@ -150,11 +149,13 @@ function drawStrandView(fDisplay, thisBam) {
 	//var bamTop = $("#bam"+fDisplay.index).css('margin-top').replace("px", "");
 	var midPt = Math.round(maxBamHgt/2);
 	
-	drawStrand(fDisplay, thisBam.samRecords, -step, true, basePerPixel, midPt, thisBam.bamId); // fwd
-	drawStrand(fDisplay, thisBam.samRecords, step, false, basePerPixel, midPt, thisBam.bamId); // rev
+	drawStrand(fDisplay, thisBam, -step, true, basePerPixel, midPt); // fwd
+	drawStrand(fDisplay, thisBam, step, false, basePerPixel, midPt); // rev
 }
 
-function drawStrand(fDisplay, samRecords, thisStep, isNegStrand, basePerPixel, midPt, bamId) {
+function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midPt) {
+	var samRecords = thisBam.samRecords;
+	var bamId = thisBam.bamId;
 	var alignmentEnd   = samRecords.alignmentEnd;
 	var alignmentStart = samRecords.alignmentStart;
 	var name  = samRecords.readName;
@@ -205,11 +206,27 @@ function drawStrand(fDisplay, samRecords, thisStep, isNegStrand, basePerPixel, m
 			}
 		}
 			
-		thisStart = margin+Math.round(thisStart/basePerPixel);
-		thisEnd   = margin+Math.round(thisEnd/basePerPixel);	
-		$("#bam"+bamId).drawLine(thisStart, ypos, thisEnd, ypos,
-				{color:colour, stroke:'1'});
+		drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, i);
 	}	
+}
+
+function drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, idx) {
+	thisStart = margin+Math.round(thisStart/basePerPixel);
+	thisEnd   = margin+Math.round(thisEnd/basePerPixel);
+	
+	if(thisBam.y != undefined) {
+		if(thisBam.y+2 > ypos && thisBam.y-2 < ypos) {
+			if(thisBam.x > thisStart &&
+	           thisBam.x < thisEnd )
+			{
+				$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
+						{color:colour, stroke:'3'});
+			}
+		}
+	}
+	
+	$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
+			{color:colour, stroke:'1'});
 }
 
 function drawBam(fDisplay, bamId) {
@@ -258,13 +275,13 @@ var rightClickBamMenu = function(action, el, pos, self, bamId) {
 		thisBam.isStack = true;
 		$("#bam"+bamId).html('');
 		$("#bamscroll"+bamId).scrollTop(maxBamHgt);
-		drawStack(self, thisBam);
+		drawReadDisplay(self, thisBam);
 	} else if(action.match(/strand/)) {
 		thisBam.isStrand = true;
 		thisBam.isStack = false;
 		$("#bam"+bamId).html('');	
 		$("#bamscroll"+bamId).scrollTop( (maxBamHgt-bamViewPortHgt)/2 );
-		drawStrandView(self, thisBam);
+		drawReadDisplay(self, thisBam);
 	} else if(action.match(/filter/)) {
 		filterFlagsDisplay(self, thisBam);
 	}
@@ -291,6 +308,16 @@ function addBamDisplay(fDisplay, tgt) {
 	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
 	
 	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
+	$('#bam'+bamId).click(function(e) {
+		var x = Math.round(e.pageX - $(this).offset().left);
+		var y = Math.round(e.pageY - $(this).offset().top);
+		var thisBam = getBamObj(bamId);
+		thisBam.x = x;
+		thisBam.y = y;
+		$("#bam"+bamId).html('');
+		drawReadDisplay(fDisplay, thisBam);
+	});
+
 	var hgt = fDisplay.marginTop-10;
 	
 	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
