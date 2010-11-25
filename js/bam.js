@@ -243,7 +243,7 @@ function addBamMenu(fDisplay, bamId) {
 	$('#menuHeader').append('<ul id="bamMenus'+bamId+'" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#stack">Stack View</a></li>'+
     		'<li><a href="#strand">Strand Stack View</a></li>'+
-    		'<li><a href="#filter">Filter By Flags...</a></li>'+
+    		'<li><a href="#filter">Filter By Flags ...</a></li>'+
    		'</ul>');
 
     $('#bam'+bamId).contextMenu({menu: 'bamMenus'+bamId}, 
@@ -322,16 +322,35 @@ function addBamDisplay(fDisplay, tgt) {
 }
 
 function removeBamDisplay(fDisplay, bamId) {
+	if(bamId != undefined) {
+		removeBamObj(bamId);
+		removeBam(fDisplay, bamId);
+	} else {
+		for(i=0; i<bamObjs.length; i++) {
+			if(bamObjs[i].bamId == undefined)
+				continue;
+			removeBam(fDisplay, bamObjs[i].bamId);
+		}
+		bamObjs = new Array();
+	}
+}
+
+function removeBam(fDisplay, bamId) {
 	var hgt = $('#bamscroll'+bamId).height();
 	// remove bam ID from array of current bam's
-	removeBamObj(bamId);
-
 	var top = $("#bamscroll"+bamId).css('margin-top').replace("px", "");
 	$("#bam"+bamId).remove();
 	$('#bamClose'+bamId).remove();
 	$("#bamscroll"+bamId).remove();
 
-	$('.bamscroll').each(function(index) {
+	$('.bamScroll').each(function(index) {
+	    var thisTop = $(this).css('margin-top').replace("px", "");
+	    if(thisTop < top) {
+	    	$(this).css({'margin-top': thisTop-hgt+'px'});
+	    }
+	 });
+	
+	$('[id*=bamClose]').each(function(index) {
 	    var thisTop = $(this).css('margin-top').replace("px", "");
 	    if(thisTop < top) {
 	    	$(this).css({'margin-top': thisTop-hgt+'px'});
@@ -341,5 +360,5 @@ function removeBamDisplay(fDisplay, bamId) {
 	fDisplay.marginTop = fDisplay.marginTop-hgt;
 	adjustFeatureDisplayPosition(false, fDisplay);
 	drawFrameAndStrand(fDisplay);
-    adjustHeight(fDisplay, -hgt)
+    adjustHeight(fDisplay, -hgt);
 }
