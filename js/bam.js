@@ -85,7 +85,7 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 		var window = Math.round(fDisplay.basesDisplayWidth/100);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
-			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window, filter:thisBam.flag }, fDisplay, { window:window, bamId:options.bamId });
+			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window/*, filter:thisBam.flag*/ }, fDisplay, { window:window, bamId:options.bamId });
 	} else {
 		serviceName = '/sams/query.json?';
 		handleAjaxCalling(serviceName, aSamCall,
@@ -214,13 +214,19 @@ function drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, idx) 
 	thisStart = margin+Math.round(thisStart/basePerPixel);
 	thisEnd   = margin+Math.round(thisEnd/basePerPixel);
 	
+	if(thisBam.samRecords.readName[idx] == thisBam.readName) {
+		$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
+				{color:colour, stroke:'3'});
+		return;
+	}
+	
 	if(thisBam.y != undefined) {
 		if(thisBam.y+2 > ypos && thisBam.y-2 < ypos) {
-			if(thisBam.x > thisStart &&
-	           thisBam.x < thisEnd )
-			{
+			if(thisBam.x > thisStart && thisBam.x < thisEnd ) {
+				thisBam.readName = thisBam.samRecords.readName[idx];
 				$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
 						{color:colour, stroke:'3'});
+				return;
 			}
 		}
 	}
@@ -302,22 +308,38 @@ function adjustHeight(fDisplay, hgt) {
     $('#featureList').css({'top': thisTop+hgt+'px'});
 }
 
+function handleBamClick(fDisplay, event, tgt) {
+	var bamId = $(event.currentTarget).attr('id').replace("bam","");
+	var x = Math.round(event.pageX - $(event.target).offset().left);
+	var y = Math.round(event.pageY - $(event.target).offset().top);
+
+	var thisBam = getBamObj(bamId);
+	thisBam.x = x;
+	thisBam.y = y;
+	thisBam.readName = undefined;
+	$("#bam"+bamId).html('');
+	drawReadDisplay(fDisplay, thisBam);
+}
+
+function handleBamDoubleClick(fDisplay, event, tgt, region) {
+	var bamId = $(event.currentTarget).attr('id').replace("bam","");
+	var thisBam = getBamObj(bamId);
+	thisBam.x = undefined;
+	thisBam.y = undefined;
+	thisBam.readName = undefined;
+	$("#bam"+bamId).html('');
+	drawReadDisplay(fDisplay, thisBam);
+}
+
 function addBamDisplay(fDisplay, tgt) {
-	var bamId = $(tgt).attr('id');
+	var bamId = $(tgt).attr('name');
 	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).attr('text')+'"></div></div>');
 	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
 	
 	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
-	$('#bam'+bamId).click(function(e) {
-		var x = Math.round(e.pageX - $(this).offset().left);
-		var y = Math.round(e.pageY - $(this).offset().top);
-		var thisBam = getBamObj(bamId);
-		thisBam.x = x;
-		thisBam.y = y;
-		$("#bam"+bamId).html('');
-		drawReadDisplay(fDisplay, thisBam);
-	});
-
+	
+	// click handler
+	$('#bam'+bamId).single_double_click(handleBamClick, handleBamDoubleClick, fDisplay, 500);
 	var hgt = fDisplay.marginTop-10;
 	
 	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
@@ -327,7 +349,7 @@ function addBamDisplay(fDisplay, tgt) {
 		'width': displayWidth+margin+20+'px', 
 		'border': '1px solid #666',
 		'background-color': '#ccc'});
-	
+
 	$('#bamClose'+bamId).css({
 		'margin-left': '0px', 
 		'position':'absolute', 

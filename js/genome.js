@@ -4,7 +4,7 @@
 // 2 - javascript served from a seperate server accessed anywhere
 // 
 var serviceType = 2;
-var serviceTypeBam = 2;
+var serviceTypeBam = 5;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
@@ -571,13 +571,11 @@ function addEventHandlers(fDisplay) {
 			if($(tgt).attr('id') == "none")
 				return;
 	
-			if(isBamVisible($(tgt).attr('id'))) {
-				removeBamDisplay(fDisplay, $(tgt).attr('id'));
+			if(isBamVisible($(tgt).attr('name'))) {
+				removeBamDisplay(fDisplay, $(tgt).attr('name'));
 			} else {
-				addBamDisplay(fDisplay, $(tgt));
+				addBamDisplay(fDisplay, tgt);
 			}
-			
-			//drawAll(fDisplay);
 		});
 		
 		$('#basesOfFeature').click(function(event){
@@ -2259,7 +2257,7 @@ function setBamMenu(fDisplay) {
 
 		if(bamFiles != undefined) {
 			for(var i=0; i<bamFiles.length; i++) {
-				bamStr += '<li class="current"><a href="#" id="'+bamFiles[i].fileID+'">'+bamFiles[i].meta+'</a></li>';
+				bamStr += '<li class="current"><a href="#" name="'+bamFiles[i].fileID+'">'+bamFiles[i].meta+'</a></li>';
 			}
 		}
 		bamStr += '</ul>';
