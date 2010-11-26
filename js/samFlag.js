@@ -45,9 +45,8 @@ function filterFlagsDisplay(fDisplay, thisBam) {
 			}
 			thisBam.flag = newFlagValue;
 			drawBam(fDisplay, thisBam.bamId);
-			$(this).dialog('close');
 		},
-		Cancel: function() {
+		Close: function() {
 			$(this).dialog('close');
 		}
 	}});
