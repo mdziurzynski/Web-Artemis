@@ -10,6 +10,19 @@ var BAMFLAGS = [["Read paired", 0x1],
 			    ["Read fails platform/vendor quality checks", 0x200],
 			    ["Read is PCR or optical duplicate", 0x400]];
 
+function printFlagHTML(flags) {
+	var flagHTML = "<table>";
+	for(i=0; i<BAMFLAGS.length; i++) {
+		flagHTML += '<tr><td>'+BAMFLAGS[i][0]+'</td>';
+    	if(BAMFLAGS[i][1] & flags)
+    		flagHTML += '<td>true<td/></tr>';
+    	else
+    		flagHTML += '<td>false<td/></tr>';
+    }
+	flagHTML += "</table>";
+	return flagHTML;
+}
+
 function filterFlagsDisplay(fDisplay, thisBam) {
 	$("div#properties").html("<div id='bamFiler"+thisBam.bamId+"'></div>");
 
@@ -27,7 +40,6 @@ function filterFlagsDisplay(fDisplay, thisBam) {
     }
     filterTable +='</table>';
     $("div#bamFiler"+thisBam.bamId).html(filterTable);
-
 
     $("div#bamFiler"+thisBam.bamId).dialog({ height: 385 ,
 		width:450, position: 'center', title:'Filter',
