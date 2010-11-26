@@ -213,24 +213,27 @@ function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midP
 function drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, idx) {
 	thisStart = margin+Math.round(thisStart/basePerPixel);
 	thisEnd   = margin+Math.round(thisEnd/basePerPixel);
-	
-	if(thisBam.samRecords.readName[idx] == thisBam.readName) {
-		$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
-				{color:colour, stroke:'3'});
-		return;
-	}
-	
-	if(thisBam.y != undefined) {
-		if(thisBam.y+2 > ypos && thisBam.y-2 < ypos) {
-			if(thisBam.x > thisStart && thisBam.x < thisEnd ) {
-				thisBam.readName = thisBam.samRecords.readName[idx];
-				$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
-						{color:colour, stroke:'3'});
-				return;
-			}
+
+	if(thisBam.click) {
+		if(thisBam.samRecords.readName[idx] == thisBam.readName) {
+			$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
+					{color:colour, stroke:'3'});
+
+			// put the index of the clicked read at the start of this array
+			if(thisBam.mouseOverY+2 > ypos      && thisBam.mouseOverY-2 < ypos &&
+			   thisBam.mouseOverX   > thisStart && thisBam.mouseOverX   < thisEnd )
+				thisBam.idx.unshift(idx);
+			else
+				thisBam.idx.push(idx);
+			return;
 		}
+	} else if(thisBam.mouseOverY+2 > ypos      && thisBam.mouseOverY-2 < ypos &&
+			  thisBam.mouseOverX   > thisStart && thisBam.mouseOverX   < thisEnd ) {
+		thisBam.readName = thisBam.samRecords.readName[idx];
 	}
-	
+	if(thisBam.mouseOver)
+		return;
+
 	$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
 			{color:colour, stroke:'1'});
 }
@@ -308,6 +311,14 @@ function adjustHeight(fDisplay, hgt) {
     $('#featureList').css({'top': thisTop+hgt+'px'});
 }
 
+function showPopupBam(thisBam, event) {
+	var msg = thisBam.samRecords.readName[thisBam.idx[0]]+"<br />";
+	msg += thisBam.samRecords.alignmentStart[thisBam.idx[0]]+".."+
+	       thisBam.samRecords.alignmentEnd[thisBam.idx[0]]+"<br />";
+	msg += printFlagHTML(thisBam.samRecords.flags[thisBam.idx[0]]);
+	loadPopup(msg, event.pageX+10, event.pageY+10, 20000);
+}
+
 function handleBamClick(fDisplay, event, tgt) {
 	var bamId = $(event.currentTarget).attr('id').replace("bam","");
 	var x = Math.round(event.pageX - $(event.target).offset().left);
@@ -316,9 +327,13 @@ function handleBamClick(fDisplay, event, tgt) {
 	var thisBam = getBamObj(bamId);
 	thisBam.x = x;
 	thisBam.y = y;
-	thisBam.readName = undefined;
+	thisBam.click = true;
+	thisBam.idx = new Array();
+
 	$("#bam"+bamId).html('');
 	drawReadDisplay(fDisplay, thisBam);
+	thisBam.click = false;
+	showPopupBam(thisBam, event);
 }
 
 function handleBamDoubleClick(fDisplay, event, tgt, region) {
@@ -340,6 +355,17 @@ function addBamDisplay(fDisplay, tgt) {
 	
 	// click handler
 	$('#bam'+bamId).single_double_click(handleBamClick, handleBamDoubleClick, fDisplay, 500);
+	$('#bam'+bamId).mousemove(function(event) {
+		var bamId = $(event.currentTarget).attr('id').replace("bam","");
+		var thisBam = getBamObj(bamId);
+		
+		thisBam.mouseOverX = Math.round(event.pageX - $(event.target).offset().left);
+		thisBam.mouseOverY = Math.round(event.pageY - $(event.target).offset().top);
+		thisBam.mouseOver = true;
+		drawReadDisplay(fDisplay, thisBam);
+		thisBam.mouseOver = false;
+	});
+
 	var hgt = fDisplay.marginTop-10;
 	
 	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
