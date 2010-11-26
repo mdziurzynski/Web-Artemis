@@ -13,7 +13,9 @@ $.fn.popup_enter_out = function(enter_callback, out_callback) {
 }
 
 //loading popup
-function loadPopup(txt,x,y){
+function loadPopup(txt,x,y, time){
+ if(time == undefined)
+	 time = 8000;
  positionPopup(x,y);
 //loads popup only if it is disabled  
  $("#popupContact").html(txt);
@@ -21,7 +23,7 @@ function loadPopup(txt,x,y){
  
  setTimeout(function(){ 
 	 disablePopup(); 
-  }, 8000 ); 
+  }, time ); 
 }
 
 function disablePopup(){  
