@@ -313,8 +313,15 @@ function adjustHeight(fDisplay, hgt) {
 
 function showPopupBam(thisBam, event) {
 	var msg = thisBam.samRecords.readName[thisBam.idx[0]]+"<br />";
-	msg += thisBam.samRecords.alignmentStart[thisBam.idx[0]]+".."+
-	       thisBam.samRecords.alignmentEnd[thisBam.idx[0]]+"<br />";
+	msg += "<table><tr><td>Position</td><td>"+
+	 	   thisBam.samRecords.alignmentStart[thisBam.idx[0]]+".."+
+	       thisBam.samRecords.alignmentEnd[thisBam.idx[0]]+"</td></tr>";
+	if(thisBam.idx.length > 1)
+		msg += "<tr><td>Mate Position</td><td>"+
+		       thisBam.samRecords.alignmentStart[thisBam.idx[1]]+".."+
+	       	   thisBam.samRecords.alignmentEnd[thisBam.idx[1]]+"</td></tr>";
+	msg += "</table>";
+	
 	msg += printFlagHTML(thisBam.samRecords.flags[thisBam.idx[0]]);
 	loadPopup(msg, event.pageX+10, event.pageY+10, 20000);
 }
@@ -420,14 +427,14 @@ function removeBam(fDisplay, bamId) {
 
 	$('.bamScroll').each(function(index) {
 	    var thisTop = $(this).css('margin-top').replace("px", "");
-	    if(thisTop < top) {
+	    if(parseInt(thisTop) > parseInt(top)) {
 	    	$(this).css({'margin-top': thisTop-hgt+'px'});
 	    }
 	 });
 	
 	$('[id*=bamClose]').each(function(index) {
 	    var thisTop = $(this).css('margin-top').replace("px", "");
-	    if(thisTop < top) {
+	    if(parseInt(thisTop) > parseInt(top)) {
 	    	$(this).css({'margin-top': thisTop-hgt+'px'});
 	    }
 	 });
