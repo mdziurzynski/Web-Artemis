@@ -78,10 +78,11 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.minimumDisplay = false;
 	this.showStopCodons = false;
 	this.nodraw = false;
-	
+	this.observers = new Observable();
+
 	this.highlightFeatures = new Array();
 	this.hideFeatures = new Array();
-	
+
 	// add tracks
 	this.tracks = new Array();
 	this.trackIndex = "track1";
@@ -825,6 +826,10 @@ function drawAll(fDisplay) {
 	  if(!fDisplay.firstTime && fDisplay.leftBase+fDisplay.basesDisplayWidth > fDisplay.sequenceLength) {
 		  hideEndOfSequence(fDisplay);
 	  }
+	  
+      if(!fDisplay.minimumDisplay) {
+         fDisplay.observers.notify('redraw', fDisplay.leftBase, fDisplay.leftBase+fDisplay.basesDisplayWidth);
+      }
 }
 
 function getSequence(fDisplay) {
@@ -2273,9 +2278,9 @@ function setBamMenu(fDisplay) {
 //Test code: to test adding extra features and giving them
 //a colour
 //
-function testAddFeatures() {
+function test(start, end) {
 	var jsonUrl  = 'http://www.genedb.org/testservice'; 
-	var service1 = "/regions/locations.json?&region=Pf3D7_06&start=1&end=6627";
+	var service1 = "/regions/locations.json?&region=Pf3D7_06&start="+start+"&end="+end;
 	var service2 = "/features/properties.json?";
 
 	// Get features and their locations
@@ -2296,14 +2301,28 @@ function testAddFeatures() {
 			  url: jsonUrl+service2,
 			  data: 'us='+featureToColourList,
 			  dataType: 'jsonp',
-			  success: function(returned2) {	
-			addFeatures(featureDisplayObjs[0].srcFeature, returned1, "NEW_TRACK_NAME", 
+			  success: function(returned2) {
+			moveTo(returned1, returned2, "NEW_TRACK_NAME", 
 					function (featureSelected, featureDisplay) {
-				  		alert("Show feature properties for "+featureSelected);
-					});
-			aFeaturePropColours(featureDisplayObjs[index], returned2, {});
+		  		alert("Show feature properties for "+featureSelected)});
 	  	} } );
 	} } );
+}
+
+//
+//
+function addArtemisObserver(o) {
+	for(i=0;i<featureDisplayObjs.length; i++) {
+		featureDisplayObjs[i].observers.addObserver(o);
+	}
+}
+
+//
+// regions_location - coordinates in JSON format
+// features_properties - properties in JSON format
+function moveTo(regions_location, features_properties, trackName, showPropFn) {
+	addFeatures(featureDisplayObjs[0].srcFeature, regions_location, trackName, showPropFn);
+	aFeaturePropColours(featureDisplayObjs[0], features_properties, {});
 }
 
 //
@@ -2322,9 +2341,12 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 				$('#features').append('<div id="features'+
 						fDisplay.index+'_'+trackIndex+'"></div>');
 			}
+			
+			var tmpTrack = fDisplay.trackIndex;
 			fDisplay.trackIndex = trackIndex;
 			aFeatureFlatten(fDisplay, jsonFeatureObj,
 					{append:true, minDisplay:fDisplay.minimumDisplay});
+			fDisplay.trackIndex = tmpTrack;
 			
 			var self = fDisplay;
 			$('#features'+fDisplay.index+'_'+trackIndex).single_double_click(handleFeatureClick, centerOnFeature, fDisplay, 500);
@@ -2340,7 +2362,6 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 
 // put at the end of the script for ie 
 $(document).ready(function() {
-
 	var arr = getUrlVars();
 	var leftBase = arr["base"];
 	
@@ -2461,6 +2482,18 @@ $(document).ready(function() {
 			disablePopup(); 
 		return originalHideMethod.apply( this ); }
 	}); 
-	//testAddFeatures();
+	
+	
+	//
+	// TEST 
+/*	test(leftBase, basesDisplayWidth);
+	var obs = new function() {
+		this.redraw = function redraw(start, end) {
+			alert("REDRAW "+start+" "+end);
+			test(start, end);
+		}
+	}
+	addArtemisObserver(obs);*/
+	//
 });
 
