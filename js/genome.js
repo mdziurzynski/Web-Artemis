@@ -109,7 +109,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$('#buttons').append('<div id="plus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom in"><span class="ui-icon ui-icon-circle-plus"></span></div>');
 	$('#buttons').append('<div id="minus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom out"><span class="ui-icon ui-icon-circle-minus"></span></div>');
 
-	$('#rightDraggableEdge').append('<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se"></div>');
+	$('#rightDraggableEdge').append(
+			   '<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se"></div>');
 
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
@@ -536,20 +537,19 @@ function adjustFeatureDisplayPosition(drag, fDisplay) {
 	$('#featureDisplay'+fDisplay.index).css(cssObj);
 	$('#sequence'+fDisplay.index).css(cssObj);
 
+	var top = thisMarginTop+margin+(thisFLH*16)-$('#rightDraggableEdge'+fDisplay.index).height();
+	var lft = margin+displayWidth-($('#rightDraggableEdge'+fDisplay.index).height()/2);
 	if(!drag) {
 		cssObj = {
-			'width': '12px', 
-			'height': '12px',
-			'border-right': '1px solid #FF0000',
-			'border-bottom': '1px solid #FF0000',
 			'position': 'absolute',
-			'opacity':'0.4',
-		    'left': margin+displayWidth+'px',
-		    'top': thisMarginTop+(thisFLH*15.4)+'px'
+			'z-index' : '2',
+			'border': '0px solid #FF0000',
+		    'left': lft+'px',
+		    'top': top+'px'
 		};
 		$('#rightDraggableEdge'+fDisplay.index).css(cssObj);
 	} else {
-		$('#rightDraggableEdge'+fDisplay.index).css('top',thisMarginTop+(thisFLH*16)+'px');
+		$('#rightDraggableEdge'+fDisplay.index).css({'top':top+'px', 'left': lft+'px'});
 	}
 }
 
