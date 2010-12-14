@@ -1,0 +1,169 @@
+body {
+	margin-top: 5px
+}
+
+/* changes to UI */
+.ui-widget {
+	font-family: "Courier New", Monospace;
+	font-size: 12px;
+}
+
+.ui-slider-horizontal .ui-slider-handle {
+	margin-left: -.1em;
+	width: .2em;
+}
+
+.ui-slider-vertical .ui-slider-handle {
+	margin-bottom: -.3em;
+	height: .2em;
+}
+
+.ui-slider-horizontal {
+	height: .3em;
+}
+
+.ui-slider-vertical {
+	width: .3em;
+}
+
+.bases {
+	height: 12px;
+	line-height: 12px; /* for ie6 */
+	position: absolute;
+	border-left: 1px solid #000;
+	border-right: 1px solid #000;
+}
+
+.feat,.featCDS,.featPseudo,.featGene,.featGreen {
+	height: 10px;
+	line-height: 10px; /* for ie6 */
+	position: absolute;
+	background-color: #FFFFFF;
+	border: 1px solid #020202;
+	overflow: hidden; /* for ie6 */
+}
+
+.featGene {
+	background-color: #FFFFFF;
+}
+
+.featCDS {
+	background-color: #00FFFF;
+}
+
+.featGreen {
+	background-color: #00FF00;
+}
+
+.holder {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	position: absolute;
+}
+
+.canvas {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	position: absolute;
+	height: 275px;
+	width: 1000px;
+}
+
+.base {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	display: block;
+	position: absolute;
+	font-family: "Courier New", Monospace;
+	font-size: 14px;
+	margin-left: 5px;
+	z-index: 1;
+}
+
+.aminoacid {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	display: block;
+	position: absolute;
+	font-family: "Courier New", Monospace;
+	font-size: 14px;
+	margin-left: 5px;
+	z-index: 1;
+	text-align: center;
+}
+
+.tickClass {
+	font-family: "Courier New", Monospace;
+	font-size: 12px;
+	font-weight: bold;
+	position: absolute;
+	border-left: 1px solid #000;
+	height: 14px;
+}
+
+.bamScroll {
+	position: absolute;
+	overflow: auto;
+}
+
+#organismSelector {
+	margin-top: 0px;
+	display: block;
+	position: absolute;
+}
+
+#srcFeatureSelector {
+	margin-top: 0px;
+	position: absolute;
+}
+
+#popupContact {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	display: none;
+	position: absolute;
+	background: #FFFFFF;
+	border: 1px solid #cecece;
+	z-index: 3;
+	padding: 12px;
+	font-size: 13px;
+	opacity: 0.9;
+}
+
+#logger {
+	margin-top: 680px;
+	display: block;
+	position: absolute;
+}
+
+#menuHeader {
+	position: absolute; /* for ie */
+	z-index: 4;
+}
+
+#exclude,#include {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	float: left;
+	margin-right: 10px;
+	background: #eee;
+	padding: 5px;
+	width: 185px;
+}
+
+#exclude li,#include li {
+	margin: 5px;
+	padding: 5px;
+	width: 160px;
+}
