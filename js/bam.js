@@ -353,28 +353,61 @@ function handleBamDoubleClick(fDisplay, event, tgt, region) {
 	drawReadDisplay(fDisplay, thisBam);
 }
 
+function addDragEdge(fDisplay) {
+	$('#bamDrag').remove();
+	var nbams = $('.bamScroll').size();
+	
+	if(nbams > 0)
+		return;
+	
+	$('#bam').append('<div id="bamDrag" class="ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se"></div>');
+	setDragCss(fDisplay);
+
+	$('#bamDrag').draggable({
+		stop: function(event, ui) {
+			var nbams = $('.bamScroll').size();
+			var hgt = ((ui.offset.top)-(margin*6)+ $("#bamDrag").height())/nbams;
+			var diff = hgt-bamViewPortHgt;
+			bamViewPortHgt = hgt;
+			
+			$('.bamScroll').css('height', bamViewPortHgt+'px');
+
+			fDisplay.marginTop = fDisplay.marginTop+(diff*nbams);
+			adjustFeatureDisplayPosition(false, fDisplay);
+			drawFrameAndStrand(fDisplay);
+		    adjustHeight(fDisplay, diff*nbams);
+		    
+		    hgt = $("#bamDrag").height()/2;
+		    $("#bamDrag").css('left',displayWidth-hgt+margin+'px');
+		}
+	});
+}
+
+function setDragCss(fDisplay) {
+	var hgt = $("#bamDrag").height()/2;
+	var top = fDisplay.marginTop+bamViewPortHgt-(hgt*2)-margin-margin;
+
+	var cssObj = {
+			'border': '0px solid #FF0000',
+			'position': 'absolute',
+		    'left': displayWidth-hgt+margin+'px',
+		    'top': top+'px',
+		    'z-index':'2'
+		};
+	
+	$("#bamDrag").css(cssObj);
+}
+
 function addBamDisplay(fDisplay, tgt) {
 	var bamId = $(tgt).attr('name');
+	addDragEdge(fDisplay);
+
 	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).attr('text')+'"></div></div>');
 	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
 	
 	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
 	
-	// click handler
-	$('#bam'+bamId).single_double_click(handleBamClick, handleBamDoubleClick, fDisplay, 500);
-	$('#bam'+bamId).mousemove(function(event) {
-		var bamId = $(event.currentTarget).attr('id').replace("bam","");
-		var thisBam = getBamObj(bamId);
-		
-		thisBam.mouseOverX = Math.round(event.pageX - $(event.target).offset().left);
-		thisBam.mouseOverY = Math.round(event.pageY - $(event.target).offset().top);
-		thisBam.mouseOver = true;
-		drawReadDisplay(fDisplay, thisBam);
-		thisBam.mouseOver = false;
-	});
-
 	var hgt = fDisplay.marginTop-10;
-	
 	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
 	$('#bamscroll'+bamId).css({ 
 		'margin-top': hgt+'px', 
@@ -400,7 +433,25 @@ function addBamDisplay(fDisplay, tgt) {
 	drawFrameAndStrand(fDisplay);
     addBamMenu(fDisplay, bamId);
     drawBam(fDisplay, bamId); 
-    adjustHeight(fDisplay, $('#bamscroll'+bamId).height())
+    adjustHeight(fDisplay, $('#bamscroll'+bamId).height());
+    
+	// click handler
+	$('#bam'+bamId).single_double_click(handleBamClick, handleBamDoubleClick, fDisplay, 500);
+	$('#bam'+bamId).mousemove(function(event) {
+		disablePopup();
+		var bamId = $(event.currentTarget).attr('id').replace("bam","");
+		var thisBam = getBamObj(bamId);
+		
+		if( !thisBam.samRecords )
+			return;
+		
+		thisBam.mouseOverX = Math.round(event.pageX - $(event.target).offset().left);
+		thisBam.mouseOverY = Math.round(event.pageY - $(event.target).offset().top);
+		thisBam.mouseOver = true;
+
+		drawReadDisplay(fDisplay, thisBam);
+		thisBam.mouseOver = false;
+	});
 }
 
 function removeBamDisplay(fDisplay, bamId) {
