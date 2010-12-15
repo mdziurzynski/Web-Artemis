@@ -4,7 +4,7 @@
 // 2 - javascript served from a seperate server accessed anywhere
 // 
 var serviceType = 2;
-var serviceTypeBam = 5;
+var serviceTypeBam = 4;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
@@ -2418,7 +2418,7 @@ $(document).ready(function() {
 	var hgt = arr["height"];
 	
 	var title = '';
-	var ypos = 40;
+	var ypos = margin*7;
 	var lastObj;
 	var compCount = 0;
 	for(var i in arr) {
