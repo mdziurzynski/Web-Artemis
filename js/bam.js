@@ -168,8 +168,8 @@ function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midP
     
     var colour = '#000000';
 	for(var i=0; i<samRecords.alignmentStart.length; i++ ) {
-		if( (!isNegStrand &&   samRecords.flags[i] & 0x0010) || //reverse strand
-		    ( isNegStrand && !(samRecords.flags[i] & 0x0010)) ) 
+		if( (!isNegStrand && !(samRecords.flags[i] & 0x0010)) || //reverse strand
+		    ( isNegStrand &&   samRecords.flags[i] & 0x0010) ) 
 			continue;
 		
 		var thisStart = alignmentStart[i]-fDisplay.leftBase;
