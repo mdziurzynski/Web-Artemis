@@ -407,7 +407,7 @@ function addBamDisplay(fDisplay, tgt) {
 	
 	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
 	
-	var hgt = fDisplay.marginTop-10;
+	var hgt = fDisplay.marginTop-5;
 	$("#bam"+bamId).css( { 'height': maxBamHgt+'px', 'width': displayWidth+margin+'px' });
 	$('#bamscroll'+bamId).css({ 
 		'margin-top': hgt+'px', 

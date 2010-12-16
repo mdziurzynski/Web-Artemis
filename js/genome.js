@@ -21,6 +21,7 @@ var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "
 
 var debug = false;
 var margin = 5;
+var initialTop = margin*6;
 var displayWidth = 1000;
 
 var screenInterval = 100;
@@ -499,14 +500,14 @@ function adjustFeatureDisplayPosition(drag, fDisplay) {
 	cssObj = {
 			'margin-left': margin+margin+displayWidth+'px',
 			'position':'absolute',
-			'top': thisMarginTop+'px'
+			'top': margin+thisMarginTop+'px'
 	};
 	$('#plus'+fDisplay.index).css(cssObj);
 	
 	cssObj = {
 			'margin-left': margin+margin+displayWidth+'px',
 			'position':'absolute',
-			'top': thisMarginTop+(thisFLH*11)+'px'
+			'top': margin+thisMarginTop+(thisFLH*11)+'px'
 	};
 	$('#minus'+fDisplay.index).css(cssObj);
 	
@@ -525,7 +526,7 @@ function adjustFeatureDisplayPosition(drag, fDisplay) {
 	     'margin-left': margin+margin+margin+displayWidth+'px',
 	     'height': (thisFLH*11)-(buttonHeight*1.2)+'px',
 	     'position':'absolute',
-	     'top': thisMarginTop+buttonHeight+'px'
+	     'top': margin+thisMarginTop+buttonHeight+'px'
 	};
 	$('#slider_vertical_container'+fDisplay.index).css(cssObj);
 	
@@ -2418,7 +2419,7 @@ $(document).ready(function() {
 	var hgt = arr["height"];
 	
 	var title = '';
-	var ypos = margin*7;
+	
 	var lastObj;
 	var compCount = 0;
 	for(var i in arr) {
@@ -2432,9 +2433,9 @@ $(document).ready(function() {
 				hgt = parseInt(hgt);
 			}
 				
-			var obj = new featureDisplayObj(basesDisplayWidth, ypos, 30000, value, hgt, leftBase);
+			var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase);
 			featureDisplayObjs[count - 1] = obj;
-			ypos+=250;
+			initialTop+=250;
 			
 			if(count > 1) {
 				compare = true;
@@ -2452,7 +2453,7 @@ $(document).ready(function() {
 			hgt = parseInt(hgt);
 		}
 		title = 'Pf3D7_01';
-		var obj = new featureDisplayObj(basesDisplayWidth, 40, 16000, title, hgt, leftBase);
+		var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase);
 		featureDisplayObjs[0] = obj;
 	}
 	
