@@ -385,7 +385,7 @@ function addDragEdge(fDisplay) {
 
 function setDragCss(fDisplay) {
 	var hgt = $("#bamDrag").height()/2;
-	var top = fDisplay.marginTop+bamViewPortHgt-(hgt*2)-margin-margin;
+	var top = fDisplay.marginTop+bamViewPortHgt-(hgt*2)-margin;
 
 	var cssObj = {
 			'border': '0px solid #FF0000',
