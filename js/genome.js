@@ -2269,6 +2269,8 @@ function setBamMenu(fDisplay) {
 		bamStr += '</ul>';
 		$('#bamFiles').append(bamStr);
 		
+		// increase menu width
+		$('#bamFiles').find('li').css('width', '20em');
 	},
 	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
 }
