@@ -466,6 +466,9 @@ function removeBamDisplay(fDisplay, bamId) {
 		}
 		bamObjs = new Array();
 	}
+	
+	if($('.bamScroll').size() == 0)
+		$('#bamDrag').remove();
 }
 
 function removeBam(fDisplay, bamId) {
