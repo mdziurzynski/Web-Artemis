@@ -2431,6 +2431,11 @@ $.fn.WebArtemis = function(options) {
 		}
 		  
 		var hgt = arr["height"];
+		if(!hgt) {
+			hgt = 10;
+		} else {
+			hgt = parseInt(hgt);
+		}
 		
 		var title = '';
 		
@@ -2440,12 +2445,6 @@ $.fn.WebArtemis = function(options) {
 			var value = arr[i];
 			if(i.indexOf("src") > -1) {
 				title+=value+' ';
-
-				if(!hgt) {
-					hgt = 10;
-				} else {
-					hgt = parseInt(hgt);
-				}
 					
 				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase);
 				featureDisplayObjs[count - 1] = obj;
@@ -2461,11 +2460,6 @@ $.fn.WebArtemis = function(options) {
 		}
 
 		if(count == 0) {
-			if(!hgt) {
-				hgt = 12
-			} else {
-				hgt = parseInt(hgt);
-			}
 			title = settings.source;
 			var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase);
 			featureDisplayObjs[0] = obj;
