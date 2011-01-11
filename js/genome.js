@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 2;
+var serviceType = 6;
 var serviceTypeBam = -1;
 
 var webService = [ "http://127.0.0.1/testservice/",
