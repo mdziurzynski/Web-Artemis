@@ -4,7 +4,7 @@
 // 2 - javascript served from a seperate server accessed anywhere
 // 
 var serviceType = 2;
-var serviceTypeBam = 4;
+var serviceTypeBam = -1;
 
 var webService = [ "http://127.0.0.1/testservice/",
                    "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
@@ -802,6 +802,7 @@ function drawAll(fDisplay) {
       
       if(!fDisplay.minimumDisplay) {
           drawBam(fDisplay);
+          fDisplay.observers.notify('redraw', fDisplay.leftBase, parseInt(fDisplay.leftBase)+parseInt(fDisplay.basesDisplayWidth));
       }
       
       if(fDisplay.minimumDisplay &&
@@ -827,15 +828,11 @@ function drawAll(fDisplay) {
 	  if(!fDisplay.firstTime && fDisplay.leftBase+fDisplay.basesDisplayWidth > fDisplay.sequenceLength) {
 		  hideEndOfSequence(fDisplay);
 	  }
-	  
-      if(!fDisplay.minimumDisplay) {
-         fDisplay.observers.notify('redraw', fDisplay.leftBase, fDisplay.leftBase+fDisplay.basesDisplayWidth);
-      }
 }
 
 function getSequence(fDisplay) {
 	var start = fDisplay.leftBase;
-	var end = start+fDisplay.basesDisplayWidth;
+	var end = parseInt(start)+parseInt(fDisplay.basesDisplayWidth);
 	
 	if(isZoomedIn(fDisplay)) {
 	  if(returnedSequence) {
@@ -2281,9 +2278,44 @@ function setBamMenu(fDisplay) {
 //Test code: to test adding extra features and giving them
 //a colour
 //
-function test(start, end) {
+function test(start, end, isolate) {
+
+	var jsonUrl  = 'http://www.spatialepidemiology.net/snp/'; 
+	var service1 = "getArtemisRegions.php?isolate=" + isolate + "&start=" + start + "&end=" + end; 
+	var service2 = "getArtemisFeatures.php?isolate=" + isolate + "&start=" + start + "&end=" + end; 
+
+	// Get features and their locations
+	$.ajax({
+		  url: jsonUrl+service1,
+		  dataType: 'jsonp',
+		  success: function(returned1) {
+		
+		var trackName = "NEW_TRACK_NAME";
+		var features  = returned1.response.features;
+		var featureToColourList = new Array();
+		for(var i=0; i<features.length; i++ ) {
+		  if(features[i].type == "exon")
+			  featureToColourList.push(features[i].feature);
+		}
+		moveTo1(returned1, trackName, 
+				function (featureSelected, featureDisplay) {
+	  		alert("Show feature properties for "+featureSelected)});
+		
+		// Get the feature colours
+		$.ajax({
+			  url: jsonUrl+service2,
+			  data: 'us='+featureToColourList,
+			  dataType: 'jsonp',
+			  success: function(returned2) {
+			moveTo2(returned2);
+	  	} } );
+	} } );
+}
+
+
+/*function test2(start, end) {
 	var jsonUrl  = 'http://www.genedb.org/testservice'; 
-	var service1 = "/regions/locations.json?&region=Pf3D7_06&start="+start+"&end="+end;
+	var service1 = "/regions/locations.json?&region=Pf3D7_05&start="+start+"&end="+end;
 	var service2 = "/features/properties.json?";
 
 	// Get features and their locations
@@ -2310,7 +2342,8 @@ function test(start, end) {
 		  		alert("Show feature properties for "+featureSelected)});
 	  	} } );
 	} } );
-}
+}*/
+
 
 //
 //
@@ -2323,8 +2356,11 @@ function addArtemisObserver(o) {
 //
 // regions_location - coordinates in JSON format
 // features_properties - properties in JSON format
-function moveTo(regions_location, features_properties, trackName, showPropFn) {
+function moveTo1(regions_location, trackName, showPropFn) {
 	addFeatures(featureDisplayObjs[0].srcFeature, regions_location, trackName, showPropFn);
+}
+
+function moveTo2(features_properties) {
 	aFeaturePropColours(featureDisplayObjs[0], features_properties, {});
 }
 
@@ -2363,134 +2399,165 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 	}
 }
 
-// put at the end of the script for ie
-$.fn.WebArtemis = function(options) {
+var methods = {
+	init : function(options) {
+		$(this).append();
+		$(this).load("js/WebArtemis.inc", function(){
+			//set the default values for the options
+			var settings = $.extend({
+				bases : 16000,
+				start : 1,
+				showFeatureList : true,
+				source : 'Pf3D7_01'
+			}, options);
 
-	$(this).append();
-	$(this).load("js/WebArtemis.inc", function(){
-		//set the default values for the options
-	    var settings = $.extend({
-	        bases : 16000,
-	        start : 1,
-	        showFeatureList : true,
-	        source : 'Pf3D7_01'
-	    }, options);
-
-		var arr = getUrlVars();
-		var leftBase = arr["base"];
-		if(!leftBase) {
-			leftBase = settings.start;
-		} else {
-			leftBase = parseInt(leftBase);
-			if(leftBase < 1)
-				leftBase = 1;
-		}
-		
-	    var width = arr["width"];	
-	    if(width) {
-	    	displayWidth = parseInt(width);
-	    } else {
-	    	width = $(window).width();   // browser viewport width
-	        displayWidth = width - (margin*12);
-	    }
-	    
-		var basesDisplayWidth = arr["bases"];
-		if(!basesDisplayWidth) {
-			basesDisplayWidth = settings.bases;
-		} else {
-			basesDisplayWidth = parseInt(basesDisplayWidth);
-		}
-		
-		var excludeFeatures = arr["exclude"];
-		if(excludeFeatures) {
-			excludes = excludeFeatures.split(',');
-		}
-		
-		var listSetting = arr["featureList"];
-		if(listSetting) {
-			if(listSetting == "true")
-				showFeatureList = true;
-			else
-				showFeatureList = false;
-		} else {
-			showFeatureList = settings.showFeatureList;
-		}
-		
-		var debugSetting = arr["debug"];
-		if(debugSetting) {
-			if(debugSetting == "true")
-				debug = true;
-			else
-				debug = false;
-		}
-		
-		if(basesDisplayWidth > 50000) {
-		  showStopCodons = false;
-		} else if(basesDisplayWidth < 1000) {
-		  showStopCodons = true;
-		}
-		  
-		var hgt = arr["height"];
-		if(!hgt) {
-			hgt = 10;
-		} else {
-			hgt = parseInt(hgt);
-		}
-		
-		var title = '';
-		
-		var lastObj;
-		var compCount = 0;
-		for(var i in arr) {
-			var value = arr[i];
-			if(i.indexOf("src") > -1) {
-				title+=value+' ';
-					
-				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase);
-				featureDisplayObjs[count - 1] = obj;
-				initialTop+=250;
-				
-				if(count > 1) {
-					compare = true;
-					new comparisonObj(lastObj, obj, compCount);
-					compCount++;
-				}
-				lastObj = obj;
+			var arr = getUrlVars();
+			var leftBase = arr["base"];
+			if(!leftBase) {
+				leftBase = settings.start;
+			} else {
+				leftBase = parseInt(leftBase);
+				if(leftBase < 1)
+					leftBase = 1;
 			}
-		}
+		
+			var width = arr["width"];	
+			if(width) {
+				displayWidth = parseInt(width);
+			} else {
+				width = $(window).width();   // browser viewport width
+				displayWidth = width - (margin*12);
+			}
+	    
+			var basesDisplayWidth = arr["bases"];
+			if(!basesDisplayWidth) {
+				basesDisplayWidth = settings.bases;
+			} else {
+				basesDisplayWidth = parseInt(basesDisplayWidth);
+			}
+		
+			var excludeFeatures = arr["exclude"];
+			if(excludeFeatures) {
+				excludes = excludeFeatures.split(',');
+			}
+		
+			var listSetting = arr["featureList"];
+			if(listSetting) {
+				if(listSetting == "true")
+					showFeatureList = true;
+				else
+					showFeatureList = false;
+			} else {
+				showFeatureList = settings.showFeatureList;
+			}
+		
+			var debugSetting = arr["debug"];
+			if(debugSetting) {
+				if(debugSetting == "true")
+					debug = true;
+				else
+					debug = false;
+			}
+		
+			if(basesDisplayWidth > 50000) {
+				showStopCodons = false;
+			} else if(basesDisplayWidth < 1000) {
+				showStopCodons = true;
+			}
+		  
+			var hgt = arr["height"];
+			if(!hgt) {
+				hgt = 10;
+			} else {
+				hgt = parseInt(hgt);
+			}
+		
+			var title = '';
+		
+			var lastObj;
+			var compCount = 0;
+			for(var i in arr) {
+				var value = arr[i];
+				if(i.indexOf("src") > -1) {
+					title+=value+' ';
+					
+					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase);
+					featureDisplayObjs[count - 1] = obj;
+					initialTop+=250;
+				
+					if(count > 1) {
+						compare = true;
+						new comparisonObj(lastObj, obj, compCount);
+						compCount++;
+					}
+					lastObj = obj;
+				}
+			}
 
-		if(count == 0) {
-			title = settings.source;
-			var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase);
-			featureDisplayObjs[0] = obj;
-		}
-		
-		if(showFeatureList)
-			featureListEvents(featureDisplayObjs[0]);
-		
-		$('ul.sf-menu').superfish({ 
-	        animation: {height:'show'},   // slide-down effect without fade-in 
-	        delay:     1200               // 1.2 second delay on mouseout 
-	    });
-		document.title = title;
-		
-		if (!$('#sequence'+1).find('canvas').get(0))
-		  $('#sequence'+1).append("<canvas width='1px' height ='1px'></canvas>");		
-		var canvas = $('#sequence'+1).find("canvas").get(0);
-		if(canvas.getContext) {
-		  useCanvas = true;
-		  debugLog('USE CANVAS');
-		}
-		$('#sequence'+1).html('');
-		
-		// Override the core hide() method
-		var originalHideMethod = jQuery.fn.hide;
-		jQuery.fn.extend({
-		hide : function(arguments) { 
-			if(this.selector == '.contextMenu') 
-				disablePopup(); 
-			return originalHideMethod.apply( this ); }
-		}); 
-	});
+			if(count == 0) {
+				title = settings.source;
+				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase);
+				featureDisplayObjs[0] = obj;
+			}
 
+			if(showFeatureList)
+				featureListEvents(featureDisplayObjs[0]);
+		
+			$('ul.sf-menu').superfish({ 
+				animation: {height:'show'},   // slide-down effect without fade-in 
+				delay:     1200               // 1.2 second delay on mouseout 
+			});
+			document.title = title;
+		
+			if (!$('#sequence'+1).find('canvas').get(0))
+				$('#sequence'+1).append("<canvas width='1px' height ='1px'></canvas>");		
+			var canvas = $('#sequence'+1).find("canvas").get(0);
+			if(canvas.getContext) {
+				useCanvas = true;
+				debugLog('USE CANVAS');
+			}
+			$('#sequence'+1).html('');
+		
+			// Override the core hide() method
+			var originalHideMethod = jQuery.fn.hide;
+			jQuery.fn.extend({
+				hide : function(arguments) { 
+				if(this.selector == '.contextMenu') 
+					disablePopup(); 
+				return originalHideMethod.apply( this ); }
+			});
+		})
+	},
+	
+	addData : function(start, end, isolate) {
+		// TEST 
+	    test(start, end, isolate);
+		attachObserver(isolate);
+	}
+};
+
+function attachObserver(isolate) {
+    if (featureDisplayObjs.length < 1) {
+        setTimeout(function() { attachObserver(isolate); }, 100);
+        return;
+    } else {
+		var obs = new function() {
+			this.redraw = function redraw(start, end) {
+				debugLog("REDRAW "+start+" "+end);
+				test(start, end, isolate);
+			}
+		};
+    	addArtemisObserver(obs);
+    }
+}
+
+// put at the end of the script for ie
+$.fn.WebArtemis = function(method) {
+	if ( methods[method] ) {
+	      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
+	} else if ( typeof method === 'object' || ! method ) {
+	     return methods.init.apply( this, arguments );
+	} else {
+	      $.error( 'Method ' +  method + ' does not exist in WebArtemis' );
+	}
 };
