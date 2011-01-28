@@ -40,18 +40,24 @@ function removeBamObj(bamId) {
 var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 	var coverage = returned.response.coverage;
 	var max = returned.response.max;
-	var window = options.window;
-	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
-	var basePerPixel  = baseInterval/screenInterval;
-	
-	for(i=0; i<coverage.length-1; i++ ) {
-		var xpos1 = margin+Math.round( ((i*window)+(window/2)) /basePerPixel);
-		var ypos1 = maxBamHgt-((coverage[i]/max)*bamViewPortHgt);
-		var xpos2 = margin+Math.round( (((i+1)*window)+(window/2)) /basePerPixel);
-		var ypos2 = maxBamHgt-((coverage[i+1]/max)*bamViewPortHgt);
 
-		$("#bam"+options.bamId).drawLine(xpos1, ypos1, xpos2, ypos2,
-				{color:colour, stroke:'1'});
+	if(max == 0) {
+		$("#bam"+options.bamId).drawLine(0, maxBamHgt-1, displayWidth, maxBamHgt-1,
+				{color:'#0000FF', stroke:'1'});
+	} else {
+		var window = options.window;
+		baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+		var basePerPixel  = baseInterval/screenInterval;
+		
+		for(i=0; i<coverage.length-1; i++ ) {
+			var xpos1 = margin+Math.round( ((i*window)+(window/2)) /basePerPixel);
+			var ypos1 = maxBamHgt-((coverage[i]/max)*bamViewPortHgt);
+			var xpos2 = margin+Math.round( (((i+1)*window)+(window/2)) /basePerPixel);
+			var ypos2 = maxBamHgt-((coverage[i+1]/max)*bamViewPortHgt);
+
+			$("#bam"+options.bamId).drawLine(xpos1, ypos1, xpos2, ypos2,
+				{color:'#0000FF', stroke:'1'});
+		}
 	}
 	$('body').css('cursor','default');
 };
