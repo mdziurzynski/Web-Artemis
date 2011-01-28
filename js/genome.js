@@ -65,7 +65,7 @@ var colour = [
 
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
-		                   srcFeature, frameLineHeight, leftBase) {
+		                   srcFeature, frameLnHgt, leftBase) {
 	count++;
 	this.index = count;
 	this.firstTime = true;
@@ -73,7 +73,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.marginTop = marginTop;
 	this.sequenceLength = sequenceLength;
 	this.srcFeature = srcFeature;
-	this.frameLineHeight = frameLineHeight;
+	this.frameLnHgt = frameLnHgt;
 	this.leftBase = leftBase;
 	this.sequence;
 	this.minimumDisplay = false;
@@ -156,16 +156,16 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 			var xpos = parseInt(
 					$('#rightDraggableEdge'+self.index).css('margin-left').replace("px", ""));
 			
-			self.frameLineHeight = (ui.offset.top-self.marginTop+8)/17;
+			self.frameLnHgt = (ui.offset.top-self.marginTop+8)/17;
 			displayWidth = (xpos-margin)+ui.offset.left;
 			
 			// adjust feature display canvas
 			var cssObj = {
-					 'height': self.frameLineHeight*17+'px',
+					 'height': self.frameLnHgt*17+'px',
 					 'width': displayWidth+'px'
 			};
 			$('#featureDisplay'+self.index).css(cssObj);
-			setGraphCss(displayWidth, self.marginTop, margin, self.frameLineHeight);
+			setGraphCss(displayWidth, self.marginTop, margin, self.frameLnHgt);
 
 			drawAll(self);
 			adjustFeatureDisplayPosition(true, self);
@@ -472,16 +472,16 @@ function hideEndOfSequence(fDisplay) {
 	var xpos = margin+((fDisplay.sequenceLength - fDisplay.leftBase + 1 )/basePerPixel);
 	var ypos = margin;
 	var width = (margin+(fDisplay.basesDisplayWidth/basePerPixel))-xpos;
-	var height = fDisplay.frameLineHeight*7;
+	var height = fDisplay.frameLnHgt*7;
 	$("#featureDisplay"+fDisplay.index).fillRect(xpos,ypos,width,height, {color: "#FFFFFF"});
-	ypos += fDisplay.frameLineHeight*9;
+	ypos += fDisplay.frameLnHgt*9;
 	$("#featureDisplay"+fDisplay.index).fillRect(xpos,ypos,width,height, {color: "#FFFFFF"});
 }
 
 //
 function adjustFeatureDisplayPosition(drag, fDisplay) {
 	var thisMarginTop = fDisplay.marginTop;
-	var thisFLH = fDisplay.frameLineHeight;
+	var thisFLH = fDisplay.frameLnHgt;
 	
 	var cssObj = {
 			 'margin-left': margin+'px',
@@ -612,7 +612,7 @@ function addEventHandlers(fDisplay) {
 				}
 				showGC = false;
 			} else {
-				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLineHeight);
+				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLnHgt);
 				showGC = true;	
 			}
 			drawAll(fDisplay);
@@ -626,7 +626,7 @@ function addEventHandlers(fDisplay) {
 				}
 				showAG = false;
 			} else {
-				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLineHeight);
+				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLnHgt);
 				showAG = true;	
 			}
 			drawAll(fDisplay);
@@ -640,7 +640,7 @@ function addEventHandlers(fDisplay) {
 				}
 				showOther = false;
 			} else {
-				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLineHeight);
+				setGraphCss(displayWidth, fDisplay.marginTop, margin, fDisplay.frameLnHgt);
 				showOther = true;
 			}
 			drawAll(fDisplay);
@@ -741,7 +741,7 @@ function showFeature(featureSelected, featureDisplay) {
 //
 function drawFrameAndStrand(fDisplay){
 	var ypos = fDisplay.marginTop;
-	var thisFLH = fDisplay.frameLineHeight;
+	var thisFLH = fDisplay.frameLnHgt;
 	
 	for(var i=0;i<3; i++)
 	{
@@ -766,7 +766,7 @@ function drawFrameAndStrand(fDisplay){
 }
 
 function addStrandLine(selector, ypos, strand, fDisplay) {
-	var thisFLH = fDisplay.frameLineHeight;
+	var thisFLH = fDisplay.frameLnHgt;
 	var cssObj = {
 		'height':thisFLH+'px',
 		'line-height' : thisFLH+'px',
@@ -783,8 +783,8 @@ function addStrandLine(selector, ypos, strand, fDisplay) {
 
 function addFrameLine(selector, ypos, frame, fDisplay) {
 	var cssObj = {
-		'height':fDisplay.frameLineHeight+'px',
-		'line-height' : fDisplay.frameLineHeight+'px',
+		'height':fDisplay.frameLnHgt+'px',
+		'line-height' : fDisplay.frameLnHgt+'px',
 		'width':displayWidth+'px',
 		'margin-left': margin+'px',
 		'margin-top': ypos+'px',
@@ -876,7 +876,7 @@ function drawStopCodons(fDisplay, basePerPixel) {
 	if(nstops > 3000) {
 		var canvasTop = $('#featureDisplay'+fDisplay.index).css('margin-top').replace("px", "");
 		var mTop = fDisplay.marginTop;
-		var flh  = fDisplay.frameLineHeight;
+		var flh  = fDisplay.frameLnHgt;
 		
 		drawStopOnCanvas(fwdStops1, mTop+((flh*2)*0+1)-canvasTop, flh, fDisplay, basePerPixel);
 		drawStopOnCanvas(fwdStops2, mTop+((flh*2)*1+1)-canvasTop, flh, fDisplay, basePerPixel);
@@ -898,27 +898,27 @@ function drawStopCodons(fDisplay, basePerPixel) {
 		drawBwdStop(bwdStops3, 2, fDisplay, basePerPixel);
 		//console.timeEnd('draw bwd stop codons');
 		
-		if($('.bases').height() != fDisplay.frameLineHeight) {
-		  $('.bases').css({'height' : fDisplay.frameLineHeight+'px'});
+		if($('.bases').height() != fDisplay.frameLnHgt) {
+		  $('.bases').css({'height' : fDisplay.frameLnHgt+'px'});
 		}
 	}
 };
 
 
-function drawStopOnCanvas(stop, ypos, frameLineHeight, fDisplay, basePerPixel) {
+function drawStopOnCanvas(stop, ypos, frameLnHgt, fDisplay, basePerPixel) {
 	var len=stop.length;
 	var colour = '#000000';
 	for(var i=0; i<len; i++ ) {
 		var position1 = stop[i];
 		var stopPosition1 = margin+Math.round(stop[i]/basePerPixel);
-		$("#featureDisplay"+fDisplay.index).drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLineHeight,
+		$("#featureDisplay"+fDisplay.index).drawLine(stopPosition1, ypos, stopPosition1, ypos+frameLnHgt,
 				{color: colour, stroke:'1'});
 	}
 }
 
 function drawFwdStop(stop, frame, fDisplay, basePerPixel) {
   var len=stop.length;
-  var ypos = fDisplay.marginTop+((fDisplay.frameLineHeight*2)*frame);
+  var ypos = fDisplay.marginTop+((fDisplay.frameLnHgt*2)*frame);
 
   var fwdStopsStr = '';
   for(var i=0; i<len; i+=2 )
@@ -942,8 +942,8 @@ function drawFwdStop(stop, frame, fDisplay, basePerPixel) {
 
 function drawBwdStop(stop, frame, fDisplay, basePerPixel) {
   var len=stop.length;
-  var ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*10)+
-  				fDisplay.frameLineHeight+((fDisplay.frameLineHeight*2)*frame);
+  var ypos = fDisplay.marginTop+(fDisplay.frameLnHgt*10)+
+  				fDisplay.frameLnHgt+((fDisplay.frameLnHgt*2)*frame);
 
   var bwdStopsStr = '';
   for(var i=0; i<len; i+=2 )
@@ -967,7 +967,7 @@ function drawBwdStop(stop, frame, fDisplay, basePerPixel) {
 
 function getSequnceCanvasCtx(fDisplay, clearCanvas) {
 	  var width = $('#featureDisplay'+fDisplay.index).css('width').replace("px", "");
-	  var height = fDisplay.frameLineHeight*17;
+	  var height = fDisplay.frameLnHgt*17;
 
 	  if (!$('#featureDisplay'+fDisplay.index).find('canvas').get(0)) {
 		  $('#featureDisplay'+fDisplay.index).append("<canvas  width='"+$('#featureDisplay'+fDisplay.index).css('width')+"' height='"+$('#featureDisplay'+fDisplay.index).css('height')+"' style='position: absolute; top: 0; left: 0;'></canvas>");
@@ -981,20 +981,34 @@ function getSequnceCanvasCtx(fDisplay, clearCanvas) {
 	  return ctx;
 }
 
+function fwdStrandYpos(fDisplay, byCanvas) {
+	if(byCanvas) {
+		return margin+7*fDisplay.frameLnHgt;
+	} else {
+		return fDisplay.marginTop+7*fDisplay.frameLnHgt;
+	}
+}
+
+function bwdStrandYpos(fDisplay, byCanvas) {
+	if(byCanvas) {
+		return margin+10*fDisplay.frameLnHgt;
+	} else {
+		return fDisplay.marginTop+10*fDisplay.frameLnHgt;
+	}
+}
+
 function drawCodons(fDisplay, basePerPixel) {
   if(window.console) 
   		console.time('draw codons');
 
+  useCanvas = false;
   if(useCanvas) {
 	  var ctx = getSequnceCanvasCtx(fDisplay, true);
-	  var yposFwd = margin+7*fDisplay.frameLineHeight-2;
-  } else {
-	  yposFwd = fDisplay.marginTop+(6*fDisplay.frameLineHeight)-2;
   }
-  var yposBwd = yposFwd+(fDisplay.frameLineHeight*3);
+  var yposFwd = fwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2;
+  var yposBwd = bwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2;
   
   var xpos = margin;
-  
   var baseStr = '';
   for(var i=0;i<fDisplay.basesDisplayWidth; i++) {
 	  if(i+fDisplay.leftBase > fDisplay.sequenceLength) {
@@ -1042,10 +1056,10 @@ function drawAminoAcids(fDisplay, basePerPixel) {
   			  fDisplay.sequence.charAt(i+2));
 
 	  if(useCanvas) {
-		  var yposFwd = margin+(frame*(fDisplay.frameLineHeight*2))+fDisplay.frameLineHeight-2;
+		  var yposFwd = margin+(frame*(fDisplay.frameLnHgt*2))+fDisplay.frameLnHgt-2;
 		  drawString(ctx, aa, xpos, yposFwd, '#000000', 0,"Courier New",14);
 	  } else {
-		  yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLineHeight*2))-2;
+		  yposFwd = fDisplay.marginTop+(frame*(fDisplay.frameLnHgt*2))-2;
 		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+yposFwd+'px; margin-left:'+
 		  		xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';   
 	  }
@@ -1059,12 +1073,12 @@ function drawAminoAcids(fDisplay, basePerPixel) {
               complement(fDisplay.sequence.charAt(i)))
               
 	  if(useCanvas) {
-		  var yposBwd = margin+(fDisplay.frameLineHeight*11)+
-			((fDisplay.frameLineHeight*2)*frame)+fDisplay.frameLineHeight-2;
+		  var yposBwd = margin+(fDisplay.frameLnHgt*11)+
+			((fDisplay.frameLnHgt*2)*frame)+fDisplay.frameLnHgt-2;
 		  drawString(ctx, aa, xpos, yposBwd, '#000000', 0,"Courier New",14);
 	  } else {
-		  yposBwd = fDisplay.marginTop+(fDisplay.frameLineHeight*11)+
-			((fDisplay.frameLineHeight*2)*frame)-2;
+		  yposBwd = fDisplay.marginTop+(fDisplay.frameLnHgt*11)+
+			((fDisplay.frameLnHgt*2)*frame)-2;
 		  aaStr = aaStr + '<div class="aminoacid" style="margin-top:'+
 		  		yposBwd+'px; margin-left:'+xpos+'px; width:'+3/basePerPixel+'px">'+aa+'</div>';
 	  }
@@ -1244,7 +1258,7 @@ function drawArrow(fDisplay, exon, ypos, basePerPixel) {
 	
 	var Xpts, Ypts;
 	
-	var flh2 = fDisplay.frameLineHeight/2;
+	var flh2 = fDisplay.frameLnHgt/2;
 	if(exon.strand == 1) {
 	  var end = margin+((exon.end - fDisplay.leftBase + 1)/basePerPixel);
 	  if(end > displayWidth) {
@@ -1258,7 +1272,7 @@ function drawArrow(fDisplay, exon, ypos, basePerPixel) {
 	  }
 	  Xpts = new Array(start, start-flh2, start);
 	}
-	Ypts = new Array(ypos, ypos+flh2, ypos+fDisplay.frameLineHeight);
+	Ypts = new Array(ypos, ypos+flh2, ypos+fDisplay.frameLnHgt);
 
 	$("#featureDisplay"+fDisplay.index).drawPolyline(Xpts,Ypts, {color:'#020202', stroke:'1'});
 }
@@ -1286,17 +1300,18 @@ function drawTicks(fDisplay) {
 	
 	var thisScreenInterval = baseInterval/basePerPixel;
 	$('#ticks'+fDisplay.index).html('');
+	
+	var yp = bwdStrandYpos(fDisplay, false)-fDisplay.frameLnHgt-14;
 	for(var i=1; i< nticks+1; i++) {
 		xScreen+=thisScreenInterval;
-		
 		if(xScreen >= displayWidth) {
 			break;
 		} else if(xScreen < margin) {
 			continue;
 		}
-		var pos = fDisplay.marginTop+(fDisplay.frameLineHeight*9)-14+"px "+xScreen+"px";
+		var pos = yp+"px "+xScreen+"px";
 		var thisTick = 'tick'+fDisplay.index+i;
-		
+
 		var thisStart = Math.round(i*baseInterval)+(start);
 		if(thisStart >= 0 && (fDisplay.firstTime || thisStart <= fDisplay.sequenceLength)) {
 			$('#ticks'+fDisplay.index).append('<div class="tickClass" id='+thisTick+'></div>');
@@ -1860,10 +1875,10 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	  }
 	  
 	  if(feature.strand == 1) {
-		ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*6);
+		ypos = fwdStrandYpos(fDisplay, false);
 	  }
 	  else {
-		ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*9);
+		ypos = bwdStrandYpos(fDisplay, false);
 	  }	
 	  
 	  var className = "feat";
@@ -1891,10 +1906,10 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 
 	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
 	
-	if($('.feat').height() != fDisplay.frameLineHeight-2 || (options != undefined && options.append) ) {
+	if($('.feat').height() != fDisplay.frameLnHgt-2 || (options != undefined && options.append) ) {
 		var cssObj = {
-			'height':fDisplay.frameLineHeight-2+'px',
-			'line-height' : fDisplay.frameLineHeight-2+'px'
+			'height':fDisplay.frameLnHgt-2+'px',
+			'line-height' : fDisplay.frameLnHgt-2+'px'
 		};
 		$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css(cssObj);
 	}
@@ -1963,13 +1978,13 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 
 		if(exon.strand == 1) {
 		   var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
-		   ypos = fDisplay.marginTop+((fDisplay.frameLineHeight*2)*frame);
+		   ypos = fDisplay.marginTop+((fDisplay.frameLnHgt*2)*frame);
 		}
 		else {
 		   var frame = 3 -
 		         ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
-		   ypos = fDisplay.marginTop+(fDisplay.frameLineHeight*9)+
-				    		((fDisplay.frameLineHeight*2)*frame);
+		   ypos = fDisplay.marginTop+(fDisplay.frameLnHgt*9)+
+				    		((fDisplay.frameLnHgt*2)*frame);
 		}
 
 		var classType;
@@ -2000,7 +2015,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, returned, options)
 	
 	var fDisplay1 = cmp.featureDisplay1;
 	var fDisplay2 = cmp.featureDisplay2;
-	var canvasTop = fDisplay1.marginTop+(fDisplay1.frameLineHeight*16.9);
+	var canvasTop = fDisplay1.marginTop+(fDisplay1.frameLnHgt*16.9);
 	var canvasBtm = fDisplay2.marginTop;
 	
 	var baseInterval1 = (fDisplay1.basesDisplayWidth/displayWidth)*screenInterval;
@@ -2311,39 +2326,6 @@ function test(start, end, isolate) {
 	  	} } );
 	} } );
 }
-
-
-/*function test2(start, end) {
-	var jsonUrl  = 'http://www.genedb.org/testservice'; 
-	var service1 = "/regions/locations.json?&region=Pf3D7_05&start="+start+"&end="+end;
-	var service2 = "/features/properties.json?";
-
-	// Get features and their locations
-	$.ajax({
-		  url: jsonUrl+service1,
-		  dataType: 'jsonp',
-		  success: function(returned1) {
-		
-		var features  = returned1.response.features;
-		var featureToColourList = new Array();
-		for(var i=0; i<features.length; i++ ) {
-		  if(features[i].type == "exon")
-			  featureToColourList.push(features[i].feature);
-		}
-		
-		// Get the feature colours
-		$.ajax({
-			  url: jsonUrl+service2,
-			  data: 'us='+featureToColourList,
-			  dataType: 'jsonp',
-			  success: function(returned2) {
-			moveTo(returned1, returned2, "NEW_TRACK_NAME", 
-					function (featureSelected, featureDisplay) {
-		  		alert("Show feature properties for "+featureSelected)});
-	  	} } );
-	} } );
-}*/
-
 
 //
 //

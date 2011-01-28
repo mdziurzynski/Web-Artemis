@@ -46,7 +46,7 @@ function positionFeatureList(featureDisplay, nrows) {
 	if($('#graph').children().length > 0)
 		ghgt = $('#graph').height();
 
-	var top = featureDisplay.marginTop+(featureDisplay.frameLineHeight*19.5)+ghgt;
+	var top = featureDisplay.marginTop+(featureDisplay.frameLnHgt*19.5)+ghgt;
     var cssObj = {
 			 'margin-left': margin+'px',
 			 'margin-right': margin+'px',

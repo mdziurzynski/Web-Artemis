@@ -34,7 +34,7 @@ function dClick(fDisplay, event, tgt) {
 
 function setFdispaySelection(fDisplay, start_x, end_x, start_y) {
 
-    var flh = fDisplay.frameLineHeight;
+    var flh = fDisplay.frameLnHgt;
     
     if($('#selection'+fDisplay.index).length == 0) {
     	$('#features').append('<div id="selection'+fDisplay.index+'"></div>');

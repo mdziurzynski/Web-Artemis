@@ -187,11 +187,11 @@ function setGraphMenu(fDisplay) {
 }
 
 
-function setGraphCss(displayWidth, marginTop, margin, frameLineHeight) {
+function setGraphCss(displayWidth, marginTop, margin, frameLnHgt) {
 	var cssObj = {
 			 'width': displayWidth+'px',
 			 'height':150+'px',
-			 'top': marginTop+(frameLineHeight*19.5)+'px',
+			 'top': marginTop+(frameLnHgt*19.5)+'px',
 			 'position': 'absolute',
 			 'margin-left': margin+'px'
 		};
