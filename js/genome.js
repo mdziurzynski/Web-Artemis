@@ -80,6 +80,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.showStopCodons = false;
 	this.nodraw = false;
 	this.observers = new Observable();
+	this.oneLinePerEntry = false;
 
 	this.highlightFeatures = new Array();
 	this.hideFeatures = new Array();
@@ -184,6 +185,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     		'<li><a href="#gotoGene">Find... </a></li>'+
     		'<li><a href="#excludeFeature" id="excludeFeature">Features to show/hide... </a></li>'+
     		'<li><a href="#stopCodonToggle" id="stopCodonToggle">View stop codons</a></li>'+
+    		'<li><a href="#oneLineToggle" id="oneLineToggle">View one-line-per-entry</a></li>'+
     		'<li><a href="#showBaseOfSelected" id="basesOfFeature">Bases of selected features...</a></li>'+
     		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
     		'<li><a href="#hideSelected" id="hideSelectedFeature">Hide/Show seleceted features</a></li>'+
@@ -218,6 +220,10 @@ var rightClickMenu = function(action, el, pos, self) {
 		showBasesOfSelectedFeatures(self);
 	} else if(action.match(/showAAOfSelected/)) {
 		showAminoAcidsOfSelectedFeatures(self);
+	} else if(action.match(/oneLineToggle/)) {
+		self.oneLinePerEntry = !self.oneLinePerEntry;
+		drawAll(self);
+		drawFrameAndStrand(self);
 	} else if(action.match(/hideSelected/)) {
 		hideSelectedFeatures(self);
 	} else if(action.match(/excludeFeature/)) {
@@ -740,13 +746,15 @@ function showFeature(featureSelected, featureDisplay) {
 
 //
 function drawFrameAndStrand(fDisplay){
+	var ntracks = getNTracks(fDisplay);
 	var ypos = fDisplay.marginTop;
 	var thisFLH = fDisplay.frameLnHgt;
-	
-	for(var i=0;i<3; i++)
-	{
+	$('.fwdFrames').html('');
+	$('.bwdFrames').html('');
+	$('.strands').html('');
+
+	for(var i=0;i<ntracks; i++) {
 	  var name = 'fwdFrame'+i+fDisplay.index;
-	  $('.'+name).html('');
 	  addFrameLine('.fwdFrames',ypos,name, fDisplay);
 	  ypos+=thisFLH*2;
 	}
@@ -756,10 +764,8 @@ function drawFrameAndStrand(fDisplay){
 	addStrandLine('.strands', ypos, 'bwdStrand'+fDisplay.index, fDisplay);
 	
 	ypos+=thisFLH*2;
-	for(var i=0;i<3; i++)
-	{
+	for(var i=0;i<ntracks; i++) {
 	  var name = 'bwdFrame'+i+fDisplay.index;
-	  $('.'+name).html('');
 	  addFrameLine('.bwdFrames',ypos,name, fDisplay);
 	  ypos+=thisFLH*2;
 	}
@@ -982,6 +988,8 @@ function getSequnceCanvasCtx(fDisplay, clearCanvas) {
 }
 
 function fwdStrandYpos(fDisplay, byCanvas) {
+	var ntracks = getNTracks(fDisplay);
+	var tm = (2*ntracks)+1;
 	if(byCanvas) {
 		return margin+7*fDisplay.frameLnHgt;
 	} else {
@@ -990,10 +998,20 @@ function fwdStrandYpos(fDisplay, byCanvas) {
 }
 
 function bwdStrandYpos(fDisplay, byCanvas) {
+	var ntracks = getNTracks(fDisplay);
+	var tm = (2*ntracks)+4;
 	if(byCanvas) {
-		return margin+10*fDisplay.frameLnHgt;
+		return margin+tm*fDisplay.frameLnHgt;
 	} else {
-		return fDisplay.marginTop+10*fDisplay.frameLnHgt;
+		return fDisplay.marginTop+tm*fDisplay.frameLnHgt;
+	}
+}
+
+function getNTracks(fDisplay) {
+	if(!fDisplay.oneLinePerEntry) {
+		return 3;
+	} else {
+		return fDisplay.tracks.length;
 	}
 }
 
@@ -1110,7 +1128,7 @@ function drawFeatures(fDisplay) {
 			{ region:fDisplay.srcFeature, 
 		      start:fDisplay.leftBase, end:end, 
 		      exclude:excludes }, 
-		      fDisplay, { append:false, minDisplay:fDisplay.minimumDisplay, startTime:currentTime });
+		      fDisplay, { append:false, minDisplay:fDisplay.minimumDisplay, startTime:currentTime, track:'track1' });
 }
 
 function getFeatureExons(transcript) {
@@ -1874,12 +1892,16 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 		  continue;
 	  }
 	  
-	  if(feature.strand == 1) {
-		ypos = fwdStrandYpos(fDisplay, false);
+	  if(fDisplay.oneLinePerEntry) {
+		ypos = getFeatureTrackPosition(fDisplay, feature, options.track);
+	  } else {
+	    if(feature.strand == 1) {
+		  ypos = fwdStrandYpos(fDisplay, false)-fDisplay.frameLnHgt;
+	    }
+	    else {
+		  ypos = bwdStrandYpos(fDisplay, false)-fDisplay.frameLnHgt;
+	    }
 	  }
-	  else {
-		ypos = bwdStrandYpos(fDisplay, false);
-	  }	
 	  
 	  var className = "feat";
 	  if(feature.type == "gene") {
@@ -1895,17 +1917,11 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 
 	for(var i=0; i<exonParent.length; i++) {
 		featureStr = 
-			drawExons(fDisplay, exonMap[exonParent[i]], featureStr, basePerPixel);
+			drawExons(fDisplay, exonMap[exonParent[i]], featureStr, basePerPixel, options.track);
 	}
 	
-/*	if(options.append) {
-		$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
-	} else {
-		$('#features'+fDisplay.index+'_track1').html(featureStr);
-	}*/
+	$('#features'+fDisplay.index+'_'+options.track).html(featureStr);
 
-	$('#features'+fDisplay.index+'_'+fDisplay.trackIndex).html(featureStr);
-	
 	if($('.feat').height() != fDisplay.frameLnHgt-2 || (options != undefined && options.append) ) {
 		var cssObj = {
 			'height':fDisplay.frameLnHgt-2+'px',
@@ -1921,8 +1937,13 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			$('.feat, .featCDS, .featPseudo, .featGene, .featGreen').css('opacity','0.9');
 		}
 
-		if( count < 2 && showFeatureList )
-			  setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
+		if( count < 2 && showFeatureList ) {
+			if(options.append) {
+				setTimeout(function() { setupFeatureList(features, exonMap, exonParent, fDisplay, options.append); }, 100);
+			} else {
+				setupFeatureList(features, exonMap, exonParent, fDisplay, options.append);
+			}
+		}
 		
 		if( featureToColourList.length > 0 && 
 			featureToColourList.length < 500 ) {
@@ -1955,7 +1976,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	return;
 };
 
-function drawExons(fDisplay, exons, featureStr, basePerPixel) {
+function drawExons(fDisplay, exons, featureStr, basePerPixel, trackName) {
 	var sequenceLength = fDisplay.sequenceLength;
 	if(exons != undefined) {
 	
@@ -1976,15 +1997,18 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 		   phase = exon.phase;
 	    } 
 
-		if(exon.strand == 1) {
-		   var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
-		   ypos = fDisplay.marginTop+((fDisplay.frameLnHgt*2)*frame);
-		}
-		else {
-		   var frame = 3 -
-		         ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
-		   ypos = fDisplay.marginTop+(fDisplay.frameLnHgt*9)+
+		if(fDisplay.oneLinePerEntry) {
+			ypos = getFeatureTrackPosition(fDisplay, exon, trackName);
+		} else {
+			if(exon.strand == 1) {
+				var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
+				ypos = fDisplay.marginTop+((fDisplay.frameLnHgt*2)*frame);
+			} else {
+				var frame = 3 -
+		           ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
+				ypos = fDisplay.marginTop+(fDisplay.frameLnHgt*9)+
 				    		((fDisplay.frameLnHgt*2)*frame);
+			}
 		}
 
 		var classType;
@@ -2007,6 +2031,17 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel) {
 	  }
 	}
 	return featureStr;
+}
+
+function getFeatureTrackPosition(fDisplay, feature, trackName) {
+	var index = jQuery.inArray( trackName, fDisplay.tracks );
+	var ntracks = fDisplay.tracks.length;
+	
+	if(feature.strand == 1) {
+		return fDisplay.marginTop+((fDisplay.frameLnHgt*2)*(ntracks-index-1));
+	} else {
+		return fDisplay.marginTop+(fDisplay.frameLnHgt*((2*(ntracks+index+1))+3));
+	}
 }
 
 var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
@@ -2366,7 +2401,7 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 			var tmpTrack = fDisplay.trackIndex;
 			fDisplay.trackIndex = trackIndex;
 			aFeatureFlatten(fDisplay, jsonFeatureObj,
-					{append:true, minDisplay:fDisplay.minimumDisplay});
+					{append:true, minDisplay:fDisplay.minimumDisplay, track:trackIndex});
 			fDisplay.trackIndex = tmpTrack;
 			
 			var self = fDisplay;

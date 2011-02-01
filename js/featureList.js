@@ -67,7 +67,7 @@ function positionFeatureList(featureDisplay, nrows) {
 
 function setupFeatureList(features, exonMap, exonParent, featureDisplay, append) {
 	
-	if(features.length < 1) {
+	if(!append && features.length < 1) {
 		$('#featureList').html('');
 		return;
 	}
@@ -77,7 +77,7 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 		$('#featureListTable').append('<thead><tr><th>Name</th><th>Type</th><th>Feature Start</th><th>Feature End</th></tr></thead>');
 		$('#featureListTable').append('<tbody>');
 	}
-	
+
 	var nrows = 0;
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
