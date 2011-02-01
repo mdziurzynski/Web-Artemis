@@ -222,6 +222,9 @@ var rightClickMenu = function(action, el, pos, self) {
 		showAminoAcidsOfSelectedFeatures(self);
 	} else if(action.match(/oneLineToggle/)) {
 		self.oneLinePerEntry = !self.oneLinePerEntry;
+		$('.fwdFrames').html('');
+		$('.bwdFrames').html('');
+		$('.strands').html('');
 		drawAll(self);
 		drawFrameAndStrand(self);
 	} else if(action.match(/hideSelected/)) {
@@ -749,9 +752,6 @@ function drawFrameAndStrand(fDisplay){
 	var ntracks = getNTracks(fDisplay);
 	var ypos = fDisplay.marginTop;
 	var thisFLH = fDisplay.frameLnHgt;
-	$('.fwdFrames').html('');
-	$('.bwdFrames').html('');
-	$('.strands').html('');
 
 	for(var i=0;i<ntracks; i++) {
 	  var name = 'fwdFrame'+i+fDisplay.index;
