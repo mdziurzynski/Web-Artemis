@@ -286,7 +286,7 @@ function logJsonp(serviceName) {
 	if(dataType[serviceType] != "jsonp") {
 		return;
 	}
-	var $jsonScript = $('head script[src*='+serviceName+']');
+	var $jsonScript = $('head script[src*="'+serviceName+'"]');
 
     for(var i=0; i<$jsonScript.length; i++) {
     	var src = $jsonScript[i].src;
