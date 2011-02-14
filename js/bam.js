@@ -246,7 +246,7 @@ function drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, idx) 
 
 function drawBam(fDisplay, bamId) {
 	var serviceName = '/sams/sequences.json?';
-	
+
 	var thisBam = getBamObj(bamId);
 	if(thisBam == null) {
 		thisBam = new bamObj(bamId);
