@@ -81,11 +81,11 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 	var nrows = 0;
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
-		if(feature.type != 'exon' && feature.type != 'pseudogenic_exon') {
+		if(feature.type.name != 'exon' && feature.type.name != 'pseudogenic_exon') {
 		  appendFeatureToList(feature);
 		  nrows++;
-		} else if(exonMap[feature.part_of] != undefined) {
-		  appendExonsToList(exonMap[feature.part_of]);
+		} else if(exonMap[feature.parent] != undefined) {
+		  appendExonsToList(exonMap[feature.parent]);
 		  exonMap[feature.part_of] = undefined;
 		  nrows++;
 		}
@@ -99,20 +99,20 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 }
 
 function appendExonsToList(exons) {
-	var fmin = parseInt(exons[0].start)+1;
-	var fmax = parseInt(exons[0].end);
-	var name = exons[0].feature;
+	var fmin = parseInt(exons[0].fmin)+1;
+	var fmax = parseInt(exons[0].fmax);
+	var name = exons[0].uniqueName;
 	
-	if(exons[0].feature.indexOf(':exon') > 0)
-		name = exons[0].feature.split(':exon')[0];
+	if(exons[0].uniqueName.indexOf(':exon') > 0)
+		name = exons[0].uniqueName.split(':exon')[0];
 	
-	if(exons[0].feature.indexOf(':mRNA') > 0)
-		name = exons[0].feature.split(':mRNA')[0];
+	if(exons[0].uniqueName.indexOf(':mRNA') > 0)
+		name = exons[0].uniqueName.split(':mRNA')[0];
 	
 	
 	for(var j=1; j<exons.length; j++) {
-		var thisFmin = parseInt(exons[j].start)+1;
-		var thisFmax = parseInt(exons[j].end);
+		var thisFmin = parseInt(exons[j].fmin)+1;
+		var thisFmax = parseInt(exons[j].fmax);
 		if(thisFmin < fmin)
 			fmin = thisFmin;
 		if(thisFmax > fmax)
@@ -122,12 +122,12 @@ function appendExonsToList(exons) {
 	}
 		
 	var type;
-	if(exons[0].type == 'exon')
+	if(exons[0].type.name == 'exon')
 		type = "CDS";
 	else
 		type = "pseudogene";
 	
-	$('#featureListTable').append('<tr id="'+exons[0].feature+':LIST">'+
+	$('#featureListTable').append('<tr id="'+exons[0].uniqueName+':LIST">'+
 			'<td>'+name+'</td>'+
 			'<td>'+type+'</td>'+
 			'<td>'+fmin+'</td>'+
@@ -137,12 +137,12 @@ function appendExonsToList(exons) {
 }
 
 function appendFeatureToList(feature) {
-	var s = parseInt(feature.start)+1;
+	var s = parseInt(feature.fmin)+1;
 	$('#featureListTable').append('<tr id="'+feature.feature+':LIST">'+
-			'<td>'+feature.feature+'</td>'+
-			'<td>'+feature.type+'</td>'+
+			'<td>'+feature.uniqueName+'</td>'+
+			'<td>'+feature.type.name+'</td>'+
 			'<td>'+s+'</td>'+
-			'<td>'+feature.end+'</td>'+
+			'<td>'+feature.fmax+'</td>'+
 			//'<td id="'+feature.feature+':PROPS"></td>'+
 			'</tr>');
 }

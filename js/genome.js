@@ -3,18 +3,18 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 6;
+var serviceType = 5;
 var serviceTypeBam = -1;
 
-var webService = [ "http://127.0.0.1/testservice/",
-                   "http://t81-omixed.internal.sanger.ac.uk:7666", // public ro snapshot
+var webService = [ "http://127.0.0.1:8080/",
+                   "http://t81-omixed.internal.sanger.ac.uk:8080/snapshot-services", // public ro snapshot
                    "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
                    "http://t81-omixed.internal.sanger.ac.uk:7000", // jython pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:8080/crawl/",  // java tomcat
                    "http://www.genedb.org/testservice",
                    "http://127.0.0.1:6666"]; 
-var dataType = [ "json", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
+var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=1000&height=10&bases=5000
@@ -859,7 +859,7 @@ function getSequence(fDisplay) {
 
 	var serviceName = '/regions/sequence.json?';
 	handleAjaxCalling(serviceName, aSequence,
-			{ uniqueName:fDisplay.srcFeature, start:start, end:end }, 
+			{ region:fDisplay.srcFeature, start:start, end:end }, 
 			fDisplay, {});
 }
 
@@ -1132,13 +1132,13 @@ function drawFeatures(fDisplay) {
 }
 
 function getFeatureExons(transcript) {
-	var nkids = transcript.children.length;
+	var nkids = transcript.child.length;
 	var exons = [];
 	if(nkids > 0)
 	{
 	  for(var i=0; i<nkids; i++) {
-		var kid = transcript.children[i];
-		if(kid.type == "exon" || kid.type == 'pseudogenic_exon') {
+		var kid = transcript.child[i];
+		if(kid.relationshipType == "exon" || kid.relationshipType == 'pseudogenic_exon') {
 	       exons.push(kid);
 		}
       }	
@@ -1151,12 +1151,12 @@ function getFeatureExons(transcript) {
 }
 
 function getFeaturePeptide(transcript) {
-	var nkids = transcript.children.length;
+	var nkids = transcript.child.length;
 	if(nkids > 0)
 	{
 	  for(var i=0; i<nkids; i++) {
-		var kid = transcript.children[i];	
-		if(kid.type == "polypeptide") {
+		var kid = transcript.child[i];	
+		if(kid.relationshipType == "polypeptide") {
 	       return kid;
 		}
       }	
@@ -1186,8 +1186,8 @@ function getSegmentFrameShift(exons, index, phase) {
 
 function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixel) {
 
-  var startFeature = margin+((feature.start - leftBase + 1)/basePerPixel);
-  var endFeature   = margin+((feature.end - leftBase + 1)/basePerPixel);
+  var startFeature = margin+((feature.fmin - leftBase + 1)/basePerPixel);
+  var endFeature   = margin+((feature.fmax - leftBase + 1)/basePerPixel);
   var extra = '';
   var bdrLft = true;
   var bdrRgt = true;
@@ -1232,7 +1232,7 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
   }
   
   featureStr = featureStr + 
-	'<div id='+feature.feature+' class="'+className+'" style="width:'+width+'px; '+pos+';'+extra+'"></div>';
+	'<div id='+feature.uniqueName+' class="'+className+'" style="width:'+width+'px; '+pos+';'+extra+'"></div>';
   return featureStr;
 }
 
@@ -1253,11 +1253,11 @@ function drawFeatureConnections(fDisplay, lastExon, exon, lastYpos, ypos, colour
 	 lastYpos = tmpPos;
 	}
 	
-	var lpos = margin+((exonL.end - fDisplay.leftBase + 1)/basePerPixel) + 1;
+	var lpos = margin+((exonL.fmax - fDisplay.leftBase + 1)/basePerPixel) + 1;
 	if(lpos > displayWidth) {
 	  return;
 	}
-	var rpos = margin+((exonR.start - fDisplay.leftBase + 1 )/basePerPixel) - 1;
+	var rpos = margin+((exonR.fmin - fDisplay.leftBase + 1 )/basePerPixel) - 1;
 	var mid  = lpos+(rpos-lpos)/2;
 	
 	var ymid = ypos-4;
@@ -1278,13 +1278,13 @@ function drawArrow(fDisplay, exon, ypos, basePerPixel) {
 	
 	var flh2 = fDisplay.frameLnHgt/2;
 	if(exon.strand == 1) {
-	  var end = margin+((exon.end - fDisplay.leftBase + 1)/basePerPixel);
+	  var end = margin+((exon.fmax - fDisplay.leftBase + 1)/basePerPixel);
 	  if(end > displayWidth) {
 		  return;
 	  }
 	  Xpts = new Array(end, end+flh2, end) ;
 	} else {
-	  var start = margin+((exon.start - fDisplay.leftBase + 1)/basePerPixel);
+	  var start = margin+((exon.fmin - fDisplay.leftBase + 1)/basePerPixel);
 	  if(start > displayWidth) {
 		  return;
 	  }
@@ -1353,7 +1353,7 @@ function getOrganismList(fDisplay) {
 function setTranslation(fDisplay, organism_id) {
 	var serviceName = '/organisms/list.json';
 	handleAjaxCalling(serviceName, function(fDisplay, returned, options) { 
-		var organisms  = returned.response.organisms;
+		var organisms  = returned.response.results.organisms;
 		for(var i=0; i<organisms.length; i++) {
 			if(organism_id == organisms[i].organism_id)
 				setTranslationTable(organisms[i].translation_table);
@@ -1506,7 +1506,7 @@ function centerOnFeature(fDisplay, event, featureSelected, region) {
 //
 
 var aShowProperties = function showProperties(fDisplay, returned, options) {
-    var features = returned.response.hierarchy;
+    var features = returned.response.results.hierarchy;
     
     var featureSelected = options.featureSelected; 
     var featureStr = "&features="+options.featureSelected;
@@ -1517,34 +1517,34 @@ var aShowProperties = function showProperties(fDisplay, returned, options) {
 
 	for(var i=0; i<features.length; i++ ) {
 		var feature = features[i];
-		var nkids = feature.children.length;
+		var nkids = feature.child.length;
 
 		if(feature.name)
 		  primary_name = feature.name;
 	    
 		if(nkids > 0) {
 			for(var j=0; j<nkids; j++ ) { 
-				var kid = feature.children[j];
+				var kid = feature.child[j];
 				var exons = getFeatureExons(kid);
 				var nexons = exons.length;
 				
 				for(var k=0; k<nexons; k++) {
 					var exon = exons[k];
-					if(exon.uniquename == featureSelected ||
-					   feature.uniquename == featureSelected) {
+					if(exon.uniqueName == featureSelected ||
+					   feature.uniqueName == featureSelected) {
 
 						if(nkids == 1) {
-							name = feature.uniquename;
+							name = feature.uniqueName;
 						} else {
-							name = kid.uniquename;
+							name = kid.uniqueName;
 						}
-						featurePropertyList.push(feature.uniquename);
-						featureStr += "&features="+feature.uniquename;
-						featureStr += "&features="+kid.uniquename;
+						featurePropertyList.push(feature.uniqueName);
+						featureStr += "&features="+feature.uniqueName;
+						featureStr += "&features="+kid.uniqueName;
 						var polypep = getFeaturePeptide(kid);
 						if(polypep != -1) {
-							featurePropertyList.push(polypep.uniquename);
-							featureStr += "&features="+polypep.uniquename;
+							featurePropertyList.push(polypep.uniqueName);
+							featureStr += "&features="+polypep.uniqueName;
 						}
 						break;
 					}
@@ -1567,7 +1567,7 @@ var aShowProperties = function showProperties(fDisplay, returned, options) {
 			featureStr, -1, {featureSelected: featureSelected});
 	
 	handleAjaxCalling('/features/properties.json?', aFeatureProps,
-		'us='+featurePropertyList, -1, { featureSelected: featureSelected});
+		'features='+featurePropertyList, -1, { featureSelected: featureSelected});
 	
 	handleAjaxCalling('/features/pubs.json?', aFeaturePubs,
 			featureStr, -1, {featureSelected: featureSelected});
@@ -1593,12 +1593,12 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
-	var srcFeatures  = returned.response.regions;
+	var srcFeatures  = returned.response.results.regions;
 	for(var j=0; j<srcFeatures.length; j++) {
 		var feat = srcFeatures[j];
 		if(feat)
 		  $('#srcFeatureList').append(
-				  '<option value="'+feat+'">'+feat+'</option>');
+				  '<option value="'+feat.uniqueName+'">'+feat.uniqueName+'</option>');
 	}
 	
 	positionLists();
@@ -1619,14 +1619,14 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 };
 
 var aOrganism = function ajaxGetOrganisms(fDisplay, returned, options) {
-	var organisms  = returned.response.organisms;
+	var organisms  = returned.response.results.organisms;
 	$('#organismSelector').html('<select id="organismList"></select>');
 	$('#organismList').append('<option value="Organism:">Organism:</option>');
 	for(var i=0; i<organisms.length; i++) {
 		var organism = organisms[i];
 		if(organism)
 		  $('#organismList').append(
-				  '<option value="'+organism.organism_id+'">'+organism.name+'</option>');
+				  '<option value="'+organism.ID+'">'+organism.common_name+'</option>');
 	}
 
 	positionLists();
@@ -1660,7 +1660,7 @@ function positionLists() {
 }
 
 var aFeatureCvTerms = function ajaxGetFeatureCvTerms(fDisplay, returned, options) {
-	showFeatureCvTerm(returned.response.features, options.featureSelected);
+	showFeatureCvTerm(returned.response.results.features, options.featureSelected);
 };
 
 var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
@@ -1743,7 +1743,7 @@ var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private',
 var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 	
 	var featureSelected = options.featureSelected;
-	var featProps  = returned.response.features;
+	var featProps  = returned.response.results.features;
 	if(!featProps || featProps.length == 0)
 		return;
 	
@@ -1752,7 +1752,7 @@ var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 	
 	var setColour = false;
     for(var i=0; i<featProps.length; i++) {	
-		var featureprops = featProps[i].props;
+		var featureprops = featProps[i].properties;
 		for(var j=0; j<featureprops.length; j++) {
 			if(!containsString(propertyFilter, featureprops[j].name)) {
 				if( featureprops[j].name == 'colour' ) {
@@ -1770,7 +1770,7 @@ var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
 
 var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options) {
 	var featureSelected = options.featureSelected;
-	var featSyns  = returned.response.results;
+	var featSyns  = returned.response.results.features;
 	if(!featSyns || featSyns.length == 0)
 		return;
 	
@@ -1781,7 +1781,7 @@ var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options)
 		var featuresyns= featSyns[i].synonyms;
 		for(var j=0; j<featuresyns.length; j++) {
 			$("div#DISP_SYN"+escapeId(featureSelected)).append(
-					featuresyns[j].type+":"+featuresyns[j].synonym);
+					featuresyns[j].synonymtype+":"+featuresyns[j].synonym);
 			if(featuresyns[j].is_current == 'False')
 				$("div#DISP_SYN"+escapeId(featureSelected)).append(' (not current); ');
 			else
@@ -1835,9 +1835,9 @@ function containsString(anArray, aStr) {
 }
 
 var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, returned, options) {
-	var featProps  = returned.response.features;
+	var featProps  = returned.response.results.features;
 	for(var i=0; i<featProps.length; i++) {	
-		var featureprops = featProps[i].props;
+		var featureprops = featProps[i].properties;
 		for(var j=0; j<featureprops.length; j++) {
 
 			//if(featureprops[j].name == 'comment')
@@ -1845,17 +1845,17 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, returned,
 			//			featureprops[j].name+"="+featureprops[j].value+";<br />");
 
 			if(featureprops[j].name == 'colour') {
-				var featureId = escapeId(featProps[i].feature);
+				var featureId = escapeId(featProps[i].uniqueName);
 				$('#'+featureId).css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 				// colour feature list
-				$('#'+escapeId(featProps[i].feature+':LIST')).children(":first").css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
+				$('#'+escapeId(featProps[i].uniqueName+':LIST')).children(":first").css('background-color', 'rgb('+colour[featureprops[j].value]+')' );
 			}
 		}
 	}
 };
 
 var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, options) {
-	var features  = returned.response.features;
+	var features  = returned.response.results.locations;
 	var nfeatures = features.length;
 
 	debugLog("No. of features "+ nfeatures+"  "+fDisplay.leftBase+".."+
@@ -1875,14 +1875,14 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	
 	for(var i=0; i<nfeatures; i++ ) {
 	  var feature = features[i];
-	  
-	  if(feature.type == "exon" || feature.type == "pseudogenic_exon") {
-		  featureToColourList.push(feature.feature);
-		  var exons = exonMap[feature.part_of];
+
+	  if(feature.type.name == "exon" || feature.type.name == "pseudogenic_exon") {
+		  featureToColourList.push(feature.uniqueName);
+		  var exons = exonMap[feature.parent];
 		  if(exons == undefined) {
 			  exons = new Array();
-			  exonParent.push(feature.part_of);
-			  exonMap[feature.part_of] = exons;
+			  exonParent.push(feature.parent);
+			  exonMap[feature.parent] = exons;
 		  }
 		  if(feature.strand == 1) {
 		     exons.push(feature);
@@ -1904,13 +1904,13 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 	  }
 	  
 	  var className = "feat";
-	  if(feature.type == "gene") {
+	  if(feature.type.name == "gene") {
 		  className = "featGene";
-	  } else if(feature.type == "pseudogene") {
+	  } else if(feature.type.name == "pseudogene") {
 		  className = "featPseudo";
 	  }
 	  
-	  if(!isHiddenFeature(feature.feature, fDisplay)) {
+	  if(!isHiddenFeature(feature.uniqueName, fDisplay)) {
 		  featureStr = drawFeature(fDisplay.leftBase, feature, featureStr, ypos, className, basePerPixel);
 	  }
     }
@@ -1951,7 +1951,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, option
 			if(!options.append) {
 				var serviceName = '/features/properties.json?';
 				handleAjaxCalling(serviceName, aFeaturePropColours,
-					'us='+featureToColourList, 
+					'features='+featureToColourList, 
 					fDisplay.leftBase, {});
 			}
 		}
@@ -2001,11 +2001,11 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel, trackName) {
 			ypos = getFeatureTrackPosition(fDisplay, exon, trackName);
 		} else {
 			if(exon.strand == 1) {
-				var frame = ( (exon.start+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
+				var frame = ( (exon.fmin+1)-1+getSegmentFrameShift(exons, k, phase) ) % 3;
 				ypos = fDisplay.marginTop+((fDisplay.frameLnHgt*2)*frame);
 			} else {
 				var frame = 3 -
-		           ((sequenceLength-exon.end+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
+		           ((sequenceLength-exon.fmax+1)-1+getSegmentFrameShift(exons, k, phase)) % 3;
 				ypos = fDisplay.marginTop+(fDisplay.frameLnHgt*9)+
 				    		((fDisplay.frameLnHgt*2)*frame);
 			}
@@ -2244,12 +2244,13 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
 	//console.time('draw all');
-	fDisplay.sequenceLength = returned.response.sequence[0].length;
-	var start = returned.response.sequence[0].start;
+	var seq = returned.response.results.sequences[0];
+	fDisplay.sequenceLength = seq.length;
+	var start = seq.start;
 	
-	var sequence = returned.response.sequence[0].dna.substring(fDisplay.leftBase-start).toUpperCase();
+	var sequence = seq.dna.substring(fDisplay.leftBase-start).toUpperCase();
 	fDisplay.sequence = sequence;
-	fDisplay.organism_id = returned.response.sequence[0].organism_id;
+	fDisplay.organism_id = seq.organism_id;
 
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
@@ -2570,6 +2571,10 @@ function attachObserver(isolate) {
 
 // put at the end of the script for ie
 $.fn.WebArtemis = function(method) {
+	// remove square brackets
+	// &exclude[]=repeat_region&exclude[]=gene
+	jQuery.ajaxSettings.traditional = true; 
+	
 	if ( methods[method] ) {
 	      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
 	} else if ( typeof method === 'object' || ! method ) {
