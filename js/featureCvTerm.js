@@ -6,15 +6,14 @@ var product_cv = 'genedb_products';
 	
 function showFeatureCvTerm(featureCvTerms, featureSelected) {
 	var goHead = false;
-	
 	// product
 	for(var i=0; i<featureCvTerms.length; i++) {	
 		var featurecvterms = featureCvTerms[i].terms;
 		for(var j=0; j<featurecvterms.length; j++) {
-		   var cvName = featurecvterms[j].cv;
+		   var cvName = featurecvterms[j].cv.name;
 		   if(cvName == product_cv) {
 			   $("div#DISP_PRODUCT"+escapeId(featureSelected)).append(
-				   "<strong>Product : </strong><br />"+featurecvterms[j].cvterm+"<br /><br />");
+				   "<strong>Product : </strong><br />"+featurecvterms[j].name+"<br /><br />");
 		   }
 		   
 		   for(var k=0; k<go.length; k++) {
@@ -34,7 +33,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 	for(var i=0; i<featureCvTerms.length; i++) {	
 		var featurecvterms = featureCvTerms[i].terms;
 		for(var j=0; j<featurecvterms.length; j++) {
-		   var cvName = featurecvterms[j].cv;
+		   var cvName = featurecvterms[j].cv.name;
 		   if(cvName == 'genedb_products')
 			   continue;
 
@@ -50,7 +49,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 			   $("div#DISP_CV"+escapeId(featureSelected)).append(
 					   '<a href="javascript:void(0)" onclick="window.open(\'http://www.genedb.org/cgi-bin/amigo/term-details.cgi?term=GO:'+
 							   featurecvterms[j].accession+'\');">GO:'+
-					   featurecvterms[j].accession+'</a>'+aspect+'; '+featurecvterms[j].cvterm+'; ');
+					   featurecvterms[j].accession+'</a>'+aspect+'; '+featurecvterms[j].name+'; ');
 			   showFeatureProps(featurecvterms[j], featureSelected, "DISP_CV");
 			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected, "DISP_CV");
 			   showFeaturePubs(featurecvterms[j].pubs, featureSelected, "DISP_CV");
@@ -64,7 +63,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
     for(var i=0; i<featureCvTerms.length; i++) {	
 		var featurecvterms = featureCvTerms[i].terms;
 		for(var j=0; j<featurecvterms.length; j++) {
-		   var cvName = featurecvterms[j].cv;
+		   var cvName = featurecvterms[j].cv.name;
 		   if(cvName == 'genedb_products')
 			   continue;
 		   
@@ -96,7 +95,7 @@ function showFeatureProps(featurecvterm, featureSelected, prefix) {
 	var featureCvTermProps = featurecvterm.props;
 	for(var k=0; k<featureCvTermProps.length; k++) {
 		   $("div#"+prefix+escapeId(featureSelected)).append(
-				   featureCvTermProps[k].proptype+"="+featureCvTermProps[k].prop+"; ");
+				   featureCvTermProps[k].type.cv.name+"="+featureCvTermProps[k].value+"; ");
 	}	
 }
 
