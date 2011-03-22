@@ -3,7 +3,7 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 5;
+var serviceType = 6;
 var serviceTypeBam = -1;
 
 var webService = [ "http://127.0.0.1:8080/",
@@ -12,7 +12,7 @@ var webService = [ "http://127.0.0.1:8080/",
                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
                    "http://t81-omixed.internal.sanger.ac.uk:7000", // jython pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:8080/crawl/",  // java tomcat
-                   "http://www.genedb.org/testservice",
+                   "http://www.genedb.org/services",
                    "http://127.0.0.1:6666"]; 
 var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
