@@ -38,8 +38,8 @@ function removeBamObj(bamId) {
 }
 
 var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
-	var coverage = returned.response.coverage;
-	var max = returned.response.max;
+	var coverage = returned.response.results.coverage.data;
+	var max = returned.response.results.coverage.max;
 
 	if(max == 0) {
 		$("#bam"+options.bamId).drawLine(0, maxBamHgt-1, displayWidth, maxBamHgt-1,
@@ -64,7 +64,7 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 
 var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
 	var thisBam = getBamObj(options.bamId);
-	thisBam.samRecords = returned.response.records;
+	thisBam.samRecords = returned.response.results.query.records;
 	drawReadDisplay(fDisplay, thisBam);
 }
 
@@ -80,7 +80,7 @@ function drawReadDisplay(fDisplay, thisBam) {
 
 var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
     $("#bam"+options.bamId).html('');
-	var samSeqs  = returned.response.sequences;	
+	var samSeqs  = returned.response.results.sequences;	
 	var sequenceName = samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
 	var thisBam = getBamObj(options.bamId);
 	

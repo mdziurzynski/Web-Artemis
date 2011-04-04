@@ -2302,7 +2302,7 @@ function setBamMenu(fDisplay) {
 	var serviceName = '/sams/listfororganism.json?';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 		
-		var bamFiles = returned.response.files;
+		var bamFiles = returned.response.results.files;
 		$('#bamFiles').html('<a href="#ab">BAM</a>');
 		
 		var bamStr = '<ul>';
