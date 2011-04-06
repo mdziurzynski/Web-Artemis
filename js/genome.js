@@ -1127,7 +1127,7 @@ function drawFeatures(fDisplay) {
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:fDisplay.srcFeature, 
 		      start:fDisplay.leftBase, end:end, 
-		      exclude:excludes }, 
+		      types:excludes }, 
 		      fDisplay, { append:false, minDisplay:fDisplay.minimumDisplay, startTime:currentTime, track:'track1' });
 }
 
