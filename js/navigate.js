@@ -65,7 +65,7 @@ function navigate(fDisplay) {
      		handleAjaxCalling('/features/withproperty.json?', 
      				function (fDisplay, returned, options) {
 
-     			var features = returned.response.features;
+     			var features = returned.response.results.features;
      			if(features.length == 0) {
      				alert('No matches.');
      				return;
@@ -76,8 +76,8 @@ function navigate(fDisplay) {
      			for(var i=0; i<features.length; i++) {
      				var f = features[i];
      				l = l + '<a href="javascript:void(0)" onclick="centerOnFeatureByDisplayIndex('+
-     					fDisplay.index+',\''+f.feature+'\');">'+
-     		        	f.feature+"</a> "+f.term+'='+f.value+'<br />';
+     					fDisplay.index+',\''+f.uniqueName+'\');">'+
+     		        	f.uniqueName+"</a> "+f.properties[0].type.name+'='+f.properties[0].value+'<br />';
      			}
      			setSearchResultWindow(l);
      		 }, inputObj, fDisplay, { 'goDialog':$(this) });
@@ -89,7 +89,7 @@ function navigate(fDisplay) {
      		
      		handleAjaxCalling('/features/withterm.json?', 
      				function (fDisplay, returned, options) {
-     			var features = returned.response.features;
+     			var features = returned.response.results.features;
      			if(features.length == 0) {
      				alert('No matches.');
      				return;
@@ -99,9 +99,10 @@ function navigate(fDisplay) {
      			var l = '';
      			for(var i=0; i<features.length; i++) {
      				var f = features[i];
+     				debugLog(f);
      				l = l + '<a href="javascript:void(0)" onclick="centerOnFeatureByDisplayIndex('+
-     					fDisplay.index+',\''+f.feature+'\');">'+
-     		        	f.feature+"</a> "+f.term+' ('+f.cv+')<br />';
+     					fDisplay.index+',\''+f.uniqueName+'\');">'+
+     		        	f.uniqueName+"</a> "+f.terms[0].name+' ('+f.terms[0].cv.name+')<br />';
      			}
      			setSearchResultWindow(l);
      		 }, inputObj, fDisplay, { 'goDialog':$(this) });
