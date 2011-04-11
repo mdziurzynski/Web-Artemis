@@ -1127,7 +1127,8 @@ function drawFeatures(fDisplay) {
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:fDisplay.srcFeature, 
 		      start:fDisplay.leftBase, end:end, 
-		      types:excludes }, 
+		      types:excludes,
+		      exclude: true}, 
 		      fDisplay, { append:false, minDisplay:fDisplay.minimumDisplay, startTime:currentTime, track:'track1' });
 }
 
@@ -1481,17 +1482,17 @@ function centerOnFeature(fDisplay, event, featureSelected, region) {
 	
 	var serviceName = '/features/coordinates.json';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-			var coords = returned.response.coordinates[0];
+			var coords = returned.response.results.features[0];
 			if(coords == undefined) {
 				alert(featureSelected+" not found.");
 				return;
 			}
-			var base = coords.regions[0].fmin-Math.round(fDisplay.basesDisplayWidth/2);
+			var base = coords.coordinates[0].fmin-Math.round(fDisplay.basesDisplayWidth/2);
 			
 			if(base < 1)
 				base = 1;
 			
-			fDisplay.srcFeature = coords.regions[0].region;
+			fDisplay.srcFeature = coords.coordinates[0].region;
 			fDisplay.leftBase = base;
 			fDisplay.firstTime = true;
 			returnedSequence = undefined;
