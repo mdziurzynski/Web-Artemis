@@ -80,7 +80,7 @@ function showFeatureCvTerm(featureCvTerms, featureSelected) {
 				   "<br /><strong>Controlled Curation : </strong><br />");
 			   }
 			   $("div#DISP_CV"+escapeId(featureSelected)).append(
-				   cvName+"="+featurecvterms[j].cvterm+'; ');
+				   cvName+"="+featurecvterms[j].name+'; ');
 
 			   showFeatureProps(featurecvterms[j], featureSelected, "DISP_CV");
 			   showFeatureDbXRefs(featurecvterms[j].dbxrefs, featureSelected, "DISP_CV");
