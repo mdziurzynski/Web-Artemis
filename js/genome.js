@@ -1665,7 +1665,7 @@ var aFeatureCvTerms = function ajaxGetFeatureCvTerms(fDisplay, returned, options
 };
 
 var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
-	var orthologues = returned.response.features;
+	var orthologues = returned.response.results.features;
 	var midDisplay = fDisplay.basesDisplayWidth/2;
 	
 	if(!orthologues || orthologues.length == 0)
@@ -1679,46 +1679,47 @@ var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
 		var featureOrthologues = orthologues[i].orthologues;
 		for(var j=0; j<featureOrthologues.length; j++) {
 			   
-		   if(featureOrthologues[j].orthotype == 'polypeptide') {
+		   if(featureOrthologues[j].orthologyType == 'polypeptide') {
 			   
 			 if(count == 0)
 				$("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   "<br /><strong>Orthologues : </strong><br />");
 				
 			 count++;
-		     var featureOrthologue = featureOrthologues[j].ortho;
+		     var featureOrthologue = featureOrthologues[j].uniqueName;
 		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   featureOrthologue+'\','+midDisplay+');">'+
 				   featureOrthologue+"</a> ("+featureOrthologues[j].orthoproduct+")<br />");
 		   } else {
-			 clusters.push(featureOrthologues[j].ortho);
+			 clusters.push(featureOrthologues[j].uniqueName);
 		   }
 		}
 	}
 	
 	var serviceName = '/features/clusters.json?';
 	handleAjaxCalling(serviceName, aCluster,
-		'orthologues='+clusters, 
+		'features='+clusters, 
 		fDisplay, {featureSelected: featureSelected});
 };
 
 var aCluster = function ajaxGetClusters(fDisplay, returned, options) {
-	var clusters = returned.response.clusters;
+	var clusters = returned.response.results.features;
 	var midDisplay = fDisplay.basesDisplayWidth/2;
 	
 	if(!clusters || clusters.length == 0)
 		return;
 	
+	debugLog(clusters);
 	var featureSelected = options.featureSelected;
 	$("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 			   "<br /><strong>Clusters : </strong><br />");
 	for(var i=0; i<clusters.length; i++) {	
-		var featureCluster = clusters[i].cluster;
+		var featureCluster = clusters[i].orthologues;
 		for(var j=0; j<featureCluster.length; j++) {
 			   
-		   if(featureCluster[j].subject_type == 'polypeptide') {
-		     var subject = featureCluster[j].subject;
+		   if(featureCluster[j].type.name == 'polypeptide') {
+		     var subject = featureCluster[j].uniqueName;
 		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   subject+'\','+midDisplay+');">'+
