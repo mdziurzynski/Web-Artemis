@@ -3,10 +3,10 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 6;
-var serviceTypeBam = -1;
+var serviceType = 0;
+var serviceTypeBam = 0;
 
-var webService = [ "http://127.0.0.1:8080/",
+var webService = [ "http://127.0.0.1:8080/snapshot-services",
                    "http://t81-omixed.internal.sanger.ac.uk:8080/snapshot-services", // public ro snapshot
                    "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
@@ -1995,9 +1995,11 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel, trackName) {
 	    var exon = exons[k];
 
 		var phase = 0;
-		if(exon.phase != "None") {
-		   phase = exon.phase;
-	    } 
+		if ("phase" in exon) {
+		    if(exon.phase != ".") {
+    		   phase = exon.phase;
+    	    }
+		}
 
 		if(fDisplay.oneLinePerEntry) {
 			ypos = getFeatureTrackPosition(fDisplay, exon, trackName);
@@ -2226,9 +2228,12 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 
 	if(!options.asDNA) {
 		var phase = 0;
-		if(coords[0].regions[0].phase != "None") {
-		   phase = coords[0].regions[0].phase;
-	    }
+		var coordinate = coords[0].regions[0];
+		if ("phase" in coordinate) {
+		    if(coordinate.phase != ".") {
+    		   phase = coordinate.phase;
+    	    }
+		}
 		sequence = getTranslation(sequence, phase);
 	}
 	
