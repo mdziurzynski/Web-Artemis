@@ -86,7 +86,7 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 		  nrows++;
 		} else if(exonMap[feature.parent] != undefined) {
 		  appendExonsToList(exonMap[feature.parent]);
-		  exonMap[feature.part_of] = undefined;
+		  exonMap[feature.parent] = undefined;
 		  nrows++;
 		}
 	}
