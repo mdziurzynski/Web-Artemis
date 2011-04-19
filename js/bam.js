@@ -133,8 +133,8 @@ function drawStack(fDisplay, thisBam) {
 			
 			if(thisFlags & 0x0002) {
 				colour = '#0000FF';
-			} else if(properPair && !(thisFlags & 0x0002)) {
-				continue;
+			} else {
+				colour = '#000000';
 			}
 			if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt) {
 				ypos=maxBamHgt-1;
