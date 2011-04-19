@@ -81,7 +81,7 @@ function drawReadDisplay(fDisplay, thisBam) {
 var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
     $("#bam"+options.bamId).html('');
 	var samSeqs  = returned.response.results.sequences;	
-	var sequenceName = samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
+	var sequenceName = fDisplay.srcFeature;  //samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
 	var thisBam = getBamObj(options.bamId);
 	
 	var start = fDisplay.leftBase;
