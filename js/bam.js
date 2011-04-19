@@ -88,7 +88,7 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 	var end = parseInt(start) + parseInt(fDisplay.basesDisplayWidth);
 	
 	if(fDisplay.basesDisplayWidth > 4000) {
-		var window = Math.round(fDisplay.basesDisplayWidth/100);
+		var window = Math.round(fDisplay.basesDisplayWidth/400);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
 			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window/*, filter:thisBam.flag*/ }, fDisplay, { window:window, bamId:options.bamId });
