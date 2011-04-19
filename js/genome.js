@@ -6,7 +6,7 @@
 var serviceType = 0;
 var serviceTypeBam = 0;
 
-var webService = [ "http://127.0.0.1:8080/snapshot-services",
+var webService = [ "http://127.0.01:8080/services/",
                    "http://t81-omixed.internal.sanger.ac.uk:8080/snapshot-services", // public ro snapshot
                    "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
@@ -2306,7 +2306,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 function setBamMenu(fDisplay) {
 	if(serviceTypeBam < 0)
 		return;
-	var serviceName = '/sams/listfororganism.json?';
+	var serviceName = '/sams/listforsequence.json?';
 	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
 		
 		var bamFiles = returned.response.results.files;
@@ -2327,7 +2327,7 @@ function setBamMenu(fDisplay) {
 		// increase menu width
 		$('#bamFiles').find('li').css('width', '20em');
 	},
-	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
+	{ sequence:fDisplay.srcFeature }, fDisplay, { });
 }
 
 
