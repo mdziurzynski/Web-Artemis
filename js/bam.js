@@ -95,7 +95,7 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
 	} else {
 		serviceName = '/sams/query.json?';
 		handleAjaxCalling(serviceName, aSamCall,
-			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, filter:thisBam.flag }, fDisplay, { bamId:options.bamId });
+			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, filter:thisBam.flag, properties:['alignmentBlocks', 'readName', 'flags'] }, fDisplay, { bamId:options.bamId });
 	}
 };
 
@@ -103,8 +103,6 @@ function drawStack(fDisplay, thisBam) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	
-	var alignmentEnd   = thisBam.samRecords.alignmentEnd;
-	var alignmentStart = thisBam.samRecords.alignmentStart;
 	var name  = thisBam.samRecords.readName;
 	var flags = thisBam.samRecords.flags;
 	var ypos  = maxBamHgt-1;
@@ -113,14 +111,17 @@ function drawStack(fDisplay, thisBam) {
     var lastStart = -1;
     var lastEnd   = -1; 
     var properPair = true;
-    
+   
     var colour = '#000000';
-	for(var i=0; i<thisBam.samRecords.alignmentStart.length; i++ ) {
-		var thisStart = alignmentStart[i]-fDisplay.leftBase;
-		var thisEnd   = alignmentEnd[i]-fDisplay.leftBase;
+    
+	for(var i=0; i<thisBam.samRecords.alignmentBlocks.length; i++ ) {
 		var thisName  = name[i];
 		var thisFlags = flags[i];
-		
+
+		var lastIdx = thisBam.samRecords.alignmentBlocks[i].length-1;
+		var thisStart = thisBam.samRecords.alignmentBlocks[i][0].referenceStart-fDisplay.leftBase;
+		var thisEnd   = thisBam.samRecords.alignmentBlocks[i][lastIdx].length+thisStart-1;
+
 		if(lastStart == thisStart && lastEnd == thisEnd) {
 			if(colour == '#32cd32') {
 				// already drawn
@@ -128,23 +129,34 @@ function drawStack(fDisplay, thisBam) {
 			}
 			colour = '#32cd32';
 		} else {
-			lastStart = thisStart;
-			lastEnd   = thisEnd;
-			
 			if(thisFlags & 0x0002) {
 				colour = '#0000FF';
 			} else {
 				colour = '#000000';
 			}
-			if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt) {
-				ypos=maxBamHgt-1;
-				lastEndAtZero = thisEnd;
-			} else {
-				ypos=ypos-step;
-			}
 		}
+
+		var blockEnd;
+		var lastBlockEnd = -1;
+		for(var j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
+			var blockStart = thisBam.samRecords.alignmentBlocks[i][j].referenceStart-fDisplay.leftBase;
+			blockEnd   = thisBam.samRecords.alignmentBlocks[i][j].length+blockStart-1;	
+			drawRead(blockStart, blockEnd, colour, ypos, basePerPixel, thisBam, i);
 			
-		drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, i);
+			if(lastBlockEnd > -1) {
+				drawRead(lastBlockEnd, blockStart, '#FFFFFF', ypos, basePerPixel, thisBam, i);
+			}
+			lastBlockEnd = blockEnd;
+		}
+		
+		lastStart = thisStart;
+		lastEnd   = blockEnd;
+		if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt) {
+			ypos=maxBamHgt-1;
+			lastEndAtZero = blockEnd;
+		} else {
+			ypos=ypos-step;
+		}
 	}	
 }
 
@@ -162,10 +174,9 @@ function drawStrandView(fDisplay, thisBam) {
 function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midPt) {
 	var samRecords = thisBam.samRecords;
 	var bamId = thisBam.bamId;
-	var alignmentEnd   = samRecords.alignmentEnd;
-	var alignmentStart = samRecords.alignmentStart;
-	var name  = samRecords.readName;
-	var flags = samRecords.flags;
+	
+	var name  = thisBam.samRecords.readName;
+	var flags = thisBam.samRecords.flags;
 
 	var ypos  = midPt+thisStep;
     var lastEndAtZero = -100;
@@ -173,19 +184,18 @@ function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midP
     var lastEnd   = -1; 
     
     var colour = '#000000';
-	for(var i=0; i<samRecords.alignmentStart.length; i++ ) {
+    
+    for(var i=0; i<thisBam.samRecords.alignmentBlocks.length; i++ ) {
 		if( (!isNegStrand && !(samRecords.flags[i] & 0x0010)) || //reverse strand
 		    ( isNegStrand &&   samRecords.flags[i] & 0x0010) ) 
 			continue;
 		
-		var thisStart = alignmentStart[i]-fDisplay.leftBase;
-		var thisEnd   = alignmentEnd[i]-fDisplay.leftBase;
 		var thisName  = name[i];
 		var thisFlags = flags[i];
-		
-		if(thisFlags & 0x0004) { // unmapped
-			continue;
-		}
+
+		var lastIdx = thisBam.samRecords.alignmentBlocks[i].length-1;
+		var thisStart = thisBam.samRecords.alignmentBlocks[i][0].referenceStart-fDisplay.leftBase;
+		var thisEnd   = thisBam.samRecords.alignmentBlocks[i][lastIdx].length+thisStart-1;
 		
 		if(lastStart == thisStart && lastEnd == thisEnd) {
 			if(colour == '#32cd32') {
@@ -194,25 +204,34 @@ function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midP
 			}
 			colour = '#32cd32';
 		} else {
-			lastStart = thisStart;
-			lastEnd   = thisEnd;
-			
-			if(thisFlags & 0x0002) {        // read mapped in proper pair
+			if(thisFlags & 0x0002) {
 				colour = '#0000FF';
 			} else {
 				colour = '#000000';
 			}
-
-			if(thisStart > lastEndAtZero+1 || (maxBamHgt-ypos) > maxBamHgt ||
-					(maxBamHgt-ypos) < 10) {
-				ypos = midPt+thisStep;
-				lastEndAtZero = thisEnd;
-			} else {
-				ypos=ypos+thisStep;
-			}
 		}
+
+		var blockEnd;
+		var lastBlockEnd = -1;
+		for(var j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
+			var blockStart = thisBam.samRecords.alignmentBlocks[i][j].referenceStart-fDisplay.leftBase;
+			blockEnd   = thisBam.samRecords.alignmentBlocks[i][j].length+blockStart-1;	
+			drawRead(blockStart, blockEnd, colour, ypos, basePerPixel, thisBam, i);
 			
-		drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, i);
+			if(lastBlockEnd > -1) {
+				drawRead(lastBlockEnd, blockStart, '#FFFFFF', ypos, basePerPixel, thisBam, i);
+			}
+			lastBlockEnd = blockEnd;
+		}
+
+		lastStart = thisStart;
+		lastEnd   = blockEnd;
+		if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt) {
+			ypos = midPt+thisStep;
+			lastEndAtZero = blockEnd;
+		} else {
+			ypos=ypos+thisStep;
+		}
 	}	
 }
 
@@ -319,13 +338,17 @@ function adjustHeight(fDisplay, hgt) {
 
 function showPopupBam(thisBam, event) {
 	var msg = thisBam.samRecords.readName[thisBam.idx[0]]+"<br />";
-	msg += "<table><tr><td>Position</td><td>"+
-	 	   thisBam.samRecords.alignmentStart[thisBam.idx[0]]+".."+
-	       thisBam.samRecords.alignmentEnd[thisBam.idx[0]]+"</td></tr>";
-	if(thisBam.idx.length > 1)
-		msg += "<tr><td>Mate Position</td><td>"+
-		       thisBam.samRecords.alignmentStart[thisBam.idx[1]]+".."+
-	       	   thisBam.samRecords.alignmentEnd[thisBam.idx[1]]+"</td></tr>";
+	
+	var lastIdx = thisBam.samRecords.alignmentBlocks[i].length-1;
+	var thisStart = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]][0].referenceStart;
+	var thisEnd   = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]][lastIdx].length+thisStart-1;
+	
+	msg += "<table><tr><td>Position</td><td>"+thisStart+".."+thisEnd+"</td></tr>";
+	if(thisBam.idx.length > 1) {
+		thisStart = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]][0].referenceStart;
+		thisEnd   = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]][lastIdx].length+thisStart-1;
+		msg += "<tr><td>Mate Position</td><td>"+thisStart+".."+thisEnd+"</td></tr>";
+	}
 	msg += "</table>";
 	
 	msg += printFlagHTML(thisBam.samRecords.flags[thisBam.idx[0]]);
