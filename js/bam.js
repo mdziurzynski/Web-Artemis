@@ -37,9 +37,9 @@ function removeBamObj(bamId) {
 	bamObjs = tmp;
 }
 
-var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
-	var coverage = returned.response.results.coverage.data;
-	var max = returned.response.results.coverage.max;
+var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returnedCoverage, options) {
+	var coverage = returnedCoverage.data;
+	var max = returnedCoverage.max;
 
 	if(max == 0) {
 		$("#bam"+options.bamId).drawLine(0, maxBamHgt-1, displayWidth, maxBamHgt-1,
@@ -62,9 +62,9 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returned, options) {
 	$('body').css('cursor','default');
 };
 
-var aSamCall = function ajaxGetSamRecords(fDisplay, returned, options) {
+var aSamCall = function ajaxGetSamRecords(fDisplay, query, options) {
 	var thisBam = getBamObj(options.bamId);
-	thisBam.samRecords = returned.response.results.query.records;
+    thisBam.samRecords = query.records;
 	drawReadDisplay(fDisplay, thisBam);
 }
 
@@ -78,9 +78,9 @@ function drawReadDisplay(fDisplay, thisBam) {
 	$('body').css('cursor','default');
 };
 
-var aSamSeqs = function ajaxGetSamSeqs(fDisplay, returned, options) {
+var aSamSeqs = function ajaxGetSamSeqs(fDisplay, samSeqs, options) {
     $("#bam"+options.bamId).html('');
-	var samSeqs  = returned.response.results.sequences;	
+	
 	var sequenceName = fDisplay.srcFeature;  //samSeqs[0].name.replace(/(\|\.)/g,'\\$1');
 	var thisBam = getBamObj(options.bamId);
 	
@@ -113,7 +113,7 @@ function drawStack(fDisplay, thisBam) {
     var properPair = true;
    
     var colour = '#000000';
-    
+    console.log(thisBam);
 	for(var i=0; i<thisBam.samRecords.alignmentBlocks.length; i++ ) {
 		var thisName  = name[i];
 		var thisFlags = flags[i];
