@@ -3,10 +3,10 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 6;
-var serviceTypeBam = -1;
+var serviceType = 0;
+var serviceTypeBam = 0;
 
-var webService = [ "http://127.0.0.1:8080/",
+var webService = [ "http://127.0.01:8080/services/",
                    "http://t81-omixed.internal.sanger.ac.uk:8080/snapshot-services", // public ro snapshot
                    "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
@@ -1127,7 +1127,8 @@ function drawFeatures(fDisplay) {
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:fDisplay.srcFeature, 
 		      start:fDisplay.leftBase, end:end, 
-		      exclude:excludes }, 
+		      types:excludes,
+		      exclude: true}, 
 		      fDisplay, { append:false, minDisplay:fDisplay.minimumDisplay, startTime:currentTime, track:'track1' });
 }
 
@@ -1352,8 +1353,8 @@ function getOrganismList(fDisplay) {
 
 function setTranslation(fDisplay, organism_id) {
 	var serviceName = '/organisms/list.json';
-	handleAjaxCalling(serviceName, function(fDisplay, returned, options) { 
-		var organisms  = returned.response.results.organisms;
+	handleAjaxCalling(serviceName, function(fDisplay, organisms, options) { 
+        
 		for(var i=0; i<organisms.length; i++) {
 			if(organism_id == organisms[i].organism_id)
 				setTranslationTable(organisms[i].translation_table);
@@ -1480,18 +1481,18 @@ function centerOnFeature(fDisplay, event, featureSelected, region) {
 	}
 	
 	var serviceName = '/features/coordinates.json';
-	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
-			var coords = returned.response.coordinates[0];
+	handleAjaxCalling(serviceName, function (fDisplay, features, options) {
+			var coords = features[0];
 			if(coords == undefined) {
 				alert(featureSelected+" not found.");
 				return;
 			}
-			var base = coords.regions[0].fmin-Math.round(fDisplay.basesDisplayWidth/2);
+			var base = coords.coordinates[0].fmin-Math.round(fDisplay.basesDisplayWidth/2);
 			
 			if(base < 1)
 				base = 1;
 			
-			fDisplay.srcFeature = coords.regions[0].region;
+			fDisplay.srcFeature = coords.coordinates[0].region;
 			fDisplay.leftBase = base;
 			fDisplay.firstTime = true;
 			returnedSequence = undefined;
@@ -1505,8 +1506,8 @@ function centerOnFeature(fDisplay, event, featureSelected, region) {
 // AJAX functions
 //
 
-var aShowProperties = function showProperties(fDisplay, returned, options) {
-    var features = returned.response.results.hierarchy;
+var aShowProperties = function showProperties(fDisplay, features, options) {
+    
     
     var featureSelected = options.featureSelected; 
     var featureStr = "&features="+options.featureSelected;
@@ -1589,11 +1590,11 @@ var aShowProperties = function showProperties(fDisplay, returned, options) {
 		width:550, position: 'top', title:name, show:'fast',  close: function(event, ui) { $(this).remove(); } });
 }
 
-var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
+var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, srcFeatures, options) {
 	$('#srcFeatureSelector').html('<select id="srcFeatureList"></select>');
 	$('#srcFeatureList').append('<option value="Sequence:">Sequence:</option>');
 	
-	var srcFeatures  = returned.response.results.regions;
+	
 	for(var j=0; j<srcFeatures.length; j++) {
 		var feat = srcFeatures[j];
 		if(feat)
@@ -1618,8 +1619,8 @@ var aSrcFeature = function ajaxGetSrcFeatures(fDisplay, returned, options) {
 	$('body').css('cursor','default');
 };
 
-var aOrganism = function ajaxGetOrganisms(fDisplay, returned, options) {
-	var organisms  = returned.response.results.organisms;
+var aOrganism = function ajaxGetOrganisms(fDisplay, organisms, options) {
+    
 	$('#organismSelector').html('<select id="organismList"></select>');
 	$('#organismList').append('<option value="Organism:">Organism:</option>');
 	for(var i=0; i<organisms.length; i++) {
@@ -1659,12 +1660,12 @@ function positionLists() {
 			margin+margin+displayWidth-srcFeatureWidth+'px');
 }
 
-var aFeatureCvTerms = function ajaxGetFeatureCvTerms(fDisplay, returned, options) {
-	showFeatureCvTerm(returned.response.results.features, options.featureSelected);
+var aFeatureCvTerms = function ajaxGetFeatureCvTerms(fDisplay, features, options) {
+	showFeatureCvTerm(features, options.featureSelected);
 };
 
-var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
-	var orthologues = returned.response.features;
+var aOrthologues = function ajaxGetOrthologues(fDisplay, orthologues, options) {
+    
 	var midDisplay = fDisplay.basesDisplayWidth/2;
 	
 	if(!orthologues || orthologues.length == 0)
@@ -1678,46 +1679,47 @@ var aOrthologues = function ajaxGetOrthologues(fDisplay, returned, options) {
 		var featureOrthologues = orthologues[i].orthologues;
 		for(var j=0; j<featureOrthologues.length; j++) {
 			   
-		   if(featureOrthologues[j].orthotype == 'polypeptide') {
+		   if(featureOrthologues[j].orthologyType == 'polypeptide') {
 			   
 			 if(count == 0)
 				$("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   "<br /><strong>Orthologues : </strong><br />");
 				
 			 count++;
-		     var featureOrthologue = featureOrthologues[j].ortho;
+		     var featureOrthologue = featureOrthologues[j].uniqueName;
 		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   featureOrthologue+'\','+midDisplay+');">'+
 				   featureOrthologue+"</a> ("+featureOrthologues[j].orthoproduct+")<br />");
 		   } else {
-			 clusters.push(featureOrthologues[j].ortho);
+			 clusters.push(featureOrthologues[j].uniqueName);
 		   }
 		}
 	}
 	
 	var serviceName = '/features/clusters.json?';
 	handleAjaxCalling(serviceName, aCluster,
-		'orthologues='+clusters, 
+		'features='+clusters, 
 		fDisplay, {featureSelected: featureSelected});
 };
 
-var aCluster = function ajaxGetClusters(fDisplay, returned, options) {
-	var clusters = returned.response.clusters;
+var aCluster = function ajaxGetClusters(fDisplay, clusters, options) {
+    
 	var midDisplay = fDisplay.basesDisplayWidth/2;
 	
 	if(!clusters || clusters.length == 0)
 		return;
 	
+	debugLog(clusters);
 	var featureSelected = options.featureSelected;
 	$("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 			   "<br /><strong>Clusters : </strong><br />");
 	for(var i=0; i<clusters.length; i++) {	
-		var featureCluster = clusters[i].cluster;
+		var featureCluster = clusters[i].orthologues;
 		for(var j=0; j<featureCluster.length; j++) {
 			   
-		   if(featureCluster[j].subject_type == 'polypeptide') {
-		     var subject = featureCluster[j].subject;
+		   if(featureCluster[j].type.name == 'polypeptide') {
+		     var subject = featureCluster[j].uniqueName;
 		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   subject+'\','+midDisplay+');">'+
@@ -1740,10 +1742,10 @@ function openMe(gene, midDisplay) {
 }
 
 var propertyFilter = [ 'fasta_file', 'blastp_file', 'blastp+go_file', 'private', 'pepstats_file' ];
-var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
+var aFeatureProps = function ajaxGetFeatureProps(fDisplay, featProps, options) {
 	
 	var featureSelected = options.featureSelected;
-	var featProps  = returned.response.results.features;
+    
 	if(!featProps || featProps.length == 0)
 		return;
 	
@@ -1768,9 +1770,9 @@ var aFeatureProps = function ajaxGetFeatureProps(fDisplay, returned, options) {
     $("div#DISP_PROP"+escapeId(featureSelected)).append("<br />");
 };
 
-var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options) {
+var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, featSyns, options) {
 	var featureSelected = options.featureSelected;
-	var featSyns  = returned.response.results.features;
+    
 	if(!featSyns || featSyns.length == 0)
 		return;
 	
@@ -1792,9 +1794,9 @@ var aFeatureSynonyms = function ajaxGetFeatureProps(fDisplay, returned, options)
 	$("div#DISP_SYN"+escapeId(featureSelected)).append("<br /><br />");
 };
 
-var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, returned, options) {
+var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, featPubs, options) {
 	var featureSelected = options.featureSelected;
-	var featPubs  = returned.response.features;
+    
 	if(!featPubs || featPubs.length == 0)
 		return;
 	
@@ -1810,9 +1812,9 @@ var aFeaturePubs = function ajaxGetFeaturePubs(fDisplay, returned, options) {
 };
 
 
-var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(fDisplay, returned, options) {
+var aFeatureDbXRefs = function ajaxGetFeatureDbXRefs(fDisplay, featDbXRefs, options) {
 	var featureSelected = options.featureSelected;
-	var featDbXRefs  = returned.response.features;
+    
 	if(!featDbXRefs || featDbXRefs.length == 0)
 		return;
 	
@@ -1834,8 +1836,8 @@ function containsString(anArray, aStr) {
 	return false;
 }
 
-var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, returned, options) {
-	var featProps  = returned.response.results.features;
+var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, featProps, options) {
+	
 	for(var i=0; i<featProps.length; i++) {	
 		var featureprops = featProps[i].properties;
 		for(var j=0; j<featureprops.length; j++) {
@@ -1854,8 +1856,8 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, returned,
 	}
 };
 
-var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, returned, options) {
-	var features  = returned.response.results.locations;
+var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, options) {
+    
 	var nfeatures = features.length;
 
 	debugLog("No. of features "+ nfeatures+"  "+fDisplay.leftBase+".."+
@@ -1993,9 +1995,11 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel, trackName) {
 	    var exon = exons[k];
 
 		var phase = 0;
-		if(exon.phase != "None") {
-		   phase = exon.phase;
-	    } 
+		if ("phase" in exon) {
+		    if(exon.phase != ".") {
+    		   phase = exon.phase;
+    	    }
+		}
 
 		if(fDisplay.oneLinePerEntry) {
 			ypos = getFeatureTrackPosition(fDisplay, exon, trackName);
@@ -2224,9 +2228,12 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 
 	if(!options.asDNA) {
 		var phase = 0;
-		if(coords[0].regions[0].phase != "None") {
-		   phase = coords[0].regions[0].phase;
-	    }
+		var coordinate = coords[0].regions[0];
+		if ("phase" in coordinate) {
+		    if(coordinate.phase != ".") {
+    		   phase = coordinate.phase;
+    	    }
+		}
 		sequence = getTranslation(sequence, phase);
 	}
 	
@@ -2244,7 +2251,7 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
 var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	//sequence = returned.response.sequence[0].dna.replace(/\r|\n|\r\n/g,"").toUpperCase();
 	//console.time('draw all');
-	var seq = returned.response.results.sequences[0];
+	var seq = returned[0];
 	fDisplay.sequenceLength = seq.length;
 	var start = seq.start;
 	
@@ -2299,10 +2306,10 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 function setBamMenu(fDisplay) {
 	if(serviceTypeBam < 0)
 		return;
-	var serviceName = '/sams/listfororganism.json?';
-	handleAjaxCalling(serviceName, function (fDisplay, returned, options) {
+	var serviceName = '/sams/listforsequence.json?';
+	handleAjaxCalling(serviceName, function (fDisplay, bamFiles, options) {
 		
-		var bamFiles = returned.response.results.files;
+        
 		$('#bamFiles').html('<a href="#ab">BAM</a>');
 		
 		var bamStr = '<ul>';
@@ -2320,7 +2327,7 @@ function setBamMenu(fDisplay) {
 		// increase menu width
 		$('#bamFiles').find('li').css('width', '20em');
 	},
-	{ organism:'org:'+fDisplay.organism_id }, fDisplay, { });
+	{ sequence:fDisplay.srcFeature }, fDisplay, { });
 }
 
 
