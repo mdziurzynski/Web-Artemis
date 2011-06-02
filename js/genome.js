@@ -2427,13 +2427,14 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 var methods = {
 	init : function(options) {
 		$(this).append();
-		$(this).load("js/WebArtemis.inc", function(){
+		$(this).load(options.directory+"/js/WebArtemis.inc", function(){
 			//set the default values for the options
 			var settings = $.extend({
 				bases : 16000,
 				start : 1,
 				showFeatureList : true,
-				source : 'Pf3D7_01'
+				source : 'Pf3D7_01',
+				width : $(window).width() // browser viewport width
 			}, options);
 
 			var arr = getUrlVars();
@@ -2446,14 +2447,12 @@ var methods = {
 					leftBase = 1;
 			}
 		
-			var width = parseInt(arr["width"]);	
+			var width = arr["width"];
 			if(!width) {
-				displayWidth = parseInt(settings.width);
-			} else {
-				width = $(window).width();   // browser viewport width
-				displayWidth = width - (margin*12);
+				width = settings.width
 			}
-	    
+			displayWidth = parseInt(width) - (margin*12);
+			
 			var basesDisplayWidth = arr["bases"];
 			if(!basesDisplayWidth) {
 				basesDisplayWidth = settings.bases;
