@@ -2446,9 +2446,9 @@ var methods = {
 					leftBase = 1;
 			}
 		
-			var width = arr["width"];	
-			if(width) {
-				displayWidth = parseInt(width);
+			var width = parseInt(arr["width"]);	
+			if(!width) {
+				displayWidth = parseInt(settings.width);
 			} else {
 				width = $(window).width();   // browser viewport width
 				displayWidth = width - (margin*12);
