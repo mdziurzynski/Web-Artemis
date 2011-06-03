@@ -2,7 +2,7 @@
 	<ul class="sf-menu">
 		<li class="ui-corner-all">
 			<a class="ui-corner-all" href="#a">View</a>
-			<ul>
+			<ul id="mainMenu">
 				<li>
 					<a href="#ab">Selected Feature</a>
 					<ul>

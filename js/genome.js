@@ -68,7 +68,7 @@ var colour = [
 
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
-		                   srcFeature, frameLnHgt, leftBase, showOrganismsList) {
+		                   srcFeature, frameLnHgt, leftBase, showOrganismsList, draggable, mainMenu) {
 	count++;
 	this.index = count;
 	this.firstTime = true;
@@ -114,10 +114,16 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 
 	$('#buttons').append('<div id="plus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom in"><span class="ui-icon ui-icon-circle-plus"></span></div>');
 	$('#buttons').append('<div id="minus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom out"><span class="ui-icon ui-icon-circle-minus"></span></div>');
-
+    
+    
+    
 	$('#rightDraggableEdge').append(
 			   '<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se"></div>');
-
+	
+   if (! draggable) 
+       $('#rightDraggableEdge').hide();
+    
+    
 	var self = this;
 	adjustFeatureDisplayPosition(false, self);
 
@@ -184,7 +190,10 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	addEventHandlers(self);
 
 	// feature display menu
-	$('#menuHeader').append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:290px;">' +
+	if (! mainMenu) {
+	    $("#menuHeader").html("");
+    }
+	    $('#menuHeader').append('<ul id="fDispMenus'+this.index+'" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#editFeat" id="editFeat">Show feature properties...</a></li>'+
     		'<li><a href="#gotoGene">Find... </a></li>'+
     		'<li><a href="#excludeFeature" id="excludeFeature">Features to show/hide... </a></li>'+
@@ -194,7 +203,9 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
     		'<li><a href="#showAAOfSelected" id="aaOfFeature">Amino acids of selected features...</a></li>'+
     		'<li><a href="#hideSelected" id="hideSelectedFeature">Hide/Show seleceted features</a></li>'+
     		'</ul>');
-
+    
+    
+    
     $('#sequence'+this.index).contextMenu({menu: 'fDispMenus'+self.index}, 
     		function(action, el, pos) { rightClickMenu(action, el, pos, self) });
     $('#features'+this.index+'_'+this.trackIndex).contextMenu({menu: 'fDispMenus'+self.index}, 
@@ -202,6 +213,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 
     // graph menu   
     setGraphMenu(self);
+    
+    
 }
 
 var rightClickMenu = function(action, el, pos, self) {
@@ -2444,7 +2457,9 @@ var methods = {
 				width : $(window).width(), // browser viewport width,
 				showOrganismsList : true,
 				webService : '',
-				dataType : ''
+				dataType : '',
+				draggable : true,
+				mainMenu : true
 			}, options);
             
             if (settings.webService.length > 0) {
@@ -2523,7 +2538,7 @@ var methods = {
 				if(i.indexOf("src") > -1) {
 					title+=value+' ';
 					
-					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase, settings.showOrganismsList);
+					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu);
 					featureDisplayObjs[count - 1] = obj;
 					initialTop+=250;
 				
@@ -2538,7 +2553,7 @@ var methods = {
 
 			if(count == 0) {
 				title = settings.source;
-				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase, settings.showOrganismsList);
+				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu);
 				featureDisplayObjs[0] = obj;
 			}
 
