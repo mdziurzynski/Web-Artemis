@@ -7,7 +7,7 @@ var lastLeftBase = -1;
 
 function scroll(direction, fDisplay) {
     if (scrolling == 1) {
-    	var leftBase = $('#slider'+fDisplay.index).slider('option', 'value');
+    	var leftBase = parseInt($('#slider'+fDisplay.index).slider('option', 'value'));
             if(direction == 1) {
             	// scroll right
             	leftBase = Math.round(Math.floor(
