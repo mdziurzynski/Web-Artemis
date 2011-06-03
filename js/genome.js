@@ -16,7 +16,7 @@
 //                    "http://127.0.0.1:6666"]; 
 // var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
-var webService = "http://127.0.01:8080/services";
+var webService = "http://www.genedb.org/services/";
 var dataType = "jsonp";
 
 //
