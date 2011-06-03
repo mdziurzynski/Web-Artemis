@@ -3,18 +3,21 @@
 // 1 - javascript served from a seperate server accessed internally
 // 2 - javascript served from a seperate server accessed anywhere
 // 
-var serviceType = 0;
-var serviceTypeBam = 0;
+// var serviceType = 0;
+// var serviceTypeBam = 0;
+// 
+// var webService = [ "http://127.0.01:8080/services/",
+//                    "http://t81-omixed.internal.sanger.ac.uk:8080/snapshot-services", // public ro snapshot
+//                    "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
+//                    "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
+//                    "http://t81-omixed.internal.sanger.ac.uk:7000", // jython pathogens
+//                    "http://t81-omixed.internal.sanger.ac.uk:8080/crawl/",  // java tomcat
+//                    "http://www.genedb.org/services",
+//                    "http://127.0.0.1:6666"]; 
+// var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
-var webService = [ "http://127.0.01:8080/services/",
-                   "http://t81-omixed.internal.sanger.ac.uk:8080/snapshot-services", // public ro snapshot
-                   "http://t81-omixed.internal.sanger.ac.uk:7667", // live pathogens
-                   "http://t81-omixed.internal.sanger.ac.uk:7668", // bigtest2
-                   "http://t81-omixed.internal.sanger.ac.uk:7000", // jython pathogens
-                   "http://t81-omixed.internal.sanger.ac.uk:8080/crawl/",  // java tomcat
-                   "http://www.genedb.org/services",
-                   "http://127.0.0.1:6666"]; 
-var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
+var webService = "http://127.0.01:8080/services";
+var dataType = "jsonp";
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=1000&height=10&bases=5000
@@ -65,7 +68,7 @@ var colour = [
 
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
-		                   srcFeature, frameLnHgt, leftBase) {
+		                   srcFeature, frameLnHgt, leftBase, showOrganismsList) {
 	count++;
 	this.index = count;
 	this.firstTime = true;
@@ -91,6 +94,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.tracks.push(this.trackIndex);
 	this.showFeatureFn = new Object();
 	this.showFeatureFn[this.trackIndex] = showFeature;
+	this.showOrganismsList = showOrganismsList;
 
 	if(showBam) {
 	  this.marginTop = this.marginTop+maxBamHgt;
@@ -1346,20 +1350,23 @@ function setTickCSS(offset, number, selector) {
 
 
 function getOrganismList(fDisplay) {
-	var serviceName = '/organisms/list.json';
-	handleAjaxCalling(serviceName, aOrganism,
-			{ }, fDisplay, {});
+    if (fDisplay.showOrganismsList) {
+        var serviceName = '/organisms/list.json';
+    	handleAjaxCalling(serviceName, aOrganism,
+    			{ }, fDisplay, {});
+    }
+	
 }
 
 function setTranslation(fDisplay, organism_id) {
-	var serviceName = '/organisms/list.json';
+	var serviceName = '/organisms/getByID.json';
 	handleAjaxCalling(serviceName, function(fDisplay, organisms, options) { 
         
 		for(var i=0; i<organisms.length; i++) {
 			if(organism_id == organisms[i].organism_id)
 				setTranslationTable(organisms[i].translation_table);
 		}
-	    }, {  }, fDisplay, {  });
+	    }, { ID : organism_id }, fDisplay, {  });
 }
 
 function getSrcFeatureList(organism_id, fDisplay, translation_table){
@@ -2304,8 +2311,8 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 };
 
 function setBamMenu(fDisplay) {
-	if(serviceTypeBam < 0)
-		return;
+	// if(serviceTypeBam < 0)
+	//         return;
 	var serviceName = '/sams/listforsequence.json?';
 	handleAjaxCalling(serviceName, function (fDisplay, bamFiles, options) {
 		
@@ -2434,9 +2441,20 @@ var methods = {
 				start : 1,
 				showFeatureList : true,
 				source : 'Pf3D7_01',
-				width : $(window).width() // browser viewport width
+				width : $(window).width(), // browser viewport width,
+				showOrganismsList : true,
+				webService : '',
+				dataType : ''
 			}, options);
-
+            
+            if (settings.webService.length > 0) {
+                webService = settings.webService;
+            }
+            
+            if (settings.dataType .length > 0) {
+                dataType = settings.dataType;
+            }
+            
 			var arr = getUrlVars();
 			var leftBase = arr["base"];
 			if(!leftBase) {
@@ -2505,7 +2523,7 @@ var methods = {
 				if(i.indexOf("src") > -1) {
 					title+=value+' ';
 					
-					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase);
+					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase, settings.showOrganismsList);
 					featureDisplayObjs[count - 1] = obj;
 					initialTop+=250;
 				
@@ -2520,7 +2538,7 @@ var methods = {
 
 			if(count == 0) {
 				title = settings.source;
-				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase);
+				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase, settings.showOrganismsList);
 				featureDisplayObjs[0] = obj;
 			}
 
@@ -2557,6 +2575,9 @@ var methods = {
 		// TEST 
 	    test(start, end, isolate);
 		attachObserver(isolate);
+	},
+	addObserver : function (observer) {
+	    addArtemisObserver(observer);
 	}
 };
 

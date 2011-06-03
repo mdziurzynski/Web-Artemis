@@ -105,6 +105,7 @@ function deselectAllFeatures(fDisplay) {
 }
 
 function selectFeature(featureSelected, fDisplay) {
+    fDisplay.observers.notify('select', featureSelected);
 	if(featureSelected.match(/\d+$/g)) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
@@ -224,19 +225,14 @@ function handleAjaxCalling(serviceName, ajaxFunction, dataArray, featureDisplay,
 
 function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisplay, options, async) {
 	
-	if(serviceName.indexOf("sams") > 0 ) {
-		var jsonUrl = webService[serviceTypeBam]+serviceName;
-	} else {
-		var jsonUrl = webService[serviceType]+serviceName;
-	}
-	
+	var jsonUrl = webService + "/" +serviceName;
 	
     debugLog(serviceName+" "+jsonUrl+ " async "+async);
     
     $.ajax({
 		  url: jsonUrl,
 		  data: dataArray,
-		  dataType: dataType[serviceType],
+		  dataType: dataType,
 		  success: function(returned) {
 
     	ajaxFunction(featureDisplay, returned, options);
@@ -283,7 +279,7 @@ function debugLog(txt) {
 }
 
 function logJsonp(serviceName) {
-	if(dataType[serviceType] != "jsonp") {
+	if(dataType != "jsonp") {
 		return;
 	}
 	var $jsonScript = $('head script[src*="'+serviceName+'"]');
