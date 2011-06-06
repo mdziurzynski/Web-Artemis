@@ -16,7 +16,7 @@
 //                    "http://127.0.0.1:6666"]; 
 // var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
-var webService = "http://www.genedb.org/services/";
+var webService = "https://developer.genedb.org/services/"; //"http://www.genedb.org/services/";
 var dataType = "jsonp";
 
 //
@@ -2065,8 +2065,7 @@ function getFeatureTrackPosition(fDisplay, feature, trackName) {
 	}
 }
 
-var aComparison = function ajaxGetComparisons(featureDisplay, returned, options) {
-	var blastFeatures = returned.response.matches;
+var aComparison = function ajaxGetComparisons(featureDisplay, blastFeatures, options) {
 	var cmp = options.comparison;
 	
 	var fDisplay1 = cmp.featureDisplay1;
