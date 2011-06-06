@@ -859,7 +859,7 @@ function getSequence(fDisplay) {
 	
 	if(isZoomedIn(fDisplay)) {
 	  if(returnedSequence) {
-		  var seq = returnedSequence.response.sequence[0];
+		  var seq = returnedSequence[0];
 
 		  if(seq.start <= fDisplay.leftBase && seq.end >= end) {
 			  aSequence(fDisplay, returnedSequence, {});
