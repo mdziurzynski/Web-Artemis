@@ -105,7 +105,7 @@ function deselectAllFeatures(fDisplay) {
 }
 
 function selectFeature(featureSelected, fDisplay) {
-    fDisplay.observers.notify('select', featureSelected, fDisplay);
+    
 	if(featureSelected.match(/\d+$/g)) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');

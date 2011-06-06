@@ -1403,6 +1403,8 @@ function handleFeatureClick(fDisplay, event, featureSelected) {
 
 	fDisplay.highlightFeatures.push(featureSelected);
 	selectFeature(featureSelected, fDisplay);
+	
+	fDisplay.observers.notify('select', featureSelected, fDisplay);
 
 	//showFeature(featureSelected, fDisplay);
 }
