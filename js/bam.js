@@ -68,8 +68,11 @@ var aSamCall = function ajaxGetSamRecords(fDisplay, query, options) {
 	drawReadDisplay(fDisplay, thisBam);
 }
 
-function drawReadDisplay(fDisplay, thisBam) {	
-	if(thisBam.isStack) {
+function drawReadDisplay(fDisplay, thisBam) {
+	
+	if(isZoomedIn(fDisplay)) {
+		drawSequenceStack(fDisplay, thisBam);
+	} else if(thisBam.isStack) {
 		drawStack(fDisplay, thisBam);
 	} else if(thisBam.isStrand) {
 		drawStrandView(fDisplay, thisBam);
@@ -91,13 +94,113 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, samSeqs, options) {
 		var window = Math.round(fDisplay.basesDisplayWidth/400);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
-			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window/*, filter:thisBam.flag*/ }, fDisplay, { window:window, bamId:options.bamId });
+			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, window:window, contained:false/*, filter:thisBam.flag*/ }, fDisplay, { window:window, bamId:options.bamId });
 	} else {
 		serviceName = '/sams/query.json?';
+		
+		var props = ['alignmentBlocks', 'readName', 'flags'];
+		if(isZoomedIn(fDisplay)){
+			props.push('readString');
+		}
 		handleAjaxCalling(serviceName, aSamCall,
-			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, filter:thisBam.flag, properties:['alignmentBlocks', 'readName', 'flags'] }, fDisplay, { bamId:options.bamId });
+			{ fileID:options.bamId, sequence:sequenceName, start:start, end:end, filter:thisBam.flag, properties:props, contained:false }, fDisplay, { bamId:options.bamId });
 	}
 };
+
+
+function getBamCanvasCtx(thisBam, clearCanvas) {
+	  var width = $("#bam"+thisBam.bamId).css('width').replace("px", "");
+	  var height = $("#bam"+thisBam.bamId).css('height').replace("px", "");
+
+	  if (!$("#bam"+thisBam.bamId).find('canvas').get(0)) {
+		  $("#bam"+thisBam.bamId).append("<canvas  width='"+width+"' height='"+height+"' style='position: absolute; top: 0; left: 0;'></canvas>");
+	  }
+	  
+	  var canvas = $("#bam"+thisBam.bamId).find("canvas").get(0);
+	  var ctx = canvas.getContext("2d");
+	  if(clearCanvas) {
+		  ctx.clearRect(0, 0, width, height);
+	  }
+	  return ctx;
+}
+
+function drawSequenceStack(fDisplay, thisBam) {
+	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
+	var basePerPixel  = baseInterval/screenInterval;
+	var ypos  = maxBamHgt+13;
+
+    var lastEndAtZero = -100;
+    var ctx = getBamCanvasCtx(thisBam, true);
+    
+    var nreads = thisBam.samRecords.alignmentBlocks.length;
+    var drawn = new Array(nreads);
+    for(var i=0; i<nreads; i++) {
+      drawn[i] = false;
+    }
+   
+    for (var i = 0; i < nreads; i++) {
+        if (!drawn[i]) {
+        	ypos -= 14;
+        	var thisEnd = drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i);
+        	drawn[i] = true;
+
+        	if (thisEnd == 0) {
+        		var thisStart = thisBam.samRecords.alignmentBlocks[i][0].referenceStart-fDisplay.leftBase;
+        		thisEnd = thisStart + thisBam.samRecords.readString[i].length;
+        	}
+        	
+        	for (var j = i + 1; j < nreads; j++) {
+        		if (!drawn[j]) {
+        			var nextStart = thisBam.samRecords.alignmentBlocks[j][0].referenceStart-fDisplay.leftBase;
+        			if (nextStart > thisEnd + 1) {
+        				var nextEnd = drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, j);
+        				drawn[j] = true;
+        				thisEnd = nextEnd;
+        	        	if (thisEnd == 0) {
+        	        		thisEnd = nextStart + thisBam.samRecords.readString[j].length;
+        	        	}
+        			} 
+        		}
+        	}
+        }
+    }
+}
+
+function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
+	var thisFlags = thisBam.samRecords.flags[i];
+	var readStr   = thisBam.samRecords.readString[i];
+
+	if(thisFlags & 0x0002) {
+		colour = '#0000FF';
+	} else {
+		colour = '#000000';
+	}
+
+	var xlast = -1;
+	var blockEnd = -1;
+	for(var j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
+		var blockStart = thisBam.samRecords.alignmentBlocks[i][j].referenceStart-fDisplay.leftBase;
+		var blockLen = thisBam.samRecords.alignmentBlocks[i][j].length;
+		blockEnd = blockStart+blockLen;
+
+		var xpos = margin+Math.round(blockStart/basePerPixel);
+		var readStart = thisBam.samRecords.alignmentBlocks[i][j].readStart-1;
+		
+		if(xlast > 0) {
+			// join alignment blocks
+			$("#bam"+thisBam.bamId).drawLine(xlast, ypos-3, xpos, ypos-3,
+					{color:'#FFFFFF', stroke:'1'});
+		}
+		
+		for(var k=0; k<blockLen; k++) {
+			drawString(ctx, readStr.charAt(readStart+k), xpos, ypos, colour, 0,"Courier New",14);
+			xpos += (1/basePerPixel);
+		}
+		xlast = xpos+1;
+	}
+	return blockEnd;
+}
+
 
 function drawStack(fDisplay, thisBam) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
@@ -113,7 +216,6 @@ function drawStack(fDisplay, thisBam) {
     var properPair = true;
    
     var colour = '#000000';
-    console.log(thisBam);
 	for(var i=0; i<thisBam.samRecords.alignmentBlocks.length; i++ ) {
 		var thisName  = name[i];
 		var thisFlags = flags[i];
@@ -339,12 +441,13 @@ function adjustHeight(fDisplay, hgt) {
 function showPopupBam(thisBam, event) {
 	var msg = thisBam.samRecords.readName[thisBam.idx[0]]+"<br />";
 	
-	var lastIdx = thisBam.samRecords.alignmentBlocks[i].length-1;
+	var lastIdx   = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]].length-1;
 	var thisStart = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]][0].referenceStart;
 	var thisEnd   = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]][lastIdx].length+thisStart-1;
 	
 	msg += "<table><tr><td>Position</td><td>"+thisStart+".."+thisEnd+"</td></tr>";
 	if(thisBam.idx.length > 1) {
+		lastIdx   = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]].length-1;
 		thisStart = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]][0].referenceStart;
 		thisEnd   = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]][lastIdx].length+thisStart-1;
 		msg += "<tr><td>Mate Position</td><td>"+thisStart+".."+thisEnd+"</td></tr>";
