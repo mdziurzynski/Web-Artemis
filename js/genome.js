@@ -988,7 +988,7 @@ function drawBwdStop(stop, frame, fDisplay, basePerPixel) {
   $('#stop_codons'+fDisplay.index).append(bwdStopsStr);
 }
 
-function getSequnceCanvasCtx(fDisplay, clearCanvas) {
+function getSequenceCanvasCtx(fDisplay, clearCanvas) {
 	  var width = $('#featureDisplay'+fDisplay.index).css('width').replace("px", "");
 	  var height = fDisplay.frameLnHgt*17;
 
@@ -1036,9 +1036,9 @@ function drawCodons(fDisplay, basePerPixel) {
   if(window.console) 
   		console.time('draw codons');
 
-  useCanvas = false;
+  //useCanvas = false;
   if(useCanvas) {
-	  var ctx = getSequnceCanvasCtx(fDisplay, true);
+	  var ctx = getSequenceCanvasCtx(fDisplay, true);
   }
   var yposFwd = fwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2;
   var yposBwd = bwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2;
@@ -1052,8 +1052,8 @@ function drawCodons(fDisplay, basePerPixel) {
 	  
 	  var b = fDisplay.sequence.charAt(i);
 	  if(useCanvas) {
-		drawString(ctx, b, xpos, yposFwd, '#000000', 0,"Courier New",14);
-	  	drawString(ctx, complement(b), xpos, yposBwd, '#000000', 0,"Courier New",14);
+		drawString(ctx, b, xpos, yposFwd+fDisplay.frameLnHgt, '#000000', 0,"Courier New",14);
+	  	drawString(ctx, complement(b), xpos, yposBwd+fDisplay.frameLnHgt, '#000000', 0,"Courier New",14);
 	  } else {
 		baseStr = baseStr+
 	  	  '<div class="base" style="margin-top:'+yposFwd+'px; margin-left:'+xpos+'px">'+b+'</div>'+
@@ -1074,7 +1074,7 @@ function drawAminoAcids(fDisplay, basePerPixel) {
  
   var xpos = margin;
   if(useCanvas) {
-	  var ctx = getSequnceCanvasCtx(fDisplay, false);
+	  var ctx = getSequenceCanvasCtx(fDisplay, false);
 	  xpos += (1/basePerPixel);
   } 
 
