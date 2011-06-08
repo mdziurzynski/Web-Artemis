@@ -16,7 +16,8 @@
 //                    "http://127.0.0.1:6666"]; 
 // var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
-var webService = "https://developer.genedb.org/services/"; //"http://www.genedb.org/services/";
+var webService = "https://developer.genedb.org/services/";
+	//"http://127.0.0.1:8080/services/"; //"http://www.genedb.org/services/";
 var dataType = "jsonp";
 
 //
@@ -2446,7 +2447,10 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 
 var methods = {
 	init : function(options) {
-		$(this).append();
+
+        if(!options.directory) {
+            options.directory = ".";
+        }
 		$(this).load(options.directory+"/js/WebArtemis.inc", function(){
 			//set the default values for the options
 			var settings = $.extend({
@@ -2569,7 +2573,7 @@ var methods = {
 			if (!$('#sequence'+1).find('canvas').get(0))
 				$('#sequence'+1).append("<canvas width='1px' height ='1px'></canvas>");		
 			var canvas = $('#sequence'+1).find("canvas").get(0);
-			if(canvas.getContext) {
+			if(canvas && canvas.getContext) {
 				useCanvas = true;
 				debugLog('USE CANVAS');
 			}
