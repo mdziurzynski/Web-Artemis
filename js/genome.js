@@ -1191,7 +1191,7 @@ function getSegmentFrameShift(exons, index, phase) {
   for(var i = 0; i < index; ++i) 
   {
     var exon = exons[i];
-    base_count += exon.end-exon.start;
+    base_count += exon.fmax-exon.fmin;
   }
 
   var mod_value = (base_count + 3 - phase) % 3;
