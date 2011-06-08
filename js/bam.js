@@ -1,5 +1,5 @@
 
-var maxBamHgt = 550;
+var maxBamHgt = 650;
 var bamViewPortHgt = 150;
 var step = 4;
 var bamObjs = new Array();
@@ -128,8 +128,6 @@ function drawSequenceStack(fDisplay, thisBam) {
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	var ypos  = maxBamHgt+13;
-
-    var lastEndAtZero = -100;
     var ctx = getBamCanvasCtx(thisBam, true);
     
     var nreads = thisBam.samRecords.alignmentBlocks.length;
@@ -219,6 +217,7 @@ function drawStack(fDisplay, thisBam) {
 	
 	var name  = thisBam.samRecords.readName;
 	var flags = thisBam.samRecords.flags;
+	var blocks = thisBam.samRecords.alignmentBlocks;
 	var ypos  = maxBamHgt-1;
 
     var lastEndAtZero = -100;
@@ -227,13 +226,15 @@ function drawStack(fDisplay, thisBam) {
     var properPair = true;
    
     var colour = '#000000';
-	for(var i=0; i<thisBam.samRecords.alignmentBlocks.length; i++ ) {
+    var i;
+    var j;
+	for(i=0; i<thisBam.samRecords.alignmentBlocks.length; i++ ) {
 		var thisName  = name[i];
 		var thisFlags = flags[i];
 
-		var lastIdx = thisBam.samRecords.alignmentBlocks[i].length-1;
-		var thisStart = thisBam.samRecords.alignmentBlocks[i][0].referenceStart-fDisplay.leftBase;
-		var thisEnd   = thisBam.samRecords.alignmentBlocks[i][lastIdx].length+thisStart-1;
+		var lastIdx = blocks[i].length-1;
+		var thisStart = blocks[i][0].referenceStart - fDisplay.leftBase;
+		var thisEnd   = blocks[i][lastIdx].length + blocks[i][lastIdx].referenceStart - fDisplay.leftBase;
 
 		if(lastStart == thisStart && lastEnd == thisEnd) {
 			if(colour == '#32cd32') {
@@ -249,11 +250,18 @@ function drawStack(fDisplay, thisBam) {
 			}
 		}
 
+		if(i == 0 || thisStart > lastEndAtZero+2 || (fDisplay.marginTop-ypos) > maxBamHgt) {
+			ypos=maxBamHgt-1;
+			lastEndAtZero = thisEnd;
+		} else {
+			ypos=ypos-step;
+		}
+
 		var blockEnd;
 		var lastBlockEnd = -1;
-		for(var j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
-			var blockStart = thisBam.samRecords.alignmentBlocks[i][j].referenceStart-fDisplay.leftBase;
-			blockEnd   = thisBam.samRecords.alignmentBlocks[i][j].length+blockStart-1;	
+		for(j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
+			var blockStart = blocks[i][j].referenceStart-fDisplay.leftBase;
+			blockEnd   = blocks[i][j].length+blockStart-1;	
 			drawRead(blockStart, blockEnd, colour, ypos, basePerPixel, thisBam, i);
 			
 			if(lastBlockEnd > -1) {
@@ -263,13 +271,7 @@ function drawStack(fDisplay, thisBam) {
 		}
 		
 		lastStart = thisStart;
-		lastEnd   = blockEnd;
-		if(thisStart > lastEndAtZero+1 || (fDisplay.marginTop-ypos) > maxBamHgt) {
-			ypos=maxBamHgt-1;
-			lastEndAtZero = blockEnd;
-		} else {
-			ypos=ypos-step;
-		}
+		lastEnd   = thisEnd;
 	}	
 }
 
@@ -284,7 +286,7 @@ function drawStrandView(fDisplay, thisBam) {
 	drawStrand(fDisplay, thisBam, step, false, basePerPixel, midPt); // rev
 	
 	$("#bam"+thisBam.bamId).drawLine(0, midPt, displayWidth+margin, midPt,
-			{color:'#C0C0C0', stroke:'1'});
+			{color:'#800080', stroke:'1'});
 }
 
 function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midPt) {
@@ -335,7 +337,7 @@ function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midP
 			drawRead(blockStart, blockEnd, colour, ypos, basePerPixel, thisBam, i);
 			
 			if(lastBlockEnd > -1) {
-				drawRead(lastBlockEnd, blockStart, '#FFFFFF', ypos, basePerPixel, thisBam, i);
+				drawRead(lastBlockEnd, blockStart, '#808080', ypos, basePerPixel, thisBam, i);
 			}
 			lastBlockEnd = blockEnd;
 		}
