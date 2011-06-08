@@ -1,7 +1,7 @@
 
 var maxBamHgt = 550;
 var bamViewPortHgt = 150;
-var step = 3;
+var step = 4;
 var bamObjs = new Array();
 
 function bamObj(bamId) {
@@ -171,7 +171,7 @@ function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 	var thisFlags = thisBam.samRecords.flags[i];
 	var readStr   = thisBam.samRecords.readString[i];
 
-	if(thisFlags & 0x0002) {
+	if(thisFlags & 0x0001) {
 		colour = '#0000FF';
 	} else {
 		colour = '#000000';
@@ -242,7 +242,7 @@ function drawStack(fDisplay, thisBam) {
 			}
 			colour = '#32cd32';
 		} else {
-			if(thisFlags & 0x0002) {
+			if(thisFlags & 0x0001) {
 				colour = '#0000FF';
 			} else {
 				colour = '#000000';
@@ -257,7 +257,7 @@ function drawStack(fDisplay, thisBam) {
 			drawRead(blockStart, blockEnd, colour, ypos, basePerPixel, thisBam, i);
 			
 			if(lastBlockEnd > -1) {
-				drawRead(lastBlockEnd, blockStart, '#FFFFFF', ypos, basePerPixel, thisBam, i);
+				drawRead(lastBlockEnd, blockStart, '#808080', ypos, basePerPixel, thisBam, i);
 			}
 			lastBlockEnd = blockEnd;
 		}
@@ -320,7 +320,7 @@ function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midP
 			}
 			colour = '#32cd32';
 		} else {
-			if(thisFlags & 0x0002) {
+			if(thisFlags & 0x0001) {
 				colour = '#0000FF';
 			} else {
 				colour = '#000000';
@@ -360,12 +360,14 @@ function drawRead(thisStart, thisEnd, colour, ypos, basePerPixel, thisBam, idx) 
 			$("#bam"+thisBam.bamId).drawLine(thisStart, ypos, thisEnd, ypos,
 					{color:colour, stroke:'3'});
 
+			if($.inArray(idx, thisBam.idx) == -1) {
 			// put the index of the clicked read at the start of this array
-			if(thisBam.mouseOverY+2 > ypos      && thisBam.mouseOverY-2 < ypos &&
-			   thisBam.mouseOverX   > thisStart && thisBam.mouseOverX   < thisEnd )
-				thisBam.idx.unshift(idx);
-			else
-				thisBam.idx.push(idx);
+				if(thisBam.mouseOverY+2 > ypos      && thisBam.mouseOverY-2 < ypos &&
+				   thisBam.mouseOverX   > thisStart && thisBam.mouseOverX   < thisEnd )
+					thisBam.idx.unshift(idx);
+				else
+					thisBam.idx.push(idx);
+			}
 			return;
 		}
 	} else if(thisBam.mouseOverY+2 > ypos      && thisBam.mouseOverY-2 < ypos &&
@@ -454,16 +456,19 @@ function adjustHeight(fDisplay, hgt) {
 
 function showPopupBam(thisBam, event) {
 	var msg = thisBam.samRecords.readName[thisBam.idx[0]]+"<br />";
-	
-	var lastIdx   = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]].length-1;
-	var thisStart = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]][0].referenceStart;
-	var thisEnd   = thisBam.samRecords.alignmentBlocks[thisBam.idx[0]][lastIdx].length+thisStart-1;
+
+	var blocks = thisBam.samRecords.alignmentBlocks;
+	var lastIdx   = blocks[thisBam.idx[0]].length-1;
+	var thisStart = blocks[thisBam.idx[0]][0].referenceStart;
+	var thisEnd   = blocks[thisBam.idx[0]][lastIdx].referenceStart+
+	                blocks[thisBam.idx[0]][lastIdx].length-1;
 	
 	msg += "<table><tr><td>Position</td><td>"+thisStart+".."+thisEnd+"</td></tr>";
 	if(thisBam.idx.length > 1) {
-		lastIdx   = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]].length-1;
-		thisStart = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]][0].referenceStart;
-		thisEnd   = thisBam.samRecords.alignmentBlocks[thisBam.idx[1]][lastIdx].length+thisStart-1;
+		lastIdx   = blocks[thisBam.idx[1]].length-1;
+		thisStart = blocks[thisBam.idx[1]][0].referenceStart;
+		thisEnd   = blocks[thisBam.idx[1]][lastIdx].referenceStart+
+		            blocks[thisBam.idx[1]][lastIdx].length-1;
 		msg += "<tr><td>Mate Position</td><td>"+thisStart+".."+thisEnd+"</td></tr>";
 	}
 	msg += "</table>";
