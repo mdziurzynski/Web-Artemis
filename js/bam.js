@@ -166,6 +166,7 @@ function drawSequenceStack(fDisplay, thisBam) {
     }
 }
 
+// draw zoomed in read sequence
 function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 	var thisFlags = thisBam.samRecords.flags[i];
 	var readStr   = thisBam.samRecords.readString[i];
@@ -178,7 +179,10 @@ function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 
 	var xlast = -1;
 	var blockEnd = -1;
-	for(var j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
+
+	var j;
+	var k;
+	for(j=0; j<thisBam.samRecords.alignmentBlocks[i].length; j++) {
 		var blockStart = thisBam.samRecords.alignmentBlocks[i][j].referenceStart-fDisplay.leftBase;
 		var blockLen = thisBam.samRecords.alignmentBlocks[i][j].length;
 		blockEnd = blockStart+blockLen;
@@ -192,8 +196,15 @@ function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 					{color:'#FFFFFF', stroke:'1'});
 		}
 		
-		for(var k=0; k<blockLen; k++) {
-			drawString(ctx, readStr.charAt(readStart+k), xpos, ypos, colour, 0,"Courier New",14);
+		for(k=0; k<blockLen; k++) {
+			var thisColour = colour;
+			if(blockStart+k > -1) {
+				// colour SNPs red
+				if(fDisplay.sequence.charAt(blockStart+k) != readStr.charAt(readStart+k)) {
+					thisColour = "#FF0000";
+				}
+			}
+			drawString(ctx, readStr.charAt(readStart+k), xpos, ypos, thisColour, 0,"Courier New",14);
 			xpos += (1/basePerPixel);
 		}
 		xlast = xpos+1;
