@@ -271,6 +271,9 @@ function drawStrandView(fDisplay, thisBam) {
 	
 	drawStrand(fDisplay, thisBam, -step, true, basePerPixel, midPt); // fwd
 	drawStrand(fDisplay, thisBam, step, false, basePerPixel, midPt); // rev
+	
+	$("#bam"+thisBam.bamId).drawLine(0, midPt, displayWidth+margin, midPt,
+			{color:'#C0C0C0', stroke:'1'});
 }
 
 function drawStrand(fDisplay, thisBam, thisStep, isNegStrand, basePerPixel, midPt) {
@@ -546,7 +549,7 @@ function addBamDisplay(fDisplay, tgt) {
 		'height': bamViewPortHgt+'px', 
 		'width': displayWidth+margin+20+'px', 
 		'border': '1px solid #666',
-		'background-color': '#ccc'});
+		'background-color': '#F0F0F0'});
 
 	$('#bamClose'+bamId).css({
 		'margin-left': '0px', 
