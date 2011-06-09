@@ -194,7 +194,7 @@ function selectInList(featureSelected) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
     	var selId = "[id*=" + wildcardSearchString +"]";
-    	$('table.#featureListTable > tbody').find(selId).children().each(function(index) {
+    	$('table.#featureListTable > tbody').find( escapeId(selId) ).children().each(function(index) {
     	    if(index == 0) {
     	    	showRow($(this).parent());
     	    	return;

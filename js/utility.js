@@ -110,9 +110,9 @@ function selectFeature(featureSelected, fDisplay) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
     	var selId = "[id*=" + wildcardSearchString +"]";
-    	
+
     	for(var i=0;i<fDisplay.tracks.length; i++) {
-    	  $('#features'+fDisplay.index+'_'+fDisplay.tracks[i]).find(selId).each(
+    	  $('#features'+fDisplay.index+'_'+fDisplay.tracks[i]).find(escapeId(selId)).each(
     			function( intIndex ){ setBorder(this, '2px'); });
     	}
 	} else {
@@ -228,7 +228,6 @@ function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisp
 	var jsonUrl = webService + "/" +serviceName;
 	
     debugLog(serviceName+" "+jsonUrl+ " async "+async);
-    
     $.ajax({
 		  url: jsonUrl,
 		  data: dataArray,
@@ -254,7 +253,7 @@ function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisp
   }
   });
 
-  logJsonp(serviceName);
+  //logJsonp(serviceName);
 }
 
 function escapeId(myid) { 

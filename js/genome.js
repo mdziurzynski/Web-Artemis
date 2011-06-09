@@ -2458,8 +2458,8 @@ var methods = {
 				source : 'Pf3D7_01',		// default sequence
 				width : $(window).width(), 	// browser viewport width,
 				showOrganismsList : true,	// show organism list
-				webService : 'http://127.0.0.1:8080/services/',
-				//webService : 'https://developer.genedb.org/services/',
+				//webService : 'http://127.0.0.1:8080/services/',
+				webService : 'https://developer.genedb.org/services/',
 				dataType : 'jsonp',			// json/jsonp
 				draggable : true,			// allow dragging to increase size
 				mainMenu : true,			// show the main menu
