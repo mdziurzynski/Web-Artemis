@@ -256,6 +256,22 @@ function handleAjaxCallingSync(serviceName, ajaxFunction, dataArray, featureDisp
   //logJsonp(serviceName);
 }
 
+// get colour property for a feature
+function getColourProperty(f) {
+	var col;
+	if(f.properties) {	// check for colour
+		  var i;
+		  for(i=0; i<f.properties.length; i++) {
+			  if(f.properties[i].name == 'colour') {
+				  if(f.properties[i].value) {
+					  return colour[f.properties[i].value];
+				  }
+			  }
+		  }
+	  }
+	return '';
+}
+
 function escapeId(myid) { 
 	   return myid.replace(/(:|\.|\|)/g,'\\$1');
 }
