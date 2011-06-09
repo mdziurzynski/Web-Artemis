@@ -16,9 +16,8 @@
 //                    "http://127.0.0.1:6666"]; 
 // var dataType = [ "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp", "jsonp" ];
 
-var webService = "https://developer.genedb.org/services/";
-	//"http://127.0.0.1:8080/services/"; //"http://www.genedb.org/services/";
-var dataType = "jsonp";
+var webService;
+var dataType;
 
 //
 // web-artemis/index.html?src=Pf3D7_04&base=200000&width=1000&height=10&bases=5000
@@ -69,7 +68,7 @@ var colour = [
 
 
 function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength, 
-		                   srcFeature, frameLnHgt, leftBase, showOrganismsList, draggable, mainMenu) {
+		                   srcFeature, frameLnHgt, leftBase, showOrganismsList, draggable, mainMenu, zoomMaxRatio) {
 	count++;
 	this.index = count;
 	this.firstTime = true;
@@ -85,7 +84,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.nodraw = false;
 	this.observers = new Observable();
 	this.oneLinePerEntry = false;
-
+	this.zoomMaxRatio = zoomMaxRatio;
+	
 	this.highlightFeatures = new Array();
 	this.hideFeatures = new Array();
 
@@ -115,9 +115,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 
 	$('#buttons').append('<div id="plus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom in"><span class="ui-icon ui-icon-circle-plus"></span></div>');
 	$('#buttons').append('<div id="minus'+this.index+'" class="ui-state-default ui-corner-all" title="zoom out"><span class="ui-icon ui-icon-circle-minus"></span></div>');
-    
-    
-    
+
 	$('#rightDraggableEdge').append(
 			   '<div id="rightDraggableEdge'+this.index+'" class="ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se"></div>');
 	
@@ -151,8 +149,8 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	$("#slider_vertical_container"+this.index).slider({
 		orientation: "vertical",
 		min: 0,
-		max: self.sequenceLength-140,
-		value: self.sequenceLength-self.basesDisplayWidth,
+		max: (self.sequenceLength*zoomMaxRatio)-140,
+		value: (self.sequenceLength*zoomMaxRatio)-self.basesDisplayWidth,
 		step: 100,
 		change: function(event, ui) {
     		if(self.firstTime || self.nodraw)
@@ -2172,7 +2170,7 @@ var aComparison = function ajaxGetComparisons(featureDisplay, blastFeatures, opt
 }
 
 function isZoomedIn(fDisplay) {
-	var seqLen = fDisplay.sequenceLength;
+	var seqLen = fDisplay.sequenceLength*fDisplay.zoomMaxRatio;
 	
 	if($('#slider_vertical_container'+fDisplay.index).slider('option', 'value') > seqLen-160) {
 		return true;
@@ -2291,8 +2289,8 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     //console.time('draw stop codons');
     $('#stop_codons'+fDisplay.index).html('');
     if (fDisplay.firstTime) {
-    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'max', (fDisplay.sequenceLength-140));
-    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'value', (fDisplay.sequenceLength-fDisplay.basesDisplayWidth));
+    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'max', ((fDisplay.sequenceLength*fDisplay.zoomMaxRatio)-140));
+    	$("#slider_vertical_container"+fDisplay.index).slider('option', 'value', ((fDisplay.sequenceLength*fDisplay.zoomMaxRatio)-fDisplay.basesDisplayWidth));
     }
     
 	if(isZoomedIn(fDisplay)) {
@@ -2454,26 +2452,23 @@ var methods = {
 		$(this).load(options.directory+"/js/WebArtemis.inc", function(){
 			//set the default values for the options
 			var settings = $.extend({
-				bases : 16000,
-				start : 1,
-				showFeatureList : true,
-				source : 'Pf3D7_01',
-				width : $(window).width(), // browser viewport width,
-				showOrganismsList : true,
-				webService : '',
-				dataType : '',
-				draggable : true,
-				mainMenu : true
+				bases : 16000,				// number of bases shown
+				start : 1,					// initial position
+				showFeatureList : true,		// show feature list
+				source : 'Pf3D7_01',		// default sequence
+				width : $(window).width(), 	// browser viewport width,
+				showOrganismsList : true,	// show organism list
+				webService : 'http://127.0.0.1:8080/services/',
+				//webService : 'https://developer.genedb.org/services/',
+				dataType : 'jsonp',			// json/jsonp
+				draggable : true,			// allow dragging to increase size
+				mainMenu : true,			// show the main menu
+				zoomMaxRatio : 1.0			// define max zoom as ratio of sequence length
 			}, options);
             
-            if (settings.webService.length > 0) {
-                webService = settings.webService;
-            }
-            
-            if (settings.dataType .length > 0) {
-                dataType = settings.dataType;
-            }
-            
+            webService = settings.webService;
+            dataType = settings.dataType;
+
 			var arr = getUrlVars();
 			var leftBase = arr["base"];
 			if(!leftBase) {
@@ -2542,7 +2537,7 @@ var methods = {
 				if(i.indexOf("src") > -1) {
 					title+=value+' ';
 					
-					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu);
+					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu, settings.zoomMaxRatio);
 					featureDisplayObjs[count - 1] = obj;
 					initialTop+=250;
 				
@@ -2557,7 +2552,7 @@ var methods = {
 
 			if(count == 0) {
 				title = settings.source;
-				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu);
+				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu, settings.zoomMaxRatio);
 				featureDisplayObjs[0] = obj;
 			}
 

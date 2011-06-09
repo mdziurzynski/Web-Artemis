@@ -36,7 +36,13 @@ function zoom(fDisplay, scrollbar, direction) {
 function zoomOnce(fDisplay, scrollbar) {
     var centerBase = parseInt(fDisplay.leftBase) + parseInt(Math.round(fDisplay.basesDisplayWidth/2)); 
 	var val = $('#slider_vertical_container'+fDisplay.index).slider('option', 'value');
-    fDisplay.basesDisplayWidth = fDisplay.sequenceLength - val;
+	
+	fDisplay.basesDisplayWidth = (fDisplay.sequenceLength*fDisplay.zoomMaxRatio) - val;
+	
+	//debugLog("MAX: "+$('#slider_vertical_container'+fDisplay.index).slider('option', 'max'));
+	//debugLog("VAL: "+$('#slider_vertical_container'+fDisplay.index).slider('option', 'value'));
+	//debugLog("WID: "+fDisplay.basesDisplayWidth);
+	
     var newLeftBase = Math.round(centerBase - (fDisplay.basesDisplayWidth/2));
     
     if( newLeftBase > fDisplay.sequenceLength-fDisplay.basesDisplayWidth/2 )
