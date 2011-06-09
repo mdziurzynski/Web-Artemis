@@ -1247,6 +1247,11 @@ function drawFeature(leftBase, feature, featureStr, ypos, className, basePerPixe
 	  else
 		  width += sz;
   }
+
+  var col = getColourProperty(feature);
+  if(col != '') {
+	  extra += 'background-color:rgb('+col+');';
+  }
   
   featureStr = featureStr + 
 	'<div id='+feature.uniqueName+' class="'+className+'" style="width:'+width+'px; '+pos+';'+extra+'"></div>';
@@ -1897,7 +1902,11 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, option
 	  var feature = features[i];
 
 	  if(feature.type.name == "exon" || feature.type.name == "pseudogenic_exon") {
-		  featureToColourList.push(feature.uniqueName);
+		  
+		  if(!feature.properties) {
+			  featureToColourList.push(feature.uniqueName);
+		  }
+
 		  var exons = exonMap[feature.parent];
 		  if(exons == undefined) {
 			  exons = new Array();

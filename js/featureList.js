@@ -127,8 +127,14 @@ function appendExonsToList(exons) {
 	else
 		type = "pseudogene";
 	
+	// colour feature list
+	var col = getColourProperty(exons[0]);
+	if(col != '') {
+		  col = 'style=\"background-color:rgb('+col+');\"';
+	 }
+	
 	$('#featureListTable').append('<tr id="'+exons[0].uniqueName+':LIST">'+
-			'<td>'+name+'</td>'+
+			'<td '+col+'>'+name+'</td>'+
 			'<td>'+type+'</td>'+
 			'<td>'+fmin+'</td>'+
 			'<td>'+fmax+'</td>'+
