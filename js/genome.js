@@ -2541,12 +2541,16 @@ var methods = {
 		
 			var lastObj;
 			var compCount = 0;
+			var slen = 30000;
+			if(slen < leftBase) {
+				slen = leftBase+basesDisplayWidth;
+			}
 			for(var i in arr) {
 				var value = arr[i];
 				if(i.indexOf("src") > -1) {
 					title+=value+' ';
-					
-					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 30000, value, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu, settings.zoomMaxRatio);
+
+					var obj = new featureDisplayObj(basesDisplayWidth, initialTop, slen, value, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu, settings.zoomMaxRatio);
 					featureDisplayObjs[count - 1] = obj;
 					initialTop+=250;
 				
@@ -2561,7 +2565,7 @@ var methods = {
 
 			if(count == 0) {
 				title = settings.source;
-				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, 16000, title, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu, settings.zoomMaxRatio);
+				var obj = new featureDisplayObj(basesDisplayWidth, initialTop, slen, title, hgt, leftBase, settings.showOrganismsList, settings.draggable, settings.mainMenu, settings.zoomMaxRatio);
 				featureDisplayObjs[0] = obj;
 			}
 
