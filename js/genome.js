@@ -1660,8 +1660,8 @@ var aOrganism = function ajaxGetOrganisms(fDisplay, organisms, options) {
 	
 		var translation_table = 1;
 		for(var j=0; j<organisms.length; j++) {
-			debugLog(j+" "+organism_id+" "+organisms[j].organism_id );
-			if(organisms[j].organism_id == organism_id)
+			debugLog(j+" "+organism_id+" "+organisms[j].ID );
+			if(organisms[j].ID == organism_id)
 				translation_table = organisms[j].translation_table;
 		}
 		
@@ -2336,8 +2336,6 @@ function setBamMenu(fDisplay) {
 	//         return;
 	var serviceName = '/sams/listforsequence.json?';
 	handleAjaxCalling(serviceName, function (fDisplay, bamFiles, options) {
-		
-        
 		$('#bamFiles').html('<a href="#ab">BAM</a>');
 		
 		var bamStr = '<ul>';
@@ -2356,6 +2354,7 @@ function setBamMenu(fDisplay) {
 		$('#bamFiles').find('li').css('width', '20em');
 	},
 	{ sequence:fDisplay.srcFeature }, fDisplay, { });
+
 }
 
 
