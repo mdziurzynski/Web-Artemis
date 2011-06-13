@@ -22,9 +22,9 @@ function navigate(fDisplay) {
      		setRegion(fDisplay, inputObj);
      		
      		handleAjaxCalling('/features/withnamelike.json?', 
-     				function (fDisplay, returned, options) {
+     				function (fDisplay, features, options) {
      			$(options.goDialog).css('cursor','default');
-     			var features = returned.response.features;
+     			//var features = returned.response.features;
      			if(features.length == 0) {
      				alert('No matches.');
      				return;
@@ -35,8 +35,8 @@ function navigate(fDisplay) {
      			for(var i=0; i<features.length; i++) {
      				var f = features[i];
      				l = l + '<a href="javascript:void(0)" onclick="centerOnFeatureByDisplayIndex('+
-     					fDisplay.index+',\''+f.uniquename+'\');">'+
-     		        	f.uniquename+'</a> '+f.name+'<br />';
+     					fDisplay.index+',\''+f.uniqueName+'\');">'+
+     		        	f.uniqueName+'</a> '+f.name+'<br />';
      			}
      			setSearchResultWindow(l);
      		 }, inputObj, fDisplay, { 'goDialog':$(this) });
@@ -63,9 +63,9 @@ function navigate(fDisplay) {
      		setRegion(fDisplay, inputObj);
      		
      		handleAjaxCalling('/features/withproperty.json?', 
-     				function (fDisplay, returned, options) {
+     				function (fDisplay, features, options) {
 
-     			var features = returned.response.results.features;
+     			//var features = returned.response.results.features;
      			if(features.length == 0) {
      				alert('No matches.');
      				return;
@@ -88,8 +88,8 @@ function navigate(fDisplay) {
      		setRegion(fDisplay, inputObj);
      		
      		handleAjaxCalling('/features/withterm.json?', 
-     				function (fDisplay, returned, options) {
-     			var features = returned.response.results.features;
+     				function (fDisplay, features, options) {
+     			//var features = returned.response.results.features;
      			if(features.length == 0) {
      				alert('No matches.');
      				return;
