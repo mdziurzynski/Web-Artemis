@@ -2468,7 +2468,7 @@ var methods = {
 				width : $(window).width(), 	// browser viewport width,
 				showOrganismsList : true,	// show organism list
 				//webService : 'http://127.0.0.1:8080/services/',
-				webService : 'https://www.genedb.org/services/',
+				webService : 'http://www.genedb.org/services/',
 				dataType : 'jsonp',			// json/jsonp
 				draggable : true,			// allow dragging to increase size
 				mainMenu : true,			// show the main menu
