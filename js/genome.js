@@ -1713,7 +1713,7 @@ var aOrthologues = function ajaxGetOrthologues(fDisplay, orthologues, options) {
 		     $("div#DISP_ORTHO"+escapeId(featureSelected)).append(
 				   '<a href="javascript:void(0)" onclick="openMe(\''+
 				   featureOrthologue+'\','+midDisplay+');">'+
-				   featureOrthologue+"</a> ("+featureOrthologues[j].orthoproduct+")<br />");
+				   featureOrthologue+"</a> ("+featureOrthologues[j].products[0]+")<br />");
 		   } else {
 			 clusters.push(featureOrthologues[j].uniqueName);
 		   }
