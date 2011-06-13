@@ -175,7 +175,7 @@ function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 		colour = '#000000';
 	}
 
-	var xlast = -1;
+	var xlast = -100000;
 	var blockEnd = -1;
 
 	var j;
@@ -186,12 +186,36 @@ function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 		blockEnd = blockStart+blockLen;
 
 		var xpos = margin+Math.round(blockStart/basePerPixel);
+		var xposEnd = margin+Math.round(blockEnd/basePerPixel);
 		var readStart = thisBam.samRecords.alignmentBlocks[i][j].readStart-1;
+		var lineCol = '#FFFFFF';
+		if(thisBam.click) {
+			if(thisBam.samRecords.readName[i] == thisBam.readName) {
+				
+				if($.inArray(i, thisBam.idx) == -1) {
+				// put the index of the clicked read at the start of this array
+					if(thisBam.mouseOverY+7 > ypos      && thisBam.mouseOverY-7 < ypos &&
+					   thisBam.mouseOverX   > blockStart && thisBam.mouseOverX   < blockEnd )
+						thisBam.idx.unshift(i);
+					else
+						thisBam.idx.push(i);
+				}
+				
+				// drawRect seems broken so using drawPolygon
+				//$("#bam"+thisBam.bamId).drawRect(xpos, (ypos-11), (xposEnd-xpos), 13, {color:'#FF0000', stroke:3});
+				var Xpoints = new Array(xpos, xpos, xposEnd, xposEnd) ;
+				var Ypoints = new Array((ypos-11),(ypos+2),(ypos+2),(ypos-11)) ;
+				lineCol = '#FF0000';
+				$("#bam"+thisBam.bamId).drawPolygon(Xpoints,Ypoints, {color:lineCol, stroke:1});
+			} 
+		} else if(thisBam.mouseOverY+7 > ypos      && thisBam.mouseOverY-7 < ypos &&
+				  thisBam.mouseOverX   > xpos && thisBam.mouseOverX   < xposEnd ) {
+			thisBam.readName = thisBam.samRecords.readName[i];
+		}
 		
-		if(xlast > 0) {
+		if(xlast > -100000) {
 			// join alignment blocks
-			$("#bam"+thisBam.bamId).drawLine(xlast, ypos-3, xpos, ypos-3,
-					{color:'#FFFFFF', stroke:'1'});
+			$("#bam"+thisBam.bamId).drawLine(xlast, ypos-3, xpos, ypos-3, {color:lineCol, stroke:1});
 		}
 		
 		for(k=0; k<blockLen; k++) {
@@ -202,6 +226,7 @@ function drawSeq(thisBam, fDisplay, ypos, basePerPixel, ctx, i) {
 					thisColour = "#FF0000";
 				}
 			}
+			
 			drawString(ctx, readStr.charAt(readStart+k), xpos, ypos, thisColour, 0,"Courier New",14);
 			xpos += (1/basePerPixel);
 		}
@@ -460,6 +485,8 @@ function showPopupBam(thisBam, event) {
 	var msg = thisBam.samRecords.readName[thisBam.idx[0]]+"<br />";
 
 	var blocks = thisBam.samRecords.alignmentBlocks;
+	if(!blocks || blocks.length < 1)
+		return;
 	var lastIdx   = blocks[thisBam.idx[0]].length-1;
 	var thisStart = blocks[thisBam.idx[0]][0].referenceStart;
 	var thisEnd   = blocks[thisBam.idx[0]][lastIdx].referenceStart+
