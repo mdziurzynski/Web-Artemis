@@ -114,6 +114,11 @@ body {
 	overflow: auto;
 }
 
+.vcfScroll {
+	position: absolute;
+	overflow: auto;
+}
+
 #organismSelector {
 	margin-top: 0px;
 	display: block;
