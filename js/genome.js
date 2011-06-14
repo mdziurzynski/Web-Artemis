@@ -605,6 +605,18 @@ function addEventHandlers(fDisplay) {
 			}
 		});
 		
+		$('#vcfFiles').click(function(event){
+			var tgt = $(event.target);
+			if($(tgt).attr('id') == "none")
+				return;
+	
+			//if(isBamVisible($(tgt).attr('name'))) {
+			//	removeBamDisplay(fDisplay, $(tgt).attr('name'));
+			//} else {
+				addVcfDisplay(fDisplay, tgt);
+			//}
+		});
+		
 		$('#basesOfFeature').click(function(event){
 			showBasesOfSelectedFeatures(fDisplay);
 		});
@@ -824,6 +836,7 @@ function drawAll(fDisplay) {
       
       if(!fDisplay.minimumDisplay) {
           drawBam(fDisplay);
+          drawVcf(fDisplay);
           fDisplay.observers.notify('redraw', fDisplay.leftBase, parseInt(fDisplay.leftBase)+parseInt(fDisplay.basesDisplayWidth));
       }
       
@@ -2319,7 +2332,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     	$('#slider'+fDisplay.index).slider('option', 'value', fDisplay.leftBase);
     	fDisplay.firstTime = false;
     	setTranslation(fDisplay, fDisplay.organism_id);
-    	setBamMenu(fDisplay);
+    	setBamAndVcfMenu(fDisplay);
 	}
 
     if(showGC || showAG || showOther) {
@@ -2331,7 +2344,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
     return;
 };
 
-function setBamMenu(fDisplay) {
+function setBamAndVcfMenu(fDisplay) {
 	// if(serviceTypeBam < 0)
 	//         return;
 	var serviceName = '/sams/listforsequence.json?';
@@ -2355,6 +2368,26 @@ function setBamMenu(fDisplay) {
 	},
 	{ sequence:fDisplay.srcFeature }, fDisplay, { });
 
+	serviceName = '/variants/listforsequence.json?';
+	handleAjaxCalling(serviceName, function (fDisplay, vcfFiles, options) {
+        $('#vcfFiles').html('<a href="#ab">VCF</a>');
+		
+		var vcfStr = '<ul>';
+		if(vcfFiles == undefined || vcfFiles.length == 0)
+			vcfStr += '<li class="current"><a href="#" id="none">None</a></li>';
+
+		if(vcfFiles != undefined) {
+			for(var i=0; i<vcfFiles.length; i++) {
+				vcfStr += '<li class="current"><a href="#" name="'+vcfFiles[i].fileID+'">'+vcfFiles[i].meta+'</a></li>';
+			}
+		}
+		vcfStr += '</ul>';
+		$('#vcfFiles').append(vcfStr);
+		
+		// increase menu width
+		$('#vcfFiles').find('li').css('width', '20em');
+	},
+	{ sequence:fDisplay.srcFeature }, fDisplay, { });
 }
 
 

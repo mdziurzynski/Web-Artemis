@@ -27,6 +27,12 @@
 						<li class="current"><a href="#" id="bamToggle">none</a></li>
 					</ul>
 				</li>
+				<li id='vcfFiles'>
+					<a href="#ab">VCF</a>
+					<ul>
+						<li class="current"><a href="#" id="vcfToggle">none</a></li>
+					</ul>
+				</li>
 			</ul>
 		</li>
 		<li class="ui-corner-all">
@@ -54,6 +60,7 @@
 	<div class="strands"></div>
 		
 	<div id="bam" class="holder"></div>
+	<div id="vcf" class="holder"></div>
 	<div id="featureDisplays" class="holder"></div>
 	<div id="comparisons" class="holder"></div>
 	<div id="stop_codons" class="holder"></div>
