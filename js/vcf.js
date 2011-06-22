@@ -25,51 +25,6 @@ function removeVcfObj(vcfId) {
 	vcfObjs = tmp;
 }
 
-function removeVcfDisplay(fDisplay, vcfId) {
-	if(vcfId != undefined) {
-		removeVcfObj(vcfId);
-		removeVcf(fDisplay, vcfId);
-	} else {
-		for(i=0; i<vcfObjs.length; i++) {
-			if(vcfObjs[i].vcfId == undefined)
-				continue;
-			removeVcf(fDisplay, vcfObjs[i].vcfId);
-		}
-		vcfObjs = new Array();
-	}
-	
-	if($('.vcfScroll').size() == 0)
-		$('#vcfDrag').remove();
-}
-
-function removeVcf(fDisplay, vcfId) {
-	var hgt = $('#vcfscroll'+vcfId).height();
-	// remove bam ID from array of current bam's
-	var top = $("#vcfscroll"+vcfId).css('margin-top').replace("px", "");
-	$("#vcf"+vcfId).remove();
-	$('#vcfClose'+vcfId).remove();
-	$("#vcfscroll"+vcfId).remove();
-
-	$('.vcfScroll').each(function(index) {
-	    var thisTop = $(this).css('margin-top').replace("px", "");
-	    if(parseInt(thisTop) > parseInt(top)) {
-	    	$(this).css({'margin-top': thisTop-hgt+'px'});
-	    }
-	 });
-	
-	$('[id*=vcfClose]').each(function(index) {
-	    var thisTop = $(this).css('margin-top').replace("px", "");
-	    if(parseInt(thisTop) > parseInt(top)) {
-	    	$(this).css({'margin-top': thisTop-hgt+'px'});
-	    }
-	 });
-
-	fDisplay.marginTop = fDisplay.marginTop-hgt;
-	adjustFeatureDisplayPosition(false, fDisplay);
-	drawFrameAndStrand(fDisplay);
-    adjustHeight(fDisplay, -hgt);
-}
-
 function addVcfDisplay(fDisplay, tgt) {
 	var vcfId = $(tgt).attr('name');
 	//addDragEdge(fDisplay);
@@ -102,7 +57,13 @@ function addVcfDisplay(fDisplay, tgt) {
 	}
 	
 	$('#vcfClose').click(function() {
-		removeVcfDisplay(fDisplay, vcfId);
+		var hgt = $('#vcfscroll').height();
+		$("#vcf").empty();
+
+		fDisplay.marginTop = fDisplay.marginTop-hgt;
+		adjustFeatureDisplayPosition(false, fDisplay);
+		drawFrameAndStrand(fDisplay);
+	    adjustHeight(fDisplay, -hgt);
 	});
 	
 	drawVcf(fDisplay, vcfId); 
@@ -160,9 +121,7 @@ var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
     var i;
     for(i=0; i<records.length; i++) {
     	debugLog(records[i]);
-    	debugLog(ypos);
-		var thisPos = margin+Math.round((records[i].pos - fDisplay.leftBase)/basePerPixel);
-		
+		var thisPos = margin+Math.round((records[i].pos - fDisplay.leftBase)/basePerPixel);	
 		var col = '#707070';
 		
 		if(records[i].alt.isInsertion) {
