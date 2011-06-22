@@ -2490,7 +2490,7 @@ var methods = {
         if(!options.directory) {
             options.directory = ".";
         }
-		$(this).load(options.directory+"/js/WebArtemis.inc", function(){
+		$(this).load(options.directory+"/js/WebArtemis.html", function(){
 			//set the default values for the options
 			var settings = $.extend({
 				bases : 16000,				// number of bases shown
