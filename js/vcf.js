@@ -59,7 +59,8 @@ function addVcfDisplay(fDisplay, tgt) {
 	$('#vcfClose').click(function() {
 		var hgt = $('#vcfscroll').height();
 		$("#vcf").empty();
-
+		vcfObjs = new Array();
+		
 		fDisplay.marginTop = fDisplay.marginTop-hgt;
 		adjustFeatureDisplayPosition(false, fDisplay);
 		drawFrameAndStrand(fDisplay);
