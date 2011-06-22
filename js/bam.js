@@ -58,6 +58,12 @@ var aSamCoverage = function ajaxGetSamCoverage(fDisplay, returnedCoverage, optio
 			$("#bam"+options.bamId).drawLine(xpos1, ypos1, xpos2, ypos2,
 				{color:'#0000FF', stroke:'1'});
 		}
+		
+		// draw max value
+		var thisBam = getBamObj(options.bamId);
+		var ctx = getBamCanvasCtx(thisBam, false);
+		var maxStr = max+"";
+		drawString(ctx, maxStr, displayWidth-(12*(maxStr.length-1)), maxBamHgt-bamViewPortHgt+14, '#000000', 0,"Courier New",12);
 	}
 	$('body').css('cursor','default');
 };
