@@ -74,56 +74,39 @@ function addVcfDisplay(fDisplay, tgt) {
 	var vcfId = $(tgt).attr('name');
 	//addDragEdge(fDisplay);
 
-	$('#vcf').append('<div id="vcfscroll'+vcfId+'" class="vcfScroll" title="'+$(tgt).attr('text')+'"></div></div>');
-	$('#vcf').append('<span id="vcfClose'+vcfId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
-	
-	$('#vcfscroll'+vcfId).append('<div id="vcf'+vcfId+'" class="canvas"></div>');
-	
-	var hgt = fDisplay.marginTop-5;
-	$("#vcf"+vcfId).css( { 'height': maxVcfHgt+'px', 'width': displayWidth+margin+'px' });
-	$('#vcfscroll'+vcfId).css({ 
-		'margin-top': hgt+'px', 
-		'height': vcfViewPortHgt+'px', 
-		'width': displayWidth+margin+20+'px', 
-		'border': '1px solid #666',
-		'background-color': '#F0F0F0'});
+	if( $('#vcfCanvas').length == 0 ) {
+		$('#vcf').append('<div id="vcfscroll" class="vcfScroll"></div></div>');
+		$('#vcf').append('<span id="vcfClose" class="ui-icon ui-icon-circle-close" title="close"></span>');
+		$('#vcfscroll').append('<div id="vcfCanvas" class="canvas"></div>');
+		
+		var hgt = fDisplay.marginTop-5;
+		$("#vcfCanvas").css( { 'height': maxVcfHgt+'px', 'width': displayWidth+margin+'px' });
+		$('#vcfscroll').css({ 
+			'margin-top': hgt+'px', 
+			'height': vcfViewPortHgt+'px', 
+			'width': displayWidth+margin+20+'px', 
+			'border': '1px solid #666',
+			'background-color': '#F0F0F0'});
 
-	$('#vcfClose'+vcfId).css({
-		'margin-left': '0px', 
-		'position':'absolute', 
-		'margin-top': hgt+'px', 
-		'border': '1px solid #666'});
+		$('#vcfClose').css({
+			'margin-left': '0px', 
+			'position':'absolute', 
+			'margin-top': hgt+'px', 
+			'border': '1px solid #666'});
+
+		fDisplay.marginTop = fDisplay.marginTop+vcfViewPortHgt;
+		
+		adjustFeatureDisplayPosition(false, fDisplay);
+		drawFrameAndStrand(fDisplay);
+	    adjustHeight(fDisplay, $('#vcfscroll').height());
+	}
 	
-	$('#vcfClose'+vcfId).click(function() {
+	$('#vcfClose').click(function() {
 		removeVcfDisplay(fDisplay, vcfId);
 	});
 	
-	$("#vcfscroll"+vcfId).scrollTop(maxVcfHgt);
-	fDisplay.marginTop = fDisplay.marginTop+vcfViewPortHgt;
-	
-	adjustFeatureDisplayPosition(false, fDisplay);
-	drawFrameAndStrand(fDisplay);
-    //addBamMenu(fDisplay, bamId);
-    drawVcf(fDisplay, vcfId); 
-    adjustHeight(fDisplay, $('#vcfscroll'+vcfId).height());
-    
-	// click handler
-	/*$('#bam'+bamId).single_double_click(handleBamClick, handleBamDoubleClick, fDisplay, 500);
-	$('#bam'+bamId).mousemove(function(event) {
-		disablePopup();
-		var bamId = $(event.currentTarget).attr('id').replace("bam","");
-		var thisBam = getBamObj(bamId);
-		
-		if( !thisBam.samRecords )
-			return;
-		
-		thisBam.mouseOverX = Math.round(event.pageX - $(event.target).offset().left);
-		thisBam.mouseOverY = Math.round(event.pageY - $(event.target).offset().top);
-		thisBam.mouseOver = true;
-
-		drawReadDisplay(fDisplay, thisBam);
-		thisBam.mouseOver = false;
-	});*/
+	drawVcf(fDisplay, vcfId); 
+	$("#vcfscroll").scrollTop(maxVcfHgt);
 }
 
 function drawVcf(fDisplay, vcfId) {
@@ -132,10 +115,12 @@ function drawVcf(fDisplay, vcfId) {
 	var thisVcf = getVcfObj(vcfId);
 	if(thisVcf == null) {
 		thisVcf = new vcfObj(vcfId);
+		thisVcf.ypos = maxBamHgt-1-(vcfObjs.length*14);
 		vcfObjs.push(thisVcf);
 	}
 	
 	if(vcfId == undefined) {
+		$("#vcfCanvas").html('');
 		for(i=0; i<vcfObjs.length; i++) {
 			if(vcfObjs[i].vcfId == undefined)
 				continue;
@@ -155,8 +140,6 @@ function drawVcf(fDisplay, vcfId) {
 
 
 var aVcfSeqs = function ajaxGetVcfSeqs(fDisplay, vcfSeqs, options) {
-    $("#vcf"+options.vcfId).html('');
-	
 	var sequenceName = fDisplay.srcFeature;
 	var thisVcf = getVcfObj(options.vcfId);
 	
@@ -173,10 +156,11 @@ var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
 	var thisVcf = getVcfObj(options.vcfId);
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
-	var ypos  = maxBamHgt-1;
+	var ypos  = thisVcf.ypos;
     var i;
     for(i=0; i<records.length; i++) {
     	debugLog(records[i]);
+    	debugLog(ypos);
 		var thisPos = margin+Math.round((records[i].pos - fDisplay.leftBase)/basePerPixel);
 		
 		var col = '#707070';
@@ -195,7 +179,7 @@ var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
 			col = '#000000';
 		}
 		
-		$("#vcf"+thisVcf.vcfId).drawLine(thisPos, ypos, thisPos, ypos-11, {color:col, stroke:'1'});
+		$("#vcfCanvas").drawLine(thisPos, ypos, thisPos, ypos-11, {color:col, stroke:'1'});
     }
     $('body').css('cursor','default');
 }
