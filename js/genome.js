@@ -1914,7 +1914,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, option
 	for(var i=0; i<nfeatures; i++ ) {
 	  var feature = features[i];
 
-	  if(feature.type.name == "exon" || feature.type.name == "pseudogenic_exon") {
+	  if(feature.type.name == "exon" || feature.type.name == "pseudogenic_exon" || feature.type.name == "CDS") {
 		  
 		  if(!feature.properties) {
 			  featureToColourList.push(feature.uniqueName);
@@ -1923,6 +1923,9 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, option
 		  var exons = exonMap[feature.parent];
 		  if(exons == undefined) {
 			  exons = new Array();
+			  if(!feature.parent) { // when no parent is defined in GFF
+				  feature.parent = feature.uniqueName
+			  }
 			  exonParent.push(feature.parent);
 			  exonMap[feature.parent] = exons;
 		  }
