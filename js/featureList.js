@@ -15,7 +15,7 @@ function handleFeatureListDoubleClick(fDisplay, event, featureSelected) {
 
 function getSelectedId(event) {
 	var name;
-	if($(event.target).attr('id') == "") {
+	if(!$(event.target).attr('id')) {
 		name = getFirstTd(event).attr('id').replace(/:LIST$/,'');
 	} else {
 		name = $(event.target).attr('id').replace(/:LIST$/,'');
@@ -81,7 +81,7 @@ function setupFeatureList(features, exonMap, exonParent, featureDisplay, append)
 	var nrows = 0;
 	for(var i=0; i<features.length; i++) {
 		var feature = features[i];
-		if(feature.type.name != 'exon' && feature.type.name != 'pseudogenic_exon') {
+		if(feature.type.name != 'exon' && feature.type.name != 'pseudogenic_exon' && feature.type.name != 'CDS') {
 		  appendFeatureToList(feature);
 		  nrows++;
 		} else if(exonMap[feature.parent] != undefined) {
@@ -122,7 +122,7 @@ function appendExonsToList(exons) {
 	}
 		
 	var type;
-	if(exons[0].type.name == 'exon')
+	if(exons[0].type.name == 'exon' || exons[0].type.name == 'CDS')
 		type = "CDS";
 	else
 		type = "pseudogene";
@@ -196,7 +196,7 @@ function selectFromList(tr, rowIndex, fDisplay) {
 }
 
 function selectInList(featureSelected) {
-	if(featureSelected.match(/\d+$/g)) {
+	if(featureSelected.match(/:\d+$/g)) {
 		// select exons of same gene
 		var wildcardSearchString = featureSelected.replace(/:\d+$/g,'');
     	var selId = "[id*=" + wildcardSearchString +"]";
