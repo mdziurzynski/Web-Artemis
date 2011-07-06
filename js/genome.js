@@ -42,8 +42,8 @@ var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
-var excludes = ['gene', 'pseudogene', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
-var includes = ['exon', 'pseudogenic_exon', 'gap', 'contig', 'ncRNA', 'tRNA', 'five_prime_UTR', 'three_prime_UTR', 'polypeptide_motif'];
+var excludes = ['gene', 'pseudogene', 'sequence_feature', 'databank_entry', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
+var includes = ['exon', 'pseudogenic_exon', 'CDS', 'gap', 'contig', 'ncRNA', 'tRNA', 'five_prime_UTR', 'three_prime_UTR', 'polypeptide_motif'];
 
 var colour = [ 
     '255,255,255',
@@ -2502,8 +2502,8 @@ var methods = {
 				source : 'Pf3D7_01',		// default sequence
 				width : $(window).width(), 	// browser viewport width,
 				showOrganismsList : true,	// show organism list
-				//webService : 'http://127.0.0.1:8080/services/',
-				webService : 'http://www.genedb.org/services/',
+				webService : 'http://127.0.0.1:8080/services/',
+				//webService : 'http://www.genedb.org/services/',
 				dataType : 'jsonp',			// json/jsonp
 				draggable : true,			// allow dragging to increase size
 				mainMenu : true,			// show the main menu
