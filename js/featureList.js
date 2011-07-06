@@ -144,7 +144,7 @@ function appendExonsToList(exons) {
 
 function appendFeatureToList(feature) {
 	var s = parseInt(feature.fmin)+1;
-	$('#featureListTable').append('<tr id="'+feature.feature+':LIST">'+
+	$('#featureListTable').append('<tr id="'+feature.uniqueName+':LIST">'+
 			'<td>'+feature.uniqueName+'</td>'+
 			'<td>'+feature.type.name+'</td>'+
 			'<td>'+s+'</td>'+
