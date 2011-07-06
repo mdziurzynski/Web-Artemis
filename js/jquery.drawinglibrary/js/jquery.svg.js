@@ -20,7 +20,7 @@ function SVGManager() {
 		// for each entry [0] is extension name, [1] is extension class (function)
 		// the function takes one parameter - the SVGRoot instance
 	this.regional = []; // Localisations, indexed by language, '' for default (English)
-	this.regional[''] = {notSupportedText: 'This browser does not support SVG',
+	this.regional[''] = {notSupportedText: '',
 		errorLoadingText: 'Error loading'};
 	this.region = this.regional['']; // Current localisation
 }
