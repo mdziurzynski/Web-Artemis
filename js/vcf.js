@@ -54,6 +54,9 @@ function addVcfDisplay(fDisplay, tgt) {
 		adjustFeatureDisplayPosition(false, fDisplay);
 		drawFrameAndStrand(fDisplay);
 	    adjustHeight(fDisplay, $('#vcfscroll').height());
+	    
+		// click handler
+		$('#vcf').single_double_click(handleVcfClick, handleVcfDoubleClick, fDisplay, 500);
 	}
 	
 	$('#vcfClose').click(function() {
@@ -116,12 +119,14 @@ var aVcfSeqs = function ajaxGetVcfSeqs(fDisplay, vcfSeqs, options) {
 
 var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
 	var thisVcf = getVcfObj(options.vcfId);
+	
+	thisVcf.records = records;
 	baseInterval = (fDisplay.basesDisplayWidth/displayWidth)*screenInterval;
 	var basePerPixel  = baseInterval/screenInterval;
 	var ypos  = thisVcf.ypos;
     var i;
     for(i=0; i<records.length; i++) {
-    	debugLog(records[i]);
+    	//debugLog(records[i]);
 		var thisPos = margin+Math.round((records[i].pos - fDisplay.leftBase)/basePerPixel);	
 		var col = '#707070';
 		
@@ -139,8 +144,54 @@ var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
 			col = '#000000';
 		}
 		
+		if(thisVcf.clicked) {
+			if(thisVcf.xpos >= thisPos-1 && thisVcf.xpos <= thisPos+1) {
+				thisVcf.clickedRecord = records[i];
+			}
+		}
 		$("#vcfCanvas").drawLine(thisPos, ypos, thisPos, ypos-11, {color:col, stroke:'1'});
     }
     $('body').css('cursor','default');
+}
+
+function showPopupVcf(thisVcf, event) {
+	if(!thisVcf.clickedRecord)
+		return;
+	var msg = "<table>"+
+		      "<tr><td>POS </td><td>"+thisVcf.clickedRecord.pos + "</td></tr>" +
+		      "<tr><td>REF </td><td>"+thisVcf.clickedRecord.ref + "</td></tr>" +
+	          "<tr><td>ALT </td><td>"+thisVcf.clickedRecord.alt.alternateBase + "</td></tr>" +
+	          "<tr><td>QUAL</td><td>"+thisVcf.clickedRecord.quality + "</td></tr></table>";
+	loadPopup(msg, event.pageX+10, event.pageY+10, 20000);
+}
+
+function getVcfObjByPos(y) {
+	for(i=0; i<vcfObjs.length; i++) {
+		if(y > vcfObjs[i].ypos-14 && y < vcfObjs[i].ypos) {
+			return vcfObjs[i];
+		}
+	}
+	return;
+}
+
+function handleVcfClick(fDisplay, event, tgt) {
+	var x = Math.round(event.pageX - $(event.target).offset().left);
+	var y = Math.round(event.pageY - $(event.target).offset().top);
+
+	var thisVcf = getVcfObjByPos(y);
+	if(!thisVcf || !thisVcf.vcfId)
+		return;
+	
+	thisVcf.clicked = true;
+	thisVcf.clickedRecord = undefined;
+	thisVcf.xpos = x;
+	aVcfCall(fDisplay, thisVcf.records, { vcfId : thisVcf.vcfId });
+	thisVcf.clicked = false;
+	showPopupVcf(thisVcf, event);
+}
+
+function handleVcfDoubleClick(fDisplay, event, tgt, region) {
+	thisVcf.clickedRecord = undefined;
+	thisVcf.clicked = false;
 }
 
