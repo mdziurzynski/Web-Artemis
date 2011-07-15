@@ -2,6 +2,8 @@
 var maxVcfHgt = 650;
 var vcfViewPortHgt = 150;
 var vcfObjs = new Array();
+var colourByQuality = false;
+var colourMap;
 
 function vcfObj(vcfId) {
 	this.vcfId = vcfId;
@@ -23,6 +25,79 @@ function removeVcfObj(vcfId) {
 		}
 	}
 	vcfObjs = tmp;
+}
+
+var rightClickVcfMenu = function(action, el, pos, self) {
+	if(action.match(/cbQuality/)) {
+		colourByQuality = true;
+		drawVcf(self);
+	} else {
+		colourByQuality = false;
+	}
+};
+
+function addVcfMenu(fDisplay) {
+	$('#menuHeader').append('<ul id="vcfMenus" class="contextMenu" style="width:290px;">' +
+    		'<li><a href="#cbQuality">Colour by Quality</a></li>'+
+    		'<li><a href="#cbType">Colour by Type</a></li>'+
+   		'</ul>');
+
+    $('#vcf').contextMenu({menu: 'vcfMenus'}, 
+    		function(action, el, pos) { rightClickVcfMenu(action, el, pos, fDisplay) });
+}
+
+function RGBtoHex(R,G,B) {return toHex(R)+toHex(G)+toHex(B)}
+function toHex(N) {
+ if (N==null) return "00";
+ N=parseInt(N); if (N==0 || isNaN(N)) return "00";
+ N=Math.max(0,N); N=Math.min(N,255); N=Math.round(N);
+ return "0123456789ABCDEF".charAt((N-N%16)/16)
+      + "0123456789ABCDEF".charAt(N%16);
+}
+
+function makeColours(NUMBER_OF_SHADES) {
+	var startColour = new Object();
+	startColour.r = 255;
+	startColour.g = 0;
+	startColour.b = 0;
+    var colMap = new Array();
+
+    for(var i = 0; i < NUMBER_OF_SHADES; ++i) {
+    	var R = startColour.r;
+    	var G = startColour.g;
+    	var B = startColour.b;
+
+    	var scale = ((NUMBER_OF_SHADES-i) * (255.0 / NUMBER_OF_SHADES )) ;
+    	if((R+scale) <= 255)
+    		R += scale;
+    	else
+    		R = 254;
+    	if((G+scale) <= 255)
+    		G += scale;
+    	else
+    		G = 254;
+    	if((B+scale) <= 255)
+    		B += scale;
+    	else
+    		B = 254;
+
+    	var hex = RGBtoHex(R, G, B);
+    	colMap[i] = '#' + hex;
+    }
+    return colMap;
+}
+
+function getColourByQuality(qual) {
+	if(!colourMap) {
+		colourMap = makeColours(255);
+	}
+	var idx = Math.floor(qual-1);
+    if(idx > colourMap.length-1) {
+      idx = colourMap.length-1;
+    } else if(idx < 0) {
+      idx = 0;
+    }
+    return colourMap[idx];
 }
 
 function addVcfDisplay(fDisplay, tgt) {
@@ -56,6 +131,7 @@ function addVcfDisplay(fDisplay, tgt) {
 	    adjustHeight(fDisplay, $('#vcfscroll').height());
 	    
 		// click handler
+	    addVcfMenu(fDisplay);
 		$('#vcf').single_double_click(handleVcfClick, handleVcfDoubleClick, fDisplay, 500);
 	}
 	
@@ -130,18 +206,22 @@ var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
 		var thisPos = margin+Math.round((records[i].pos - fDisplay.leftBase)/basePerPixel);	
 		var col = '#707070';
 		
-		if(records[i].alt.isInsertion) {
-			col = '#CD00CD';  // magenta
-		} else if(records[i].alt.isDeletion) {
-			col = '#6C7B8B';  // slate grey
-		} else if(records[i].alt.alternateBase.toUpperCase() == 'C') {
-			col = '#FF0000';
-		} else if(records[i].alt.alternateBase.toUpperCase() == 'A') {
-			col = '#00FF00';
-		} else if(records[i].alt.alternateBase.toUpperCase() == 'G') {
-			col = '#0000FF';
-		} else if(records[i].alt.alternateBase.toUpperCase() == 'T') {
-			col = '#000000';
+		if(colourByQuality) {
+			col = getColourByQuality(records[i].quality);
+		} else {
+			if(records[i].alt.isInsertion) {
+				col = '#CD00CD';  // magenta
+			} else if(records[i].alt.isDeletion) {
+				col = '#6C7B8B';  // slate grey
+			} else if(records[i].alt.alternateBase.toUpperCase() == 'C') {
+				col = '#FF0000';
+			} else if(records[i].alt.alternateBase.toUpperCase() == 'A') {
+				col = '#00FF00';
+			} else if(records[i].alt.alternateBase.toUpperCase() == 'G') {
+				col = '#0000FF';
+			} else if(records[i].alt.alternateBase.toUpperCase() == 'T') {
+				col = '#000000';
+			}	
 		}
 		
 		if(thisVcf.clicked) {
