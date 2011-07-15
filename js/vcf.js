@@ -28,18 +28,43 @@ function removeVcfObj(vcfId) {
 }
 
 var rightClickVcfMenu = function(action, el, pos, self) {
-	if(action.match(/cbQuality/)) {
-		colourByQuality = true;
-		drawVcf(self);
-	} else {
-		colourByQuality = false;
-	}
+	if(action.match(/colScheme/)) {
+		addColourSchemeDialog(self);
+	} 
 };
+
+function addColourSchemeDialog(fDisplay) {
+	$("div#properties").html("<div id='VCFCol'></div>");
+    $("div#VCFCol").dialog({ height: 145 ,
+		width:250, position: 'center', title:'VCF Colour Scheme',
+		close: function(event, ui) { $(this).remove(); },
+		open: function(event, ui) { setCheckBoxStatus(); },
+		buttons: {
+		'Set': function() {
+			if ($(":radio[@name='rdio']:checked").val() == 'type'){
+				colourByQuality = false;
+			} else {
+				colourByQuality = true;
+			}
+			drawVcf(fDisplay);
+		},
+		Close: function() {
+			$(this).dialog('close');
+		}
+	}});
+	
+    var colTable = 
+    	'<table>'+
+		'<tr><td><input type="radio" name="rdio" value="type" checked="checked" />Variant Type</td></tr>' +
+		'<tr><td><input type="radio" name="rdio" value="qual" />Quality</td></tr>' +
+    	'</table>';
+    
+    $("div#VCFCol").html(colTable);
+}
 
 function addVcfMenu(fDisplay) {
 	$('#menuHeader').append('<ul id="vcfMenus" class="contextMenu" style="width:290px;">' +
-    		'<li><a href="#cbQuality">Colour by Quality</a></li>'+
-    		'<li><a href="#cbType">Colour by Type</a></li>'+
+    		'<li><a href="#colScheme">Colour Scheme</a></li>'+
    		'</ul>');
 
     $('#vcf').contextMenu({menu: 'vcfMenus'}, 
