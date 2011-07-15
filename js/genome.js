@@ -78,7 +78,7 @@ function featureDisplayObj(basesDisplayWidth, marginTop, sequenceLength,
 	this.srcFeature = srcFeature;
 	this.frameLnHgt = frameLnHgt;
 	this.leftBase = leftBase;
-	this.sequence;
+	//this.sequence;
 	this.minimumDisplay = false;
 	this.showStopCodons = false;
 	this.nodraw = false;
@@ -2625,7 +2625,7 @@ var methods = {
 			// Override the core hide() method
 			var originalHideMethod = jQuery.fn.hide;
 			jQuery.fn.extend({
-				hide : function(arguments) { 
+				hide : function(args) { 
 				if(this.selector == '.contextMenu') 
 					disablePopup(); 
 				return originalHideMethod.apply( this ); }
