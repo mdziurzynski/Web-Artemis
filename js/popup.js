@@ -17,6 +17,9 @@ function loadPopup(txt,x,y, time){
  if(time == undefined)
 	 time = 8000;
  positionPopup(x,y);
+ 
+ $(document).appendTo('<div id="popupContact"><div id="popupTxt"></div></div>');
+ 
 //loads popup only if it is disabled  
  $("#popupContact").html(txt);
  $("#popupContact").fadeIn("fast");
@@ -28,7 +31,9 @@ function loadPopup(txt,x,y, time){
 
 function disablePopup(){  
   //disables popup only if it is enabled  
-  $("#popupContact").fadeOut("fast");  
+  $("#popupContact").fadeOut("fast", function(e) {
+	  $("#popupContact").remove();
+  });
 }  
 
 //centering popup  
