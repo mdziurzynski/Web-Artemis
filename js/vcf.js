@@ -4,6 +4,17 @@ var vcfViewPortHgt = 150;
 var vcfObjs = new Array();
 var colourByQuality = false;
 var colourMap;
+var VCFfilter = [ 
+         'SHOW_SYNONYMOUS',
+         'SHOW_NON_SYNONYMOUS',
+         'SHOW_DELETIONS',
+         'SHOW_INSERTIONS',
+         'SHOW_MULTI_ALLELES',
+         'SHOW_NON_OVERLAPPINGS',
+         'SHOW_NON_VARIANTS',
+         'MARK_NEW_STOPS'];
+
+var currentVCFfilter;
 
 function vcfObj(vcfId) {
 	this.vcfId = vcfId;
@@ -30,7 +41,9 @@ function removeVcfObj(vcfId) {
 var rightClickVcfMenu = function(action, el, pos, self) {
 	if(action.match(/colScheme/)) {
 		addColourSchemeDialog(self);
-	} 
+	} else if(action.match(/vcfFilter/)) {
+		vcfFilter(self);
+	}
 };
 
 function addColourSchemeDialog(fDisplay) {
@@ -62,9 +75,50 @@ function addColourSchemeDialog(fDisplay) {
     $("div#VCFCol").html(colTable);
 }
 
+function vcfFilter(fDisplay) {
+	$("div#properties").html("<div id='VCFfilters'></div>");
+	$("div#VCFfilters").dialog({ height: 385 ,
+		width:450, position: 'center', title:'Filter',
+		close: function(event, ui) { $(this).remove(); },
+		buttons: {
+		'Filter': function() {
+			var cbs = $('input[name*=cbVCFFilter]')
+			  .map(function() { return this; }) // get element
+			  .get(); // convert to instance of Array (optional)
+			currentVCFfilter = new Array();
+			for(i=0; i<cbs.length; i++) {
+				if($(cbs[i]).is(':checked')) {
+					currentVCFfilter.push(VCFfilter[i]);
+				}
+			}
+			drawVcf(fDisplay);
+		},
+		Close: function() {
+			$(this).dialog('close');
+		}
+	}});
+	
+    var filterTable = '<table>';
+    for(i=0; i<VCFfilter.length; i++) {
+    	if($.inArray(VCFfilter[i], currentVCFfilter)) {
+    		filterTable += 
+    			'<tr><td><input type="checkbox" name="cbVCFFilter'+i+'" checked="checked" value="'+
+    			VCFfilter[i]+'"/>'+VCFfilter[i]+'</td></tr>';
+    	} else {
+    		filterTable += 
+    			'<tr><td><input type="checkbox" name="cbVCFFilter'+i+'" value="'+
+    			VCFfilter[i]+'"/>'+VCFfilter[i]+'</td></tr>';
+    	}
+    }
+    filterTable +='</table>';
+    
+    $("div#VCFfilters").html(filterTable);
+}
+
 function addVcfMenu(fDisplay) {
 	$('#menuHeader').append('<ul id="vcfMenus" class="contextMenu" style="width:290px;">' +
     		'<li><a href="#colScheme">Colour Scheme</a></li>'+
+    		'<li><a href="#vcfFilter">Filters</a></li>'+
    		'</ul>');
 
     $('#vcf').contextMenu({menu: 'vcfMenus'}, 
@@ -130,6 +184,8 @@ function addVcfDisplay(fDisplay, tgt) {
 	//addDragEdge(fDisplay);
 
 	if( $('#vcfCanvas').length == 0 ) {
+		
+		currentVCFfilter = VCFfilter;
 		$('#vcf').append('<div id="vcfscroll" class="vcfScroll"></div></div>');
 		$('#vcf').append('<span id="vcfClose" class="ui-icon ui-icon-circle-close" title="close"></span>');
 		$('#vcfscroll').append('<div id="vcfCanvas" class="canvas"></div>');
@@ -212,10 +268,10 @@ var aVcfSeqs = function ajaxGetVcfSeqs(fDisplay, vcfSeqs, options) {
 	var start = fDisplay.leftBase;
 	var end = parseInt(start) + parseInt(fDisplay.basesDisplayWidth);
 	
-	serviceName = '/variants/query.json?';
+	serviceName = '/variants/queryWithFilters.json?';
 	
 	handleAjaxCalling(serviceName, aVcfCall,
-		{ fileID:options.vcfId, sequence:sequenceName, start:start, end:end }, fDisplay, { vcfId:options.vcfId });
+		{ fileID:options.vcfId, sequence:sequenceName, start:start, end:end, filters:currentVCFfilter }, fDisplay, { vcfId:options.vcfId });
 };
 
 var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
