@@ -895,7 +895,8 @@ function FeatureInfo(uniqueName, options) {
         }
 	});
 	
-	
+
+//	
 //	$.ajax({
 //        url: settings.web_service_root + "features/hierarchy.json",
 //        type: 'GET',
@@ -920,41 +921,8 @@ function FeatureInfo(uniqueName, options) {
 //        }
 //	});
 	
-	
-	
-	$.ajax({
-        url: settings.web_service_root + "features/hierarchy.json",
-        type: 'GET',
-        dataType: 'json',
-        data: {
-            'features' : uniqueName
-        },
-        success: function(features) {
-        	
-        	var feature = features[0];
-        	
-        	if (feature.uniqueName == self.uniqueName) {
-        		
-        		
-        	}
-        	
-        	$.each(features, function(index, feature) {
-        		var type = region.type.name;
-        		self.region_types_container.append("<button class='fg-button ui-state-default region_type' region_type='" + type + "' >" + type + "</button>");
-        	});
-			self.onLoadTypes();
-        }
-	});
-	
 }
 
-	$fn.GeneInfo = function(options) {
-		
-	}
-
-	$.fn.GeneInfo.defaults = {
-		'web_service_root' : "/services/"
-	};
 
 
 
