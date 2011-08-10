@@ -872,6 +872,89 @@ function WebArtemisToChromosomeMap(selector) {
 
 
 
+function FeatureInfo(uniqueName, options) {
+	
+	var self = this;
+	
+	self.settings = $.extend({}, {
+		'web_service_root' : "/services/"
+	}, 
+	options);
+	
+	$.ajax({
+		url: settings.web_service_root + "features/coordinates.json",
+		type: 'GET',
+        dataType: 'json',
+        data: {
+            'features' : uniqueName
+        },
+        success: function(features) {
+        	self.feature = features[0];
+        	$.log(self.feature);
+        	$.log(self.feature.coordinates[0]);
+        }
+	});
+	
+	
+//	$.ajax({
+//        url: settings.web_service_root + "features/hierarchy.json",
+//        type: 'GET',
+//        dataType: 'json',
+//        data: {
+//            'features' : uniqueName
+//        },
+//        success: function(features) {
+//        	
+//        	var feature = features[0];
+//        	
+//        	if (feature.uniqueName == self.uniqueName) {
+//        		
+//        		
+//        	}
+//        	
+//        	$.each(features, function(index, feature) {
+//        		var type = region.type.name;
+//        		self.region_types_container.append("<button class='fg-button ui-state-default region_type' region_type='" + type + "' >" + type + "</button>");
+//        	});
+//			self.onLoadTypes();
+//        }
+//	});
+	
+	
+	
+	$.ajax({
+        url: settings.web_service_root + "features/hierarchy.json",
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            'features' : uniqueName
+        },
+        success: function(features) {
+        	
+        	var feature = features[0];
+        	
+        	if (feature.uniqueName == self.uniqueName) {
+        		
+        		
+        	}
+        	
+        	$.each(features, function(index, feature) {
+        		var type = region.type.name;
+        		self.region_types_container.append("<button class='fg-button ui-state-default region_type' region_type='" + type + "' >" + type + "</button>");
+        	});
+			self.onLoadTypes();
+        }
+	});
+	
+}
+
+	$fn.GeneInfo = function(options) {
+		
+	}
+
+	$.fn.GeneInfo.defaults = {
+		'web_service_root' : "/services/"
+	};
 
 
 
