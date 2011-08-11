@@ -268,7 +268,7 @@ var aVcfSeqs = function ajaxGetVcfSeqs(fDisplay, vcfSeqs, options) {
 	var start = fDisplay.leftBase;
 	var end = parseInt(start) + parseInt(fDisplay.basesDisplayWidth);
 	
-	serviceName = '/variants/queryWithFilters.json?';
+	serviceName = '/variants/query.json?';
 	
 	handleAjaxCalling(serviceName, aVcfCall,
 		{ fileID:options.vcfId, sequence:sequenceName, start:start, end:end, filters:currentVCFfilter }, fDisplay, { vcfId:options.vcfId });
@@ -294,6 +294,9 @@ var aVcfCall = function ajaxGetVcfRecords(fDisplay, records, options) {
 				col = '#CD00CD';  // magenta
 			} else if(records[i].alt.isDeletion) {
 				col = '#6C7B8B';  // slate grey
+			} else if(records[i].alt.isMultiAllele) {
+				col = '#FFA500';  // orange
+				$("#vcfCanvas").fillEllipse(thisPos-3, ypos-12, 6, 6, {color:col, stroke:'1'});
 			} else if(records[i].alt.alternateBase.toUpperCase() == 'C') {
 				col = '#FF0000';
 			} else if(records[i].alt.alternateBase.toUpperCase() == 'A') {
