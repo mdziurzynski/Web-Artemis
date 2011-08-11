@@ -870,60 +870,260 @@ function WebArtemisToChromosomeMap(selector) {
 
 
 
-
-
-function FeatureInfo(uniqueName, options) {
-	
+function FeatureOrganism(uniqueName, options, onReady) {
 	var self = this;
-	
 	self.settings = $.extend({}, {
-		'web_service_root' : "/services/"
+		web_service_root : "/services/"
 	}, 
 	options);
 	
-	$.ajax({
-		url: settings.web_service_root + "features/coordinates.json",
-		type: 'GET',
-        dataType: 'json',
-        data: {
-            'features' : uniqueName
-        },
-        success: function(features) {
-        	self.feature = features[0];
-        	$.log(self.feature);
-        	$.log(self.feature.coordinates[0]);
-        }
-	});
-	
+}
 
-//	
-//	$.ajax({
-//        url: settings.web_service_root + "features/hierarchy.json",
-//        type: 'GET',
-//        dataType: 'json',
-//        data: {
-//            'features' : uniqueName
-//        },
-//        success: function(features) {
-//        	
-//        	var feature = features[0];
-//        	
-//        	if (feature.uniqueName == self.uniqueName) {
-//        		
-//        		
-//        	}
-//        	
-//        	$.each(features, function(index, feature) {
-//        		var type = region.type.name;
-//        		self.region_types_container.append("<button class='fg-button ui-state-default region_type' region_type='" + type + "' >" + type + "</button>");
-//        	});
-//			self.onLoadTypes();
-//        }
-//	});
+/*
+ * A very simple queing list, which will sequentially fire a list of functions. Each function (except the last one, must call the first parameter given to it when done);
+ * */
+function Q (funcs) {
+	var self = this;
+	
+	self.funcs = [];
+	if (funcs != null && funcs.length > 0)
+		self.funcs = funcs;
+	
+	self.index = 0;
+	
+	self.add = function (func) {
+		self.funcs.push(func);
+	}
+	
+	self.next = function() {
+		if (self.index <= self.max()) {
+			var func = self.funcs[self.index];
+			func(self.next);
+		} 
+		self.index++;
+	}
+	
+	self.max = function() {
+		return self.funcs.length -1;
+	}
+	
 	
 }
 
 
+function FeatureInfo(uniqueName, options, onReady) {
+	
+	var self = this;
+	$.log(uniqueName);
+	self.settings = $.extend({}, {services : ["/smansoni/", "/service/"]}, options);
+	
+	self.geneUniqueName = null;
+	self.feature = {region:null, type:"gene"};
+	self.features = [];
+	self.peptideName = null;
+	self.organism = null;
+	
+	self.transcript_count = 0;
+	self.sequenceLength = 0;
+	self.synonyms = null;
+	
+	self.service = null;
+	
+	self.getRegion=function() {
+		return self.feature.region;
+	};
+	
+	// this one is queued
+	self.getCoordinates = function(serviceName, success) {
+		$.ajax({
+			url: serviceName + "features/coordinates.json",
+			type: 'GET',
+			mode: "queue",
+	        dataType: 'json',
+	        data: {
+	            'features' : uniqueName
+	        },
+	        success: success
+		});
+	};
+	
+	self.getHierarchy = function(next) {
+		$.ajax({
+	        url: self.service + "features/hierarchy.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            'features' : uniqueName,
+	            'root_on_genes' : true
+	        },
+	        success: function(features) {
+	        	self.hierarchy = features;
+	        	$.log(self.hierarchy);
+	        	
+	        	self.geneUniqueName = self.hierarchy[0].uniqueName;
+	        	
+	        	self.recurseHierarchy(self.hierarchy[0]);
+	        	$.log(self.feature.type, self.transcript_count);
+	        	
+	        	next();
+	        }
+		});
+	};
+	
+	self.children_of_original_feature = false;
+	self.recurseHierarchy = function(relation) {
+		self.features.push(relation.uniqueName);
+		var type = relation.relationshipType;
+		$.log(relation.uniqueName, type);
+		if (type == "mRNA") {
+			self.transcript_count++;
+		}
+		if (relation.uniqueName == self.feature.uniqueName) {
+			if (type != null)
+				self.feature.type = type;
+			
+			self.children_of_original_feature = true;
+		}
+		
+		if (self.children_of_original_feature && type == "polypeptide") {
+			self.peptideName = relation.uniqueName;
+		}
+		
+		$.each(relation.child, function(n, child) {
+			self.recurseHierarchy(child);
+		});
+		
+		self.children_of_original_feature = false;
+	};
+	
+	
+	self.getSequenceLength = function (next) {
+		$.ajax({
+	        url: self.service + "regions/sequenceLength.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            'region' : self.getRegion()
+	        },
+	        success: function(sequences) {
+	        	self.sequenceLength = sequences[0].length;
+	        	$.log(sequences[0].length);
+	        	
+	        	next();
+	        	
+	        }
+		});
+	};
+	
+	self.getOrganism = function (next) {
+		$.ajax({
+	        url: self.service + "organisms/getByID.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            'ID' : self.feature.organism_id
+	        },
+	        success: function(organisms) {
+	        	self.organism = organisms[0];
+	        	
+	        	next();
+	        }
+		});
+	};
+	
+	self.getSynonyms = function(next) {
+		$.ajax({
+	        url: self.service + "features/synonyms.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            'features' : self.features.join(",")
+	        },
+	        success: function(synonyms) {
+	        	
+	        	// TODO this need needs to work on all the subfeatures of the hierarchy!
+	        	
+	        	if (synonyms.length > 0) {
+	        		self.synonyms = synonyms[0].synonyms;
+	        	}
+	        	
+	        	next();
+	        }
+		});
+	};
+	
+	
+	
+	
+	self.init = function (next) {
+		
+		var found = false;
+		
+		$.log("!");
+		$.each(self.settings.services, function(n,service) {
+			
+			if (found)
+				return;
+			
+			self.getCoordinates(service, function(features) {
+				
+				if (found)
+					return;
+				
+				if (features.length > 0) {
+					found = true;
+					self.service = service;
+					
+					self.feature = features[0];
+		        	$.log(self.feature.uniqueName);
+		        	$.log(self.feature.coordinates[0]);
+		        	
+		        	var initial_coordinates = self.feature.coordinates[0];
+		        	self.feature.fmin = initial_coordinates.fmin;
+		        	self.feature.fmax = initial_coordinates.fmax;
+		        	self.feature.region = initial_coordinates.region;
+					
+		        	next();
+		        	
+		        	return;
+				}
+			});
+			
+		});
+		
+		
+	}
+	
+	var q = new Q([self.init, self.getHierarchy, self.getSynonyms, self.getSequenceLength, self.getOrganism, onReady]);
+	q.next();
+	
+	
+	
+}
+
+
+function PolypeptideInfo(uniqueName, options) {
+	
+	var self = this;
+	self.settings = $.extend({}, {service : "/service/"}, options);
+	
+	self.getProducts = function (onSuccess) {
+		$.ajax({
+	        url: self.settings.service + "features/terms.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            cvs : "genedb_products",
+	            features: uniqueName
+	        },
+	        success: function(terms) {
+	        	$.log(terms);
+	        	onSuccess(terms);
+	        }
+		});
+	};
+	
+}
 
 
 
