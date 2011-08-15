@@ -925,6 +925,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 	
 	self.transcript_count = 0;
 	self.sequenceLength = 0;
+	self.regionInfo = null;
 	self.synonyms = null;
 	
 	self.service = null;
@@ -1015,6 +1016,25 @@ function FeatureInfo(uniqueName, options, onReady) {
 		});
 	};
 	
+	self.getRegionInfo = function (next) {
+		$.ajax({
+	        url: self.service + "regions/getInfo.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            'uniqueName' : self.getRegion()
+	        },
+	        success: function(regionInfo) {
+	        	
+	        	self.regionInfo = regionInfo;
+	        	$.log("info");
+	        	$.log(self.regionInfo);
+	        	next();
+	        	
+	        }
+		});
+	};
+	
 	self.getOrganism = function (next) {
 		$.ajax({
 	        url: self.service + "organisms/getByID.json",
@@ -1094,7 +1114,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		
 	}
 	
-	var q = new Q([self.init, self.getHierarchy, self.getSynonyms, self.getSequenceLength, self.getOrganism, onReady]);
+	var q = new Q([self.init, self.getHierarchy, self.getSynonyms, self.getSequenceLength, self.getRegionInfo, self.getOrganism, onReady]);
 	q.next();
 	
 	
@@ -1119,6 +1139,21 @@ function PolypeptideInfo(uniqueName, options) {
 	        success: function(terms) {
 	        	$.log(terms);
 	        	onSuccess(terms);
+	        }
+		});
+	};
+	
+	self.getDbxrefs = function (onSuccess) {
+		$.ajax({
+	        url: self.settings.service + "features/dbxrefs.json",
+	        type: 'GET',
+	        dataType: 'json',
+	        data: {
+	            features: uniqueName
+	        },
+	        success: function(dbxrefs) {
+	        	$.log(dbxrefs);
+	        	onSuccess(dbxrefs);
 	        }
 		});
 	};
