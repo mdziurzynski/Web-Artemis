@@ -915,9 +915,12 @@ function FeatureInfo(uniqueName, options, onReady) {
 	
 	var self = this;
 	$.log(uniqueName);
-	self.settings = $.extend({}, {services : ["/smansoni/", "/service/"]}, options);
+	self.settings = $.extend({}, {services : ["/service/"]}, options);
 	
 	self.geneUniqueName = null;
+	self.geneType = null;
+	self.hierarchyType = null;
+	
 	self.feature = {region:null, type:"gene"};
 	self.features = [];
 	self.peptideName = null;
@@ -937,12 +940,12 @@ function FeatureInfo(uniqueName, options, onReady) {
 	// this one is queued
 	self.getCoordinates = function(serviceName, success) {
 		$.ajax({
-			url: serviceName + "features/coordinates.json",
+			url: serviceName + "features/getInfo.json",
 			type: 'GET',
 			mode: "queue",
 	        dataType: 'json',
 	        data: {
-	            'features' : uniqueName
+	            'feature' : uniqueName
 	        },
 	        success: success
 		});
@@ -958,13 +961,19 @@ function FeatureInfo(uniqueName, options, onReady) {
 	            'root_on_genes' : true
 	        },
 	        success: function(features) {
-	        	self.hierarchy = features;
-	        	$.log(self.hierarchy);
 	        	
-	        	self.geneUniqueName = self.hierarchy[0].uniqueName;
+	        	if (features.length > 0) {
+	        		
+	        		self.hierarchy = features;
+		        	$.log(self.hierarchy);
+		        	
+		        	self.geneUniqueName = self.hierarchy[0].uniqueName;
+		        	self.geneType = self.hierarchy[0].type;
+		        	
+		        	self.recurseHierarchy(self.hierarchy[0]);
+		        	$.log(self.feature.type, self.transcript_count);
+	        	} 
 	        	
-	        	self.recurseHierarchy(self.hierarchy[0]);
-	        	$.log(self.feature.type, self.transcript_count);
 	        	
 	        	next();
 	        }
@@ -974,14 +983,25 @@ function FeatureInfo(uniqueName, options, onReady) {
 	self.children_of_original_feature = false;
 	self.recurseHierarchy = function(relation) {
 		self.features.push(relation.uniqueName);
-		var type = relation.relationshipType;
+		
+		var type = relation.type;
 		$.log(relation.uniqueName, type);
+		
 		if (type == "mRNA") {
 			self.transcript_count++;
 		}
+		
+		if (type == "ncRNA" || type == "snoRNA" || type == "snRNA" || type == "tRNA" || type == "miscRNA" || type == "rRNA")
+			self.hierarchyType = type;
+		else if (type == "polypeptide")
+			self.hierarchyType = "Protein coding gene";
+		else if (type.contains("pseudo"))
+			self.hierarchyType = "Pseudogene";
+		
+		
 		if (relation.uniqueName == self.feature.uniqueName) {
 			if (type != null)
-				self.feature.type = type;
+				self.feature.type = {name : type} ;
 			
 			self.children_of_original_feature = true;
 		}
@@ -1015,6 +1035,8 @@ function FeatureInfo(uniqueName, options, onReady) {
 	        }
 		});
 	};
+	
+	
 	
 	self.getRegionInfo = function (next) {
 		$.ajax({
@@ -1085,16 +1107,16 @@ function FeatureInfo(uniqueName, options, onReady) {
 			if (found)
 				return;
 			
-			self.getCoordinates(service, function(features) {
+			self.getCoordinates(service, function(feature) {
 				
 				if (found)
 					return;
 				
-				if (features.length > 0) {
+				if (feature != null) {
 					found = true;
 					self.service = service;
 					
-					self.feature = features[0];
+					self.feature = feature;
 		        	$.log(self.feature.uniqueName);
 		        	$.log(self.feature.coordinates[0]);
 		        	
@@ -1107,6 +1129,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		        	
 		        	return;
 				}
+				
 			});
 			
 		});
