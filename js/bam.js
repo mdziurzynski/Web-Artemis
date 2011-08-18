@@ -588,7 +588,7 @@ function addBamDisplay(fDisplay, tgt) {
 	var bamId = $(tgt).attr('name');
 	addDragEdge(fDisplay);
 
-	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).attr('text')+'"></div></div>');
+	$('#bam').append('<div id="bamscroll'+bamId+'" class="bamScroll" title="'+$(tgt).text()+'"></div></div>');
 	$('#bam').append('<span id="bamClose'+bamId+'" class="ui-icon ui-icon-circle-close" title="close"></span>');
 	
 	$('#bamscroll'+bamId).append('<div id="bam'+bamId+'" class="canvas"></div>');
