@@ -1,16 +1,89 @@
-
-/*
- * Gene pages should be instantiated only when the document is ready. 
- * */
-function GenePage(uniqueName, webArtemisPath, options) { 
+$(function(){
+    
+    
+    wa.GeneInfo = Spine.Class.create({
+		service : ["/services/"],
+		uniqueName : "flash",
+		init : function(uniqueName, service) {
+		    if (uniqueName != null)
+		        this.uniqueName = uniqueName;
+	        if (service != null)
+		        this.service=service;
+		    this.proxyAll("hierarchy", "recurse_hierarchy", "gene_name");
+		},
+		hierarchy : function(success) {
+		    $.log(this.service);
+		    $.ajax({
+    	        url: this.service + "/feature/hierarchy.json",
+    	        type: 'GET',
+    	        dataType: 'json',
+    	        data: {
+    	            'uniqueName' : this.uniqueName
+    	        },
+    	        success: this.proxy(function(hierarchy) {
+    	            $.log("received hierarchy for " + this.uniqueName);
+    	            this.hierarchy = hierarchy;
+    	            $.log(this.hierarchy);
+    	            if (success != null) success();
+	            })
+            });
+		},
+		/*
+		    This function is used by many others to fetch information out of the hierarchy. It will apply the callback
+		    to each feature in the hiearchy. 
+		*/
+		recurse_hierarchy : function(feature, callback) {
+		    for (c in feature.children) {
+		        // the hierarchy has feature_relationship bridges, which contain the child and the type of relationship
+		        var child_feature_relationship = feature.children[c];
+		        var child = child_feature_relationship.child;
+		        this.recurse_hierarchy(child, callback);
+		    }
+		    return callback(feature);
+		},
+		gene_name : function() {
+		    return this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        if (feature.type.name == "gene" || feature.type.name == "pseudogene") 
+		            return feature.uniqueName;
+		    });
+		},
+		transcripts : function() {
+		    var transcripts = [];
+		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        if (feature.type.name == "mRNA")
+		            transcripts.push(feature);
+		    });
+		    return transcripts;
+		},
+		type : function() {
+		    var type = "gene";
+		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        var feature_type = feature.type.name;
+	            if (feature_type == "ncRNA" || feature_type == "snoRNA" || feature_type == "snRNA" || feature_type == "tRNA" || feature_type == "miscRNA" || feature_type == "rRNA")
+                    type = feature_type;
+                else if (feature_type == "polypeptide")
+                    type = "Protein coding gene";
+                else if (feature_type.contains("pseudo"))
+                    type = "Pseudogene";
+		    });
+		    return type;
+		},
+		synonyms : function() {
+		    var synonyms = {};
+		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        if (feature.synonyms != null && feature.synonyms.length > 0)
+		            synonyms[feature.uniqueName] = feature.synonyms;
+	        });
+	        return synonyms;
+		}
+	});
 	
-	var defaults = {
-		services : ["/services/"],
-		hideable : ".hideable",
-		erasable : ".erasable",
-		links : {
+	
+	wa.GenePage = Spine.Class.create({
+	    links : {
 			go : "http://www.genedb.org/cgi-bin/amigo/term-details.cgi",
-			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids="
+			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids=",
+			others : "http://www.genedb.org/Query/controlledCuration"
 		}, 
 		evidence : {
 		    'lab' : { 
@@ -47,7 +120,95 @@ function GenePage(uniqueName, webArtemisPath, options) {
 		    }
 		},
 		elements : {
-			gene_summary : "#gene_summary",
+			gene_summary : {
+				id : "#gene_summary",
+				elements : {
+					".gene_summary_items" : "items"
+				}
+			},
+			properties : "#feature_properties",
+			go : "#gene_ontology"
+		},
+		init : function (uniqueName, web_artemis_path){
+		    
+		    this.uniqueName = uniqueName;
+		    this.web_artemis_path = web_artemis_path;
+		    
+		    var geneInfo = wa.GeneInfo.init(this.uniqueName);
+        	geneInfo.hierarchy(function() {
+        		var geneName = geneInfo.gene_name();
+        		$.log("gene name is " + geneName);
+        		var transcripts = geneInfo.transcripts();
+        		$.log(transcripts);
+        		$.log("transcripts count is " + transcripts.length);
+        		var type = geneInfo.type();
+        		$.log("type is " + type);
+        		var synonyms = geneInfo.synonyms();
+        		$.log(synonyms);
+        	});
+		}
+	})
+	
+    
+});
+
+
+/*
+ * Gene pages should be instantiated only when the document is ready. 
+ * */
+function GenePage(uniqueName, webArtemisPath, options) { 
+	
+	var defaults = {
+		services : ["/services/"],
+		hideable : ".hideable",
+		erasable :
+		 ".erasable",
+		links : {
+			go : "http://www.genedb.org/cgi-bin/amigo/term-details.cgi",
+			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids=",
+			others : "http://www.genedb.org/Query/controlledCuration"
+		}, 
+		evidence : {
+		    'lab' : { 
+		    	// Experimental Evidence
+		        'EXP': 'Inferred from Experiment',
+		        'IDA': 'Inferred from Direct Assay',
+		        'IPI': 'Inferred from Physical Interaction',
+		        'IMP': 'Inferred from Mutant Phenotype',
+		        'IGI': 'Inferred from Genetic Interaction',
+		        'IEP': 'Inferred from Expression Pattern'
+		    }, 
+		    'auto' : {
+		    	// Computational Analysis Evidence
+		        'ISS': 'Inferred from Sequence or Structural Similarity',
+		        'ISO': 'Inferred from Sequence Orthology',
+		        'ISA': 'Inferred from Sequence Alignment',
+		        'ISM': 'Inferred from Sequence Model',
+		        'IGC': 'Inferred from Genomic Context',
+		        'IBA': 'Inferred from Biological aspect of Ancestor',
+		        'IBD': 'Inferred from Biological aspect of Descendant',
+		        'IKR': 'Inferred from Key Residues',
+		        'IRD': 'Inferred from Rapid Divergence',
+		        'RCA': 'Inferred from Reviewed Computational Analysis',
+		        // Automatically-assigned Evidence
+		        'IEA': 'Inferred from Electronic Annotation'
+		    },
+		    'journal' : {
+		    	// Author Statement Evidence
+		        'TAS': 'Traceable Author Statement',
+		        'NAS': 'Non-traceable Author Statement',
+		        // Curator Statement Evidence
+		        'IC': 'Inferred by Curator',
+		        'ND': 'No biological Data available'
+		    }
+		},
+		elements : {
+			gene_summary : {
+				id : "#gene_summary",
+				elements : {
+					".gene_summary_items" : "items"
+				}
+			},
 			properties : "#feature_properties",
 			go : "#gene_ontology"
 		}
@@ -62,6 +223,10 @@ function GenePage(uniqueName, webArtemisPath, options) {
 	
 	function goLink(species) {
 		return settings.links.go + "?species=GeneDB_" + species;  
+	}
+	
+	function othersLink(species,cv,term) {
+	    return settings.links.others + "?taxons=" + species + "&cvTermName="+term+"&cv="+cv ;
 	}
 	
 	function evidenceCategory(supplied_evidence) {
@@ -92,11 +257,11 @@ function GenePage(uniqueName, webArtemisPath, options) {
 		$.log("resetPage");
 		$.log("resetPage", name, settings.erasable, settings.hideable);
 		
-		$.log($(settings.erasable));
-		$.log($(settings.hideable));
-		
-		$(settings.erasable).html("");
-		$(settings.hideable).hide();
+//		$.log($(settings.erasable));
+//		$.log($(settings.hideable));
+//		
+		//$(settings.erasable).html("");
+		//$(settings.hideable).hide();
 		
 		getInfo(name, function(info) {
 			setPage(info);
@@ -106,9 +271,32 @@ function GenePage(uniqueName, webArtemisPath, options) {
 		
 	}
 	
+	function clearModels() {
+		wa.FeatureSummaryItem.destroyAll();
+		wa.FeatureLocationModel.destroyAll();
+		wa.FeatureProductModel.destroyAll();
+		wa.DbxrefModel.destroyAll();
+	}
+	
+	function setupSummary() {
+		self.featureSummary = wa.FeatureSummary.init({ 
+			el: $(settings.elements.gene_summary.id), 
+			elements : settings.elements.gene_summary.elements 
+		});
+	}
+	
+	function add_item(key,name,value) {
+		self.featureSummary.add(wa.FeatureSummaryItem.init({
+    		key:key, 
+    		name:name, 
+    		value:value}));
+	}
+	
 	function generateSummary(info) {
 		
-		var hash = {};
+		clearModels();
+		setupSummary();
+		
 		
 		var usedUniqueName = info.uniqueName;
 		
@@ -122,15 +310,14 @@ function GenePage(uniqueName, webArtemisPath, options) {
 	    	systematicName += " (one splice form of " + info.geneUniqueName;
 	    }
 	    
-	    hash ["Systematic Name"] = systematicName;
+	    add_item("systematicName", "Systematic Name", systematicName);
 	    
 	    if (info.geneUniqueName != null && info.geneUniqueName != usedUniqueName) {
-	    	hash["Gene Name"] = info.geneUniqueName;
+	    	add_item('geneName', "Gene Name", geneUniqueName);
 	    }
 	    
-	    hash ["Feature Type"] = ( info.hierarchyType != null ) ? info.hierarchyType : info.feature.type.name;
+	    add_item('featureType', "Feature Type", ( info.hierarchyType != null ) ? info.hierarchyType : info.feature.type.name);
 	    
-	    hash ["Product"] = "";
 	    
 	    
 	    if (info.synonyms != null) {
@@ -155,23 +342,33 @@ function GenePage(uniqueName, webArtemisPath, options) {
 	    	});
 	    	
 	    	if (previous_systematic_ids.length > 0)
-	    		hash["Previous Systematic ID"] = previous_systematic_ids.join (", ");
+	    		add_item("previous_systematic_id", "Previous Systematic ID", previous_systematic_ids.join (", "));
 	    	
 	    	if (synonyms.length > 0)
-	    		hash["Synonym"] = synonyms.join (", ");
-	    	
+	    		add_item("synonym", "Synonym", synonyms.join (", "));
+	    		
 	    	if (product_synonyms.length > 0)
-	    		hash["Product Synonym"] = product_synonyms.join (", ");
+	    		add_item("product_synonym", "Product Synonym", product_synonyms.join (", "));
 	    	
 	    }
 	    
-	    hash["Location"] = info.regionInfo.type.name + " " + info.regionInfo.uniqueName + "; " + info.feature.fmin + "-" + info.feature.fmax;
+	    //add_item("location", "Location", info.regionInfo.type.name + " " + info.regionInfo.uniqueName + "; " + info.feature.fmin + "-" + info.feature.fmax);
 	    
-	    hash ["See Also"] = "";
+	    //self.featureSummary.addLocation(info.feature,info.regionInfo);
+	    self.featureSummary.addLocation(wa.FeatureLocationModel.init({feature : info.feature, region : info.regionInfo}));
+	    
 	    
 	    if (info.organism.common_name == "Pchabaudi" || info.organism.common_name == "Pberghei" ) {
-			hash["PlasmoDB"] = "<a href=\"http://plasmodb.org/gene/"+info.geneUniqueName+ "\" >"+info.geneUniqueName+"</a>";
-			
+	    	
+	    	var dbxref = wa.Dbxref.create({
+	    		database : "PlasmoDB", 
+	    		accession : info.geneUniqueName,
+	    		urlprefix : "http://plasmodb.org/gene/"
+	    	}) ;
+	    	
+	    	
+	    	
+	    	add_item("plasmodb", "PlasmoDB", "<a href=\"http://plasmodb.org/gene/"+info.geneUniqueName+ "\" >"+info.geneUniqueName+"</a>");
 		} else if (
 			info.organism.common_name == "Lmajor" ||
 			info.organism.common_name == "Linfantum" ||
@@ -182,14 +379,9 @@ function GenePage(uniqueName, webArtemisPath, options) {
 			info.organism.common_name =='Tvivax' || 
 			info.organism.common_name =='Tcruzi'
 		) {
-			hash["TriTrypDB"] = "<a href=\"http://tritrypdb.org/gene/"+info.geneUniqueName+ "\" >"+info.geneUniqueName+"</a>";
+			add_item("tritrypdb", "TriTrypDB", "<a href=\"http://tritrypdb.org/gene/"+info.geneUniqueName+ "\" >"+info.geneUniqueName+"</a>");
 		}
 	    
-	    window.featureModel = new FeatureModel(hash);
-	    window.featureSummary = new FeatureSummaryView({model : window.featureModel, el: settings.elements.gene_summary });
-	    
-	    
-		$.log(window.featureSummary);
 		
 	}
 	
@@ -298,7 +490,9 @@ function GenePage(uniqueName, webArtemisPath, options) {
         				name : term.name,
         				accession : term.accession,
         				pubs: term.pubs,
-        				dbxrefs: term.dbxrefs
+        				dbxrefs: term.dbxrefs,
+        				count: term.count,
+        				others_link : othersLink(info.organism.common_name, term.cv.name, term.name)
         			};
         			
         			$.each(term.props, function(pp, prop) {
@@ -308,6 +502,7 @@ function GenePage(uniqueName, webArtemisPath, options) {
     						$.log("!!!" + t.evidence_category);
     					}
     				});
+        			
         			
         			terms_hash[term.cv.name].push(t);
         			
@@ -342,19 +537,28 @@ function GenePage(uniqueName, webArtemisPath, options) {
         	poly_info.getDbxrefs(function(features){
         		$.log(features);
         		
-        		var d = [];
+        		//var d = [];
         		
         		$.each(features, function(n,feature) {
         			
         			$.each(feature.dbxrefs, function(m,dbxref){
-        				d.push(dbxref);
+        				
+        				var dbxref_model = wa.DbxrefModel.fromJSON(dbxref);
+        				
+        				$.log("dbxref_model");
+        				$.log((dbxref_model));
+        				
+        				self.featureSummary.addDbxref(dbxref_model);
+        				
+        				
+        				
         			});
         		});
         		
-        		if (d.length > 0) {
-        			window.featureSeeAlsotModel = new FeatureSeeAlsoModel(d);
-        			window.featureSummary.addSeeAlso(featureSeeAlsotModel);
-        		}
+//        		if (d.length > 0) {
+//        			window.featureSeeAlsotModel = new FeatureSeeAlsoModel(d);
+//        			window.featureSummary.addSeeAlso(featureSeeAlsotModel);
+//        		}
         		
         	});
         	
@@ -362,27 +566,40 @@ function GenePage(uniqueName, webArtemisPath, options) {
         	poly_info.getProducts(function(features){
         		$.log(features);
         		
-        		var p = []
+        		//var p = []
         		
         		$.each(features, function(n,feature) {
         			$.each(feature.terms, function(t,term) {
-        				p.push(term);
+        				//p.push(term);
+        				
+        				var product_model = wa.FeatureProductModel.fromJSON(term);
+        				//product_model.fromJSON(term);
+        				
+            			//product_model.setProduct(term); 
+            			
+            			self.featureSummary.addProduct(product_model);
+            			
         			});
         		});
         		
-        		if (p.length > 0) {
-        			window.featureProductModel = new FeatureProductModel(p);
-        			window.featureSummary.addProduct(featureProductModel);
-        		}
+//        		if (p.length > 0) {
+//        			//window.featureProductModel = new FeatureProductModel(p);
+//        			//window.featureSummary.addProduct(featureProductModel);
+//        			
+//        			
+//        			
+//        			
+//        			
+//        		}
         		
         	});
         	
 		}
 		
-		generateProperties(info);
-		
-		generateGo(info);
-			
+//		generateProperties(info);
+//		
+//		generateGo(info);
+//			
         	
 	}
 	

@@ -14,13 +14,16 @@ function mungeKey (key) {
  * Default templates for rendering the views. 
  */
 
-window.FeatureSummaryTemplate = 
-	"<% _.each( this.model.attributes, function( obj, key){ %> \
-		<tr id='<%= mungeKey(key) %>Row' > \
-		    <th><%= key %></th> \
-		    <td class='erasable' id='<%= mungeKey(key) %>Value' ><%= obj %></td> \
-		</tr> \
-	<% }); %> ";
+//window.FeatureSummaryTemplate = 
+//	"<% _.each( this.model.attributes, function( obj, key){ %> \
+//		<tr id='<%= mungeKey(key) %>Row' > \
+//		    <th><%= key %></th> \
+//		    <td class='erasable' id='<%= mungeKey(key) %>Value' ><%= obj %></td> \
+//		</tr> \
+//	<% }); %> ";
+
+//window.FeatureSummaryTemplate = 
+//	" <th>${name}</th> <td class='erasable' id='${key}Value' >${value}</td> ";
 
 
 window.FeatureSeeAlsoTemplate = 
@@ -88,7 +91,7 @@ window.GeneOntologyTemplate =
 						<b>Evidence : <%= term.evidence %> </b> <br>\
 						<% _.each( term.dbxrefs, function( dbxref, dkey){ %> to <a href="<%= dbxref.urlprefix %><%= dbxref.accession %>" ><%= dbxref.accession %> (<%= dbxref.database %>)</a>  <% }); %>  \
 						<% _.each( term.pubs, function( pub, pkey){ %> based on  <a href="<%= pub_link %><%= pub.accession %>" ><%= pub.uniqueName %></a>  <% }); %>\
-				</div>  \
+				</div>  (<a href="<%= term.others_link %>"><%= term.count %> other<% if (term.count >1) { %>s<% } %></a>) \
 			</tr>   \
 		<% }); %> \
 	<tr><th>Molecular Function</th></tr>\
@@ -98,7 +101,7 @@ window.GeneOntologyTemplate =
 						<b>Evidence : <%= term.evidence %> </b> <br>\
 						<% _.each( term.dbxrefs, function( dbxref, dkey){ %> to <a href="<%= dbxref.urlprefix %><%= dbxref.accession %>" ><%= dbxref.accession %> (<%= dbxref.database %>)</a>  <% }); %>  \
 						<% _.each( term.pubs, function( pub, pkey){ %> based on  <a href="<%= pub_link %><%= pub.accession %>" ><%= pub.uniqueName %></a>  <% }); %>\
-				</div>  \
+				</div>  (<a href="<%= term.others_link %>"><%= term.count %> other<% if (term.count >1) { %>s<% } %></a>) \
 			</tr>   \
 		<% }); %> \
 	<tr><th>Cellular Component</th></tr>\
@@ -108,7 +111,7 @@ window.GeneOntologyTemplate =
 						<b>Evidence : <%= term.evidence %> </b> <br>\
 						<% _.each( term.dbxrefs, function( dbxref, dkey){ %> to <a href="<%= dbxref.urlprefix %><%= dbxref.accession %>" ><%= dbxref.accession %> (<%= dbxref.database %>)</a>  <% }); %>  \
 						<% _.each( term.pubs, function( pub, pkey){ %> based on  <a href="<%= pub_link %><%= pub.accession %>" ><%= pub.uniqueName %></a>  <% }); %>\
-				</div>  \
+				</div>  (<a href="<%= term.others_link %>"><%= term.count %> other<% if (term.count >1) { %>s<% } %></a>) \
 			</tr>   \
 		<% }); %> ';
 	
