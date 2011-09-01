@@ -1,18 +1,196 @@
 $(function(){
     
+	/**
+	 * A standard set of templates, which can be changed, and reinitialized using wa.initialize_templates()
+	 */
+	wa.templates = {};
+	
+	wa.templates.FeatureSummary = (<r><![CDATA[ 
+<style>
+table.gene_summary_items tr {
+    display:none;
+}
+table.gene_summary_items tr.show {
+    display:block;
+}
+</style>
+<table class="sequence-table gene_summary_items" cellspacing="4" cellpadding="0" border="0">
+    <tr class="{{if typeof systematicName != 'undefined'  }} show {{/if}}" >
+        <th >Systematic Name</th><td >${systematicName}</td>
+    </tr>
+    <tr class="{{if typeof geneName != 'undefined' }} show {{/if}}" >
+        <th>Gene Name</th><td >${geneName}</td>
+    </tr>
+    <tr class="{{if typeof type != 'undefined' }} show {{/if}}" >
+        <th>Feature Type</th><td>${type}</td>
+    </tr>
+    <tr>
+        <th>
+            Previous Systematic ID
+        </th>
+        <td></td>
+    </tr>
+    <tr>
+        <th>
+            Synonym
+        </th>
+        <td></td>
+    </tr>
+    <tr>
+        <th>
+            Product Synonym
+        </th>
+        <td></td>
+    </tr>
+    <tr class="{{if typeof dbxrefs != 'undefined' }} show {{/if}}">
+        <th>
+            See Also
+        </th>
+        <td id="see_also">
+            {{each(feature, dbxref_list) dbxrefs}}
+                {{each(d, dbxref) dbxref_list}}
+                     <a href='${dbxref.urlprefix}${dbxref.accession}'>${dbxref.accession}</a> (${dbxref.database}) <br>
+                {{/each}}
+            {{/each}}
+        </td>
+    </tr>
+    <tr>
+        <th>
+            PlasmoDB
+        </th>
+        <td></td>
+    </tr>
+    <tr>
+        <th>
+            TriTrypDB
+        </th>
+        <td></td>
+    </tr>
+</table>
+
+    ]]></r>).toString();
+	
+	//
+	// (dbxref.description) ? dbxref.description : 
+	wa.templates.FeatureSingleDbxrefTemplate = "<a href='${urlprefix}${accession}'>${accession}</a> (${database})";
+	
+	/*
+	
+	*/
+	
+	// (<r><![CDATA[ 
+	// 
+	//        The text string goes here.  Since this is a XML CDATA section, 
+	//        stuff like <> work fine too, even if definitely invalid XML.  
+	// 
+	//     ]]></r>).toString();
+    
+	// wa.templates.FeatureSummaryTemplate = "<th>${name}</th> <td class='erasable' id='${key}Value' >${value}</td> ";
+	//         
+	//     wa.templates.FeatureSummaryLocationTemplate = "<th>Location</th> <td> ${region.type.name} ${region.uniqueName} - ${feature.fmin} - ${feature.fmax} </td> ";
+	//     
+	//     //(dbxref.description) ? dbxref.description : 
+	//     wa.templates.FeatureSingleDbxrefTemplate = "<a href='${urlprefix}${accession}'>${accession}</a> (${database})";
+	//     wa.templates.FeatureDbxrefsTemplate = "<th>See Also</th><td class='dbxrefs' ></td>";
+	//         
+	//     wa.templates.FeatureProductSummaryTemplate =  
+	//         "<th>Product</th><td><li> ${name} \
+	//              {{each(p, prop) props}} \
+	//                 {{if prop.type.name == 'qualifier' }} \
+	//                     ${prop.value} {{if p > 0}} | {{/if}}  \
+	//                 {{/if}} \
+	//             {{/each}} \
+	//             {{each(p, prop) props}} \
+	//                 {{if prop.type.name == 'evidence' }} \
+	//                     ${prop.value} {{if p > 0}} | {{/if}}  \
+	//                 {{/if}} \
+	//             {{/each}} \
+	//             {{each(p, pub) pubs}} \
+	//                      <a href='http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.uniqueName}'>${pub.uniqueName}</a> \
+	//             {{/each}} \
+	//             {{each(d, dbxref) dbxrefs}} \
+	//                      ${dbxref} \
+	//              {{/each}} \
+	//             (${count} other{{if count >1}}s{{/if}}) \
+	//             </li> </td>";
+	
+	
+	wa.initialize_templates = function(templates_hash) {
+		for (template_name in templates_hash) {
+		    var  template_string = templates_hash[template_name];
+			$.log("Registering template :: " + template_name);
+			$.template(template_name, template_string);
+		}
+	};
+	
+	
+    
+    
+    
+    wa.FeatureSummaryModel = Spine.Model.setup("FeatureSummaryModel", [ "systematicName" , "geneName", "dbxrefs"]);
+	
+	
+	
+	
+	wa.FeatureSummaryController= Spine.Controller.create({
+		tag : "div",
+		proxied : [ "render", "remove" ], 
+		template_name : "FeatureSummary",
+		init : function() {
+		    $.log("!!!!!!!!!!!!!!!!!!!!!");
+		    $.log(this.el);
+		    $.log(this.model);
+		    $.log(this.elements);
+		    
+			this.model.bind("change", this.render);
+			this.model.bind("destroy", this.remove);
+			this.render();
+		},
+		render : function() {
+		    $.log("???????????");
+		    $.log(this.model);
+			var templated = $.tmpl(this.template_name, this.model);
+			$.log("el");
+		    $.log(this.el);
+		    $.log(templated);
+			this.el.html(templated);
+			this.refreshElements();
+			//this.model.save();
+			return this;
+		},
+		destroy : function() {
+			this.model.destroy();
+		},
+		remove : function() {
+			this.el.remove();
+		}
+	});
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     wa.GeneInfo = Spine.Class.create({
 		service : ["/services/"],
 		uniqueName : "flash",
+		types : {
+		    "gene" : ["gene", "pseudogene"],
+		    "special_transcript" : ["ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"],
+		    "transcript" : ["mRNA", "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"]
+		},
 		init : function(uniqueName, service) {
 		    if (uniqueName != null)
 		        this.uniqueName = uniqueName;
 	        if (service != null)
 		        this.service=service;
-		    this.proxyAll("hierarchy", "recurse_hierarchy", "gene_name");
+		    this.proxy("hierarchy", "recurse_hierarchy", "gene_name", "transcripts", "type", "synonyms", "systematic_name");
 		},
 		hierarchy : function(success) {
-		    $.log(this.service);
 		    $.ajax({
     	        url: this.service + "/feature/hierarchy.json",
     	        type: 'GET',
@@ -23,7 +201,6 @@ $(function(){
     	        success: this.proxy(function(hierarchy) {
     	            $.log("received hierarchy for " + this.uniqueName);
     	            this.hierarchy = hierarchy;
-    	            $.log(this.hierarchy);
     	            if (success != null) success();
 	            })
             });
@@ -34,47 +211,88 @@ $(function(){
 		*/
 		recurse_hierarchy : function(feature, callback) {
 		    for (c in feature.children) {
-		        // the hierarchy has feature_relationship bridges, which contain the child and the type of relationship
-		        var child_feature_relationship = feature.children[c];
-		        var child = child_feature_relationship.child;
+		        var child = feature.children[c];
 		        this.recurse_hierarchy(child, callback);
 		    }
 		    return callback(feature);
 		},
 		gene_name : function() {
+		    var types = this.types;
 		    return this.recurse_hierarchy(this.hierarchy, function(feature) {
-		        if (feature.type.name == "gene" || feature.type.name == "pseudogene") 
+		        if (types.gene.indexOf(feature.type.name) > -1)
 		            return feature.uniqueName;
 		    });
 		},
 		transcripts : function() {
+		    var types = this.types;
 		    var transcripts = [];
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
-		        if (feature.type.name == "mRNA")
+		        if (types.transcript.indexOf(feature.type.name) > -1) {
 		            transcripts.push(feature);
+		        }
 		    });
 		    return transcripts;
 		},
 		type : function() {
-		    var type = "gene";
+		    var type = "feature";
+		    var types = this.types;
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
-		        var feature_type = feature.type.name;
-	            if (feature_type == "ncRNA" || feature_type == "snoRNA" || feature_type == "snRNA" || feature_type == "tRNA" || feature_type == "miscRNA" || feature_type == "rRNA")
-                    type = feature_type;
-                else if (feature_type == "polypeptide")
+	            if (types.special_transcript.indexOf(feature.type.name) > -1) 
+                    type = feature.type.name;
+                else if (feature.type.name == "polypeptide")
                     type = "Protein coding gene";
-                else if (feature_type.contains("pseudo"))
+                else if (feature.type.name.contains("pseudo"))
                     type = "Pseudogene";
 		    });
 		    return type;
 		},
-		synonyms : function() {
+		synonyms : function(type) {
 		    var synonyms = {};
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
-		        if (feature.synonyms != null && feature.synonyms.length > 0)
-		            synonyms[feature.uniqueName] = feature.synonyms;
+		        var feature_synonyms = []
+		        if (feature.synonyms != null && feature.synonyms.length > 0) {
+		            for (s in feature.synonyms) {
+		                var synonym = feature.synonyms[s];
+		                if (type == null || synonym.synonymtype == type)
+		                    feature_synonyms.push(synonym);
+		            }
+		        }
+		        if (feature_synonyms.length > 0)
+		            synonyms[feature.uniqueName] = feature_synonyms;
 	        });
 	        return synonyms;
+		},
+		systematic_name : function() {
+		    
+		    var systematicName = this.uniqueName;
+		    var geneName = this.gene_name();
+		    
+		    var transcript_count = this.transcripts().length;
+		    
+		    if (geneName != null) {
+		        if (transcript_count < 2) {
+		            systematicName = geneName;
+		        } else if (transcript_count >= 2 && info.feature.type=="mRNA") {
+		            systematicName += " (one splice form of " + info.geneUniqueName;
+	            }
+		    }
+		    
+		    return systematicName;
+		},
+		get_attribute_map : function(name) {
+		    var map = {};
+		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        var attribute = feature[name];
+		        if (attribute != null && attribute.length > 0)
+		            map[feature.uniqueName] = attribute
+	        });
+	        return map;
+		},
+		dbxrefs: function() {
+		    return this.get_attribute_map("dbxrefs");
+		},
+		coordinates : function() {
+		    return this.get_attribute_map("coordinates");
 		}
 	});
 	
@@ -129,23 +347,61 @@ $(function(){
 			properties : "#feature_properties",
 			go : "#gene_ontology"
 		},
-		init : function (uniqueName, web_artemis_path){
+		init : function (uniqueName, web_artemis_path) {
 		    
 		    this.uniqueName = uniqueName;
 		    this.web_artemis_path = web_artemis_path;
 		    
 		    var geneInfo = wa.GeneInfo.init(this.uniqueName);
-        	geneInfo.hierarchy(function() {
-        		var geneName = geneInfo.gene_name();
-        		$.log("gene name is " + geneName);
-        		var transcripts = geneInfo.transcripts();
-        		$.log(transcripts);
-        		$.log("transcripts count is " + transcripts.length);
-        		var type = geneInfo.type();
-        		$.log("type is " + type);
-        		var synonyms = geneInfo.synonyms();
-        		$.log(synonyms);
-        	});
+        	geneInfo.hierarchy(this.proxy(function() {
+                var geneName = geneInfo.gene_name();
+                $.log("gene name is " + geneName);
+                var transcripts = geneInfo.transcripts();
+                $.log(transcripts);
+
+
+                $.log("transcripts count is " + transcripts.length);
+                var type = geneInfo.type();
+                $.log("type is " + type);
+                var synonyms = geneInfo.synonyms("synonym");
+                $.log(synonyms);
+                
+                var product_synonyms = geneInfo.synonyms("product_synonym");
+                $.log(product_synonyms);
+                
+                var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id");
+                $.log(previous_systematic_ids);
+
+                var systematicName = geneInfo.systematic_name();
+                $.log(systematicName);
+                
+                var dbxrefs = geneInfo.dbxrefs();
+                $.log(dbxrefs);
+                
+                var coordinates = geneInfo.coordinates();
+                $.log(coordinates);
+                
+                wa.initialize_templates(wa.templates);
+                
+                var featureSummaryModel = wa.FeatureSummaryModel.init({
+                    systematicName : systematicName,
+                    type: type,
+                    dbxrefs : dbxrefs
+                });
+                
+                if (geneName != systematicName)
+                    featureSummaryModel.geneName = geneName
+                
+                featureSummaryModel.save();
+                
+                $.log(this.elements);
+                
+                var featureSummary = wa.FeatureSummaryController.init({ 
+        			el: $(this.elements.gene_summary.id), 
+        			model : featureSummaryModel
+        		});
+        		
+        	}));
 		}
 	})
 	

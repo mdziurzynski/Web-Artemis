@@ -66,163 +66,116 @@ $(function(){
 	
 	
 	
-	/*
-	 * Declare views and models. This must be done once Backbone is loaded, best
-	 * to do it when the document is ready.
-	 */
-	
-	/**
-	 * A standard set of templates, which can be changed, and reinitialized using wa.initialize_templates()
-	 */
-	wa.templates = {};
-	
-	wa.templates.FeatureSummaryTemplate = "<th>${name}</th> <td class='erasable' id='${key}Value' >${value}</td> ";
-		
-	wa.templates.FeatureSummaryLocationTemplate = "<th>Location</th> <td> ${region.type.name} ${region.uniqueName} - ${feature.fmin} - ${feature.fmax} </td> ";
-	
-	//(dbxref.description) ? dbxref.description : 
-	wa.templates.FeatureSingleDbxrefTemplate = "<a href='${urlprefix}${accession}'>${accession}</a> (${database})";
-	wa.templates.FeatureDbxrefsTemplate = "<th>See Also</th><td class='dbxrefs' ></td>";
-		
-	wa.templates.FeatureProductSummaryTemplate =  
-		"<th>Product</th><td><li> ${name} \
-			 {{each(p, prop) props}} \
-				{{if prop.type.name == 'qualifier' }} \
-					${prop.value} {{if p > 0}} | {{/if}}  \
-				{{/if}} \
-			{{/each}} \
-			{{each(p, prop) props}} \
-				{{if prop.type.name == 'evidence' }} \
-					${prop.value} {{if p > 0}} | {{/if}}  \
-				{{/if}} \
-			{{/each}} \
-			{{each(p, pub) pubs}} \
-					 <a href='http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.uniqueName}'>${pub.uniqueName}</a> \
-			{{/each}} \
-			{{each(d, dbxref) dbxrefs}} \
-					 ${dbxref} \
-			 {{/each}} \
-			(${count} other{{if count >1}}s{{/if}}) \
-			</li> </td>";
-	
-	
-	wa.initialize_templates = function(templates_hash) {
-		$.each(templates_hash, function (template_name, template_string) {
-			$.log(template_name);
-			$.template(template_name, template_string);
-		});
-	};
-	
-	wa.initialize_templates(wa.templates)
 	
 	
 	/**
 	 * Models. 
 	 */
-	wa.FeatureLocationModel = Spine.Model.setup("FeatureLocationModel", [ "feature", "region"]);
-	wa.FeatureProductModel = Spine.Model.setup("FeatureProductModel", [ "name", "props", "pubs", "dbxrefs", "count"]);
-	wa.FeatureSummaryItem = Spine.Model.setup("FeatureSummaryItem", [ "key", "name", "value" ]);
+    // wa.FeatureLocationModel = Spine.Model.setup("FeatureLocationModel", [ "feature", "region"]);
+    // wa.FeatureProductModel = Spine.Model.setup("FeatureProductModel", [ "name", "props", "pubs", "dbxrefs", "count"]);
+    // wa.FeatureSummaryItem = Spine.Model.setup("FeatureSummaryItem", [ "key", "name", "value" ]);
+    // 
+    // 
+    // wa.DbxrefModel= Spine.Model.setup("FeatureSummaryDbxref", [ "dbxref" ]);
+    // 
+    // wa.FeatureSummarySpecialDbxrefModel= Spine.Model.setup("FeatureSummarySpecialDbxref", [ "name", "dbxref" ]);
 	
-	
-	wa.DbxrefModel= Spine.Model.setup("FeatureSummaryDbxref", [ "dbxref" ]);
-	
-	wa.FeatureSummarySpecialDbxrefModel= Spine.Model.setup("FeatureSummarySpecialDbxref", [ "name", "dbxref" ]);
 	
 	
 	
 	/**
 	 * A generic controller that expects a the model to be passed in as a model attribute.
 	 */
-	wa.FeatureSummaryItemController= Spine.Controller.create({
-		tag : "tr",
-		proxied : [ "render", "remove" ], 
-		init : function() {
-			this.model.bind("update", this.render);
-			this.model.bind("destroy", this.remove);
-		},
-		render : function() {
-			var elements = $.tmpl(this.template_name, this.model);
-			this.el.html(elements);
-			this.refreshElements();
-			this.model.save();
-			return this;
-		},
-		destroy : function() {
-			this.model.destroy();
-		},
-		remove : function() {
-			this.el.remove();
-		}
-	});
-	
-	wa.FeatureDbxrefController = Spine.Controller.create({
-		tag : "tr",
-		proxied : [ "render", "remove", "addDbxref" ], 
-		elements : {
-			".dbxrefs" : "dbxrefs"
-		},
-		init : function(){
-		    this.el.append($.tmpl(this.template_name, {name:"See Also"}));
-		},
-		render : function() {
-		    $.log("RENDERBENDER");
-            //          var elements = $.tmpl(this.template_name, {name:"See Also"});
-            // this.el.html(elements);
-            // this.refreshElements();
-		    return this;
-		},
-		addDbxref : function(dbxrefModel) {
-			$.log(dbxrefModel);
-			var view = wa.FeatureSummaryItemController.init({
-				model : dbxrefModel,
-				template_name : "FeatureSingleDbxrefTemplate",
-				tag : "li"
-			});
-			// TODO - not sure why this doesn't work - the elements hais set above
-			//$(this.dbxrefs).append(view.render().el);
-			this.$(".dbxrefs").append(view.render().el)
-		}
-	});
-	
-	wa.FeatureSummary = Spine.Controller.create({
-		tag : "div",
-		init : function() {
-
-			// FeatureSummaryItem.bind("create", this.add);
-			// FeatureSummaryItem.bind("refresh", this.addAll);
-		},
-		add : function(item) {
-			var view = wa.FeatureSummaryItemController.init({
-				model : item, 
-				template_name : "FeatureSummaryTemplate"
-			});
-			$(this.items).append(view.render().el);
-		},
-		addLocation: function (locationModel) {
-			var view = wa.FeatureSummaryItemController.init({
-				model : locationModel,
-				template_name : "FeatureSummaryLocationTemplate"
-			});
-			$(this.items).append(view.render().el);
-		},
-		addProduct: function (productModel) {
-			var view = wa.FeatureSummaryItemController.init({
-				model : productModel,
-				template_name : "FeatureProductSummaryTemplate"
-			});
-			$(this.items).append(view.render().el);
-		},
-		addDbxref: function(dbxrefModel) {
-			if (this.dbxrefView == null) {
-				this.dbxrefView = wa.FeatureDbxrefController.init({
-					template_name : "FeatureDbxrefsTemplate"
-					//, el : "#gene_summary_dbxrefs" 
-				});
-			}
-			this.dbxrefView.addDbxref(dbxrefModel);
-			$(this.items).append(this.dbxrefView.render().el);
-		}
-	});
+    // wa.FeatureSummaryItemController= Spine.Controller.create({
+    //  tag : "tr",
+    //  proxied : [ "render", "remove" ], 
+    //  init : function() {
+    //      this.model.bind("update", this.render);
+    //      this.model.bind("destroy", this.remove);
+    //  },
+    //  render : function() {
+    //      var elements = $.tmpl(this.template_name, this.model);
+    //      this.el.html(elements);
+    //      this.refreshElements();
+    //      this.model.save();
+    //      return this;
+    //  },
+    //  destroy : function() {
+    //      this.model.destroy();
+    //  },
+    //  remove : function() {
+    //      this.el.remove();
+    //  }
+    // });
+    // 
+    // wa.FeatureDbxrefController = Spine.Controller.create({
+    //  tag : "tr",
+    //  proxied : [ "render", "remove", "addDbxref" ], 
+    //  elements : {
+    //      ".dbxrefs" : "dbxrefs"
+    //  },
+    //  init : function(){
+    //      this.el.append($.tmpl(this.template_name, {name:"See Also"}));
+    //  },
+    //  render : function() {
+    //      $.log("RENDERBENDER");
+    //             //          var elements = $.tmpl(this.template_name, {name:"See Also"});
+    //             // this.el.html(elements);
+    //             // this.refreshElements();
+    //      return this;
+    //  },
+    //  addDbxref : function(dbxrefModel) {
+    //      $.log(dbxrefModel);
+    //      var view = wa.FeatureSummaryItemController.init({
+    //          model : dbxrefModel,
+    //          template_name : "FeatureSingleDbxrefTemplate",
+    //          tag : "li"
+    //      });
+    //      // TODO - not sure why this doesn't work - the elements hais set above
+    //      //$(this.dbxrefs).append(view.render().el);
+    //      this.$(".dbxrefs").append(view.render().el)
+    //  }
+    // });
+    // 
+    // wa.FeatureSummary = Spine.Controller.create({
+    //  tag : "div",
+    //  init : function() {
+    // 
+    //      // FeatureSummaryItem.bind("create", this.add);
+    //      // FeatureSummaryItem.bind("refresh", this.addAll);
+    //  },
+    //  add : function(item) {
+    //      var view = wa.FeatureSummaryItemController.init({
+    //          model : item, 
+    //          template_name : "FeatureSummaryTemplate"
+    //      });
+    //      $(this.items).append(view.render().el);
+    //  },
+    //  addLocation: function (locationModel) {
+    //      var view = wa.FeatureSummaryItemController.init({
+    //          model : locationModel,
+    //          template_name : "FeatureSummaryLocationTemplate"
+    //      });
+    //      $(this.items).append(view.render().el);
+    //  },
+    //  addProduct: function (productModel) {
+    //      var view = wa.FeatureSummaryItemController.init({
+    //          model : productModel,
+    //          template_name : "FeatureProductSummaryTemplate"
+    //      });
+    //      $(this.items).append(view.render().el);
+    //  },
+    //  addDbxref: function(dbxrefModel) {
+    //      if (this.dbxrefView == null) {
+    //          this.dbxrefView = wa.FeatureDbxrefController.init({
+    //              template_name : "FeatureDbxrefsTemplate"
+    //              //, el : "#gene_summary_dbxrefs" 
+    //          });
+    //      }
+    //      this.dbxrefView.addDbxref(dbxrefModel);
+    //      $(this.items).append(this.dbxrefView.render().el);
+    //  }
+    // });
 		    
 	
 	
