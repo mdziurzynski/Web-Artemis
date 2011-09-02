@@ -1,72 +1,72 @@
 
 $(function(){
-	
-	/**
-	 * A namespace for Web-Artemis MVC classes.
-	 */
-	window.wa = {};
-	
-	wa.Feature = Spine.Class.create({
-		uniqueName : "",
-		name : "",
-		coordinates : [],
-		properties : [],
-		dbxrefs : [],
-		synonyms: [],
-		terms : []
-	});
-	
-	wa.LocatedFeature = wa.Feature.create({
-		fmin : 0,
-		fmax : 0,
-		region : "",
-		parent : "",
-		parentRelationshipType : "part_of",
-		phase : 0,
-		strand : -1,
-		fmin_partial : false,
-		fmax_partial : false
-	});
-	
-	wa.Coordinates = Spine.Class.create({
-		fmin : 0,
-		fmax : 0,
-		region : "",
-		phase : 0,
-		strand : 0,
-		toplevel : true
-	});
-	
-	wa.Property = Spine.Class.create({
-		name: "", 
-		value : ""
-	});
-	
-	wa.Cv = Spine.Class.create({
-		name:""
-	});
-	
-	wa.CvTerm = Spine.Class.create({
-		name:"", 
-		cv : null
-	});
-	
-	wa.Synonym = Spine.Class.create({
-		synonym : "",
-		synonymtype : "synonym",
-		is_current : true
-	});
-	
-	wa.Dbxref = Spine.Class.create({
-		database : "",
-		accession : "",
-		urlprefix : "",
-		description : ""
-	});
-	
-	
-	
-	
+	    // 
+	   // /**
+	   //  * A namespace for Web-Artemis MVC classes.
+	   //  */
+	   // window.wa = {};
+	   // 
+	   // wa.Feature = Spine.Class.create({
+	   //  uniqueName : "",
+	   //  name : "",
+	   //  coordinates : [],
+	   //  properties : [],
+	   //  dbxrefs : [],
+	   //  synonyms: [],
+	   //  terms : []
+	   // });
+	   // 
+	   // wa.LocatedFeature = wa.Feature.create({
+	   //  fmin : 0,
+	   //  fmax : 0,
+	   //  region : "",
+	   //  parent : "",
+	   //  parentRelationshipType : "part_of",
+	   //  phase : 0,
+	   //  strand : -1,
+	   //  fmin_partial : false,
+	   //  fmax_partial : false
+	   // });
+	   // 
+	   // wa.Coordinates = Spine.Class.create({
+	   //  fmin : 0,
+	   //  fmax : 0,
+	   //  region : "",
+	   //  phase : 0,
+	   //  strand : 0,
+	   //  toplevel : true
+	   // });
+	   // 
+	   // wa.Property = Spine.Class.create({
+	   //  name: "", 
+	   //  value : ""
+	   // });
+	   // 
+	   // wa.Cv = Spine.Class.create({
+	   //  name:""
+	   // });
+	   // 
+	   // wa.CvTerm = Spine.Class.create({
+	   //  name:"", 
+	   //  cv : null
+	   // });
+	   // 
+	   // wa.Synonym = Spine.Class.create({
+	   //  synonym : "",
+	   //  synonymtype : "synonym",
+	   //  is_current : true
+	   // });
+	   // 
+	   // wa.Dbxref = Spine.Class.create({
+	   //  database : "",
+	   //  accession : "",
+	   //  urlprefix : "",
+	   //  description : ""
+	   // });
+	   // 
+	   // 
+	   // 
+	   // 
 	
 	/**
 	 * Models. 

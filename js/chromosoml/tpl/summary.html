@@ -1,0 +1,22 @@
+<table cellpadding="0" cellspacing="4" border="0" class="sequence-table">
+	<tr>
+		<th>Systematic Name</th>
+		<td data-bind="text: systematicName" ></td>
+	</tr>
+	<tr data-bind="visible: geneName != systematicName" >
+		<th>Gene Name</th>
+		<td data-bind="text: geneName" ></td>
+	</tr>
+	<tr >
+		<th>Gene Type</th>
+		<td data-bind="text: type" ></td>
+	</tr>
+	<tr >
+		<th>Product</th>
+		<td data-bind="template: 'product'" ></td>
+	</tr>
+	<tr >
+		<th>See Also</th>
+		<td data-bind="template: 'dbxrefs' " ></td>
+	</tr>
+</table>

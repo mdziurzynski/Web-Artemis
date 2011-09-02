@@ -1,89 +1,34 @@
+if (!Object.create) {  
+    Object.create = function (o) {  
+        if (arguments.length > 1) {  
+            throw new Error('Object.create implementation only accepts the first parameter.');  
+        }  
+        function F() {}  
+        F.prototype = o;  
+        return new F();  
+    };  
+}
+
+
+// these templates need to know the script directory for the images
+var scripts= document.getElementsByTagName('script');
+var path= scripts[scripts.length-1].src.split('?')[0];      
+var current_directory = path.split('/').slice(0, -1).join('/')+'/';
+
+
 $(function(){
+    
+    // alert(ko.externaljQueryTemplateEngine);
+    
+    
+    wa = {}
     
 	/**
 	 * A standard set of templates, which can be changed, and reinitialized using wa.initialize_templates()
 	 */
-	wa.templates = {};
-	
-	wa.templates.FeatureSummary = (<r><![CDATA[ 
-<style>
-table.gene_summary_items tr {
-    display:none;
-}
-table.gene_summary_items tr.show {
-    display:block;
-}
-</style>
-<table class="sequence-table gene_summary_items" cellspacing="4" cellpadding="0" border="0">
-    <tr class="{{if typeof systematicName != 'undefined'  }} show {{/if}}" >
-        <th >Systematic Name</th><td >${systematicName}</td>
-    </tr>
-    <tr class="{{if typeof geneName != 'undefined' }} show {{/if}}" >
-        <th>Gene Name</th><td >${geneName}</td>
-    </tr>
-    <tr class="{{if typeof type != 'undefined' }} show {{/if}}" >
-        <th>Feature Type</th><td>${type}</td>
-    </tr>
-    <tr>
-        <th>
-            Previous Systematic ID
-        </th>
-        <td></td>
-    </tr>
-    <tr>
-        <th>
-            Synonym
-        </th>
-        <td></td>
-    </tr>
-    <tr>
-        <th>
-            Product Synonym
-        </th>
-        <td></td>
-    </tr>
-    <tr class="{{if typeof dbxrefs != 'undefined' }} show {{/if}}">
-        <th>
-            See Also
-        </th>
-        <td id="see_also">
-            {{each(feature, dbxref_list) dbxrefs}}
-                {{each(d, dbxref) dbxref_list}}
-                     <a href='${dbxref.urlprefix}${dbxref.accession}'>${dbxref.accession}</a> (${dbxref.database}) <br>
-                {{/each}}
-            {{/each}}
-        </td>
-    </tr>
-    <tr>
-        <th>
-            PlasmoDB
-        </th>
-        <td></td>
-    </tr>
-    <tr>
-        <th>
-            TriTrypDB
-        </th>
-        <td></td>
-    </tr>
-</table>
+//  wa.templates = {};
+//  
 
-    ]]></r>).toString();
-	
-	//
-	// (dbxref.description) ? dbxref.description : 
-	wa.templates.FeatureSingleDbxrefTemplate = "<a href='${urlprefix}${accession}'>${accession}</a> (${database})";
-	
-	/*
-	
-	*/
-	
-	// (<r><![CDATA[ 
-	// 
-	//        The text string goes here.  Since this is a XML CDATA section, 
-	//        stuff like <> work fine too, even if definitely invalid XML.  
-	// 
-	//     ]]></r>).toString();
     
 	// wa.templates.FeatureSummaryTemplate = "<th>${name}</th> <td class='erasable' id='${key}Value' >${value}</td> ";
 	//         
@@ -115,56 +60,15 @@ table.gene_summary_items tr.show {
 	//             </li> </td>";
 	
 	
-	wa.initialize_templates = function(templates_hash) {
-		for (template_name in templates_hash) {
-		    var  template_string = templates_hash[template_name];
-			$.log("Registering template :: " + template_name);
-			$.template(template_name, template_string);
-		}
-	};
+    // wa.initialize_templates = function(templates_hash) {
+    //  for (template_name in templates_hash) {
+    //      var  template_string = templates_hash[template_name];
+    //      $.log("Registering template :: " + template_name);
+    //      $.template(template_name, template_string);
+    //  }
+    // };
+    // 
 	
-	
-    
-    
-    
-    wa.FeatureSummaryModel = Spine.Model.setup("FeatureSummaryModel", [ "systematicName" , "geneName", "dbxrefs"]);
-	
-	
-	
-	
-	wa.FeatureSummaryController= Spine.Controller.create({
-		tag : "div",
-		proxied : [ "render", "remove" ], 
-		template_name : "FeatureSummary",
-		init : function() {
-		    $.log("!!!!!!!!!!!!!!!!!!!!!");
-		    $.log(this.el);
-		    $.log(this.model);
-		    $.log(this.elements);
-		    
-			this.model.bind("change", this.render);
-			this.model.bind("destroy", this.remove);
-			this.render();
-		},
-		render : function() {
-		    $.log("???????????");
-		    $.log(this.model);
-			var templated = $.tmpl(this.template_name, this.model);
-			$.log("el");
-		    $.log(this.el);
-		    $.log(templated);
-			this.el.html(templated);
-			this.refreshElements();
-			//this.model.save();
-			return this;
-		},
-		destroy : function() {
-			this.model.destroy();
-		},
-		remove : function() {
-			this.el.remove();
-		}
-	});
     
     
     
@@ -172,25 +76,36 @@ table.gene_summary_items tr.show {
     
     
     
+     ko.externaljQueryTemplateEngine.setOptions({
+            templateUrl: current_directory + "/tpl",
+            templateSuffix: ".html"
+        });
     
     
     
-    wa.GeneInfo = Spine.Class.create({
-		service : ["/services/"],
-		uniqueName : "flash",
-		types : {
+    
+    wa.GeneInfo = function() {
+        
+        
+       
+		this.service = ["/services/"];
+		this.uniqueName = "flash";
+		
+		this.types = {
 		    "gene" : ["gene", "pseudogene"],
 		    "special_transcript" : ["ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"],
 		    "transcript" : ["mRNA", "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"]
-		},
-		init : function(uniqueName, service) {
+		};
+		
+		this.init = function(uniqueName, service) {
 		    if (uniqueName != null)
 		        this.uniqueName = uniqueName;
 	        if (service != null)
 		        this.service=service;
-		    this.proxy("hierarchy", "recurse_hierarchy", "gene_name", "transcripts", "type", "synonyms", "systematic_name");
-		},
-		hierarchy : function(success) {
+		    //this.proxy("hierarchy", "recurse_hierarchy", "gene_name", "transcripts", "type", "synonyms", "systematic_name");
+		}
+		this.hierarchy = function(success) {
+		    var self=this;
 		    $.ajax({
     	        url: this.service + "/feature/hierarchy.json",
     	        type: 'GET',
@@ -198,32 +113,32 @@ table.gene_summary_items tr.show {
     	        data: {
     	            'uniqueName' : this.uniqueName
     	        },
-    	        success: this.proxy(function(hierarchy) {
-    	            $.log("received hierarchy for " + this.uniqueName);
-    	            this.hierarchy = hierarchy;
+    	        success: function(hierarchy) {
+    	            $.log("received hierarchy for " + self.uniqueName);
+    	            self.hierarchy = hierarchy;
     	            if (success != null) success();
-	            })
+	            }
             });
-		},
+		}
 		/*
 		    This function is used by many others to fetch information out of the hierarchy. It will apply the callback
 		    to each feature in the hiearchy. 
 		*/
-		recurse_hierarchy : function(feature, callback) {
+		this.recurse_hierarchy = function(feature, callback) {
 		    for (c in feature.children) {
 		        var child = feature.children[c];
 		        this.recurse_hierarchy(child, callback);
 		    }
 		    return callback(feature);
-		},
-		gene_name : function() {
+		}
+		this.gene_name = function() {
 		    var types = this.types;
 		    return this.recurse_hierarchy(this.hierarchy, function(feature) {
 		        if (types.gene.indexOf(feature.type.name) > -1)
 		            return feature.uniqueName;
 		    });
-		},
-		transcripts : function() {
+		}
+		this.transcripts = function() {
 		    var types = this.types;
 		    var transcripts = [];
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
@@ -232,8 +147,8 @@ table.gene_summary_items tr.show {
 		        }
 		    });
 		    return transcripts;
-		},
-		type : function() {
+		}
+		this.type = function() {
 		    var type = "feature";
 		    var types = this.types;
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
@@ -245,8 +160,8 @@ table.gene_summary_items tr.show {
                     type = "Pseudogene";
 		    });
 		    return type;
-		},
-		synonyms : function(type) {
+		}
+		this.synonyms = function(type) {
 		    var synonyms = {};
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
 		        var feature_synonyms = []
@@ -261,8 +176,8 @@ table.gene_summary_items tr.show {
 		            synonyms[feature.uniqueName] = feature_synonyms;
 	        });
 	        return synonyms;
-		},
-		systematic_name : function() {
+		}
+		this.systematic_name = function() {
 		    
 		    var systematicName = this.uniqueName;
 		    var geneName = this.gene_name();
@@ -278,8 +193,8 @@ table.gene_summary_items tr.show {
 		    }
 		    
 		    return systematicName;
-		},
-		get_attribute_map : function(name) {
+		}
+		this.get_attribute_map = function(name) {
 		    var map = {};
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
 		        var attribute = feature[name];
@@ -287,17 +202,36 @@ table.gene_summary_items tr.show {
 		            map[feature.uniqueName] = attribute
 	        });
 	        return map;
-		},
-		dbxrefs: function() {
+		}
+		this.dbxrefs = function() {
 		    return this.get_attribute_map("dbxrefs");
-		},
-		coordinates : function() {
+		}
+		this.coordinates = function() {
 		    return this.get_attribute_map("coordinates");
 		}
-	});
+		this.terms = function(cv) {
+		    var terms_map = {}
+		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        var terms = feature.terms
+		        var attribute = feature[name];
+		        var matched = []
+		        if (terms != null && terms.length > 0) {
+		            for (var t in terms) {
+		                var term = terms[t];
+		                if (cv == null || term.cv.name == cv) {
+		                    matched.push(term)
+		                }
+		            }
+		        }
+		        if (matched.length > 0)
+		            terms_map[feature.uniqueName] = matched;
+	        });
+	        return terms_map;
+		}
+	};
 	
 	
-	wa.GenePage = Spine.Class.create({
+	wa.GenePage = Object.create({
 	    links : {
 			go : "http://www.genedb.org/cgi-bin/amigo/term-details.cgi",
 			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids=",
@@ -352,14 +286,18 @@ table.gene_summary_items tr.show {
 		    this.uniqueName = uniqueName;
 		    this.web_artemis_path = web_artemis_path;
 		    
-		    var geneInfo = wa.GeneInfo.init(this.uniqueName);
-        	geneInfo.hierarchy(this.proxy(function() {
+		    var self = this;
+		    
+		    var geneInfo = new wa.GeneInfo()
+		    geneInfo.init(self.uniqueName);
+		    
+        	geneInfo.hierarchy(function() {
                 var geneName = geneInfo.gene_name();
                 $.log("gene name is " + geneName);
+                
                 var transcripts = geneInfo.transcripts();
                 $.log(transcripts);
-
-
+                
                 $.log("transcripts count is " + transcripts.length);
                 var type = geneInfo.type();
                 $.log("type is " + type);
@@ -381,27 +319,24 @@ table.gene_summary_items tr.show {
                 var coordinates = geneInfo.coordinates();
                 $.log(coordinates);
                 
-                wa.initialize_templates(wa.templates);
+                //wa.initialize_templates(wa.templates);
                 
-                var featureSummaryModel = wa.FeatureSummaryModel.init({
+                var products = geneInfo.terms("genedb_products");
+                $.log(products);
+                
+                wa.viewModel = {
                     systematicName : systematicName,
                     type: type,
-                    dbxrefs : dbxrefs
-                });
+                    dbxrefs : dbxrefs,
+                    geneName : geneName,
+                    products : products
+                }
                 
-                if (geneName != systematicName)
-                    featureSummaryModel.geneName = geneName
                 
-                featureSummaryModel.save();
+                ko.applyBindings(wa.viewModel);
                 
-                $.log(this.elements);
                 
-                var featureSummary = wa.FeatureSummaryController.init({ 
-        			el: $(this.elements.gene_summary.id), 
-        			model : featureSummaryModel
-        		});
-        		
-        	}));
+        	});
 		}
 	})
 	
