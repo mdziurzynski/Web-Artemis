@@ -10,7 +10,7 @@ if (!Object.create) {
 }
 
 
-// these templates need to know the script directory for the images
+// we need to know the script directory for templates and images
 var scripts= document.getElementsByTagName('script');
 var path= scripts[scripts.length-1].src.split('?')[0];      
 var current_directory = path.split('/').slice(0, -1).join('/')+'/';
@@ -18,76 +18,16 @@ var current_directory = path.split('/').slice(0, -1).join('/')+'/';
 
 $(function(){
     
-    // alert(ko.externaljQueryTemplateEngine);
-    
-    
     wa = {}
-    
-	/**
-	 * A standard set of templates, which can be changed, and reinitialized using wa.initialize_templates()
-	 */
-//  wa.templates = {};
-//  
-
-    
-	// wa.templates.FeatureSummaryTemplate = "<th>${name}</th> <td class='erasable' id='${key}Value' >${value}</td> ";
-	//         
-	//     wa.templates.FeatureSummaryLocationTemplate = "<th>Location</th> <td> ${region.type.name} ${region.uniqueName} - ${feature.fmin} - ${feature.fmax} </td> ";
-	//     
-	//     //(dbxref.description) ? dbxref.description : 
-	//     wa.templates.FeatureSingleDbxrefTemplate = "<a href='${urlprefix}${accession}'>${accession}</a> (${database})";
-	//     wa.templates.FeatureDbxrefsTemplate = "<th>See Also</th><td class='dbxrefs' ></td>";
-	//         
-	//     wa.templates.FeatureProductSummaryTemplate =  
-	//         "<th>Product</th><td><li> ${name} \
-	//              {{each(p, prop) props}} \
-	//                 {{if prop.type.name == 'qualifier' }} \
-	//                     ${prop.value} {{if p > 0}} | {{/if}}  \
-	//                 {{/if}} \
-	//             {{/each}} \
-	//             {{each(p, prop) props}} \
-	//                 {{if prop.type.name == 'evidence' }} \
-	//                     ${prop.value} {{if p > 0}} | {{/if}}  \
-	//                 {{/if}} \
-	//             {{/each}} \
-	//             {{each(p, pub) pubs}} \
-	//                      <a href='http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.uniqueName}'>${pub.uniqueName}</a> \
-	//             {{/each}} \
-	//             {{each(d, dbxref) dbxrefs}} \
-	//                      ${dbxref} \
-	//              {{/each}} \
-	//             (${count} other{{if count >1}}s{{/if}}) \
-	//             </li> </td>";
-	
-	
-    // wa.initialize_templates = function(templates_hash) {
-    //  for (template_name in templates_hash) {
-    //      var  template_string = templates_hash[template_name];
-    //      $.log("Registering template :: " + template_name);
-    //      $.template(template_name, template_string);
-    //  }
-    // };
-    // 
-	
-    
-    
-    
-    
-    
-    
-    
-     ko.externaljQueryTemplateEngine.setOptions({
-            templateUrl: current_directory + "/tpl",
-            templateSuffix: ".html"
-        });
-    
-    
+    // TODO - this needs to be parameterizable by the caller
+    ko.externaljQueryTemplateEngine.setOptions({
+        templateUrl: current_directory + "/tpl",
+        templateSuffix: ".html"
+    });
     
     
     wa.GeneInfo = function() {
         
-        
-       
 		this.service = ["/services/"];
 		this.uniqueName = "flash";
 		
@@ -345,8 +285,7 @@ $(function(){
 
 
 /*
- * Gene pages should be instantiated only when the document is ready. 
- * */
+
 function GenePage(uniqueName, webArtemisPath, options) { 
 	
 	var defaults = {
@@ -932,3 +871,4 @@ function GeneDBPageWebArtemisObserver(source,start,bases, doReload) {
     changeLink(source,start,bases);
 };
 
+*/
