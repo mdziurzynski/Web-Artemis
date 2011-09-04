@@ -1,0 +1,6 @@
+<!-- note the $data variable is what knockout passes to the template -->
+{{each(k, list) $data}}
+    {{each(s, syn) list}}
+        ${syn.synonym} 
+    {{/each}}
+{{/each}}

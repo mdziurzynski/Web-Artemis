@@ -7,6 +7,14 @@
 		<th>Gene Name</th>
 		<td data-bind="text: geneName" ></td>
 	</tr>
+	<tr data-bind="visible: len([previous_systematic_ids]) > 0">
+	    <th>Previous Systematic Name</th>
+		<td data-bind="template: {name: 'synonyms', data: previous_systematic_ids }" ></td>
+    </tr>
+	<tr data-bind="visible: len([synonyms]) > 0">
+	    <th>Synonym</th>
+		<td data-bind="template: {name: 'synonyms', data: synonyms }" ></td>
+    </tr>
 	<tr >
 		<th>Gene Type</th>
 		<td data-bind="text: type" ></td>
@@ -15,6 +23,10 @@
 		<th>Product</th>
 		<td data-bind="template: 'product'" ></td>
 	</tr>
+	<tr data-bind="visible: len([product_synonyms]) > 0">
+	    <th>Product Synonym</th>
+		<td data-bind="template: {name: 'synonyms', data: product_synonyms }" ></td>
+    </tr>
 	<tr >
 		<th>See Also</th>
 		<td data-bind="template: 'dbxrefs' " ></td>

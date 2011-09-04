@@ -10,6 +10,8 @@ if (!Object.create) {
 }
 
 
+
+
 // we need to know the script directory for templates and images
 var scripts= document.getElementsByTagName('script');
 var path= scripts[scripts.length-1].src.split('?')[0];      
@@ -25,6 +27,7 @@ $(function(){
         templateSuffix: ".html"
     });
     
+   
     
     wa.GeneInfo = function() {
         
@@ -153,7 +156,6 @@ $(function(){
 		    var terms_map = {}
 		    this.recurse_hierarchy(this.hierarchy, function(feature) {
 		        var terms = feature.terms
-		        var attribute = feature[name];
 		        var matched = []
 		        if (terms != null && terms.length > 0) {
 		            for (var t in terms) {
@@ -167,50 +169,111 @@ $(function(){
 		            terms_map[feature.uniqueName] = matched;
 	        });
 	        return terms_map;
-		}
+		},
+		this.properties = function(property_name) {
+		    var prop_map = {}
+		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		        var matched = [];
+		        var properties = feature.properties;
+		        if (properties != null && properties.length > 0) {
+		            for (var p in properties) {
+		                var property = properties[p];
+		                if (property_name == null || property.name == property_name)
+		                    matched.push(property);
+		            }
+		        }
+		        if (matched.length > 0) 
+		            prop_map[feature.uniqueName] = matched;
+		    });
+		    return prop_map;
+		},
+    	this.pubs = function() {
+    	    return this.get_attribute_map("pubs");
+    	}
+    	this.organism = function() {
+    	    return this.hierarchy.organism;
+    	}
 	};
 	
+	wa.ViewHelper = function (options) {
+	    
+	    var defaults = {
+	        links : {
+    			go : "http://www.genedb.org/cgi-bin/amigo/term-details.cgi",
+    			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids=",
+    			others : "http://www.genedb.org/Query/controlledCuration"
+    		},
+	        evidence : {
+		        'lab' : { 
+    		    	// Experimental Evidence
+    		        'EXP': 'Inferred from Experiment',
+    		        'IDA': 'Inferred from Direct Assay',
+    		        'IPI': 'Inferred from Physical Interaction',
+    		        'IMP': 'Inferred from Mutant Phenotype',
+    		        'IGI': 'Inferred from Genetic Interaction',
+    		        'IEP': 'Inferred from Expression Pattern'
+    		    }, 
+    		    'auto' : {
+    		    	// Computational Analysis Evidence
+    		        'ISS': 'Inferred from Sequence or Structural Similarity',
+    		        'ISO': 'Inferred from Sequence Orthology',
+    		        'ISA': 'Inferred from Sequence Alignment',
+    		        'ISM': 'Inferred from Sequence Model',
+    		        'IGC': 'Inferred from Genomic Context',
+    		        'IBA': 'Inferred from Biological aspect of Ancestor',
+    		        'IBD': 'Inferred from Biological aspect of Descendant',
+    		        'IKR': 'Inferred from Key Residues',
+    		        'IRD': 'Inferred from Rapid Divergence',
+    		        'RCA': 'Inferred from Reviewed Computational Analysis',
+    		        // Automatically-assigned Evidence
+    		        'IEA': 'Inferred from Electronic Annotation'
+    		    },
+    		    'journal' : {
+    		    	// Author Statement Evidence
+    		        'TAS': 'Traceable Author Statement',
+    		        'NAS': 'Non-traceable Author Statement',
+    		        // Curator Statement Evidence
+    		        'IC': 'Inferred by Curator',
+    		        'ND': 'No biological Data available'
+    		    }
+		    },
+		    img : {
+		        prefix : current_directory + "/img/",
+		        suffix : ".png"
+	        }
+		};
+		
+		var self = this;
+	    
+		self.settings = $.extend({}, defaults, options);
+		self.organism = null;
+		
+		
+		self.evidence_category = function (supplied_evidence) {
+    		for (c in self.settings.evidence) 
+    		    for (e in self.settings.evidence[c]) 
+    		        if (supplied_evidence == self.settings.evidence[c][e]) 
+    		            return c;
+    	}
+    	self.go_link = function(accession) {
+            return self.settings.links.go + "?species=GeneDB_" + self.organism.common_name + "&term=" + accession;
+        }
+        self.img = function(props) {
+            for (p in props) {
+                var prop = props[p];
+                if (prop.type.name == "evidence") {
+                    var evidence = prop.value;
+                    return self.settings.img.prefix + self.evidence_category(evidence) + self.settings.img.suffix;
+                }
+            }
+        }
+	}
+	
+	// this is a singleton, for now
+	wa.viewHelper = new wa.ViewHelper();
 	
 	wa.GenePage = Object.create({
-	    links : {
-			go : "http://www.genedb.org/cgi-bin/amigo/term-details.cgi",
-			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids=",
-			others : "http://www.genedb.org/Query/controlledCuration"
-		}, 
-		evidence : {
-		    'lab' : { 
-		    	// Experimental Evidence
-		        'EXP': 'Inferred from Experiment',
-		        'IDA': 'Inferred from Direct Assay',
-		        'IPI': 'Inferred from Physical Interaction',
-		        'IMP': 'Inferred from Mutant Phenotype',
-		        'IGI': 'Inferred from Genetic Interaction',
-		        'IEP': 'Inferred from Expression Pattern'
-		    }, 
-		    'auto' : {
-		    	// Computational Analysis Evidence
-		        'ISS': 'Inferred from Sequence or Structural Similarity',
-		        'ISO': 'Inferred from Sequence Orthology',
-		        'ISA': 'Inferred from Sequence Alignment',
-		        'ISM': 'Inferred from Sequence Model',
-		        'IGC': 'Inferred from Genomic Context',
-		        'IBA': 'Inferred from Biological aspect of Ancestor',
-		        'IBD': 'Inferred from Biological aspect of Descendant',
-		        'IKR': 'Inferred from Key Residues',
-		        'IRD': 'Inferred from Rapid Divergence',
-		        'RCA': 'Inferred from Reviewed Computational Analysis',
-		        // Automatically-assigned Evidence
-		        'IEA': 'Inferred from Electronic Annotation'
-		    },
-		    'journal' : {
-		    	// Author Statement Evidence
-		        'TAS': 'Traceable Author Statement',
-		        'NAS': 'Non-traceable Author Statement',
-		        // Curator Statement Evidence
-		        'IC': 'Inferred by Curator',
-		        'ND': 'No biological Data available'
-		    }
-		},
+	    
 		elements : {
 			gene_summary : {
 				id : "#gene_summary",
@@ -221,15 +284,20 @@ $(function(){
 			properties : "#feature_properties",
 			go : "#gene_ontology"
 		},
+		
 		init : function (uniqueName, web_artemis_path) {
 		    
 		    this.uniqueName = uniqueName;
 		    this.web_artemis_path = web_artemis_path;
 		    
+		    
+		    
 		    var self = this;
 		    
 		    var geneInfo = new wa.GeneInfo()
 		    geneInfo.init(self.uniqueName);
+		    
+		    
 		    
         	geneInfo.hierarchy(function() {
                 var geneName = geneInfo.gene_name();
@@ -264,17 +332,39 @@ $(function(){
                 var products = geneInfo.terms("genedb_products");
                 $.log(products);
                 
+                var organism = geneInfo.organism();
+                wa.viewHelper.organism = organism;
+                
                 wa.viewModel = {
                     systematicName : systematicName,
                     type: type,
                     dbxrefs : dbxrefs,
                     geneName : geneName,
-                    products : products
+                    products : products,
+                    synonyms : synonyms,
+                    product_synonyms : product_synonyms,
+                    previous_systematic_ids : previous_systematic_ids,
+                    len : function(maps) { // returns the combined size of a list of maps
+                        count = 0
+                        for (m in maps) 
+                            for (mm in maps[m]) count++;
+                        return count;
+                    },
+                    pubs: geneInfo.pubs(),
+                    notes : geneInfo.properties("note"),
+                    comments : geneInfo.properties("comment"),
+                    curations : geneInfo.properties("curation"),
+                    cellular_component : geneInfo.terms("cellular_component"),
+                    molecular_function : geneInfo.terms("molecular_function"),
+                    biological_process : geneInfo.terms("biological_process"),
+                    organism : organism
                 }
+                
                 
                 
                 ko.applyBindings(wa.viewModel);
                 
+                $(".evidence").tooltip();
                 
         	});
 		}
