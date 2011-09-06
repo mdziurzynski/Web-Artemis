@@ -862,6 +862,7 @@ function ChromosomeMapToWebArtemis() {
  * @returns {WebArtemisToChromosomeMap}
  */
 function WebArtemisToChromosomeMap(selector) {
+    $.log("WebArtemisToChromosomeMap " + selector);
     this.redraw = function redraw(start, end) {
         $(selector).ChromosomeMapSlider('set', start, end - start);
     };

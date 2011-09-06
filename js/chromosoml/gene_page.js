@@ -20,41 +20,35 @@ var current_directory = path.split('/').slice(0, -1).join('/')+'/';
 
 $(function(){
     
-    wa = {}
-    // TODO - this needs to be parameterizable by the caller
-    ko.externaljQueryTemplateEngine.setOptions({
-        templateUrl: current_directory + "/tpl",
-        templateSuffix: ".html"
-    });
+    // we create a window wide web artemis namespace
+    window.wa = {}
+    
+    
     
    
     
-    wa.GeneInfo = function() {
+    wa.GeneInfo = function(options) {
         
-		this.service = ["/services/"];
-		this.uniqueName = "flash";
-		
-		this.types = {
-		    "gene" : ["gene", "pseudogene"],
-		    "special_transcript" : ["ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"],
-		    "transcript" : ["mRNA", "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"]
-		};
-		
-		this.init = function(uniqueName, service) {
-		    if (uniqueName != null)
-		        this.uniqueName = uniqueName;
-	        if (service != null)
-		        this.service=service;
-		    //this.proxy("hierarchy", "recurse_hierarchy", "gene_name", "transcripts", "type", "synonyms", "systematic_name");
-		}
-		this.hierarchy = function(success) {
-		    var self=this;
+        var defaults = {
+            service : ["/services/"],
+            uniqueName : "flash",
+            types : {
+    		    "gene" : ["gene", "pseudogene"],
+    		    "special_transcript" : ["ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"],
+    		    "transcript" : ["mRNA", "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA"]
+    		}
+        }
+        
+        var self=this;
+        $.extend(self, defaults, options);
+        
+		self.get_hierarchy = function(success) {
 		    $.ajax({
-    	        url: this.service + "/feature/hierarchy.json",
+    	        url: self.service + "/feature/hierarchy.json",
     	        type: 'GET',
     	        dataType: 'json',
     	        data: {
-    	            'uniqueName' : this.uniqueName
+    	            'uniqueName' : self.uniqueName
     	        },
     	        success: function(hierarchy) {
     	            $.log("received hierarchy for " + self.uniqueName);
@@ -63,38 +57,51 @@ $(function(){
 	            }
             });
 		}
+		self.get_sequence_length = function(region, success) {
+		    $.ajax({
+    	        url: self.service + "/regions/sequenceLength.json",
+    	        type: 'GET',
+    	        dataType: 'json',
+    	        data: {
+    	            'region' : region
+    	        },
+    	        success: function(regions) {
+    	            success(regions[0].length);
+	            }
+            });
+		}
 		/*
 		    This function is used by many others to fetch information out of the hierarchy. It will apply the callback
 		    to each feature in the hiearchy. 
 		*/
-		this.recurse_hierarchy = function(feature, callback) {
+		self.recurse_hierarchy = function(feature, callback) {
 		    for (c in feature.children) {
 		        var child = feature.children[c];
-		        this.recurse_hierarchy(child, callback);
+		        self.recurse_hierarchy(child, callback);
 		    }
 		    return callback(feature);
 		}
-		this.gene_name = function() {
-		    var types = this.types;
-		    return this.recurse_hierarchy(this.hierarchy, function(feature) {
+		self.gene_name = function() {
+		    var types = self.types;
+		    return self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        if (types.gene.indexOf(feature.type.name) > -1)
 		            return feature.uniqueName;
 		    });
 		}
-		this.transcripts = function() {
-		    var types = this.types;
+		self.transcripts = function() {
+		    var types = self.types;
 		    var transcripts = [];
-		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        if (types.transcript.indexOf(feature.type.name) > -1) {
 		            transcripts.push(feature);
 		        }
 		    });
 		    return transcripts;
 		}
-		this.type = function() {
+		self.type = function() {
 		    var type = "feature";
-		    var types = this.types;
-		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		    var types = self.types;
+		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 	            if (types.special_transcript.indexOf(feature.type.name) > -1) 
                     type = feature.type.name;
                 else if (feature.type.name == "polypeptide")
@@ -104,9 +111,9 @@ $(function(){
 		    });
 		    return type;
 		}
-		this.synonyms = function(type) {
+		self.synonyms = function(type) {
 		    var synonyms = {};
-		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        var feature_synonyms = []
 		        if (feature.synonyms != null && feature.synonyms.length > 0) {
 		            for (s in feature.synonyms) {
@@ -120,12 +127,12 @@ $(function(){
 	        });
 	        return synonyms;
 		}
-		this.systematic_name = function() {
+		self.systematic_name = function() {
 		    
-		    var systematicName = this.uniqueName;
-		    var geneName = this.gene_name();
+		    var systematicName = self.uniqueName;
+		    var geneName = self.gene_name();
 		    
-		    var transcript_count = this.transcripts().length;
+		    var transcript_count = self.transcripts().length;
 		    
 		    if (geneName != null) {
 		        if (transcript_count < 2) {
@@ -137,24 +144,24 @@ $(function(){
 		    
 		    return systematicName;
 		}
-		this.get_attribute_map = function(name) {
+		self.get_attribute_map = function(name) {
 		    var map = {};
-		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        var attribute = feature[name];
 		        if (attribute != null && attribute.length > 0)
 		            map[feature.uniqueName] = attribute
 	        });
 	        return map;
 		}
-		this.dbxrefs = function() {
-		    return this.get_attribute_map("dbxrefs");
+		self.dbxrefs = function() {
+		    return self.get_attribute_map("dbxrefs");
 		}
-		this.coordinates = function() {
-		    return this.get_attribute_map("coordinates");
+		self.coordinates = function() {
+		    return self.hierarchy.coordinates;
 		}
-		this.terms = function(cv) {
+		self.terms = function(cv) {
 		    var terms_map = {}
-		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        var terms = feature.terms
 		        var matched = []
 		        if (terms != null && terms.length > 0) {
@@ -170,9 +177,9 @@ $(function(){
 	        });
 	        return terms_map;
 		},
-		this.properties = function(property_name) {
+		self.properties = function(property_name) {
 		    var prop_map = {}
-		    this.recurse_hierarchy(this.hierarchy, function(feature) {
+		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        var matched = [];
 		        var properties = feature.properties;
 		        if (properties != null && properties.length > 0) {
@@ -187,11 +194,24 @@ $(function(){
 		    });
 		    return prop_map;
 		},
-    	this.pubs = function() {
-    	    return this.get_attribute_map("pubs");
+    	self.pubs = function() {
+    	    return self.get_attribute_map("pubs");
     	}
-    	this.organism = function() {
-    	    return this.hierarchy.organism;
+    	self.organism = function() {
+    	    return self.hierarchy.organism;
+    	}
+    	self.order_terms = function(terms) {
+            var new_terms = {}
+            for (f in terms) {
+                ordered = terms[f].sort(function(t1,t2) {
+                    return t1.name > t2.name;
+                });
+                new_terms[f] = ordered;
+            }
+            return new_terms;
+        }
+        self.domains = function() {
+    	    return self.get_attribute_map("domains");
     	}
 	};
 	
@@ -267,39 +287,37 @@ $(function(){
                 }
             }
         }
+        
 	}
 	
 	// this is a singleton, for now
 	wa.viewHelper = new wa.ViewHelper();
 	
-	wa.GenePage = Object.create({
+	wa.GenePage = function(options) {
 	    
-		elements : {
-			gene_summary : {
-				id : "#gene_summary",
-				elements : {
-					".gene_summary_items" : "items"
-				}
-			},
-			properties : "#feature_properties",
-			go : "#gene_ontology"
-		},
+	    var defaults = {
+	        uniqueName : "fred",
+	        webArtemisPath : "wa",
+	        template_options : {
+	            templateUrl: current_directory + "/tpl",
+                templateSuffix: ".html"
+	        }
+	    }
+	    
+	    var self = this;
+	    $.extend(self, defaults, options);
+	    
+        ko.externaljQueryTemplateEngine.setOptions(self.template_options);
+	    
+	    self.init = function () {
+		    self.geneInfo = new wa.GeneInfo();
+        	self.info(self.geneInfo, self.uniqueName, self.on_init);
+		}
 		
-		init : function (uniqueName, web_artemis_path) {
+		self.info = function (geneInfo, uniqueName, onComplete) {
+		    geneInfo.uniqueName = uniqueName;
 		    
-		    this.uniqueName = uniqueName;
-		    this.web_artemis_path = web_artemis_path;
-		    
-		    
-		    
-		    var self = this;
-		    
-		    var geneInfo = new wa.GeneInfo()
-		    geneInfo.init(self.uniqueName);
-		    
-		    
-		    
-        	geneInfo.hierarchy(function() {
+        	geneInfo.get_hierarchy(function() {
                 var geneName = geneInfo.gene_name();
                 $.log("gene name is " + geneName);
                 
@@ -325,6 +343,7 @@ $(function(){
                 $.log(dbxrefs);
                 
                 var coordinates = geneInfo.coordinates();
+                $.log("coordinates");
                 $.log(coordinates);
                 
                 //wa.initialize_templates(wa.templates);
@@ -334,6 +353,12 @@ $(function(){
                 
                 var organism = geneInfo.organism();
                 wa.viewHelper.organism = organism;
+                
+                $.log("curation")
+                $.log(geneInfo.properties("curation"));
+                
+                var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
+                $.log(controlled_curation);
                 
                 wa.viewModel = {
                     systematicName : systematicName,
@@ -345,7 +370,7 @@ $(function(){
                     product_synonyms : product_synonyms,
                     previous_systematic_ids : previous_systematic_ids,
                     len : function(maps) { // returns the combined size of a list of maps
-                        count = 0
+                        var count = 0
                         for (m in maps) 
                             for (mm in maps[m]) count++;
                         return count;
@@ -357,19 +382,236 @@ $(function(){
                     cellular_component : geneInfo.terms("cellular_component"),
                     molecular_function : geneInfo.terms("molecular_function"),
                     biological_process : geneInfo.terms("biological_process"),
-                    organism : organism
+                    organism : organism,
+                    controlled_curation : controlled_curation,
+                    domains : geneInfo.domains()
                 }
-                
-                
                 
                 ko.applyBindings(wa.viewModel);
                 
+                $.log(["onComplete?", onComplete]);
+                
+                //self.embed_web_artemis(coordinates[0]);
+                wa.webArtemisLinker.link(coordinates[0]);
+                
                 $(".evidence").tooltip();
+                
+                if (onComplete != null)
+                    onComplete(geneInfo.hierarchy);
                 
         	});
 		}
-	})
+		
+		self.on_init = function(feature) {
+		    self.geneInfo.get_sequence_length(feature.coordinates[0].region, function(sequenceLength) {
+		        self.embedded_web_artemis = new wa.EmbeddedWebArtemis({
+    		        coordinates : feature.coordinates[0], 
+    		        webArtemisPath: self.webArtemisPath, 
+    		        sequenceLength : sequenceLength,
+    		        onChange : self.resetPage
+    		    });
+		    });
+		}
+		
+		self.resetPage = function(uniqueName) {
+            self.info(self.geneInfo,uniqueName);
+        }
+		
+		self.init();
+	}
 	
+	/*
+	    
+	*/
+	wa.EmbeddedWebArtemis = function(options) {
+	    
+	    var defaults = {
+	        chromosome_map_element : "#chromosome-map",
+	        chromosome_map_slider_element : "#chromosome-map-slider",
+	        web_artemis_element : "#webartemis",
+	        sequenceLength : 1,
+	        coordinates : {
+	            fmin : 1,
+	            fmax : 1000,
+	            region : "some_region"
+            },
+            webArtemisPath : "path",
+	        max_residues : 1000000,
+	        service : "/services/", 
+	        onChange : function () {
+	            $.log("default change");
+	        }
+	    }
+	    
+	    var self = this;
+	    $.extend(self, defaults, options);
+	    
+		var topLevelFeatureLength = parseInt(self.sequenceLength);
+        var max = self.max_residues;
+        var needsSlider = true;
+        if (max > topLevelFeatureLength) {
+            max = topLevelFeatureLength;
+            //needsSlider = false;
+        }
+        var zoomMaxRatio = max / parseInt(self.sequenceLength);
+        
+        $.log("zooom " + zoomMaxRatio);
+        
+        $(self.chromosome_map_element).ChromosomeMap({
+            region : self.coordinates.region, 
+            overideUseCanvas : false,
+            bases_per_row: parseInt(self.sequenceLength),
+            row_height : 10,
+            row_width : 870,
+            overideUseCanvas : true,
+            loading_interval : 100000,
+            axisLabels : false,
+            row_vertical_space_sep : 10,
+            web_service_root : self.service
+        });
+        
+        $.log(self.coordinates);
+        
+        $(self.web_artemis_element).WebArtemis({
+            source : self.coordinates.region,
+            start : self.coordinates.fmin-1000,
+            bases : self.coordinates.fmax-self.coordinates.fmin +2000,
+            showFeatureList : false,
+            width : 950,
+            directory : self.webArtemisPath,
+            showOrganismsList : false,
+            webService : self.service,
+            draggable : false,
+            mainMenu : false, 
+            zoomMaxRatio : zoomMaxRatio
+        });
+        
+        
+        if (needsSlider) {
+            
+            $(self.chromosome_map_slider_element).ChromosomeMapSlider({
+                windowWidth : 870,
+                max : parseInt(self.sequenceLength), 
+                observers : [new ChromosomeMapToWebArtemis()],
+                pos : self.coordinates.fmin-1000,
+                width : self.coordinates.fmax-self.coordinates.fmin +2000
+            });
+            
+            setTimeout(function() { 
+                $(self.web_artemis_element).WebArtemis('addObserver', self);
+                $(self.web_artemis_element).WebArtemis('addObserver', 
+                    new WebArtemisToChromosomeMap(self.chromosome_map_slider_element));
+            }, 500);
+        }
+        
+        self.redraw = function redraw(start, end) {
+        	$.log("REDRAW DETECTED " + start + " " + end);
+        	//changeLink(source, start, end - start);
+        };
+        self.select = function(feature, fDisplay) {
+        	$.log("SELECT DETECTED " + feature + " ON DISPLAY ");
+        	self.onChange(feature);
+    	};
+    	
+        $('.wacontainer').hover(
+            function(e) {
+                $("#web-artemis-link-container").show();                    
+            }, function(e) {
+                $("#web-artemis-link-container").hide();
+            }
+        );
+	}
+	
+	wa.WebArtemisLinker = function (options) {
+	    var defaults = {
+	        baseURL : "http://www.genedb.org/web-artemis/?src=",
+	        web_artemis_link : "#web-artemis-link",
+	        web_artemis_link_container : "#web-artemis-link-container",
+	        web_artemis_container : ".wacontainer"
+	    }
+	    var self = this;
+	    $.extend(self, defaults, options);
+	    
+	    
+	    $(self.web_artemis_container).hover(
+            function(e) {
+                $(self.web_artemis_link_container).show();                    
+            }, function(e) {
+                $(self.web_artemis_link_container).hide();
+            }
+        );
+        
+        self.link = function (coordinates) {
+            var href = self.baseURL + coordinates.region + "&base=" 
+        	    	+ (coordinates.fmin-1000) + "&bases=" + (coordinates.fmax-coordinates.fmin +2000);
+        	$(self.web_artemis_link).attr("href", href);
+        }
+	    
+	}
+	
+	// also a singleton
+	wa.webArtemisLinker = new wa.WebArtemisLinker();
+	
+    
+    /*
+    wa.EmbeddedWebArtemisObserver = function (source,start,bases, doReload) {
+
+    	var loading = false;
+    	var loadedFeatureName = "";
+
+    	function changeLink(topLevelFeatureUniqueName, leftBase, basesDisplayWidth) {
+    	    var href = "http://www.genedb.org/web-artemis/?src=" + topLevelFeatureUniqueName + "&base=" 
+    	    	+ leftBase + "&bases=" + basesDisplayWidth;
+    	    $("#web-artemis-link").attr("href", href);
+    	}
+
+    	function reloadDetails(name) {
+
+    		$.log("reloadDetails :" , [loading, name, loadedFeatureName, doReload]);
+
+    	    if (loading || name ==  null || name == loadedFeatureName) {
+    	    	return;
+    	    }
+
+    	    loading = true;
+
+    	    $.log("reload " + name);
+
+    	    doReload(name, onReload);
+    //	    
+    //	    $("#geneDetails").fadeTo("slow", 0.4).load(encodeURIComponent(name)+"?detailsOnly=true", null, function () {
+    //	    	loadedFeatureName = name;
+    //	    	document.title = "Gene element "+name+" - GeneDB";
+    //	    	$("#geneDetails").stop().fadeTo("fast", 1);
+    //	        loading = false;
+    //	   }); 
+
+    	} 
+
+    	function onReload(feature) {
+    	    $.log(["EmbeddedWebArtemisObserver.onReload", feature.uniqueName]);
+            loading = false;
+            document.title = "Gene element " + feature.uniqueName + " - GeneDB";
+    	}
+
+        this.redraw = function redraw(start, end) {
+        	$.log("REDRAW DETECTED " + start + " " + end);
+        	changeLink(source, start, end - start);
+        };
+        this.select = function(feature, fDisplay) {
+        	if (feature == loadedFeatureName) {
+        		return;
+        	}
+        	$.log("SELECT DETECTED " + feature + " ON DISPLAY ");
+        	//$.historyLoad(feature);
+        	reloadDetails(feature);
+    	};
+
+    	//$.historyInit(reloadDetails);
+        changeLink(source,start,bases);
+    };
+    
+    */
     
 });
 
