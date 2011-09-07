@@ -23,10 +23,9 @@ $(function(){
     // we create a window wide web artemis namespace
     window.wa = {}
     
-    
-    
-   
-    
+    /*
+        A crawl client, that specialises in recursing hierarchy results, to enable the view of a gene to be constructed.
+    */
     wa.GeneInfo = function(options) {
         
         var defaults = {
@@ -211,10 +210,46 @@ $(function(){
             return new_terms;
         }
         self.domains = function() {
-    	    return self.get_attribute_map("domains");
+    	    
+    	    // compound hash of feature_uniqueName.category_dbxref_accession.domain_list
+    	    var categorized_domains = {}
+    	    
+    	    // we must walk through each domain, and categorize by checking the presence of an Interpro dbxref
+    	    self.recurse_hierarchy(self.hierarchy, function(feature) {
+    	        
+    	        for (d in feature.domains) {
+    	            
+                    var domain = feature.domains[d];
+                    var key = "Other Matches";
+
+                    for (dx in domain.dbxrefs) {
+                        var dbxref = domain.dbxrefs[dx];
+                        if (dbxref.db.name == "InterPro") {
+                            var key = dbxref.accession;
+                            break;
+                        }
+                    }
+
+                    if ((feature in categorized_domains) != true) 
+                       categorized_domains[feature] = {}
+
+                    if ((key in categorized_domains[feature]) != true)
+                       categorized_domains[feature][key] = []  
+
+                    categorized_domains[feature][key].push(domain)
+    	           
+    	        }
+    	    });
+    	    
+    	    $.log("categorized_domains");
+    	    $.log(categorized_domains);
+        	return categorized_domains;
     	}
 	};
 	
+	/*
+	    Provides functions that can be called from within templates, usually generating links.
+	*/
 	wa.ViewHelper = function (options) {
 	    
 	    var defaults = {
@@ -293,6 +328,9 @@ $(function(){
 	// this is a singleton, for now
 	wa.viewHelper = new wa.ViewHelper();
 	
+	/*
+	    Initiates a gene page, including web artemis and 
+	*/
 	wa.GenePage = function(options) {
 	    
 	    var defaults = {
@@ -408,16 +446,22 @@ $(function(){
     		        coordinates : feature.coordinates[0], 
     		        webArtemisPath: self.webArtemisPath, 
     		        sequenceLength : sequenceLength,
-    		        onChange : self.resetPage
+    		        observers : [self]
     		    });
 		    });
 		}
-		
-		self.resetPage = function(uniqueName) {
-            self.info(self.geneInfo,uniqueName);
-        }
+        
+        self.redraw = function redraw(start, end) {
+        	$.log("REDRAW DETECTED " + start + " " + end);
+        };
+        
+        self.select = function(uniqueName, fDisplay) {
+        	$.log("SELECT DETECTED " + uniqueName + " ON DISPLAY ");
+        	self.info(self.geneInfo,uniqueName);
+    	};
 		
 		self.init();
+		
 	}
 	
 	/*
@@ -438,9 +482,9 @@ $(function(){
             webArtemisPath : "path",
 	        max_residues : 1000000,
 	        service : "/services/", 
-	        onChange : function () {
+	        observers : [function () {
 	            $.log("default change");
-	        }
+	        }]
 	    }
 	    
 	    var self = this;
@@ -486,7 +530,6 @@ $(function(){
             zoomMaxRatio : zoomMaxRatio
         });
         
-        
         if (needsSlider) {
             
             $(self.chromosome_map_slider_element).ChromosomeMapSlider({
@@ -498,28 +541,14 @@ $(function(){
             });
             
             setTimeout(function() { 
-                $(self.web_artemis_element).WebArtemis('addObserver', self);
+                for (o in self.observers)
+                    $(self.web_artemis_element).WebArtemis('addObserver', self.observers[o]);
                 $(self.web_artemis_element).WebArtemis('addObserver', 
                     new WebArtemisToChromosomeMap(self.chromosome_map_slider_element));
             }, 500);
         }
         
-        self.redraw = function redraw(start, end) {
-        	$.log("REDRAW DETECTED " + start + " " + end);
-        	//changeLink(source, start, end - start);
-        };
-        self.select = function(feature, fDisplay) {
-        	$.log("SELECT DETECTED " + feature + " ON DISPLAY ");
-        	self.onChange(feature);
-    	};
-    	
-        $('.wacontainer').hover(
-            function(e) {
-                $("#web-artemis-link-container").show();                    
-            }, function(e) {
-                $("#web-artemis-link-container").hide();
-            }
-        );
+                
 	}
 	
 	wa.WebArtemisLinker = function (options) {

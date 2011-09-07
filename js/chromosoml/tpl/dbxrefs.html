@@ -1,6 +1,6 @@
 {{each(feature, dbxref_list) dbxrefs}}
     {{each(d, dbxref) dbxref_list}}
          <a href='${dbxref.urlprefix}${dbxref.accession}'>${dbxref.accession}</a> 
-            (${ (dbxref.description != null) ? dbxref.description : dbxref.database }) <br>
+            (${ (dbxref.description != null) ? dbxref.description : dbxref.db.description }) <br>
     {{/each}}
 {{/each}}
