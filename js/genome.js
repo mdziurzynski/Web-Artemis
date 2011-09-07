@@ -1914,6 +1914,10 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, option
 	for(var i=0; i<nfeatures; i++ ) {
 	  var feature = features[i];
 
+	  if(feature.isObsolete == true) {
+		  continue;
+	  }
+	  
 	  if(feature.type.name == "exon" || feature.type.name == "pseudogenic_exon" || feature.type.name == "CDS") {
 		  
 		  if(!feature.properties) {
