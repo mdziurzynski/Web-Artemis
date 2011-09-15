@@ -15,10 +15,13 @@
 	    <th>Synonym</th>
 		<td data-bind="template: {name: 'synonyms', data: synonyms }" ></td>
     </tr>
-	<tr >
+	<tr>
 		<th>Gene Type</th>
 		<td data-bind="text: type" ></td>
 	</tr>
+        <th>Location</th>
+        <td >${coordinates[0].region} : ${coordinates[0].fmin}-${coordinates[0].fmax}</td>
+    </tr>
 	<tr >
 		<th>Product</th>
 		<td data-bind="template: 'product'" ></td>

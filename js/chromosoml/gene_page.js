@@ -18,6 +18,90 @@ var path= scripts[scripts.length-1].src.split('?')[0];
 var current_directory = path.split('/').slice(0, -1).join('/')+'/';
 
 
+(function($) {
+	
+	
+	$.fn.AbsoluteToolTips = function(options) {
+    	
+		$.log("AbsoluteToolTips");
+		
+		var defaults = {
+			"tooltip_element_id" : "reltool",
+			"sub_element_class" : "relative_block_tooltip"
+		}
+		
+		// the tooltip is shared by all elements bound to this plugin
+		var tooltip = null;
+		var toolout = true;
+		var elout = false;
+		
+		return this.each(function() {
+			
+			$.log(this);
+			
+			var self=this;
+			$.extend(self, defaults, options);
+			
+    		self.hideTool = function () {
+    			$.log(toolout, elout);
+    			setTimeout(function() {
+    				if (toolout == true && elout == true)
+    					tooltip.fadeOut('slow');
+    			}, 500);
+    		}
+    		
+    		self.showTool = function (html, e) {
+    			
+    			if (tooltip == null) {
+    				
+    				var div = $("<div />", {id: self.tooltip_element_id}).appendTo($("body"));
+    				
+    				tooltip = $("#"+self.tooltip_element_id);
+    				
+    				tooltip.bind("mouseenter", function(e){
+    					$.log("enter tool");
+    					toolout = false;
+        			});
+    				
+        			tooltip.bind("mouseleave", function(e){
+        				$.log("exit tool");
+        				toolout = true;
+        				self.hideTool();
+        			});
+        			
+        			$.log(tooltip);
+    				
+    			}
+    			
+    			tooltip.html(html)
+    				.css('left', e.pageX  + 10 )
+    				.css('top', e.pageY -5)
+    				.show();
+    			
+    		}
+    		
+    		$(this).bind("mouseenter mouseover", function(e) {
+    			var html = $("." + self.sub_element_class, self).html();
+    			elout = false;
+    			$.log("enter el");
+    			$.log(toolout, elout);
+    			self.showTool(html,e);
+    		});
+    		
+    		$(this).bind("mouseleave", function(e) {
+    			$.log("exit el");
+    			elout = true;
+    			self.hideTool();
+    		});
+    		
+	    	
+			
+		});
+		
+    }
+	
+})(jQuery);
+
 $(function(){
     
     // we create a window wide web artemis namespace
@@ -65,7 +149,8 @@ $(function(){
     	            'region' : region
     	        },
     	        success: function(regions) {
-    	            success(regions[0].length);
+    	        	self.sequenceLength = regions[0].length; 
+    	            success(self.sequenceLength);
 	            }
             });
 		}
@@ -245,7 +330,20 @@ $(function(){
     	    $.log(categorized_domains);
         	return categorized_domains;
     	}
+    	self.getBounds = function(domains) {
+    	    var coordinates = self.coordinates()[0];
+    	    var bounds = {
+    	        fmin : coordinates.fmin,
+    	        fmax : coordinates.fmax,
+    	    }
+    	    for (feature in domains) {
+    	        
+    	    }
+    	}
 	};
+	
+	
+	
 	
 	/*
 	    Provides functions that can be called from within templates, usually generating links.
@@ -295,38 +393,303 @@ $(function(){
 		    img : {
 		        prefix : current_directory + "/img/",
 		        suffix : ".png"
+	        },
+	        colours : {
+	        	"default" : "rgb(125, 125, 125)",
+	        	"Pfam" : "rgb(248, 57, 217)",
+	            "PIRSF" : "rgb(52, 33, 135)",
+	            "Prosite" : "rgb(130, 68, 225)",
+	            "SMART" : "rgb(247, 65, 66)",
+	            "PRINTS" : "rgb(57, 45, 209)",
+	            "ProDom" : "rgb(0, 160, 9)",
+	            "Superfamily" : "rgb(0, 199, 127)",
+	            "TIGR_TIGRFAMS" : "rgb(0, 255, 255)"
 	        }
 		};
 		
 		var self = this;
-	    
-		self.settings = $.extend({}, defaults, options);
+	    $.extend(self, defaults, options);
 		self.organism = null;
 		
-		
 		self.evidence_category = function (supplied_evidence) {
-    		for (c in self.settings.evidence) 
-    		    for (e in self.settings.evidence[c]) 
-    		        if (supplied_evidence == self.settings.evidence[c][e]) 
+    		for (c in self.evidence) 
+    		    for (e in self.evidence[c]) 
+    		        if (supplied_evidence == self.evidence[c][e]) 
     		            return c;
     	}
     	self.go_link = function(accession) {
-            return self.settings.links.go + "?species=GeneDB_" + self.organism.common_name + "&term=" + accession;
+            return self.links.go + "?species=GeneDB_" + self.organism.common_name + "&term=" + accession;
         }
         self.img = function(props) {
             for (p in props) {
                 var prop = props[p];
                 if (prop.type.name == "evidence") {
                     var evidence = prop.value;
-                    return self.settings.img.prefix + self.evidence_category(evidence) + self.settings.img.suffix;
+                    return self.img.prefix + self.evidence_category(evidence) + self.img.suffix;
                 }
             }
         }
+        
+        
+        
         
 	}
 	
 	// this is a singleton, for now
 	wa.viewHelper = new wa.ViewHelper();
+	
+	wa.ProteinMap = function(options, hierarchy, domains, sequenceLength) {
+	    
+	    var defaults = {
+	        step_number : 10,
+	        pixel_width : 700
+	    }
+	    
+	    var self = this;
+	    $.extend(self, defaults, options);
+	    
+	    self.hierarchy = hierarchy;
+	    self.domains = domains;
+	    self.sequenceLength = sequenceLength;
+	    
+//	    self.init = function() {
+//	        //var coordinates = self.coordinates()[0];
+//    	    self.bounds = {
+//    	        fmin : sequenceLength,
+//    	        fmax : 1
+//    	    }
+//    	    self.positions = {}
+//    	    for (var feature in domains) {
+//    	        for (var category in domains[feature]) {
+//    	            var domain = domains[feature][category];
+//    	            self.positions [feature+"::"+category] = {
+//    	                fmin : domain.fmin,
+//    	                fmax : domain.fmax
+//    	            }
+//        	        if (domain.fmin < self.bounds.fmin) 
+//        	            self.bounds.fmin = domain.fmin;
+//        	        if (domain.fmin > self.bounds.fmax)
+//        	            self.bounds.fmax = domain.fmax;
+//    	        }
+//    	        
+//    	    }
+//    	    return bounds;
+//	    }
+	    
+	    self.isOverlap= function(bounds) {
+	        for (var feature in self.domains) {
+	        	
+    	        for (var category in self.domains[feature]) {
+    	        	
+    	            var domains = self.domains[feature][category];
+    	            
+    	            for (var d in domains) {
+    	            	var domain = domains[d];
+    	            	$.log(category, domain.uniqueName, bounds.fmin, domain.fmin, domain.fmax, bounds.fmax,
+    	            			bounds.fmin <= domain.fmin && domain.fmin <= bounds.fmax,
+    	            			bounds.fmin <= domain.fmax && domain.fmax <= bounds.fmax);
+        	            if ((bounds.fmin <= domain.fmin && domain.fmin <= bounds.fmax) || 
+    	            		(bounds.fmin <= domain.fmax && domain.fmax <= bounds.fmax)) {
+        	            	$.log("!");
+        	            	return true;
+        	            }
+    	            }
+    	            
+    	            
+	            }
+            }
+            return false;
+	    }
+	    
+	    // adapted from http://gamedev.stackexchange.com/questions/586/what-is-the-fastest-way-to-work-out-2d-bounding-box-intersection
+	    self.boxesOverlap = function(box1, box2) {
+	    	return (Math.abs(box1.x - box2.x) * 2 < (box1.width + box2.width) &&
+	    			Math.abs(box1.y - box2.y) * 2 < (box1.height + box2.height));
+	    }
+	    
+	    self.showSection = function (base_position) {
+	    	for (var b in self.shown) {
+	    		var bounds = self.shown[b];
+	    		if (bounds.fmin <= base_position && bounds.fmax >= base_position)
+	    			return true;
+	    	}
+	    	return false;
+	    }
+	    
+	    self.totalGapLength = function() {
+	    	var gapLength = 0;
+	        for (g in self.gaps) {
+	            var gap = self.gaps[g];
+	            gapLength += (gap.fmax - gap.fmin);
+	        }
+	        return gapLength;
+	    }
+	    
+	    self.getDivPosition = function (base_position) {
+	        var subtract = 0;
+	        for (g in self.gaps) {
+	            var gap = self.gaps[g];
+	            if (gap.fmax < base_position) 
+	                subtract += (gap.fmax - gap.fmin);
+	            if (gap.fmin > base_position) 
+	                break;
+	        }
+	        return base_position - subtract;
+	    }
+	    
+	    self.scaleX = function (base_position) {
+	    	var coordinates = self.hierarchy.coordinates[0];
+	    	var base_length = coordinates.fmax - coordinates.fmin;
+	    	
+	    	var totalGapLength = self.totalGapLength();
+	    	
+	    	var max = base_length - totalGapLength;
+	    	
+	    	var div_position = self.getDivPosition(base_position);
+	    	
+	    	var pos = (self.pixel_width / max ) * div_position 
+	    	
+	    	$.log("scaleX", base_length, totalGapLength, max, base_position, div_position, self.pixel_width,  pos);
+	    	
+	    	return  pos;
+	    }
+	    
+	    self.determine_step = function(max) {
+	    	
+	    	function log10(val) {
+	    		return Math.log(val) / Math.log(10);
+	    	}
+
+	    	
+			//diff = max; // divide by 3 for amino acids
+	    	
+			var stepsUncorrected = max / self.step_number;
+			var log = log10(stepsUncorrected);
+			var round = Math.floor(log);
+			var step = Math.pow(10, round);
+	        return step;
+	    }
+	    
+	    self.init = function() {
+	        self.gaps = [];
+	        self.shown = [];
+	        var coordinates = self.hierarchy.coordinates[0];
+	        var max = coordinates.fmax - coordinates.fmin;
+	        
+	        var step = self.determine_step(max);
+	        self.step = step;
+	        
+	        var pos = 0;
+	        // var pos2 = pos + step;
+	        for (var i = 0; pos <= max; i++) {
+	        	
+	        	pos = (i*step) ;
+	        	
+	        	if (pos > max)
+	        		break;
+	        	
+	            var pos2 = pos + step;
+	            
+	            if (pos2 > max)
+	            	pos2 = max;
+	            
+	            $.log(i, "pos", pos, "pos2", pos2);
+	            
+	            var bounds = {
+            		fmin:pos,
+            		fmax:pos2
+	            };
+	            if (self.isOverlap(bounds)) {
+	            	self.shown.push(bounds);
+	            } else {
+	            	self.gaps.push(bounds);
+	            }
+	        }
+	        $.log("shown");
+	        for (var b in self.shown) {
+	        	var box = self.shown[b];
+	        	box.x = self.scaleX(box.fmin);
+	        	box.x2 = self.scaleX(box.fmax);
+	        }
+	        $.log("gaps");
+	        for (var b in self.gaps) {
+	        	var box = self.gaps[b];
+	        	box.x = self.scaleX(box.fmin);
+	        	box.x2 = self.scaleX(box.fmax);
+	        }
+	        
+	        
+	        self.domain_graph = [];
+	        var y =0;
+	        
+	        for (var feature in self.domains) {
+    	        for (var category in self.domains[feature]) {
+    	            var domains = self.domains[feature][category];
+    	            for (var d in domains) {
+    	            	var domain = domains[d];
+    	            	var x = self.scaleX(domain.fmin);
+    	            	
+    	            	
+    	            	y=10;
+    	            	
+    	            	
+    	            	
+    	            	
+    	            	
+    	            	var width = self.scaleX(domain.fmax) - x;
+    	            	var height = 10;
+    	            	
+    	            	var dbname = "";
+    	            	
+    	            	var dbxref = null;
+    	            	for (dx in domain.dbxrefs) {
+    	            		// we don't break, we want the last value
+    	            		dbxref = domain.dbxrefs[dx];
+    	            		dbname = dbxref.db.name; 
+    	            	}
+    	            	
+    	            	var colour = null;
+    	            	if (dbname != null)
+    	            		colour = wa.viewHelper.colours[dbname];
+    	            	if (colour == null) // if still null 
+    	            		colour = wa.viewHelper.colours.default;
+    	            	
+    	            	var box = {
+    	            		dbxref : dbxref,
+    	            		category : category,
+    	            		feature : feature,
+    	            		x : x,
+    	            		y : y,
+    	            		fmin:domain.fmin,
+    	            		fmax:domain.fmax,
+    	            		width : width,
+    	            		height : height,
+    	            		colour : colour
+    	            	}
+    	            	
+    	            	
+    	            	for (p in self.domain_graph) {
+    	            		var previous = self.domain_graph[p];
+    	            		
+    	            		if (self.boxesOverlap(box,previous)) {
+    	            			box.y += 15;
+    	            		}
+    	            		
+    	            	}
+    	            	
+    	            	
+    	            	//$.log("draw domain", domain.fmin, domain.fmax, box);
+    	            	self.domain_graph.push(box);
+    	            	
+    	            }
+    	        }
+	        }
+	        
+	    }
+	    
+	    self.init ();
+	}
+	
 	
 	/*
 	    Initiates a gene page, including web artemis and 
@@ -398,6 +761,8 @@ $(function(){
                 var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
                 $.log(controlled_curation);
                 
+                var domains = geneInfo.domains();
+                
                 wa.viewModel = {
                     systematicName : systematicName,
                     type: type,
@@ -422,8 +787,17 @@ $(function(){
                     biological_process : geneInfo.terms("biological_process"),
                     organism : organism,
                     controlled_curation : controlled_curation,
-                    domains : geneInfo.domains()
+                    domains : domains,
+                    coordinates : coordinates
                 }
+                
+                
+                var proteinMap = new wa.ProteinMap ({}, geneInfo.hierarchy, domains, geneInfo.sequenceLength); 
+                $.log(proteinMap.gaps);
+                $.log(proteinMap.shown);
+                $.log(proteinMap.domain_graph);
+                wa.viewModel.domain_graph = proteinMap.domain_graph;
+                wa.viewModel.domain_graph_shown = proteinMap.shown;
                 
                 ko.applyBindings(wa.viewModel);
                 
@@ -431,6 +805,13 @@ $(function(){
                 
                 //self.embed_web_artemis(coordinates[0]);
                 wa.webArtemisLinker.link(coordinates[0]);
+                
+                $(".absolute_tool").AbsoluteToolTips();
+                
+                
+                $( "#tabs" ).tabs();
+                
+                
                 
                 $(".evidence").tooltip();
                 

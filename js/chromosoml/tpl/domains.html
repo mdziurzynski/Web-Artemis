@@ -20,7 +20,7 @@
                         
                     {{if dbxref.accession != category_name}}
                         
-                        <td>&nbsp;</td><td> ${dbxref.accession} </td><td> ${dbxref.description}</td><td> ${domain.fmin} - ${domain.fmax}</td>
+                        <td>&nbsp;</td><td> <a href="${dbxref.db.urlprefix}${dbxref.accession}"> ${dbxref.db.name}:${dbxref.accession}</a> </td><td> ${dbxref.description}</td><td> ${domain.fmin} - ${domain.fmax}</td>
                         
                         {{if domain.analysisFeature != null}}
                         <td>
@@ -36,8 +36,6 @@
                     </tr>
                     
                 {{/each}}
-                
-                
             {{/each}}
     {{/each}}
 {{/each}}

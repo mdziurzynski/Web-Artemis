@@ -1,0 +1,53 @@
+
+
+<div style="
+    height:${domain_graph.length*15}px; 
+    position:relative;"
+    >
+{{each(d, domain) domain_graph}}
+    
+    <div class="domain_graph absolute_tool" 
+        style="position:absolute; 
+	        left:${domain.x}px; 
+	        top:${domain.y}px; 
+	        width:${domain.width}px; 
+	        height:${domain.height}px; 
+	        background:${domain.colour};" >
+	        
+	        <a class="evidence" href="lalal"  >
+                    
+            </a>
+             <div class="relative_block_tooltip" style="display:none;background:${domain.colour};padding:20px;">
+                ${domain.category} : ${domain.dbxref.db.name} : ${domain.dbxref.accession} <br>
+                ${domain.fmin} -- ${domain.fmax}
+             </div>
+                    
+                    
+	        
+	        </div>
+
+{{/each}}
+
+<div style="position:absolute;width:100%;left:0px;bottom:10px;border-bottom:1px solid black">&nbsp;</div>
+
+{{each(b, box) domain_graph_shown}}
+    <div style="position:absolute; 
+            left:${box.x}px; 
+            bottom:0px; 
+            width:10px; 
+            height:5px; 
+            ">
+        ${box.fmin}
+    </div>
+    <div style="position:absolute; 
+            left:${box.x2}px; 
+            bottom:0px; 
+            width:10px; 
+            height:5px; 
+            ">
+        ${box.fmax}
+    </div>
+{{/each}}
+
+</div>
+

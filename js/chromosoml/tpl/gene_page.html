@@ -1,3 +1,15 @@
+<style>
+
+#reltool {
+	background:#eeeebb;
+	padding:20px;
+	position:absolute;
+	top:10px;
+	left:10px;
+}
+
+</style>
+
 
 <h2 style="padding-top:0px;margin-top:0px;">General Information</h2>
 <div id="col-4-1">
@@ -51,17 +63,22 @@
 
 <br class="clear" /><br />
 
-<div class='full-light-grey-top'></div>
-<div class='light-grey'> 
-<div  >
 <h2>Domain Information</h2>
-<table 
-    cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
-    data-bind="template: 'domains' " >
-</table>
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Graph</a></li>
+        <li><a href="#tabs-2">Table</a></li>
+    </ul>
+    <div id="tabs-1">
+        <div data-bind="template: 'domain_graph' "  ></div>
+    </div>
+    <div id="tabs-2">
+        <table 
+            cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+            data-bind="template: 'domains' " >
+        </table>
+    </div>
 </div>
-</div>
-<div class='full-light-grey-bot'></div><br>
 
 <br class="clear" /><br />
 
