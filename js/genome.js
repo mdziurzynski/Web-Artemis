@@ -1168,7 +1168,7 @@ function getFeatureExons(transcript) {
 	{
 	  for(var i=0; i<nkids; i++) {
 		var kid = transcript.child[i];
-		if(kid.relationshipType == "exon" || kid.relationshipType == 'pseudogenic_exon') {
+		if(kid.type == "exon" || kid.type == 'pseudogenic_exon') {
 	       exons.push(kid);
 		}
       }	
@@ -1186,7 +1186,7 @@ function getFeaturePeptide(transcript) {
 	{
 	  for(var i=0; i<nkids; i++) {
 		var kid = transcript.child[i];	
-		if(kid.relationshipType == "polypeptide") {
+		if(kid.type == "polypeptide") {
 	       return kid;
 		}
       }	
@@ -2252,7 +2252,7 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
             tag = "DISPDNA";
     }
 
-    if($('[id*='+tag+options.suff+']').get(0)) {
+    if($('[id*="'+tag+options.suff+'"]').get(0)) {
             // already displaying
             return;
     }
@@ -2503,7 +2503,7 @@ var methods = {
 				bases : 16000,				// number of bases shown
 				start : 1,					// initial position
 				showFeatureList : true,		// show feature list
-				source : 'Pf3D7_01',		// default sequence
+				source : 'BX571857',		// default sequence
 				width : $(window).width(), 	// browser viewport width,
 				showOrganismsList : true,	// show organism list
 				//webService : 'http://127.0.0.1:8080/services/',
