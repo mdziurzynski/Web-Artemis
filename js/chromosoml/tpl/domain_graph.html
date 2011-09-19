@@ -18,8 +18,10 @@
                     
             </a>
              <div class="relative_block_tooltip" style="display:none;background:${domain.colour};padding:20px;">
-                ${domain.category} : ${domain.dbxref.db.name} : ${domain.dbxref.accession} <br>
-                ${domain.fmin} -- ${domain.fmax}
+                Category : ${domain.category} <br> 
+                Database : ${domain.dbxref.db.name} <br> 
+                Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
+                Location : ${domain.fmin} - ${domain.fmax}
              </div>
                     
                     

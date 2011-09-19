@@ -63,11 +63,13 @@
 
 <br class="clear" /><br />
 
-<h2>Domain Information</h2>
+<h2>Protein Data</h2>
 <div id="tabs">
     <ul>
-        <li><a href="#tabs-1">Graph</a></li>
-        <li><a href="#tabs-2">Table</a></li>
+        <li><a href="#tabs-1">Protein Map</a></li>
+        <li><a href="#tabs-2">Domain Information Table</a></li>
+        <li><a href="#tabs-3">Predicted Peptide Data</a></li>
+        <li><a href="#tabs-4">Algorithmic Predictions</a></li>
     </ul>
     <div id="tabs-1">
         <div data-bind="template: 'domain_graph' "  ></div>
@@ -78,9 +80,31 @@
             data-bind="template: 'domains' " >
         </table>
     </div>
+    <div id="tabs-3">
+        <table>
+            {{each(p,prop) polypeptide_properties}}
+                <tr><th>${prop.name}</th><td>${prop.value}</td>
+            {{/each}}
+        </table>
+    </div>
+    <div id="tabs-4">
+        ...
+    </div>
 </div>
 
 <br class="clear" /><br />
 
 
+<div class='full-light-grey-top'></div>
+<div class='light-grey'> 
+<div  >
+<h2>Orthologues and Paralogues</h2>
+<table 
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+    data-bind="template: 'orthologues' " >
+</table>
+</div>
+</div>
+<div class='full-light-grey-bot'></div><br>
 
+<br class="clear" /><br />

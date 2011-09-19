@@ -154,6 +154,22 @@ $(function(){
 	            }
             });
 		}
+		self.get_polypeptide_properties = function(success) {
+		    $.ajax({
+    	        url: self.service + "/feature/polypeptide_properties.json",
+    	        type: 'GET',
+    	        dataType: 'json',
+    	        data: {
+    	            'feature' : self.uniqueName
+    	        },
+    	        success: function(polypeptide_properties) {
+    	        	self.polypeptide_properties = polypeptide_properties;
+    	        	$.log("polypeptide_properties : " );
+    	        	$.log(polypeptide_properties);
+    	            success();
+	            }
+            });
+		}
 		/*
 		    This function is used by many others to fetch information out of the hierarchy. It will apply the callback
 		    to each feature in the hiearchy. 
@@ -339,6 +355,9 @@ $(function(){
     	    for (feature in domains) {
     	        
     	    }
+    	}
+    	self.orthologues = function() {
+    		return self.get_attribute_map("orthologues");
     	}
 	};
 	
@@ -702,7 +721,8 @@ $(function(){
 	        template_options : {
 	            templateUrl: current_directory + "/tpl",
                 templateSuffix: ".html"
-	        }
+	        },
+	        baseLinkURL : "http://www.genedb.org/"
 	    }
 	    
 	    var self = this;
@@ -718,107 +738,124 @@ $(function(){
 		self.info = function (geneInfo, uniqueName, onComplete) {
 		    geneInfo.uniqueName = uniqueName;
 		    
-        	geneInfo.get_hierarchy(function() {
-                var geneName = geneInfo.gene_name();
-                $.log("gene name is " + geneName);
-                
-                var transcripts = geneInfo.transcripts();
-                $.log(transcripts);
-                
-                $.log("transcripts count is " + transcripts.length);
-                var type = geneInfo.type();
-                $.log("type is " + type);
-                var synonyms = geneInfo.synonyms("synonym");
-                $.log(synonyms);
-                
-                var product_synonyms = geneInfo.synonyms("product_synonym");
-                $.log(product_synonyms);
-                
-                var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id");
-                $.log(previous_systematic_ids);
-
-                var systematicName = geneInfo.systematic_name();
-                $.log(systematicName);
-                
-                var dbxrefs = geneInfo.dbxrefs();
-                $.log(dbxrefs);
-                
-                var coordinates = geneInfo.coordinates();
-                $.log("coordinates");
-                $.log(coordinates);
-                
-                //wa.initialize_templates(wa.templates);
-                
-                var products = geneInfo.terms("genedb_products");
-                $.log(products);
-                
-                var organism = geneInfo.organism();
-                wa.viewHelper.organism = organism;
-                
-                $.log("curation")
-                $.log(geneInfo.properties("curation"));
-                
-                var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
-                $.log(controlled_curation);
-                
-                var domains = geneInfo.domains();
-                
-                wa.viewModel = {
-                    systematicName : systematicName,
-                    type: type,
-                    dbxrefs : dbxrefs,
-                    geneName : geneName,
-                    products : products,
-                    synonyms : synonyms,
-                    product_synonyms : product_synonyms,
-                    previous_systematic_ids : previous_systematic_ids,
-                    len : function(maps) { // returns the combined size of a list of maps
-                        var count = 0
-                        for (m in maps) 
-                            for (mm in maps[m]) count++;
-                        return count;
-                    },
-                    pubs: geneInfo.pubs(),
-                    notes : geneInfo.properties("note"),
-                    comments : geneInfo.properties("comment"),
-                    curations : geneInfo.properties("curation"),
-                    cellular_component : geneInfo.terms("cellular_component"),
-                    molecular_function : geneInfo.terms("molecular_function"),
-                    biological_process : geneInfo.terms("biological_process"),
-                    organism : organism,
-                    controlled_curation : controlled_curation,
-                    domains : domains,
-                    coordinates : coordinates
-                }
-                
-                
-                var proteinMap = new wa.ProteinMap ({}, geneInfo.hierarchy, domains, geneInfo.sequenceLength); 
-                $.log(proteinMap.gaps);
-                $.log(proteinMap.shown);
-                $.log(proteinMap.domain_graph);
-                wa.viewModel.domain_graph = proteinMap.domain_graph;
-                wa.viewModel.domain_graph_shown = proteinMap.shown;
-                
-                ko.applyBindings(wa.viewModel);
-                
-                $.log(["onComplete?", onComplete]);
-                
-                //self.embed_web_artemis(coordinates[0]);
-                wa.webArtemisLinker.link(coordinates[0]);
-                
-                $(".absolute_tool").AbsoluteToolTips();
-                
-                
-                $( "#tabs" ).tabs();
-                
-                
-                
-                $(".evidence").tooltip();
-                
-                if (onComplete != null)
-                    onComplete(geneInfo.hierarchy);
-                
-        	});
+		    geneInfo.get_polypeptide_properties(function() {
+				
+	        	geneInfo.get_hierarchy(function() {
+	                var geneName = geneInfo.gene_name();
+	                $.log("gene name is " + geneName);
+	                
+	                var transcripts = geneInfo.transcripts();
+	                $.log(transcripts);
+	                
+	                $.log("transcripts count is " + transcripts.length);
+	                var type = geneInfo.type();
+	                $.log("type is " + type);
+	                var synonyms = geneInfo.synonyms("synonym");
+	                $.log(synonyms);
+	                
+	                var product_synonyms = geneInfo.synonyms("product_synonym");
+	                $.log(product_synonyms);
+	                
+	                var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id");
+	                $.log(previous_systematic_ids);
+	
+	                var systematicName = geneInfo.systematic_name();
+	                $.log(systematicName);
+	                
+	                var dbxrefs = geneInfo.dbxrefs();
+	                $.log(dbxrefs);
+	                
+	                var coordinates = geneInfo.coordinates();
+	                $.log("coordinates");
+	                $.log(coordinates);
+	                
+	                //wa.initialize_templates(wa.templates);
+	                
+	                var products = geneInfo.terms("genedb_products");
+	                $.log(products);
+	                
+	                var organism = geneInfo.organism();
+	                wa.viewHelper.organism = organism;
+	                
+	                $.log("curation")
+	                $.log(geneInfo.properties("curation"));
+	                
+	                var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
+	                $.log(controlled_curation);
+	                
+	                var domains = geneInfo.domains();
+	                
+	                var orthologues = geneInfo.orthologues();
+	                
+	                wa.viewModel = {
+	                    systematicName : systematicName,
+	                    type: type,
+	                    dbxrefs : dbxrefs,
+	                    geneName : geneName,
+	                    products : products,
+	                    synonyms : synonyms,
+	                    product_synonyms : product_synonyms,
+	                    previous_systematic_ids : previous_systematic_ids,
+	                    len : function(maps) { // returns the combined size of a list of maps
+	                        var count = 0
+	                        for (m in maps) 
+	                            for (mm in maps[m]) count++;
+	                        return count;
+	                    },
+	                    pubs: geneInfo.pubs(),
+	                    notes : geneInfo.properties("note"),
+	                    comments : geneInfo.properties("comment"),
+	                    curations : geneInfo.properties("curation"),
+	                    cellular_component : geneInfo.terms("cellular_component"),
+	                    molecular_function : geneInfo.terms("molecular_function"),
+	                    biological_process : geneInfo.terms("biological_process"),
+	                    organism : organism,
+	                    controlled_curation : controlled_curation,
+	                    domains : domains,
+	                    coordinates : coordinates, 
+	                    orthologues : orthologues,
+	                    first_element : function(name) {
+	                    	if (this[name] == null) {
+	                    		this[name] = true;
+	                    		return true;
+	                    	}
+	                    	return false;
+	                    },
+	                    baseLinkURL : self.baseLinkURL, 
+	                    polypeptide_properties : geneInfo.polypeptide_properties
+	                }
+	                
+	                
+	                var proteinMap = new wa.ProteinMap ({}, geneInfo.hierarchy, domains, geneInfo.sequenceLength); 
+	                $.log(proteinMap.gaps);
+	                $.log(proteinMap.shown);
+	                $.log(proteinMap.domain_graph);
+	                wa.viewModel.domain_graph = proteinMap.domain_graph;
+	                wa.viewModel.domain_graph_shown = proteinMap.shown;
+	                
+	                
+	                
+	                ko.applyBindings(wa.viewModel);
+	                
+	                $.log(["onComplete?", onComplete]);
+	                
+	                //self.embed_web_artemis(coordinates[0]);
+	                wa.webArtemisLinker.link(coordinates[0]);
+	                
+	                $(".absolute_tool").AbsoluteToolTips();
+	                
+	                
+	                $( "#tabs" ).tabs();
+	                
+	                
+	                
+	                $(".evidence").tooltip();
+	                
+	                if (onComplete != null)
+	                    onComplete(geneInfo.hierarchy);
+	                
+	        	});
+		    });
 		}
 		
 		self.on_init = function(feature) {
