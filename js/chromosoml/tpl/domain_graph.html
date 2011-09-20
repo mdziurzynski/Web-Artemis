@@ -17,12 +17,14 @@
 	        <a class="evidence" href="lalal"  >
                     
             </a>
+            {{if domain.dbxref != null }}
              <div class="relative_block_tooltip" style="display:none;background:${domain.colour};padding:20px;">
                 Category : ${domain.category} <br> 
                 Database : ${domain.dbxref.db.name} <br> 
                 Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
                 Location : ${domain.fmin} - ${domain.fmax}
              </div>
+             {{/if}}
                     
                     
 	        

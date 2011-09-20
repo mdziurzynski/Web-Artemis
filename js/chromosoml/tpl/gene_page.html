@@ -22,6 +22,20 @@
 <div class="main-grey-3-4-bot"></div>
 </div><!-- end internal column -left -->
 
+<div id="col-4-2" >
+<div class="main-blue-3-4-top"></div>
+<div class="baby-blue-nopad">
+<img id="basketbutton" src="${baseLinkURL}/includes/image/button-add-to-basket.gif" alt="Add to Basket" onclick="addToBasket('${geneName}')" height="46" width="144" style="cursor: pointer;">
+<a href="${baseLinkURL}/featureSeq/${geneName}" ><img src="${baseLinkURL}/includes/image/button-view-sequence.gif" height="46" width="144" alt="View Sequence" border="0" /></a>
+<a href="${baseLinkURL}/ArtemisLaunch/${organism.common_name}/${coordinates[0].region}.jnlp?start=${coordinates[0].fmin}&end=${coordinates[0].fmax}" >
+    <img src="${baseLinkURL}/includes/image/button-artemis.gif" height="46" width="144" alt="Launch Artemis" border="0" /> </a>
+<a href="${baseLinkURL}/jbrowse/${organism.common_name}/?loc=${coordinates[0].region}:${coordinates[0].fmin - 5000}..${coordinates[0].fmax + 5000}&tracks=Complex%20Gene%20Models" >
+    <img src="${baseLinkURL}/includes/image/button-jbrowse.gif" height="46" width="144" alt="Show in JBrowse" border="0" /></a>
+</div>
+<div class="main-blue-3-4-bot"></div>
+</div><!-- end internal column -right -->
+
+
 <br class="clear" /><br />
 
 <div class='full-light-grey-top'></div>
@@ -31,40 +45,40 @@
 <div data-bind="template: 'properties', visible: len([notes, comments, curations, pubs]) > 0 " ></div>
 </div>
 </div>
-<div class='full-light-grey-bot'></div><br>
+<div class='full-light-grey-bot'></div>
 
 <br class="clear" /><br />
-<h2>Phenotype</h2>
-<div class='full-light-grey-top'></div>
-<div class='light-grey'> 
-<div  >
+
+<h2 data-bind="visible: len([controlled_curation, cellular_component, molecular_function, biological_process]) > 0 " >Curation</h2>
+
+<div class='full-light-grey-top' data-bind="visible: len(controlled_curation) > 0 "></div>
+<div class='light-grey' data-bind="visible: len(controlled_curation) > 0 "> 
 <h2>Phenotype</h2>
 <table 
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
     data-bind="template: {name:'phenotype', data: controlled_curation}" >
 </table>
 </div>
-</div>
-<div class='full-light-grey-bot'></div><br>
+<div class='full-light-grey-bot' data-bind="visible: len(controlled_curation) > 0 "></div>
 
-<br class="clear" /><br />
+<br class="clear" data-bind="visible: len(controlled_curation) > 0 " />
 
-<div class='full-light-grey-top'></div>
-<div class='light-grey'> 
+<div class='full-light-grey-top' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "></div>
+<div class='light-grey' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "> 
 <div  >
 <h2>Gene Ontology</h2>
 <table 
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
-    data-bind="template: 'gos', visible: len([cellular_component, molecular_function, biological_process]) > 0 " >
+    data-bind="template: 'gos' " >
 </table>
 </div>
 </div>
-<div class='full-light-grey-bot'></div><br>
+<div class='full-light-grey-bot' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "></div>
 
 <br class="clear" /><br />
 
-<h2>Protein Data</h2>
-<div id="tabs">
+<h2 data-bind="visible: len([domain_graph, domains]) > 0" >Protein Data</h2>
+<div style="font-family:sans-serif;" data-bind="visible: len([domain_graph, domains]) > 0" id="tabs">
     <ul>
         <li><a href="#tabs-1">Protein Map</a></li>
         <li><a href="#tabs-2">Domain Information Table</a></li>

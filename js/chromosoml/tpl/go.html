@@ -38,8 +38,9 @@
             	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
             	        {{/each}}
             	        </div>
-        	            
-        	            ( ${term.count} other{{if term.count >1 }}s{{/if}})
+        	            {{if term.count > 1 }}
+        	                (<a href="${wa.viewHelper.go_others_link(term.name, term.cv.name, feature)}">${term.count} others)
+        	            {{/if}}
     	                
                     </div>
                 </div>

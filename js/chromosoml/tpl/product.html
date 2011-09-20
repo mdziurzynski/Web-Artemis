@@ -17,7 +17,7 @@
          {{each(dp, dbxref) product.dbxrefs}} 
                   ${dbxref} 
           {{/each}} 
-         (${product.count} other{{if product.count >1}}s{{/if}}) 
+         (<a href="${wa.viewHelper.others_product_link(product.name, f)}">${product.count} other{{if product.count >1}}s{{/if}}) 
     {{/each}}
 {{/each}}
 

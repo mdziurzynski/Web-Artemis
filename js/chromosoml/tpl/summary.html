@@ -20,7 +20,7 @@
 		<td data-bind="text: type" ></td>
 	</tr>
         <th>Location</th>
-        <td >${coordinates[0].region} : ${coordinates[0].fmin}-${coordinates[0].fmax}</td>
+        <td >${coordinates[0].regionType} ${coordinates[0].region} : ${coordinates[0].fmin}-${coordinates[0].fmax}</td>
     </tr>
 	<tr >
 		<th>Product</th>
@@ -34,4 +34,5 @@
 		<th>See Also</th>
 		<td data-bind="template: 'dbxrefs' " ></td>
 	</tr>
+	<tr data-bind="template: 'extra_dbxrefs' " ></tr>
 </table>

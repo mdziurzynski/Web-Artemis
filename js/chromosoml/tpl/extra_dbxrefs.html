@@ -1,0 +1,11 @@
+
+
+{{each(d, dbxref) extra_dbxrefs}}
+    
+    <th>${dbxref.db.name}</th><td>
+     <a href='${dbxref.db.urlprefix}${dbxref.accession}'>${dbxref.accession}</a> 
+        {{if ((dbxref.description != null) || (dbxref.db.description != null)) }} (${ (dbxref.description != null) ? dbxref.description : dbxref.db.description }) {{/if}} 
+    </td>
+    
+{{/each}}
+
