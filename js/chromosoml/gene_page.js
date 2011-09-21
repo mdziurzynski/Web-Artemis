@@ -25,7 +25,7 @@ var current_directory = path.split('/').slice(0, -1).join('/')+'/';
 	*/
 	$.fn.AbsoluteToolTips = function(options) {
     	
-		$.log("AbsoluteToolTips");
+		//$.log("AbsoluteToolTips");
 		
 		var defaults = {
 			"tooltip_element_id" : "reltool",
@@ -39,7 +39,7 @@ var current_directory = path.split('/').slice(0, -1).join('/')+'/';
 		
 		return this.each(function() {
 			
-			$.log(this);
+			//$.log(this);
 			
 			var self=this;
 			$.extend(self, defaults, options);
@@ -128,7 +128,7 @@ $(function(){
     	            'uniqueName' : self.uniqueName
     	        },
     	        success: function(hierarchy) {
-    	            $.log("received hierarchy for " + self.uniqueName);
+    	            //$.log("received hierarchy for " + self.uniqueName);
     	            self.hierarchy = hierarchy;
     	            if (success != null) success();
 	            }
@@ -158,8 +158,8 @@ $(function(){
     	        },
     	        success: function(polypeptide_properties) {
     	        	self.polypeptide_properties = polypeptide_properties;
-    	        	$.log("polypeptide_properties : " );
-    	        	$.log(polypeptide_properties);
+    	        	//$.log("polypeptide_properties : " );
+    	        	//$.log(polypeptide_properties);
     	            success();
 	            }
             });
@@ -236,8 +236,8 @@ $(function(){
 		    if (geneName != null) {
 		        if (transcript_count < 2) {
 		            systematicName = geneName;
-		        } else if (transcript_count >= 2 && info.feature.type=="mRNA") {
-		            systematicName += " (one splice form of " + info.geneUniqueName;
+		        } else if (transcript_count >= 2 && self.uniqueName != geneName) {
+		            systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
 	            }
 		    }
 		    
@@ -275,8 +275,8 @@ $(function(){
 		            terms_map[feature.uniqueName] = matched;
 	        });
 	        return terms_map;
-		},
-		self.properties = function(property_name) {
+		}
+		self.properties = function(property_names) {
 		    var prop_map = {}
 		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        var matched = [];
@@ -284,7 +284,25 @@ $(function(){
 		        if (properties != null && properties.length > 0) {
 		            for (var p in properties) {
 		                var property = properties[p];
-		                if (property_name == null || property.name == property_name)
+		                
+		                var push = false;
+		                
+		                if (property_names == null) {
+		                    push = true
+	                    }
+		                else if (property_names instanceof Array) {
+		                    for (var p in property_names) {
+		                        if (property_names[p] == property.name) {
+		                            push = true;
+		                            break;
+		                        }
+		                    }
+		                }
+		                else if (property.name == property_names) {
+		                    push = true;
+		                }
+		                
+		                if (push)
 		                    matched.push(property);
 		            }
 		        }
@@ -292,7 +310,7 @@ $(function(){
 		            prop_map[feature.uniqueName] = matched;
 		    });
 		    return prop_map;
-		},
+		}
     	self.pubs = function() {
     	    return self.get_attribute_map("pubs");
     	}
@@ -353,8 +371,71 @@ $(function(){
     	        
     	    }
     	}
+    	
     	self.orthologues = function() {
     		return self.get_attribute_map("orthologues");
+    	}
+    	
+    	self.algorithm = function() {
+            
+            //$.log("ALLLLLLLLLL");
+            
+            // these are the names of algorithmic properies
+            var algorithm = {
+                SignalP_prediction : null,
+                signal_peptide_probability : null,
+                signal_anchor_probability : null,
+                GPI_anchored : null,
+                plasmoAP_score : null
+            }
+            
+            self.recurse_hierarchy(self.hierarchy, function(feature) {
+		        var properties = feature.properties;
+		        if (properties != null && properties.length > 0) {
+		            for (var p in properties) {
+		                var property = properties[p];
+		                //$.log([property.name, property.value]);
+		                if (property.name in algorithm) {
+		                    algorithm[property.name] = property.value;
+		                }
+	                }
+                }
+            });
+            
+            algorithm.tms = [];
+            algorithm.cleavages = [];
+            algorithm.signals = [];
+            
+            // we use a synchronous call here... tutut.
+            function summary(domain) {
+                var summary = $.ajax({
+                  url: self.service + "/feature/info.json",
+                  async: false,
+                  data : { uniqueName : domain.uniqueName },
+                  success: function(summary){
+                    domain.properties = summary.properties
+                  }
+                 });
+            }
+            
+            self.recurse_hierarchy(self.hierarchy, function(feature) {
+    	        for (d in feature.domains) {
+                    var domain = feature.domains[d];
+                    if (domain.type.name == "GPI_anchor_cleavage_site") {
+                        summary(domain);
+                        algorithm.cleavages.push(domain);
+                    }
+                    if (domain.type.name == "transmembrane_polypeptide_region") {
+                        algorithm.tms.push(domain);
+                    }
+                    if (domain.type.name == "signal_peptide") {
+                        summary(domain);
+                        algorithm.signals.push(domain);
+                    }
+                }
+            });
+            
+            return algorithm;
     	}
 	};
 	
@@ -635,13 +716,13 @@ $(function(){
 	            	self.gaps.push(bounds);
 	            }
 	        }
-	        $.log("shown");
+	        //$.log("shown");
 	        for (var b in self.shown) {
 	        	var box = self.shown[b];
 	        	box.x = self.scaleX(box.fmin);
 	        	box.x2 = self.scaleX(box.fmax);
 	        }
-	        $.log("gaps");
+	        //$.log("gaps");
 	        for (var b in self.gaps) {
 	        	var box = self.gaps[b];
 	        	box.x = self.scaleX(box.fmin);
@@ -804,55 +885,60 @@ $(function(){
 				
 	        	geneInfo.get_hierarchy(function() {
 	                var geneName = geneInfo.gene_name();
-	                $.log("gene name is " + geneName);
+	                //$.log("gene name is " + geneName);
 	                
 	                var transcripts = geneInfo.transcripts();
-	                $.log(transcripts);
+	                //$.log(transcripts);
 	                
-	                $.log("transcripts count is " + transcripts.length);
+	                //$.log("transcripts count is " + transcripts.length);
 	                var type = geneInfo.type();
-	                $.log("type is " + type);
+	                //$.log("type is " + type);
 	                var synonyms = geneInfo.synonyms("synonym");
-	                $.log(synonyms);
+	                //$.log(synonyms);
 	                
 	                var product_synonyms = geneInfo.synonyms("product_synonym");
-	                $.log(product_synonyms);
+	                //$.log(product_synonyms);
 	                
 	                var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", "gene");
-	                $.log(previous_systematic_ids);
+	                //$.log(previous_systematic_ids);
 	
 	                var systematicName = geneInfo.systematic_name();
-	                $.log(systematicName);
+	                //$.log(systematicName);
 	                
 	                var organism = geneInfo.organism();
 	                wa.viewHelper.organism = organism;
 	                
 	                var dbxrefs = geneInfo.dbxrefs();
-	                $.log(dbxrefs);
+	                //$.log(dbxrefs);
 	                
 	                var extra_dbxrefs = self.extraDbxrefs(self.uniqueName, organism);
 	                
 	                var coordinates = geneInfo.coordinates();
-	                $.log("coordinates");
-	                $.log(coordinates);
+	                //$.log("coordinates");
+	                //$.log(coordinates);
 	                
 	                //wa.initialize_templates(wa.templates);
 	                
 	                var products = geneInfo.terms("genedb_products");
-	                $.log(products);
+	                //$.log(products);
 	                
 	                
 	                
-	                $.log("curation")
-	                $.log(geneInfo.properties("curation"));
+	                //$.log("curation")
+	                //$.log(geneInfo.properties("curation"));
 	                
 	                var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
-	                $.log("controlled_curation");
-	                $.log(controlled_curation);
+	                //$.log("controlled_curation");
+	                //$.log(controlled_curation);
 	                
 	                var domains = geneInfo.domains();
 	                
 	                var orthologues = geneInfo.orthologues();
+	                
+	                var algorithm = geneInfo.algorithm();
+	                
+	                //$.log("algorithm");
+	                //$.log(algorithm);
 	                
 	                wa.viewModel = {
 	                    systematicName : systematicName,
@@ -882,6 +968,7 @@ $(function(){
 	                    domains : domains,
 	                    coordinates : coordinates, 
 	                    orthologues : orthologues,
+	                    algorithm : algorithm,
 	                    first_element : function(name) {
 	                    	if (this[name] == null) {
 	                    		this[name] = true;
@@ -893,13 +980,14 @@ $(function(){
 	                    polypeptide_properties : geneInfo.polypeptide_properties
 	                }
 	                
-	                $.log("wa.viewModel.len(wa.viewModel.controlled_curation)");
-	                $.log(wa.viewModel.len(wa.viewModel.controlled_curation));
+	                
+	                //$.log("wa.viewModel.len(wa.viewModel.controlled_curation)");
+	                //$.log(wa.viewModel.len(wa.viewModel.controlled_curation));
 	                
 	                var proteinMap = new wa.ProteinMap ({}, geneInfo.hierarchy, domains, geneInfo.sequenceLength); 
-	                $.log(proteinMap.gaps);
-	                $.log(proteinMap.shown);
-	                $.log(proteinMap.domain_graph);
+	                //$.log(proteinMap.gaps);
+	                //$.log(proteinMap.shown);
+	                //$.log(proteinMap.domain_graph);
 	                wa.viewModel.domain_graph = proteinMap.domain_graph;
 	                wa.viewModel.domain_graph_shown = proteinMap.shown;
 	                
@@ -907,7 +995,7 @@ $(function(){
 	                
 	                ko.applyBindings(wa.viewModel);
 	                
-	                $.log(["onComplete?", onComplete]);
+	                //$.log(["onComplete?", onComplete]);
 	                
 	                //self.embed_web_artemis(coordinates[0]);
 	                wa.webArtemisLinker.link(coordinates[0]);
@@ -987,7 +1075,7 @@ $(function(){
         }
         var zoomMaxRatio = max / parseInt(self.sequenceLength);
         
-        $.log("zooom " + zoomMaxRatio);
+        //$.log("zooom " + zoomMaxRatio);
         
         $(self.chromosome_map_element).ChromosomeMap({
             region : self.coordinates.region, 
@@ -1002,7 +1090,7 @@ $(function(){
             web_service_root : self.service
         });
         
-        $.log(self.coordinates);
+        //$.log(self.coordinates);
         
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,

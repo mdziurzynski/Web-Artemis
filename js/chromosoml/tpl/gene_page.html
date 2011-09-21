@@ -38,22 +38,22 @@
 
 <br class="clear" /><br />
 
-<div class='full-light-grey-top'></div>
-<div class='light-grey'> 
+<div class='full-light-grey-top' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "></div>
+<div class='light-grey' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "> 
 <div  >
 <h2>Comments</h2>
-<div data-bind="template: 'properties', visible: len([notes, comments, curations, pubs]) > 0 " ></div>
+<div data-bind="template: 'properties' " ></div>
 </div>
 </div>
-<div class='full-light-grey-bot'></div>
+<div class='full-light-grey-bot' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "></div>
 
-<br class="clear" /><br />
+<br class="clear" data-bind="visible: len([notes, comments, curations, pubs]) > 0 " /><br />
 
 <h2 data-bind="visible: len([controlled_curation, cellular_component, molecular_function, biological_process]) > 0 " >Curation</h2>
 
 <div class='full-light-grey-top' data-bind="visible: len(controlled_curation) > 0 "></div>
 <div class='light-grey' data-bind="visible: len(controlled_curation) > 0 "> 
-<h2>Phenotype</h2>
+<h2>Phenotype </h2>
 <table 
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
     data-bind="template: {name:'phenotype', data: controlled_curation}" >
@@ -102,7 +102,7 @@
         </table>
     </div>
     <div id="tabs-4">
-        ...
+        <table data-bind="template: 'algorithm' "></table>
     </div>
 </div>
 
