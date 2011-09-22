@@ -119,7 +119,15 @@ $(function(){
         var self=this;
         $.extend(self, defaults, options);
         
-		self.get_hierarchy = function(success) {
+        /*
+         * Fetch the gene hierarchy for this freature.
+         * 
+         * @param trim_for_transcripts - for a gene page view where the only the children of a specific transcript should be shown, remove the others
+         * @param success, a callback
+         * 
+         * */
+		self.get_hierarchy = function(trim_for_transcripts, success) {
+			
 		    $.ajax({
     	        url: self.service + "/feature/hierarchy.json",
     	        type: 'GET',
@@ -130,10 +138,113 @@ $(function(){
     	        success: function(hierarchy) {
     	            //$.log("received hierarchy for " + self.uniqueName);
     	            self.hierarchy = hierarchy;
+    	            $.log(self.hierarchy);
+    	            
+    	            // let's detemine the requested feature, must reset this property it first
+    	            self.requestedFeature = null;
+    				self.recurse_hierarchy(self.hierarchy, function(feature) {
+    					if (self.requestedFeature != null)
+    						return;
+    					if (feature.uniqueName == self.uniqueName) 
+    						self.requestedFeature = feature;
+    				});
+    				
+    				// let's get the number of transcripts
+    				var transcripts = self.transcripts();
+    				self.transcript_count = transcripts.length;
+    				
+    				if (trim_for_transcripts) {
+    					
+    					// if trimming, we want to look for a default transcript if a gene has been requested
+        				// essentially requesting the first transcript
+        				if (self.types.gene.indexOf(self.requestedFeature.type.name ) > -1 
+        						&& self.transcript_count > 0 /* && transcript_count >= 2 */) {
+        					self.requestedFeature = transcripts[0];
+        				}
+        				
+       	            	self.trim_hierarchy();
+       	            	
+    				}
+    	            
+    	            $.log(self.hierarchy);
     	            if (success != null) success();
 	            }
             });
 		}
+		
+		/*
+	    This function is used by many others to fetch information out of the hierarchy. It will apply the callback
+	    to each feature in the hiearchy. 
+		*/
+		self.recurse_hierarchy = function(feature, callback) {
+		    for (c in feature.children) {
+		        var child = feature.children[c];
+		        self.recurse_hierarchy(child, callback);
+		    }
+		    return callback(feature);
+		}
+		
+		self.trim_hierarchy = function() {
+			
+			var requestedFeature = self.requestedFeature;
+			var transcript_count = self.transcript_count;
+			
+			var children_of_original_feature = true;
+			
+			// we don't use recurse_hierarchy(callback) method for this particular case, because we want to walk through the parents before the children.
+			// so, instead we use a standard recursion approach
+			function trim(feature) {
+				var featureIsRequested = (feature.uniqueName == requestedFeature.uniqueName);
+				$.log(feature.uniqueName, feature.type.name, featureIsRequested, requestedFeature.type.name );
+				
+				// none of the checks below apply for single transcript genes
+				if (transcript_count <= 1) {
+					children_of_original_feature = true;
+				} 
+				else if (self.types.gene.indexOf(feature.type.name ) > -1 && featureIsRequested) {
+					children_of_original_feature = true; // if the requested type is a gene then show 
+				} 
+				else if (feature.type.name == "mRNA") {
+					
+					// simple case of where we asked for an mRNA, that's what we whould guess
+					if (featureIsRequested) {
+						children_of_original_feature = true;
+					} 
+					// complex case of where we ask for an exon or polypeptide, then we have to check this mRNA's children
+					else if (requestedFeature.type.name == "exon" || requestedFeature.type.name == "polypeptide") {
+						children_of_original_feature = false;
+						for (c in feature.children) {
+							var child = feature.children[c];
+							if (child.uniqueName == requestedFeature.uniqueName) {
+								children_of_original_feature = true;
+								break;
+							}
+						}
+					} else {
+						children_of_original_feature = false;
+					}
+				} 
+				else {
+					// if it's none of the above, then we always show
+					children_of_original_feature = true;
+				}
+				
+				if (children_of_original_feature == false) {
+					feature.children = [];
+				}
+				
+				for (c in feature.children) {
+					var child = feature.children[c];
+					trim(child);
+				}
+				
+		    }
+			
+			trim (self.hierarchy);
+			
+			
+		}
+		
 		self.get_sequence_length = function(region, success) {
 		    $.ajax({
     	        url: self.service + "/regions/sequenceLength.json",
@@ -148,6 +259,7 @@ $(function(){
 	            }
             });
 		}
+		
 		self.get_polypeptide_properties = function(success) {
 		    $.ajax({
     	        url: self.service + "/feature/polypeptide_properties.json",
@@ -158,23 +270,12 @@ $(function(){
     	        },
     	        success: function(polypeptide_properties) {
     	        	self.polypeptide_properties = polypeptide_properties;
-    	        	//$.log("polypeptide_properties : " );
-    	        	//$.log(polypeptide_properties);
     	            success();
 	            }
             });
 		}
-		/*
-		    This function is used by many others to fetch information out of the hierarchy. It will apply the callback
-		    to each feature in the hiearchy. 
-		*/
-		self.recurse_hierarchy = function(feature, callback) {
-		    for (c in feature.children) {
-		        var child = feature.children[c];
-		        self.recurse_hierarchy(child, callback);
-		    }
-		    return callback(feature);
-		}
+		
+		
 		self.gene_name = function() {
 		    var types = self.types;
 		    return self.recurse_hierarchy(self.hierarchy, function(feature) {
@@ -182,6 +283,7 @@ $(function(){
 		            return feature.uniqueName;
 		    });
 		}
+		
 		self.transcripts = function() {
 		    var types = self.types;
 		    var transcripts = [];
@@ -190,8 +292,14 @@ $(function(){
 		            transcripts.push(feature);
 		        }
 		    });
+		    
+		    transcripts.sort(function(t1,t2) {
+		    	return (t1.uniqueName > t2.uniqueName);
+		    });
+		    
 		    return transcripts;
 		}
+		
 		self.type = function() {
 		    var type = "feature";
 		    var types = self.types;
@@ -205,6 +313,7 @@ $(function(){
 		    });
 		    return type;
 		}
+		
 		self.synonyms = function(type, feature_type) {
 		    var synonyms = {};
 		    self.recurse_hierarchy(self.hierarchy, function(feature) {
@@ -226,12 +335,18 @@ $(function(){
 	        });
 	        return synonyms;
 		}
+		
+		self.gene_name = function() {
+			return self.hierarchy.name;
+		}
+		
 		self.systematic_name = function() {
 		    
-		    var systematicName = self.uniqueName;
+		    var systematicName = self.requestedFeature.uniqueName;
 		    var geneName = self.gene_name();
 		    
-		    var transcript_count = self.transcripts().length;
+		    var transcripts = self.transcripts();
+		    var transcript_count = transcripts.length;
 		    
 		    if (geneName != null) {
 		        if (transcript_count < 2) {
@@ -816,6 +931,7 @@ $(function(){
 	    var defaults = {
 	        uniqueName : "fred",
 	        webArtemisPath : "wa",
+	        trim_for_transcripts : true,
 	        template_options : {
 	            templateUrl: current_directory + "/tpl",
                 templateSuffix: ".html"
@@ -883,7 +999,7 @@ $(function(){
 		    
 		    geneInfo.get_polypeptide_properties(function() {
 				
-	        	geneInfo.get_hierarchy(function() {
+	        	geneInfo.get_hierarchy(self.trim_for_transcripts, function() {
 	                var geneName = geneInfo.gene_name();
 	                //$.log("gene name is " + geneName);
 	                
