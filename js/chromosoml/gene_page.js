@@ -138,7 +138,7 @@ $(function(){
     	        success: function(hierarchy) {
     	            //$.log("received hierarchy for " + self.uniqueName);
     	            self.hierarchy = hierarchy;
-    	            $.log(self.hierarchy);
+    	            //$.log(self.hierarchy);
     	            
     	            // let's detemine the requested feature, must reset this property it first
     	            self.requestedFeature = null;
@@ -166,7 +166,7 @@ $(function(){
        	            	
     				}
     	            
-    	            $.log(self.hierarchy);
+    	            //$.log(self.hierarchy);
     	            if (success != null) success();
 	            }
             });
@@ -195,7 +195,7 @@ $(function(){
 			// so, instead we use a standard recursion approach
 			function trim(feature) {
 				var featureIsRequested = (feature.uniqueName == requestedFeature.uniqueName);
-				$.log(feature.uniqueName, feature.type.name, featureIsRequested, requestedFeature.type.name );
+				//$.log(feature.uniqueName, feature.type.name, featureIsRequested, requestedFeature.type.name );
 				
 				// none of the checks below apply for single transcript genes
 				if (transcript_count <= 1) {
@@ -881,11 +881,13 @@ $(function(){
     	            	}
     	            	
     	            	var colour = null;
-    	            	if (dbname != null)
+    	            	if (dbname != null) {
     	            		colour = wa.viewHelper.colours[dbname];
-    	            	if (colour == null) // if still null 
-    	            		colour = wa.viewHelper.colours.default;
-    	            	
+    	            	}
+    	            	// if still null
+    	            	if (colour == null) { 
+    	            		colour = wa.viewHelper.colours["default"];
+    	            	}
     	            	var box = {
     	            		dbxref : dbxref,
     	            		category : category,
