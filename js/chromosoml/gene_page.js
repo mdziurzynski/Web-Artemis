@@ -1094,10 +1094,20 @@ $(function(){
 	                    	}
 	                    	return false;
 	                    },
+	                    camel_to_title : function(camel) {
+	                    	var tokens = camel.split("_");
+	                    	var title = [];
+	                    	for (t in tokens) {
+	                    		var token = tokens[t];
+	                    		title.push(token.charAt(0).toUpperCase() + token.slice(1));
+	                    	}
+	                    	return title.join(" ");
+	                    },
 	                    baseLinkURL : self.baseLinkURL, 
 	                    polypeptide_properties : geneInfo.polypeptide_properties
 	                }
 	                
+	                //$.log(wa.viewModel.camel_to_title("molecular_function"));
 	                
 	                //$.log("wa.viewModel.len(wa.viewModel.controlled_curation)");
 	                //$.log(wa.viewModel.len(wa.viewModel.controlled_curation));

@@ -8,6 +8,11 @@
 	left:10px;
 }
 
+h2 {
+    padding-top:0px;
+    margin-top:0px;
+}
+
 </style>
 
 
@@ -47,7 +52,7 @@
 </div>
 <div class='full-light-grey-bot' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "></div>
 
-<br class="clear" data-bind="visible: len([notes, comments, curations, pubs]) > 0 " /><br />
+<br data-bind="visible: len([notes, comments, curations, pubs]) > 0 " />
 
 <h2 data-bind="visible: len([controlled_curation, cellular_component, molecular_function, biological_process]) > 0 " >Curation</h2>
 
@@ -55,7 +60,7 @@
 <div class='light-grey' data-bind="visible: len(controlled_curation) > 0 "> 
 <h2>Phenotype </h2>
 <table 
-    cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%"
     data-bind="template: {name:'phenotype', data: controlled_curation}" >
 </table>
 </div>
@@ -68,7 +73,7 @@
 <div  >
 <h2>Gene Ontology</h2>
 <table 
-    cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%" 
     data-bind="template: 'gos' " >
 </table>
 </div>

@@ -6,7 +6,7 @@
         	    <td>
         	        <div>
         	            <a class="evidence" href="${wa.viewHelper.go_link(term.accession)}" >
-                            » ${term.name}
+                           ${term.name}
         	            </a>
             	        <div class="tooltip">
 
@@ -41,6 +41,19 @@
 
                         </div>
                     </div>
+        	    </td>
+        	    <td>
+        	       {{each(p,prop) term.props}}
+	                    {{if prop.type.name=="evidence"}}
+	                        ${prop.value} 
+	                    {{/if}}
+	                {{/each}}
+        	    </td>
+        	    
+        	    <td>
+        	       {{each(pu,pub) term.pubs}}
+                                <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+                            {{/each}}
         	    </td>
         	</tr>
     	{{/each}}
