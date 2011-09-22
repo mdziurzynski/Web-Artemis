@@ -109,16 +109,14 @@
 <br class="clear" /><br />
 
 
-<div class='full-light-grey-top'></div>
-<div class='light-grey'> 
-<div  >
+<div class='full-light-grey-top' data-bind="visible: len([orthologues]) > 0"></div>
+<div class='light-grey' data-bind="visible: len([orthologues]) > 0"> 
 <h2>Orthologues and Paralogues</h2>
 <table 
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
     data-bind="template: 'orthologues' " >
 </table>
 </div>
-</div>
-<div class='full-light-grey-bot'></div><br>
+<div class='full-light-grey-bot' data-bind="visible: len([orthologues]) > 0"></div><br>
 
-<br class="clear" /><br />
+<br class="clear" data-bind="visible: len([orthologues]) > 0"/><br />
