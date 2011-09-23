@@ -271,6 +271,12 @@ $(function(){
     	        success: function(polypeptide_properties) {
     	        	self.polypeptide_properties = polypeptide_properties;
     	            success();
+	            },
+	            error : function() {
+	            	self.polypeptide_properties = [
+	            		{name : "Peptide Data" ,value : "No predicted polypeptide data are available"}
+	            	]
+	            	success();
 	            }
             });
 		}
