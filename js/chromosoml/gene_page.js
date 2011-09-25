@@ -674,7 +674,7 @@ $(function(){
 	    
 	    var defaults = {
 	        step_number : 10,
-	        pixel_width : 700
+	        pixel_width : 850
 	    }
 	    
 	    var self = this;
@@ -717,14 +717,35 @@ $(function(){
     	            
     	            for (var d in domains) {
     	            	var domain = domains[d];
+    	            	
+    	            	var domain_box = {
+    	            		x : domain.fmin,
+    	            		width : domain.fmax - domain.fmin
+    	            	}
+    	            	
+    	            	var bounds_box = {
+    	            		x : bounds.fmin,
+    	            		width : bounds.fmax - bounds.fmin
+    	            	}
+    	            	
+    	            	var d1 = self.pointInBox(domain.fmin, bounds_box);
+    	            	var d2 = self.pointInBox(domain.fmax, bounds_box);
+    	            	var b1 = self.pointInBox(bounds.fmin, domain_box);
+    	            	var b2 = self.pointInBox(bounds.fmax, domain_box);
+    	            	
+    	            	if (d1 || d2 || b1 || b2) {
+    	            		return true;
+    	            	}
+    	            	
+    	            	
     	            	// $.log(category, domain.uniqueName, bounds.fmin, domain.fmin, domain.fmax, bounds.fmax,
     	            	//                                bounds.fmin <= domain.fmin && domain.fmin <= bounds.fmax,
     	            	//                                bounds.fmin <= domain.fmax && domain.fmax <= bounds.fmax);
-        	            if ((bounds.fmin <= domain.fmin && domain.fmin <= bounds.fmax) || 
-    	            		(bounds.fmin <= domain.fmax && domain.fmax <= bounds.fmax)) {
-        	            	//$.log("!");
-        	            	return true;
-        	            }
+//        	            if ((bounds.fmin <= domain.fmin && domain.fmin <= bounds.fmax) || 
+//    	            		(bounds.fmin <= domain.fmax && domain.fmax <= bounds.fmax)) {
+//        	            	//$.log("!");
+//        	            	return true;
+//        	            }
     	            }
     	            
     	            
@@ -733,10 +754,34 @@ $(function(){
             return false;
 	    }
 	    
-	    // adapted from http://gamedev.stackexchange.com/questions/586/what-is-the-fastest-way-to-work-out-2d-bounding-box-intersection
+	    self.pointInBox=function(point,box) {
+	    	var pointOverX = box.x < point;
+	    	var pointUnderX2 = (box.x + box.width) > point;
+	    	return (pointOverX && pointUnderX2);
+	    }
+	    
 	    self.boxesOverlap = function(box1, box2) {
-	    	return (Math.abs(box1.x - box2.x) * 2 < (box1.width + box2.width) &&
-	    			Math.abs(box1.y - box2.y) * 2 < (box1.height + box2.height));
+	    	
+	    	// the y property is what we are adjusting in the box1
+	    	// the base_y of box2 is what we are comparing against
+	    	var boxes_same_height = (box1.y == box2.base_y);
+	    	
+	    	if (! boxes_same_height)
+	    		return false;
+	    	
+	    	var box1x_in_box2 = self.pointInBox(box1.x, box2);
+	    	var box1x2_in_box2 = self.pointInBox(box1.x+box1.width, box2);
+	    	
+	    	var box2x_in_box1 = self.pointInBox(box2.x, box1);
+	    	var box2x2_in_box1 = self.pointInBox(box2.x+box2.width, box1);
+	    	
+	    	//$.log(box1.uniqueName, box1x_in_box2,box1x2_in_box2, box2.uniqueName, box2x_in_box1, box2x2_in_box1);
+	    	
+	    	if (box1x_in_box2 || box1x2_in_box2 || box2x_in_box1 || box2x2_in_box1) {
+	    		return true;
+	    	}
+	    	
+	    	return false;
 	    }
 	    
 	    self.showSection = function (base_position) {
@@ -761,11 +806,16 @@ $(function(){
 	        var subtract = 0;
 	        for (g in self.gaps) {
 	            var gap = self.gaps[g];
-	            if (gap.fmax < base_position) 
-	                subtract += (gap.fmax - gap.fmin);
-	            if (gap.fmin > base_position) 
-	                break;
+	            var gap_length = gap.fmax - gap.fmin;
+	            
+	            if (gap.fmax < base_position) {
+	            	subtract += gap_length;
+	            }
+	            else {
+	            	break;
+	            } 
 	        }
+	        //$.log(g, self.gaps[g -1], base_position, subtract, base_position - subtract);
 	        return base_position - subtract;
 	    }
 	    
@@ -781,7 +831,7 @@ $(function(){
 	    	
 	    	var pos = (self.pixel_width / max ) * div_position 
 	    	
-	    	// $.log("scaleX", base_length, totalGapLength, max, base_position, div_position, self.pixel_width,  pos);
+	    	//$.log("scaleX", base_length, totalGapLength, max, base_position, "div:", div_position, self.pixel_width,  pos);
 	    	
 	    	return  pos;
 	    }
@@ -808,7 +858,7 @@ $(function(){
 	        var coordinates = self.hierarchy.coordinates[0];
 	        var max = coordinates.fmax - coordinates.fmin;
 	        
-	        var step = self.determine_step(max);
+	        var step = self.determine_step(max); //50;
 	        self.step = step;
 	        
 	        var pos = 0;
@@ -841,18 +891,54 @@ $(function(){
 	        for (var b in self.shown) {
 	        	var box = self.shown[b];
 	        	box.x = self.scaleX(box.fmin);
-	        	box.x2 = self.scaleX(box.fmax);
+	        	//box.x2 = self.scaleX(box.fmax);
+	        	//$.log(box.fmin, box.x);
 	        }
 	        //$.log("gaps");
+	        
+	        var merged_gaps = [];
+	        
 	        for (var b in self.gaps) {
 	        	var box = self.gaps[b];
 	        	box.x = self.scaleX(box.fmin);
 	        	box.x2 = self.scaleX(box.fmax);
+	        	//$.log(box.fmin, box.x);
+	        	
+	        	var merging = false;
+	        	for (m in merged_gaps) {
+	        		var merged_gap = merged_gaps[m];
+	        		if (merged_gap.x2 == box.x) {
+	        			merged_gap.x2 = box.x2;
+	        			merged_gap.fmax = box.fmax;
+	        			merging = true;
+	        			break;
+	        		}
+	        	}
+	        	if (! merging) {
+	        		merged_gaps.push({
+	        			fmin : box.fmin,
+	        			fmax : box.fmax,
+	        			x : box.x, 
+	        			x2 : box.x2
+	        		});
+	        	}
 	        }
 	        
+	        //$.log(merged_gaps);
+	        
+	        self.gaps = merged_gaps;
 	        
 	        self.domain_graph = [];
 	        var y =0;
+	        
+	        
+	        var membrs = [
+	           "non_cytoplasmic_polypeptide_region", 
+	           "cytoplasmic_polypeptide_region", 
+	           "transmembrane_polypeptide_region"];
+	        
+	        var last_box = null;
+	        self.max_y = 0;
 	        
 	        for (var feature in self.domains) {
     	        for (var category in self.domains[feature]) {
@@ -861,12 +947,9 @@ $(function(){
     	            	var domain = domains[d];
     	            	var x = self.scaleX(domain.fmin);
     	            	
+    	            	//$.log(feature, category, domain.type.name , domain.uniqueName);
     	            	
     	            	y=10;
-    	            	
-    	            	
-    	            	
-    	            	
     	            	
     	            	var width = self.scaleX(domain.fmax) - x;
     	            	var height = 10;
@@ -886,6 +969,7 @@ $(function(){
     	            		dbname = dbxref.db.name; 
     	            	}
     	            	
+    	            	
     	            	var colour = null;
     	            	if (dbname != null) {
     	            		colour = wa.viewHelper.colours[dbname];
@@ -895,11 +979,14 @@ $(function(){
     	            		colour = wa.viewHelper.colours["default"];
     	            	}
     	            	var box = {
+    	            		type : domain.type.name,
     	            		dbxref : dbxref,
     	            		category : category,
     	            		feature : feature,
+    	            		uniqueName : domain.uniqueName,
     	            		x : x,
     	            		y : y,
+    	            		base_y : y,
     	            		fmin:domain.fmin,
     	            		fmax:domain.fmax,
     	            		width : width,
@@ -908,19 +995,52 @@ $(function(){
     	            	}
     	            	
     	            	
-    	            	for (p in self.domain_graph) {
+    	            	
+
+    	            	var is_membr = (membrs.indexOf(box.type) > -1);
+    	            	
+    	            	var last_is_membr = false;
+    	            	if (last_box != null)
+    	            		last_is_membr = (membrs.indexOf(last_box.type) > -1 );
+    	            	
+    	            	//$.log(box.uniqueName);
+	            		for (p in self.domain_graph) {
     	            		var previous = self.domain_graph[p];
-    	            		
+    	            		//$.log(box.uniqueName, previous.uniqueName, self.boxesOverlap(box,previous))
     	            		if (self.boxesOverlap(box,previous)) {
+    	            			//$.log("+");
     	            			box.y += 15;
     	            		}
-    	            		
+    	            	}
+	            		
+	            		// we hit a hard return in this case
+	            		if (is_membr && last_is_membr) {
+    	            		box.y = last_box.base_y;
+    	            	}
+	            		
+	            		box.base_y = box.y;
+    	            	
+	            		if (box.base_y > self.max_y)
+	            			self.max_y = box.base_y;
+
+    	            	if (domain.type.name == "non_cytoplasmic_polypeptide_region") {
+    	            		box.height = 5;
+    	            		box.y += 5;
+    	            	} else if (domain.type.name == "cytoplasmic_polypeptide_region") {
+    	            		box.height = 5;
+    	            	} else if (domain.type.name == "transmembrane_polypeptide_region") {
+    	            		// not sure if this is necessary
     	            	}
     	            	
+//    	            	$.log(box.y, domain.uniqueName, 
+//    	            			box.type, is_membr, 
+//    	            			(last_box != null) ? last_box.type : "", 
+//    	            			last_is_membr);
     	            	
     	            	//$.log("draw domain", domain.fmin, domain.fmax, box);
     	            	self.domain_graph.push(box);
     	            	
+    	            	last_box = box;
     	            }
     	        }
 	        }
@@ -1124,6 +1244,8 @@ $(function(){
 	                //$.log(proteinMap.domain_graph);
 	                wa.viewModel.domain_graph = proteinMap.domain_graph;
 	                wa.viewModel.domain_graph_shown = proteinMap.shown;
+	                wa.viewModel.domain_graph_hidden = proteinMap.gaps;
+	                wa.viewModel.domain_graph_max_y = proteinMap.max_y;
 	                
 	                
 	                

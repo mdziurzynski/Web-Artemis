@@ -1,7 +1,7 @@
 
 
 <div style="
-    height:${domain_graph.length*15}px; 
+    height:${domain_graph_max_y+50}px; 
     position:relative;"
     >
 {{each(d, domain) domain_graph}}
@@ -19,6 +19,8 @@
             </a>
             {{if domain.dbxref != null }}
              <div class="relative_block_tooltip" style="display:none;background:${domain.colour};padding:20px;">
+                Name : ${domain.uniqueName} <br>
+                Type : ${domain.type} <br>
                 Category : ${domain.category} <br> 
                 Database : ${domain.dbxref.db.name} <br> 
                 Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
@@ -32,25 +34,42 @@
 
 {{/each}}
 
-<div style="position:absolute;width:100%;left:0px;bottom:10px;border-bottom:1px solid black">&nbsp;</div>
+<div style="position:absolute;width:100%;left:0px;bottom:20px;border-bottom:1px solid black">&nbsp;</div>
 
 {{each(b, box) domain_graph_shown}}
     <div style="position:absolute; 
             left:${box.x}px; 
-            bottom:0px; 
+            bottom:15px; 
             width:10px; 
-            height:5px; 
+            height:5px;
+            border-left:1px solid black;
+            font-size:xx-small;
+            color:black; 
             ">
         ${box.fmin}
     </div>
+{{/each}}
+
+{{each(b, box) domain_graph_hidden}}
+    
     <div style="position:absolute; 
-            left:${box.x2}px; 
-            bottom:0px; 
-            width:10px; 
-            height:5px; 
-            ">
-        ${box.fmax}
-    </div>
+            left:${box.x}px; 
+            bottom:0px;
+            width:2px;
+            height:20px;  
+            color: grey;
+            border-left:1px solid grey;
+            border-right:1px solid grey;
+            
+            "></div>
+    <div style="position:absolute; 
+            left:${box.x}px; 
+            bottom:-15px;
+            width:10px;  
+            font-style:italic;
+            font-size:xx-small;
+            color: grey;">${box.fmin}-${box.fmax}</div>
+    
 {{/each}}
 
 </div>
