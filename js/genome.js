@@ -42,7 +42,7 @@ var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
-var excludes = ['gene', 'pseudogene', 'sequence_feature', 'databank_entry', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match', 'databank_entry'];
+var excludes = ['gene', 'pseudogene', 'sequence_feature', 'databank_entry', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
 var includes = ['exon', 'pseudogenic_exon', 'CDS', 'gap', 'contig', 'ncRNA', 'tRNA', 'five_prime_UTR', 'three_prime_UTR', 'polypeptide_motif'];
 
 var colour = [ 
@@ -1168,7 +1168,7 @@ function getFeatureExons(transcript) {
 	{
 	  for(var i=0; i<nkids; i++) {
 		var kid = transcript.child[i];
-		if(kid.relationshipType == "exon" || kid.relationshipType == 'pseudogenic_exon') {
+		if(kid.type == "exon" || kid.type == 'pseudogenic_exon') {
 	       exons.push(kid);
 		}
       }	
@@ -1186,7 +1186,7 @@ function getFeaturePeptide(transcript) {
 	{
 	  for(var i=0; i<nkids; i++) {
 		var kid = transcript.child[i];	
-		if(kid.relationshipType == "polypeptide") {
+		if(kid.type == "polypeptide") {
 	       return kid;
 		}
       }	
@@ -1914,6 +1914,10 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, option
 	for(var i=0; i<nfeatures; i++ ) {
 	  var feature = features[i];
 
+	  if(feature.isObsolete == true) {
+		  continue;
+	  }
+	  
 	  if(feature.type.name == "exon" || feature.type.name == "pseudogenic_exon" || feature.type.name == "CDS") {
 		  
 		  if(!feature.properties) {
@@ -2248,7 +2252,7 @@ var aDisplaySequence = function ajaxGetSequence2(fDisplay, returned, options) {
             tag = "DISPDNA";
     }
 
-    if($('[id*='+tag+options.suff+']').get(0)) {
+    if($('[id*="'+tag+options.suff+'"]').get(0)) {
             // already displaying
             return;
     }
@@ -2499,7 +2503,7 @@ var methods = {
 				bases : 16000,				// number of bases shown
 				start : 1,					// initial position
 				showFeatureList : true,		// show feature list
-				source : 'Pf3D7_01',		// default sequence
+				source : 'BX571857',		// default sequence
 				width : $(window).width(), 	// browser viewport width,
 				showOrganismsList : true,	// show organism list
 				//webService : 'http://127.0.0.1:8080/services/',
