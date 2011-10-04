@@ -1,0 +1,91 @@
+
+{{each(feature, list) go}}
+    
+    {{each(t, term) list}}
+	       <tr>
+	       <th>
+	           
+	           {{if first_element(term.cv.name) }}
+	                 ${ camel_to_title(term.cv.name) }
+	           {{/if}}
+	       </th>
+    	    <td>
+    	        <div>
+    	            <a class="evidence" href="${wa.viewHelper.go_link(term.accession)}" >
+    	            
+        	        &raquo; ${term.name}
+        	        
+    	            </a>
+        	        <div class="tooltip">
+        	            
+        	            <div><h2>
+            	            <a href="${wa.viewHelper.go_link(term.accession)}" >
+                                ${term.cv.name} / ${term.name} 
+                	        </a>
+                	        </h2>
+            	        </div>
+        	            
+        	            <div>Evidence : </div>
+        	            
+        	            <div style="float:right;"><img src="${wa.viewHelper.img(term.props)}" border="0" ></div>
+        	            
+        	            <div>
+        	            {{each(p,prop) term.props}}
+            	            {{if prop.type.name=="evidence"}}
+            	                &raquo;  ${prop.value} 
+            	            {{/if}}
+            	        {{/each}}
+            	        </div>
+            	        
+            	        <div>
+            	        {{each(d,dbxref) term.dbxrefs}}
+            	            <i>to</i> <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
+            	        {{/each}}
+            	        
+            	        {{each(pu,pub) term.pubs}}
+            	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+            	        {{/each}}
+            	        </div>
+        	            {{if term.count > 1 }}
+        	                (<a href="${wa.viewHelper.go_others_link(term.name, term.cv.name, feature)}">${term.count} others)
+        	            {{/if}}
+    	                
+                    </div>
+                    
+                </div>
+    	    </td>
+    	    
+    	    
+            <td class="grey-text">
+                {{each(p,prop) term.props}}
+                    {{if prop.type.name=="evidence"}}
+                        ${prop.value} 
+                    {{/if}}
+                {{/each}}
+            </td>
+            
+            <td>
+                {{each(pu,pub) term.pubs}}
+                    <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+                {{/each}}
+            </td>
+            
+            <td>
+                {{each(d,dbxref) term.dbxrefs}}
+                  <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
+                {{/each}}
+            </td>
+            
+            <td>
+                {{if term.count > 1 }}
+	                 (<a href="${wa.viewHelper.go_others_link(term.name, term.cv.name, feature)}">${term.count} others)
+	            {{/if}}
+	              
+            </td>
+    	
+    	</tr>
+
+	{{/each}}
+	 
+{{/each}}
+

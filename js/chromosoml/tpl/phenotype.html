@@ -1,0 +1,64 @@
+<table width="100%" class="go-section" > 
+    
+    {{each(feature, list) $data}}
+        {{each(t, term) list}}
+    	    <tr>
+        	    <td>
+        	        <div>
+        	            <a class="evidence" href="${wa.viewHelper.go_link(term.accession)}" >
+                           ${term.name}
+        	            </a>
+            	        <div class="tooltip">
+
+            	            <div><h2>
+                	            <a href="${wa.viewHelper.go_link(term.accession)}" >
+                                    ${term.name} 
+                    	        </a>
+                    	        </h2>
+                	        </div>
+
+            	            <div style="float:right;"><img src="${wa.viewHelper.img(term.props)}" border="0" ></div>
+
+            	            <div>
+            	            {{each(p,prop) term.props}}
+                	            {{if prop.type.name=="evidence"}}
+                	                &raquo;  ${prop.value} 
+                	            {{/if}}
+                	        {{/each}}
+                	        </div>
+
+                	        <div>
+                	        {{each(d,dbxref) term.dbxrefs}}
+                	            <i>to</i> <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
+                	        {{/each}}
+
+                	        {{each(pu,pub) term.pubs}}
+                	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+                	        {{/each}}
+                	        </div>
+
+            	            ( ${term.count} other{{if term.count >1 }}s{{/if}})
+
+                        </div>
+                    </div>
+        	    </td>
+        	    <td>
+        	       {{each(p,prop) term.props}}
+	                    {{if prop.type.name=="evidence"}}
+	                        ${prop.value} 
+	                    {{/if}}
+	                {{/each}}
+        	    </td>
+        	    
+        	    <td>
+        	       {{each(pu,pub) term.pubs}}
+                                <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+                            {{/each}}
+        	    </td>
+        	</tr>
+    	{{/each}}
+    {{/each}}
+
+
+    
+</table>

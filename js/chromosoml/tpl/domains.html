@@ -1,0 +1,46 @@
+
+<tr>
+    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Position</td><td>Score</td><td>Significance</td>
+</tr>
+
+{{each(feature, category) domains}}
+    {{each(category_name, categorized_domains) category}} 
+            
+            {{if len(categorized_domains[0].dbxrefs) > 0 }}
+            
+                <tr><th> ${category_name} </th><td> 
+                    {{if categorized_domains[0].dbxrefs[0].db.name == "InterPro"}}
+                        <i>${categorized_domains[0].dbxrefs[0].description}</i> 
+                    {{/if}}
+                    matches:</td>
+                </tr>
+            
+                {{each(dom, domain) categorized_domains}}
+                
+                    {{each(dx, dbxref) domain.dbxrefs}}
+                        <tr>
+                        
+                        {{if dbxref.accession != category_name}}
+                        
+                            <td>&nbsp;</td><td> <a href="${dbxref.db.urlprefix}${dbxref.accession}"> ${dbxref.db.name}:${dbxref.accession}</a> </td><td> ${dbxref.description}</td><td> ${domain.fmin} - ${domain.fmax}</td>
+                        
+                            {{if domain.analysisFeature != null}}
+                            <td>
+                                ${domain.analysisFeature.rawscore}
+                            </td>
+                            <td>
+                                ${domain.analysisFeature.significance}
+                            </td>
+                            {{/if}}
+                        
+                        {{/if}}
+                    
+                        </tr>
+                    
+                    {{/each}}
+                {{/each}}
+            
+            
+            {{/if}}
+    {{/each}}
+{{/each}}

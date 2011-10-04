@@ -1,0 +1,40 @@
+{{if algorithm.GPI_anchored == "true"}}
+    <tr>
+        <th>DGPI</th>
+        <td>
+            
+        {{each(c, cleavage) algorithm.cleavages}}
+            This protein is GPI-anchored. Predicted cleavage site at ${cleavage.fmin} with score 
+            {{each(p, prop) cleavage.properties}}
+                {{if prop.name == "GPI_cleavage_site_score"}}
+                    ${prop.value}
+                {{/if}}
+            {{/each}}. 
+        {{/each}}
+    </td></tr>
+{{/if}}
+{{if algorithm.SignalP_prediction != null}}
+<tr>
+    <th>SignalP</th>
+    <td>
+        Predicted Signal peptide (Signal peptide probability ${algorithm.signal_peptide_probability}, signal anchor probability ${algorithm.signal_anchor_probability}). 
+        
+        
+        {{each(c, cleavage) algorithm.signals}}
+            Predicted cleavage site at ${cleavage.fmax} with probability 
+            {{each(p, prop) cleavage.properties}}
+                {{if prop.name == "cleavage_site_probability"}}
+                    ${prop.value}
+                {{/if}}
+            {{/each}}. 
+        {{/each}}
+    </td>
+{{/if}}
+
+<tr>
+    <th>TMHMM</th>
+    <td>
+        Predicted ${algorithm.tms.length} transmembrane regions at locations {{each(t, tm) algorithm.tms}}{{if t > 0}}, {{/if}}${tm.fmin}-${tm.fmax}{{/each}}. 
+
+    </td>
+</tr>

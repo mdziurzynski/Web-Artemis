@@ -1,0 +1,127 @@
+<style>
+
+#reltool {
+	background:#eeeebb;
+	padding:20px;
+	position:absolute;
+	top:10px;
+	left:10px;
+}
+
+h2 {
+    padding-top:0px;
+    margin-top:0px;
+}
+
+</style>
+
+
+<h2 style="padding-top:0px;margin-top:0px;">General Information</h2>
+<div id="col-4-1">
+
+<div class="main-grey-3-4-top"></div>
+<div class="light-grey">
+<span class="float-right grey-text"></span>
+<div id="gene_summary" data-bind="template: 'summary' " ></div>
+</div>
+<div class="main-grey-3-4-bot"></div>
+</div><!-- end internal column -left -->
+
+<div id="col-4-2" >
+<div class="main-blue-3-4-top"></div>
+<div class="baby-blue-nopad">
+<img id="basketbutton" src="${baseLinkURL}includes/image/button-add-to-basket.gif" alt="Add to Basket" onclick="addToBasket('${geneName}')" height="46" width="144" style="cursor: pointer;">
+<a href="${baseLinkURL}featureSeq/${geneName}" ><img src="${baseLinkURL}includes/image/button-view-sequence.gif" height="46" width="144" alt="View Sequence" border="0" /></a>
+<a href="${baseLinkURL}ArtemisLaunch/${organism.common_name}/${coordinates[0].region}.jnlp?start=${coordinates[0].fmin}&end=${coordinates[0].fmax}" >
+    <img src="${baseLinkURL}includes/image/button-artemis.gif" height="46" width="144" alt="Launch Artemis" border="0" /> </a>
+<a href="${baseLinkURL}jbrowse/${organism.common_name}/?loc=${coordinates[0].region}:${coordinates[0].fmin - 5000}..${coordinates[0].fmax + 5000}&tracks=Complex%20Gene%20Models" >
+    <img src="${baseLinkURL}includes/image/button-jbrowse.gif" height="46" width="144" alt="Show in JBrowse" border="0" /></a>
+</div>
+<div class="main-blue-3-4-bot"></div>
+</div><!-- end internal column -right -->
+
+
+<br class="clear" /><br />
+
+<div class='full-light-grey-top' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "></div>
+<div class='light-grey' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "> 
+<div  >
+<h2>Comments</h2>
+<div data-bind="template: 'properties' " ></div>
+</div>
+</div>
+<div class='full-light-grey-bot' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "></div>
+
+<br data-bind="visible: len([notes, comments, curations, pubs]) > 0 " />
+
+<h2 data-bind="visible: len([controlled_curation, cellular_component, molecular_function, biological_process]) > 0 " >Curation</h2>
+
+<div class='full-light-grey-top' data-bind="visible: len(controlled_curation) > 0 "></div>
+<div class='light-grey' data-bind="visible: len(controlled_curation) > 0 "> 
+<h2>Phenotype </h2>
+<table 
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%"
+    data-bind="template: {name:'phenotype', data: controlled_curation}" >
+</table>
+</div>
+<div class='full-light-grey-bot' data-bind="visible: len(controlled_curation) > 0 "></div>
+
+<br class="clear" data-bind="visible: len(controlled_curation) > 0 " />
+
+<div class='full-light-grey-top' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "></div>
+<div class='light-grey' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "> 
+<div  >
+<h2>Gene Ontology</h2>
+<table 
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%" 
+    data-bind="template: 'gos' " >
+</table>
+</div>
+</div>
+<div class='full-light-grey-bot' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "></div>
+
+<br class="clear" /><br />
+
+<h2 data-bind="visible: len([domain_graph, domains]) > 0" >Protein Data</h2>
+<div style="font-family:sans-serif;" data-bind="visible: len([domain_graph, domains]) > 0" id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Protein Map</a></li>
+        <li><a href="#tabs-2">Domain Information Table</a></li>
+        <li><a href="#tabs-3">Predicted Peptide Data</a></li>
+        <li><a href="#tabs-4">Algorithmic Predictions</a></li>
+    </ul>
+    <div id="tabs-1">
+        <div data-bind="template: 'domain_graph' "  ></div>
+    </div>
+    <div id="tabs-2">
+        <table 
+            cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+            data-bind="template: 'domains' " >
+        </table>
+    </div>
+    <div id="tabs-3">
+        <table>
+            {{each(p,prop) polypeptide_properties}}
+                <tr><th>${prop.name}</th><td>${prop.value}</td>
+            {{/each}}
+        </table>
+    </div>
+    <div id="tabs-4">
+        <table data-bind="template: 'algorithm' "></table>
+    </div>
+</div>
+
+<br class="clear" /><br />
+
+
+<div class='full-light-grey-top' data-bind="visible: len([orthologues]) > 0"></div>
+<div class='light-grey' data-bind="visible: len([orthologues]) > 0"> 
+<h2>Orthologues and Paralogues</h2>
+<table 
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+    data-bind="template: 'orthologues' " >
+</table>
+</div>
+<div class='full-light-grey-bot' data-bind="visible: len([orthologues]) > 0"></div><br>
+
+<br class="clear" data-bind="visible: len([orthologues]) > 0"/><br />
