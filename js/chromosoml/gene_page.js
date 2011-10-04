@@ -610,7 +610,7 @@ $(function(){
     		        'ND': 'No biological Data available'
     		    }
 		    },
-		    img : {
+		    image : {
 		        prefix : current_directory + "/img/",
 		        suffix : ".png"
 	        },
@@ -661,7 +661,7 @@ $(function(){
                 var prop = props[p];
                 if (prop.type.name == "evidence") {
                     var evidence = prop.value;
-                    return self.img.prefix + self.evidence_category(evidence) + self.img.suffix;
+                    return self.image.prefix + self.evidence_category(evidence) + self.image.suffix;
                 }
             }
         }
@@ -1257,13 +1257,10 @@ $(function(){
 	                wa.webArtemisLinker.link(coordinates[0]);
 	                
 	                $(".absolute_tool").AbsoluteToolTips();
-	                
+	                //$(".evidence").AbsoluteToolTips();
 	                
 	                $( "#tabs" ).tabs();
 	                
-	                
-	                
-	                $(".evidence").tooltip();
 	                
 	                $(self.spinner).CallStatusSpinner("removeCall");
 	                $(".gene_page").stop().fadeTo(100, 1);
