@@ -91,7 +91,8 @@
         }
         var service = "http://www.genedb.org/services/";
         var url = $.url();
-        
+        $.log("url");
+        $.log(url);
         $.ajax({
             url: service + "/regions/sequenceLength.json",
             dataType: 'jsonp',
