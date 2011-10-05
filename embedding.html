@@ -91,14 +91,13 @@
         $('.spinner').CallStatusSpinner();
         
         var embedded = null;
-        
         var region = "Pf3D7_01__new";
-        var service = "http://www.genedb.org/services/"
+        var service = "http://localhost:8080/services/";
         
         $.ajax({
             url: service + "/regions/sequenceLength.json",
             dataType: 'jsonp',
-            data: {'region' : region },
+            data: { 'region' : region },
             success: function(regions) {
                 var sequenceLength = regions[0].length; 
                 embedded = new wa.EmbeddedWebArtemis({
