@@ -93,9 +93,10 @@
         var embedded = null;
         
         var region = "Pf3D7_01__new";
+        var service = "http://www.genedb.org/services/"
         
         $.ajax({
-            url: self.service + "/regions/sequenceLength.json",
+            url: service + "/regions/sequenceLength.json",
             dataType: 'jsonp',
             data: {'region' : region },
             success: function(regions) {
@@ -107,7 +108,8 @@
                         region : region
                     }, 
                     webArtemisPath: "/", 
-                    sequenceLength : sequenceLength
+                    sequenceLength : sequenceLength,
+                    service : service
                 });
             }
         });
