@@ -1345,10 +1345,14 @@ $(function(){
         
         //$.log(self.coordinates);
         
+        var real_fmin = self.coordinates.fmin-1000;
+        if (real_fmin < 0)
+        	real_fmin = 0;
+        
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
-            start : self.coordinates.fmin-1000,
-            bases : self.coordinates.fmax-self.coordinates.fmin +2000,
+            start : real_fmin,
+            bases : real_fmin +2000,
             showFeatureList : false,
             width : 950,
             directory : self.webArtemisPath,
@@ -1365,8 +1369,8 @@ $(function(){
                 windowWidth : 870,
                 max : parseInt(self.sequenceLength), 
                 observers : [new ChromosomeMapToWebArtemis()],
-                pos : self.coordinates.fmin-1000,
-                width : self.coordinates.fmax-self.coordinates.fmin +2000
+                pos : real_fmin,
+                width : real_fmin+2000
             });
             
             setTimeout(function() { 
