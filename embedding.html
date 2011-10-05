@@ -101,7 +101,7 @@
                 var sequenceLength = regions[0].length; 
                 new wa.EmbeddedWebArtemis({
                     coordinates : coordinates, 
-                    webArtemisPath: url.directory, 
+                    webArtemisPath: url.attr("directory"), 
                     sequenceLength : sequenceLength,
                     service : service
                 });
