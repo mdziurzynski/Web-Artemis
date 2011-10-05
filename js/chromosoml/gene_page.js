@@ -1346,8 +1346,8 @@ $(function(){
         //$.log(self.coordinates);
         
         var real_fmin = self.coordinates.fmin-1000;
-        if (real_fmin < 0)
-        	real_fmin = 0;
+        if (real_fmin < 1)
+        	real_fmin = 1;
         
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
