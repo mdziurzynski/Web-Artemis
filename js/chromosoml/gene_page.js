@@ -131,7 +131,7 @@ $(function(){
 		    $.ajax({
     	        url: self.service + "/feature/hierarchy.json",
     	        type: 'GET',
-    	        dataType: 'json',
+    	        dataType: 'jsonp',
     	        data: {
     	            'uniqueName' : self.uniqueName
     	        },
@@ -249,7 +249,7 @@ $(function(){
 		    $.ajax({
     	        url: self.service + "/regions/sequenceLength.json",
     	        type: 'GET',
-    	        dataType: 'json',
+    	        dataType: 'jsonp',
     	        data: {
     	            'region' : region
     	        },
@@ -264,7 +264,7 @@ $(function(){
 		    $.ajax({
     	        url: self.service + "/feature/polypeptide_properties.json",
     	        type: 'GET',
-    	        dataType: 'json',
+    	        dataType: 'jsonp',
     	        data: {
     	            'feature' : self.uniqueName
     	        },
