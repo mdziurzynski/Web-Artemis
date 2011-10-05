@@ -1308,6 +1308,7 @@ $(function(){
 	            fmax : 1000,
 	            region : "some_region"
             },
+            initial_window_size : 20000,
             webArtemisPath : "path",
 	        max_residues : 1000000,
 	        service : "/services/", 
@@ -1352,7 +1353,7 @@ $(function(){
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
             start : real_fmin,
-            bases : real_fmin +2000,
+            bases : real_fmin + self.initial_window_size,
             showFeatureList : false,
             width : 950,
             directory : self.webArtemisPath,
@@ -1370,7 +1371,7 @@ $(function(){
                 max : parseInt(self.sequenceLength), 
                 observers : [new ChromosomeMapToWebArtemis()],
                 pos : real_fmin,
-                width : real_fmin+2000
+                width : real_fmin + self.initial_window_size
             });
             
             setTimeout(function() { 
