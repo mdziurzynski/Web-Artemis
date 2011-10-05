@@ -1,92 +1,13 @@
 <html>
 <header>
-    
-    <script type="text/javascript" src="../../js/jquery-1.6.1.min.js"></script>
-    <script type="text/javascript" src="../../js/jquery-ui-1.8.4.custom.min.js"></script>
-    
-    <script type="text/javascript" src="../../js/jquery.drawinglibrary/js/jquery.svg.js"></script>
-	<script type="text/javascript" src="../../js/jquery.drawinglibrary/js/jquery.drawinglibrary.js"></script>
-	<script type="text/javascript" src="../../js/jquery.flot.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.flot.selection.min.js"></script>
-	
-	
-	
-	<script type="text/javascript" src="../../js/popup.js"></script>
-	<script type="text/javascript" src="../../js/jquery.contextMenu-1.01/jquery.contextMenu.js"></script>
-	
-	<script type="text/javascript" src="../../js/observerable.js"></script>
-	<script type="text/javascript" src="../../js/utility.js"></script>
-	<script type="text/javascript" src="../../js/bases.js"></script>
-	<script type="text/javascript" src="../../js/aminoacid.js"></script>
-	<script type="text/javascript" src="../../js/superfish-1.4.8/hoverIntent.js"></script>
-	<script type="text/javascript" src="../../js/superfish-1.4.8/superfish.js"></script>
-	<script type="text/javascript" src="../../js/jquery.tablesorter.min.js"></script>
-	<script type="text/javascript" src="../../js/graph.js"></script>
-	<script type="text/javascript" src="../../js/scrolling.js"></script>
-	<script type="text/javascript" src="../../js/selection.js"></script>
-	<script type="text/javascript" src="../../js/zoom.js"></script>
-	<script type="text/javascript" src="../../js/featureCvTerm.js"></script>
-	<script type="text/javascript" src="../../js/bam.js"></script>
-	<script type="text/javascript" src="../../js/vcf.js"></script>
-	<script type="text/javascript" src="../../js/featureList.js"></script>
-	<script type="text/javascript" src="../../js/navigate.js"></script>
-	<script type="text/javascript" src="../../js/genome.js"></script>
-	<script type="text/javascript" src="../../js/samFlag.js"></script>
-	
-	<script type="text/javascript" src="lib/jquery.log.js"></script>
-	<script type="text/javascript" src="lib/jquery.tmpl.js"></script>
-	<script type='text/javascript' src='lib/knockout.js'></script>
-	<script type='text/javascript' src='lib/koExternalTemplateEngine.js'></script>
-	
-	<script type="text/javascript" src="chromosoml.js"></script>
-	<script type="text/javascript" src="gene_page.js"></script>
-	
-	<script>
-	    
-	$(document).ready(function() {
-	    
-	    $.fn.CallStatusSpinner.defaults = {
-	        height : 11.5,
-	        width : 50,
-	        img : 'js/chromosoml/img/spinner.gif'
-	    };
-	    
-	    $('.spinner').CallStatusSpinner();
-	    
-	    var embedded = null;
-	    
-	    var region = "Pf3D7_01__new";
-	    
-	    $.ajax({
-	        url: self.service + "/regions/sequenceLength.json",
-	        dataType: 'jsonp',
-	        data: {'region' : region },
-	        success: function(regions) {
-	            var sequenceLength = regions[0].length; 
-	            embedded = new wa.EmbeddedWebArtemis({
-	                coordinates :  {
-	                    fmin : 1,
-	                    fmax : 1000,
-	                    region : region
-	                }, 
-	                webArtemisPath: "../../", 
-	                sequenceLength : sequenceLength
-	            });
-	        }
-	    });
-	    
-	    
-	});
-	</script>
-	
 	<style type="text/css">
         @import "css/ui-lightness/jquery-ui-1.8.4.custom.css";
     </style>
 	
-	<link rel="stylesheet" type="text/css" href="../../css/superfish.css" media="screen">
-	<link rel="stylesheet" type="text/css" href="../../css/tablesorter.css" media="screen">
-	<link rel="stylesheet" type="text/css" href="../../js/jquery.contextMenu-1.01/jquery.contextMenu.css" media="screen">
-	<link rel="stylesheet" type="text/css" href="../../css/artemis.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="css/superfish.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="css/tablesorter.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="js/jquery.contextMenu-1.01/jquery.contextMenu.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="css/artemis.css" media="screen">
 	
 	
 	<style>
@@ -116,6 +37,84 @@
     
     
     </style>
+    
+    <script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.4.custom.min.js"></script>
+    
+    <script type="text/javascript" src="js/jquery.drawinglibrary/js/jquery.svg.js"></script>
+    <script type="text/javascript" src="js/jquery.drawinglibrary/js/jquery.drawinglibrary.js"></script>
+    <script type="text/javascript" src="js/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="js/jquery.flot.selection.min.js"></script>
+    
+    
+    
+    <script type="text/javascript" src="js/popup.js"></script>
+    <script type="text/javascript" src="js/jquery.contextMenu-1.01/jquery.contextMenu.js"></script>
+    
+    <script type="text/javascript" src="js/observerable.js"></script>
+    <script type="text/javascript" src="js/utility.js"></script>
+    <script type="text/javascript" src="js/bases.js"></script>
+    <script type="text/javascript" src="js/aminoacid.js"></script>
+    <script type="text/javascript" src="js/superfish-1.4.8/hoverIntent.js"></script>
+    <script type="text/javascript" src="js/superfish-1.4.8/superfish.js"></script>
+    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="js/graph.js"></script>
+    <script type="text/javascript" src="js/scrolling.js"></script>
+    <script type="text/javascript" src="js/selection.js"></script>
+    <script type="text/javascript" src="js/zoom.js"></script>
+    <script type="text/javascript" src="js/featureCvTerm.js"></script>
+    <script type="text/javascript" src="js/bam.js"></script>
+    <script type="text/javascript" src="js/vcf.js"></script>
+    <script type="text/javascript" src="js/featureList.js"></script>
+    <script type="text/javascript" src="js/navigate.js"></script>
+    <script type="text/javascript" src="js/genome.js"></script>
+    <script type="text/javascript" src="js/samFlag.js"></script>
+    
+    <script type="text/javascript" src="lib/jquery.log.js"></script>
+    <script type="text/javascript" src="lib/jquery.tmpl.js"></script>
+    <script type='text/javascript' src='lib/knockout.js'></script>
+    <script type='text/javascript' src='lib/koExternalTemplateEngine.js'></script>
+    
+    <script type="text/javascript" src="chromosoml.js"></script>
+    <script type="text/javascript" src="gene_page.js"></script>
+    
+    <script>
+        
+    $(document).ready(function() {
+        
+        $.fn.CallStatusSpinner.defaults = {
+            height : 11.5,
+            width : 50,
+            img : 'js/chromosoml/img/spinner.gif'
+        };
+        
+        $('.spinner').CallStatusSpinner();
+        
+        var embedded = null;
+        
+        var region = "Pf3D7_01__new";
+        
+        $.ajax({
+            url: self.service + "/regions/sequenceLength.json",
+            dataType: 'jsonp',
+            data: {'region' : region },
+            success: function(regions) {
+                var sequenceLength = regions[0].length; 
+                embedded = new wa.EmbeddedWebArtemis({
+                    coordinates :  {
+                        fmin : 1,
+                        fmax : 1000,
+                        region : region
+                    }, 
+                    webArtemisPath: "/", 
+                    sequenceLength : sequenceLength
+                });
+            }
+        });
+        
+        
+    });
+    </script>
 
 </header>
 <body>
