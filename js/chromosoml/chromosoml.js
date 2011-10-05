@@ -136,7 +136,7 @@ if(!String.prototype.startsWith){
 				if (useCanvas) {
 					ctx.strokeRect(x,y,w,h);
 				} else {
-					axisHtml += "<hr class='chromosome_axis' style='position:absolute;left:" + x + "px;top:" + y + "px;width:"+ w +"px;'></hr>";
+					axisHtml += "<div class='chromosome_axis' style='border:1px solid black;position:absolute;left:" + x + "px;top:" + y + "px;width:"+ w +"px;'></div>";
 				}
 				
 				axisHtml += "<div class='chromosome_axis_label' style='z-index:100000000;position:absolute;left:" + (x + 5) + "px;top:" + (y) + "px;'>"+text+"</div>";
@@ -154,7 +154,7 @@ if(!String.prototype.startsWith){
 				$.ajax({
 			        url: settings.web_service_root + "regions/sequenceLength.json",
 			        type: 'GET',
-			        dataType: 'json',
+			        dataType: 'jsonp',
 			        data: {
 			            'region' : settings.region
 			        },
@@ -224,7 +224,7 @@ if(!String.prototype.startsWith){
 				$.ajax({
 			        url: settings.web_service_root + "regions/locations.json",
 			        type: 'GET',
-			        dataType: 'json',
+			        dataType: 'jsonp',
 			        data: {
 			            'region' : settings.region, 
 			            'types' : settings.types,
@@ -408,7 +408,7 @@ if(!String.prototype.startsWith){
 //					traditional : true, // we're sending non string delimited arrays here, and we don't want [] either.
 //			        url: settings.web_service_root + "features/properties.json",
 //			        type: 'GET',
-//			        dataType: 'json',
+//			        dataType: 'jsonp',
 //			        data: {
 //			            'features' : bin,
 //			            'types' : "colour"
@@ -950,7 +950,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 			url: serviceName + "features/getInfo.json",
 			type: 'GET',
 			mode: "queue",
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'feature' : uniqueName
 	        },
@@ -963,7 +963,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "features/hierarchy.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'features' : uniqueName,
 	            'root_on_genes' : true
@@ -1054,7 +1054,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "regions/sequenceLength.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'region' : self.getRegion()
 	        },
@@ -1075,7 +1075,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "regions/getInfo.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'uniqueName' : self.getRegion()
 	        },
@@ -1095,7 +1095,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "organisms/getByID.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'ID' : self.feature.organism_id
 	        },
@@ -1112,7 +1112,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "features/synonyms.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'features' : self.features.join(",")
 	        },
@@ -1134,7 +1134,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "features/properties.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'features' : self.features.join(",")
 	        },
@@ -1152,7 +1152,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "features/pubs.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'features' : self.features.join(",")
 	        },
@@ -1170,7 +1170,7 @@ function FeatureInfo(uniqueName, options, onReady) {
 		$.ajax({
 	        url: self.service + "features/terms.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            'features' : self.features.join(",")
 	        },
@@ -1240,7 +1240,7 @@ function PolypeptideInfo(uniqueName, options) {
 		$.ajax({
 	        url: self.settings.service + "features/terms.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            cvs : "genedb_products",
 	            features: uniqueName
@@ -1256,7 +1256,7 @@ function PolypeptideInfo(uniqueName, options) {
 		$.ajax({
 	        url: self.settings.service + "features/dbxrefs.json",
 	        type: 'GET',
-	        dataType: 'json',
+	        dataType: 'jsonp',
 	        data: {
 	            features: uniqueName
 	        },
@@ -1312,7 +1312,7 @@ function PolypeptideInfo(uniqueName, options) {
 				$.ajax({
 			        url: settings.web_service_root + "regions/typesinorganism.json",
 			        type: 'GET',
-			        dataType: 'json',
+			        dataType: 'jsonp',
 			        data: {
 			            'organism' : settings.organism
 			        },
@@ -1361,7 +1361,7 @@ function PolypeptideInfo(uniqueName, options) {
 				$.ajax({
 			        url: settings.web_service_root + "regions/inorganism.json",
 			        type: 'GET',
-			        dataType: 'json',
+			        dataType: 'jsonp',
 			        data: data,
 			        success: function(regions) {
 //			        	var regions = [];
@@ -1499,7 +1499,7 @@ function PolypeptideInfo(uniqueName, options) {
 				$.ajax({
 			        url: settings.web_service_root + "features/annotation_changes_statistics.json",
 			        type: 'GET',
-			        dataType: 'json',
+			        dataType: 'jsonp',
 			        data: {
 			            'organism' : settings.organism,
 			            'date' : getDateString(date)
@@ -1538,7 +1538,7 @@ function PolypeptideInfo(uniqueName, options) {
 				$.ajax({
 			        url: settings.web_service_root + "features/annotation_changes.json",
 			        type: 'GET',
-			        dataType: 'json',
+			        dataType: 'jsonp',
 			        data: {
 			            'organism' : settings.organism,
 			            'date' : getDateString(date)

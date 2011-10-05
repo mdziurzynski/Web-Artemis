@@ -131,7 +131,7 @@ $(function(){
 		    $.ajax({
     	        url: self.service + "/feature/hierarchy.json",
     	        type: 'GET',
-    	        dataType: 'json',
+    	        dataType: 'jsonp',
     	        data: {
     	            'uniqueName' : self.uniqueName
     	        },
@@ -249,7 +249,7 @@ $(function(){
 		    $.ajax({
     	        url: self.service + "/regions/sequenceLength.json",
     	        type: 'GET',
-    	        dataType: 'json',
+    	        dataType: 'jsonp',
     	        data: {
     	            'region' : region
     	        },
@@ -264,7 +264,7 @@ $(function(){
 		    $.ajax({
     	        url: self.service + "/feature/polypeptide_properties.json",
     	        type: 'GET',
-    	        dataType: 'json',
+    	        dataType: 'jsonp',
     	        data: {
     	            'feature' : self.uniqueName
     	        },
@@ -610,7 +610,7 @@ $(function(){
     		        'ND': 'No biological Data available'
     		    }
 		    },
-		    img : {
+		    image : {
 		        prefix : current_directory + "/img/",
 		        suffix : ".png"
 	        },
@@ -661,7 +661,7 @@ $(function(){
                 var prop = props[p];
                 if (prop.type.name == "evidence") {
                     var evidence = prop.value;
-                    return self.img.prefix + self.evidence_category(evidence) + self.img.suffix;
+                    return self.image.prefix + self.evidence_category(evidence) + self.image.suffix;
                 }
             }
         }
@@ -1257,13 +1257,10 @@ $(function(){
 	                wa.webArtemisLinker.link(coordinates[0]);
 	                
 	                $(".absolute_tool").AbsoluteToolTips();
-	                
+	                //$(".evidence").AbsoluteToolTips();
 	                
 	                $( "#tabs" ).tabs();
 	                
-	                
-	                
-	                $(".evidence").tooltip();
 	                
 	                $(self.spinner).CallStatusSpinner("removeCall");
 	                $(".gene_page").stop().fadeTo(100, 1);
@@ -1311,6 +1308,7 @@ $(function(){
 	            fmax : 1000,
 	            region : "some_region"
             },
+            initial_window_size : 20000,
             webArtemisPath : "path",
 	        max_residues : 1000000,
 	        service : "/services/", 
@@ -1348,10 +1346,14 @@ $(function(){
         
         //$.log(self.coordinates);
         
+        var real_fmin = self.coordinates.fmin-1000;
+        if (real_fmin < 1)
+        	real_fmin = 1;
+        
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
-            start : self.coordinates.fmin-1000,
-            bases : self.coordinates.fmax-self.coordinates.fmin +2000,
+            start : real_fmin,
+            bases : real_fmin + self.initial_window_size,
             showFeatureList : false,
             width : 950,
             directory : self.webArtemisPath,
@@ -1368,8 +1370,8 @@ $(function(){
                 windowWidth : 870,
                 max : parseInt(self.sequenceLength), 
                 observers : [new ChromosomeMapToWebArtemis()],
-                pos : self.coordinates.fmin-1000,
-                width : self.coordinates.fmax-self.coordinates.fmin +2000
+                pos : real_fmin,
+                width : real_fmin + self.initial_window_size
             });
             
             setTimeout(function() { 
