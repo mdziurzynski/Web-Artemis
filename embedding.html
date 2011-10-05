@@ -72,6 +72,7 @@
     
     <script type="text/javascript" src="js/chromosoml/lib/jquery.log.js"></script>
     <script type="text/javascript" src="js/chromosoml/lib/jquery.tmpl.js"></script>
+    <script type="text/javascript" src="js/chromosoml/lib/jquery.url.js"></script>
     <script type='text/javascript' src='js/chromosoml/lib/knockout.js'></script>
     <script type='text/javascript' src='js/chromosoml/lib/koExternalTemplateEngine.js'></script>
     
@@ -89,6 +90,7 @@
             region : "Pf3D7_01__new"
         }
         var service = "http://www.genedb.org/services/";
+        var url = $.url();
         
         $.ajax({
             url: service + "/regions/sequenceLength.json",
@@ -98,7 +100,7 @@
                 var sequenceLength = regions[0].length; 
                 new wa.EmbeddedWebArtemis({
                     coordinates : coordinates, 
-                    webArtemisPath: window.location.href, 
+                    webArtemisPath: url.directory, 
                     sequenceLength : sequenceLength,
                     service : service
                 });
