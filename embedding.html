@@ -35,26 +35,6 @@
             z-index:100;
         }
         
-        .hideable {
-            display:none;
-        }
-        
-        .tooltip {
-            display:none;
-            background-color:#ffa;
-            border:1px solid #cc9;
-            padding:3px;
-            font-size:13px;
-            -moz-box-shadow: 2px 2px 11px #666;
-            -webkit-box-shadow: 2px 2px 11px #666;
-        }
-       
-        a.evidence {
-           text-decoration:none;
-           font-weight:bold;
-           color:#555;
-        }
-    
     
     </style>
     
@@ -102,31 +82,23 @@
         
     $(document).ready(function() {
         
-        $.fn.CallStatusSpinner.defaults = {
-            height : 11.5,
-            width : 50,
-            img : 'js/chromosoml/img/spinner.gif'
-        };
-        
-        $('.spinner').CallStatusSpinner();
-        
-        var embedded = null;
-        var region = "Pf3D7_01__new";
+        // as an embedded widget, the embedding page must provide the display coordinates
+        var coordinates :  {
+            fmin : 1,
+            fmax : 1000,
+            region : "Pf3D7_01__new"
+        }
         var service = "http://www.genedb.org/services/";
         
         $.ajax({
             url: service + "/regions/sequenceLength.json",
             dataType: 'jsonp',
-            data: { 'region' : region },
+            data: { 'region' : coordinates.region },
             success: function(regions) {
                 var sequenceLength = regions[0].length; 
-                embedded = new wa.EmbeddedWebArtemis({
-                    coordinates :  {
-                        fmin : 1,
-                        fmax : 1000,
-                        region : region
-                    }, 
-                    webArtemisPath: "http://localhost/Web-Artemis/", 
+                new wa.EmbeddedWebArtemis({
+                    coordinates : coordinates, 
+                    webArtemisPath: window.location.href, 
                     sequenceLength : sequenceLength,
                     service : service
                 });
