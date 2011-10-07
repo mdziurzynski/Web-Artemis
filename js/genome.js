@@ -36,6 +36,7 @@ var showAG = false;
 var showOther = false;
 var compare = false;
 var showFeatureList = true;
+var showChromosomeMap = false;
 
 var clicks = 0;
 var count = 0;
@@ -863,6 +864,73 @@ function drawAll(fDisplay) {
 	  if(!fDisplay.firstTime && fDisplay.leftBase+fDisplay.basesDisplayWidth > fDisplay.sequenceLength) {
 		  hideEndOfSequence(fDisplay);
 	  }
+      
+	  if(fDisplay.firstTime && showChromosomeMap) {
+		  
+	        $.ajax({
+	            url: webService + "/regions/sequenceLength.json",
+	            dataType: 'jsonp',
+	            data: { 'region' : fDisplay.srcFeature },
+	            success: function(regions) { 
+	                chromosomeMap(fDisplay, regions[0].length);
+	            }
+	        });
+
+	  }
+
+}
+
+function chromosomeMap(fDisplay, sequenceLength) {
+
+	$('#slider'+fDisplay.index).css('display', 'none');
+	
+	var buttonWidth = $('#left'+fDisplay.index).width()+5;
+	cssObj = {
+	    'margin-left': margin+buttonWidth+'px',  
+	    'width': displayWidth-buttonWidth+'px',
+	    'position':'absolute',
+	    'top':fDisplay.marginTop+(fDisplay.frameLnHgt*16.9)+margin+'px'
+	};
+	
+	cssObj2 = {
+		'margin-top':-26+'px',
+	    'z-index': '100'
+	};
+	
+	var chr_container = "chr-container"+fDisplay.index;
+	var chr_map = "chr-map"+fDisplay.index;
+	var chr_map_slider = "chr-map-slider"+fDisplay.index;
+	
+	$('#slider_container').append('<div id="'+chr_container+'"><div id="'+chr_map+'" ></div><div id="'+chr_map_slider+'" ></div></div>');
+	$('#'+chr_container).css(cssObj);
+	$('#'+chr_map_slider).css(cssObj2);
+	
+    $('#'+chr_map).ChromosomeMap({
+        region : fDisplay.srcFeature, 
+        overideUseCanvas : false,
+        bases_per_row: parseInt(sequenceLength),
+        row_height : 10,
+        row_width : $('#slider'+fDisplay.index).width()-(2*margin),
+        overideUseCanvas : true,
+        loading_interval : 100000,
+        axisLabels : false,
+        row_vertical_space_sep : 10,
+        web_service_root : webService
+    });
+
+    $('#'+chr_map_slider).ChromosomeMapSlider({
+        windowWidth : $('#'+chr_map).width(),
+        max : parseInt(sequenceLength), 
+        observers : [new ChromosomeMapToWebArtemis()],
+        pos : parseInt(fDisplay.leftBase),
+        width : parseInt(fDisplay.basesDisplayWidth)
+    });
+
+    
+    setTimeout(function() { 
+        $('#web-artemis').WebArtemis('addObserver', 
+            new WebArtemisToChromosomeMap('#'+chr_map_slider));
+    }, 500);
 }
 
 function getSequence(fDisplay) {
@@ -2503,6 +2571,7 @@ var methods = {
 				bases : 16000,				// number of bases shown
 				start : 1,					// initial position
 				showFeatureList : true,		// show feature list
+				showChromosomeMap : false,      // use chromosoml
 				source : 'BX571857',		// default sequence
 				width : $(window).width(), 	// browser viewport width,
 				showOrganismsList : true,	// show organism list
@@ -2554,6 +2623,8 @@ var methods = {
 			} else {
 				showFeatureList = settings.showFeatureList;
 			}
+			
+			showChromosomeMap = settings.showChromosomeMap;
 		
 			var debugSetting = arr["debug"];
 			if(debugSetting) {

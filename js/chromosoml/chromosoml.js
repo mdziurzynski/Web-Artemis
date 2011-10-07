@@ -608,7 +608,7 @@ if(!String.prototype.startsWith){
 		'overideUseCanvas' : false,
 		'axisLabels' : true,
 		'click' : function(event) {
-			$.log(event);
+			//$.log(event);
 		},
 		'base_position_start' : 0,
 		'web_service_root' : "/services/"
