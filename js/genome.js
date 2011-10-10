@@ -2481,16 +2481,16 @@ function test(start, end, isolate) {
 	$.ajax({
 		  url: jsonUrl+service1,
 		  dataType: 'jsonp',
-		  success: function(returned1) {
+		  success: function(features) {
 		
 		var trackName = "NEW_TRACK_NAME";
-		var features  = returned1.response.features;
+		//var features  = returned1;
 		var featureToColourList = new Array();
 		for(var i=0; i<features.length; i++ ) {
 		  if(features[i].type == "exon")
 			  featureToColourList.push(features[i].feature);
 		}
-		moveTo1(returned1, trackName, 
+		moveTo1(features, trackName, 
 				function (featureSelected, featureDisplay) {
 	  		alert("Show feature properties for "+featureSelected)});
 		
