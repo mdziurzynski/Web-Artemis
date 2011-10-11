@@ -1214,8 +1214,9 @@ $(function(){
 	                    orthologues : orthologues,
 	                    algorithm : algorithm,
 	                    first_element : function(name) {
-	                    	if (this[name] == null) {
-	                    		this[name] = true;
+	                    	// $.log("first_element", name, wa.viewModel.first_element[name]);
+	                    	if (wa.viewModel.first_element[name] == null) {
+	                    		wa.viewModel.first_element[name] = true;
 	                    		return true;
 	                    	}
 	                    	return false;
@@ -1247,9 +1248,9 @@ $(function(){
 	                wa.viewModel.domain_graph_hidden = proteinMap.gaps;
 	                wa.viewModel.domain_graph_max_y = proteinMap.max_y;
 	                
-	                
-	                
 	                ko.applyBindings(wa.viewModel);
+	                
+	                
 	                
 	                //$.log(["onComplete?", onComplete]);
 	                
@@ -1260,6 +1261,7 @@ $(function(){
 	                //$(".evidence").AbsoluteToolTips();
 	                
 	                $( "#tabs" ).tabs();
+	                
 	                
 	                
 	                $(self.spinner).CallStatusSpinner("removeCall");
@@ -1320,6 +1322,8 @@ $(function(){
 	    var self = this;
 	    $.extend(self, defaults, options);
 	    
+	    
+	    
 		var topLevelFeatureLength = parseInt(self.sequenceLength);
         var max = self.max_residues;
         var needsSlider = true;
@@ -1350,10 +1354,11 @@ $(function(){
         if (real_fmin < 1)
         	real_fmin = 1;
         
+        
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
             start : real_fmin,
-            bases : real_fmin + self.initial_window_size,
+            bases : self.initial_window_size,
             showFeatureList : false,
             width : 950,
             directory : self.webArtemisPath,
@@ -1371,7 +1376,7 @@ $(function(){
                 max : parseInt(self.sequenceLength), 
                 observers : [new ChromosomeMapToWebArtemis()],
                 pos : real_fmin,
-                width : real_fmin + self.initial_window_size
+                width : self.initial_window_size
             });
             
             setTimeout(function() { 
