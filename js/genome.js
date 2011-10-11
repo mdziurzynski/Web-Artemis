@@ -541,7 +541,7 @@ function adjustFeatureDisplayPosition(drag, fDisplay) {
 	var buttonWidth = $('#left'+fDisplay.index).width()+5;
 	cssObj = {
         'margin-left': margin+buttonWidth+'px',
-        'width': displayWidth-buttonWidth+'px',
+        'width': displayWidth-buttonWidth-(2*margin)+'px',
         'position':'absolute',
         'top':thisMarginTop+(thisFLH*16.9)+'px'
 	};
@@ -910,7 +910,7 @@ function chromosomeMap(fDisplay, sequenceLength) {
         overideUseCanvas : false,
         bases_per_row: parseInt(sequenceLength),
         row_height : 10,
-        row_width : $('#slider'+fDisplay.index).width()-(2*margin),
+        row_width : $('#slider'+fDisplay.index).width(),
         overideUseCanvas : true,
         loading_interval : 100000,
         axisLabels : false,
@@ -919,7 +919,7 @@ function chromosomeMap(fDisplay, sequenceLength) {
     });
 
     $('#'+chr_map_slider).ChromosomeMapSlider({
-        windowWidth : $('#'+chr_map).width(),
+        windowWidth : $('#slider'+fDisplay.index).width(),
         max : parseInt(sequenceLength), 
         observers : [new ChromosomeMapToWebArtemis()],
         pos : parseInt(fDisplay.leftBase),
@@ -2008,7 +2008,7 @@ var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, option
 		  }
 		  continue;
 	  }
-	  
+
 	  if(fDisplay.oneLinePerEntry) {
 		ypos = getFeatureTrackPosition(fDisplay, feature, options.track);
 	  } else {
