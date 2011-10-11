@@ -1,4 +1,4 @@
-<div >Key information on this gene is available from
+<div data-bind="visible: len(pubs) > 0 " >Key information on this gene is available from
     {{each(feature, list) $data}}
     {{each(p, pub) list}}
          <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a>
