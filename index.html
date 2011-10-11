@@ -41,22 +41,25 @@
 	<script type="text/javascript" src="js/featureList.js"></script>
 	<script type="text/javascript" src="js/navigate.js"></script>
     <script type="text/javascript" src="js/genome.js"></script>
+    <script type="text/javascript" src="js/chromosoml/chromosoml.js"></script>
+	<script type="text/javascript" src="js/chromosoml/gene_page.js"></script>
 	
 	<script>
 	$(document).ready(function(){
-   	 	$('#webartemis').WebArtemis(
-		   {'directory':'.', 'source':'Pf3D7_01', 'start':'1', 'bases':'8000', 'showFeatureList':true, 'start': '1', 'zoomMaxRatio':'1.'});
-		//$('#webartemis').WebArtemis('addData', 408000, 412000, '2A8');
+        
+   	 	$('#web-artemis').WebArtemis(
+		   {'directory':'.', 'source':'BX571857', 'start':'1', 'bases':'4000', 'showFeatureList':true, 'showChromosomeMap': true, 'zoomMaxRatio':'1.'});
+		//$('#webartemis').WebArtemis('addData', 69200, 73200, '06-01347,07-03354-2&tbl=ST22_Fixed_SNPS');
 	});
 	</script>
 
 	<script type="text/javascript" src="js/samFlag.js"></script>
     </head>
     <body>
-    <!--<body onload="draw();">-->
-    	
-    <!--<script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
-        <div id="switcher"></div>-->
+
+	<div id="wacontainer">
+	 <div id="web-artemis"></div>
+	</div>
 	
-	<div id="webartemis"></div></body>
+	</body>
 </html>

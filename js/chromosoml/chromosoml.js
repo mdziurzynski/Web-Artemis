@@ -608,7 +608,7 @@ if(!String.prototype.startsWith){
 		'overideUseCanvas' : false,
 		'axisLabels' : true,
 		'click' : function(event) {
-			$.log(event);
+			//$.log(event);
 		},
 		'base_position_start' : 0,
 		'web_service_root' : "/services/"
@@ -696,7 +696,7 @@ if(!String.prototype.startsWith){
 					$(this).mouseup(function(event) {
 						this.notify('up');
 						if (this.down) {
-							this.redraw(event.pageX - this.offsetLeft);
+							this.redraw(event.pageX - $(this).offset().left);
 						}
 						this.down = false;
 						$(this).css('cursor', 'pointer');
@@ -704,7 +704,7 @@ if(!String.prototype.startsWith){
 					
 					$(this).mousemove(function(event) {
 						if (this.down) {
-							this.redraw(event.pageX - this.offsetLeft);
+							this.redraw(event.pageX - $(this).offset().left);
 							//this.pos = this.windowWindowToPos(event.pageX - this.offsetLeft) - parseInt(this.width / 2);
 							//this.set(this.pos,this.width);
 						}
@@ -716,7 +716,7 @@ if(!String.prototype.startsWith){
 			    	
 			    	this.pos = this.windowWindowToPos(x) - parseInt(this.width / 2);
 					//var winWidth = this.posToWindow(this.width);
-					
+			    	
 					this.set(this.pos,this.width);
 					
 					//console.log("?", x, winWidth);

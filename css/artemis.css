@@ -26,6 +26,10 @@ body {
 	width: .3em;
 }
 
+.chromosome_feature {
+    border:0px;
+}
+
 .bases {
 	height: 12px;
 	line-height: 12px; /* for ie6 */
