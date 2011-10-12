@@ -31,7 +31,7 @@
 	    <th>Product Synonym</th>
 		<td data-bind="template: {name: 'synonyms', data: {synonyms:product_synonyms} }" ></td>
     </tr>
-	<tr >
+	<tr data-bind="visible: len(dbxrefs) > 0 " >
 		<th>See Also</th>
 		<td data-bind="template: 'dbxrefs' " ></td>
 	</tr>
