@@ -46,9 +46,7 @@
 	            	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
 	            	        {{/each}}
 	            	        </div>
-	        	            {{if term.count > 1 }}
-	        	                (<a href="${wa.viewHelper.go_others_link(term.name, term.cv.name, feature)}">${term.count} others)
-	        	            {{/if}}
+	        	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
 	    	                
 	                    </div>
                     </div>
@@ -77,9 +75,8 @@
             </td>
             
             <td>
-                {{if term.count > 1 }}
-	                 (<a href="${wa.viewHelper.go_others_link(term.name, term.cv.name, feature)}">${term.count} others)
-	            {{/if}}
+                <span data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
+                
 	              
             </td>
     	

@@ -354,13 +354,9 @@ $(function(){
 		    var transcripts = self.transcripts();
 		    var transcript_count = transcripts.length;
 		    
-		    if (geneName != null) {
-		        if (transcript_count < 2) {
-		            systematicName = geneName;
-		        } else if (transcript_count >= 2 && self.uniqueName != geneName) {
-		            systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
-	            }
-		    }
+	        if (transcript_count > 2) {
+	            systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
+            }
 		    
 		    return systematicName;
 		}
@@ -442,7 +438,7 @@ $(function(){
             var new_terms = {}
             for (f in terms) {
                 ordered = terms[f].sort(function(t1,t2) {
-                    return t1.name > t2.name;
+                    return t1.name.toLowerCase() > t2.name.toLowerCase();
                 });
                 new_terms[f] = ordered;
             }
@@ -574,7 +570,8 @@ $(function(){
     			go : "cgi-bin/amigo/term-details.cgi",
     			pub : "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;dopt=Abstract&amp;list_uids=",
     			product_others : "Query/controlledCuration",
-    			go_others : "Query/controlledCuration"
+    			go_others : "Query/controlledCuration",
+    			cc_others : "Query/controlledCuration"
     		},
 	        evidence : {
 		        'lab' : { 
@@ -655,6 +652,15 @@ $(function(){
                 link += "&suppress=" + suppress;
             return link;
         }
+        
+        // http://www.genedb.org/Query/controlledCuration?taxons=Tbruceibrucei927&cvTermName=RIT-Seq+phenotype%3A+Normal+cell+proliferation+in+bloodstream+trypomastigote+stage+6+days&cv=ControlledCuration&suppress=
+        self.others_cc_link = function(term, suppress) {
+            var link = self.baseLinkURL + self.links.cc_others + "?taxons=" + self.organism.common_name + "&cvTermName=" + term + "&cv=ControlledCuration";
+            if (suppress != null)
+                link += "&suppress=" + suppress;
+            return link;
+        }
+        
         
         self.img = function(props) {
             for (p in props) {
