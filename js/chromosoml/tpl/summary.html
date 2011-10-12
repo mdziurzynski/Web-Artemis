@@ -3,7 +3,7 @@
 		<th>Systematic Name</th>
 		<td>
 		  <span data-bind="text: systematicName"></span>
-		  <span data-bind="visisble: len(previous_systematic_ids) > 0">
+		  <span data-bind="visible: len(previous_systematic_ids) > 0">
             (previously known as : <span data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids} }"></span>)
           </span>
 		</td>
