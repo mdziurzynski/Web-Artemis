@@ -320,7 +320,7 @@ $(function(){
 		    return type;
 		}
 		
-		self.synonyms = function(type, feature_type) {
+		self.synonyms = function(type, feature_type, must_not_be_current) {
 		    var synonyms = {};
 		    self.recurse_hierarchy(self.hierarchy, function(feature) {
 		        
@@ -332,6 +332,10 @@ $(function(){
 		        if (feature.synonyms != null && feature.synonyms.length > 0) {
 		            for (s in feature.synonyms) {
 		                var synonym = feature.synonyms[s];
+		                
+		                if (must_not_be_current == true && synonym.is_current) 
+		                	continue;
+		                
 		                if (type == null || synonym.synonymtype == type)
 		                    feature_synonyms.push(synonym);
 		            }
@@ -1149,7 +1153,7 @@ $(function(){
 	                var product_synonyms = geneInfo.synonyms("product_synonym");
 	                //$.log(product_synonyms);
 	                
-	                var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", "gene");
+	                var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", "gene", true);
 	                //$.log(previous_systematic_ids);
 	
 	                var systematicName = geneInfo.systematic_name();
