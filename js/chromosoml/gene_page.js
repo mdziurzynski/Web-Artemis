@@ -1213,12 +1213,14 @@ $(function(){
 	                    coordinates : coordinates, 
 	                    orthologues : orthologues,
 	                    algorithm : algorithm,
-	                    first_element : function(name) {
-	                    	// $.log("first_element", name, wa.viewModel.first_element[name]);
+	                    first_element : function(name, x) {
+	                    	//$.log("first_element", name, wa.viewModel.first_element[name]);
 	                    	if (wa.viewModel.first_element[name] == null) {
 	                    		wa.viewModel.first_element[name] = true;
+	                    		//$.log("first_element", name, true, x, this);
 	                    		return true;
 	                    	}
+	                    	//$.log("first_element", name, false, x, this);
 	                    	return false;
 	                    },
 	                    camel_to_title : function(camel) {
