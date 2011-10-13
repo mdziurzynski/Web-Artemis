@@ -33,7 +33,10 @@ function disablePopup(){
 
 //centering popup  
 function positionPopup(x,y){  
-	$("#popupContact").css({ "top": y,  "left": x });
+	var offset = $("#popupContact").parent().offset();
+	var dy = y - offset.top;
+	var dx = x - offset.left;
+	$("#popupContact").css({ "top": dy,  "left": dx });
 }
 
 //CLOSING POPUP
