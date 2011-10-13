@@ -117,7 +117,40 @@ $(function(){
         }
         
         var self=this;
+        
+        /*
+         * The feature that was requested. 
+         */
+        self.requestedFeature = null;
+        
+        /*
+         * The feature relating to the correct isoform, which is either 
+         *  - the transcript most closely related to the requested feature
+         *  - the first transcript if the feature is not part of a transcript
+         *  - the gene if the feature is in a gene model
+         *  - the feature if none of the above are true.
+         *   
+         */
+        self.isoform = null;
+        
+        /*
+         * The entire gene hierarchy.
+         */
+        self.hierarchy = null;
+        
+        /*
+         * The length of the gene sequence.
+         */
+        self.sequenceLength = null;
+        
+        /*
+         * A list of properties derived from the isoform's polypeptide. 
+         */
+        self.polypeptide_properties = null;
+        
         $.extend(self, defaults, options);
+        
+        
         
         /*
          * Fetch the gene hierarchy for this freature.
@@ -165,9 +198,17 @@ $(function(){
        	            	self.trim_hierarchy();
        	            	
     				}
+    				
+    				// now we get the isoform information.
+    				self.get_isoform(self.uniqueName, function(isoform) {
+    					self.isoform = isoform;
+    					
+    					if (success != null) 
+    						success();
+    				});
     	            
     	            //$.log(self.hierarchy);
-    	            if (success != null) success();
+    	            
 	            }
             });
 		}
@@ -366,16 +407,13 @@ $(function(){
 		
 		self.systematic_name = function() {
 		    
-		    var systematicName = self.requestedFeature.uniqueName;
-		    var geneName = self.gene_name();
-		    
+			var systematicName = self.isoform.uniqueName;
+			
 		    var transcripts = self.transcripts();
 		    var transcript_count = transcripts.length;
 		    
-	        if (transcript_count > 2) {
-	            systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
-            } else  {
-            	systematicName = self.hierarchy.uniqueName;
+		    if (transcript_count > 1) {
+		    	systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
             }
 		    
 		    return systematicName;
