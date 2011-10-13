@@ -266,7 +266,7 @@ $(function(){
     	        type: 'GET',
     	        dataType: 'jsonp',
     	        data: {
-    	            'feature' : self.uniqueName
+    	            'uniqueName' : self.uniqueName
     	        },
     	        success: function(polypeptide_properties) {
     	        	self.polypeptide_properties = polypeptide_properties;
@@ -279,6 +279,20 @@ $(function(){
 	            	success();
 	            }
             });
+		}
+		
+		self.get_isoform = function(uniqueName, success) {
+			$.ajax({
+    	        url: self.service + "/feature/isoform.json",
+    	        type: 'GET',
+    	        dataType: 'jsonp',
+    	        data: {
+    	            'uniqueName' : uniqueName
+    	        },
+    	        success: function(isoform) {
+    	            success(isoform);
+	            }
+			});
 		}
 		
 		
@@ -360,6 +374,8 @@ $(function(){
 		    
 	        if (transcript_count > 2) {
 	            systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
+            } else  {
+            	systematicName = self.hierarchy.uniqueName;
             }
 		    
 		    return systematicName;
@@ -1298,12 +1314,16 @@ $(function(){
 		}
         
         self.redraw = function redraw(start, end) {
-        	$.log("REDRAW DETECTED " + start + " " + end);
+        	//$.log("REDRAW DETECTED " + start + " " + end);
         };
         
         self.select = function(uniqueName, fDisplay) {
-        	$.log("SELECT DETECTED " + uniqueName + " ON DISPLAY ");
-        	self.info(self.geneInfo,uniqueName);
+        	//$.log("SELECT DETECTED " + uniqueName + " ON DISPLAY ");
+        	//self.info(self.geneInfo,uniqueName);
+        	self.geneInfo.get_isoform(uniqueName, function(isoform) {
+        		//$.log(uniqueName, isoform.uniqueName);
+        		self.info(self.geneInfo,isoform.uniqueName);
+        	});
     	};
 		
 		self.init();
