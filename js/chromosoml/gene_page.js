@@ -1169,6 +1169,9 @@ $(function(){
 	    
 	    
 	    
+	    
+	    
+	    
 	    // if no viewHelper was passed in the options, instanciate one
 	    if (self.viewHelper == null) 
 	        self.viewHelper = new wa.ViewHelper({baseLinkURL : self.baseLinkURL});
@@ -1321,20 +1324,23 @@ $(function(){
 	                //$.log(["onComplete?", onComplete]);
 	                
 	                //self.embed_web_artemis(coordinates[0]);
-	                wa.webArtemisLinker.link(coordinates[0]);
+	                
 	                
 	                $(".absolute_tool").AbsoluteToolTips();
 	                //$(".evidence").AbsoluteToolTips();
 	                
 	                $( "#tabs" ).tabs();
 	                
-	                
-	                
 	                $(self.spinner).CallStatusSpinner("removeCall");
 	                $(".gene_page").stop().fadeTo(100, 1);
 	                
 	                if (onComplete != null)
 	                    onComplete(geneInfo.hierarchy);
+	                
+	                if (self.embedded_web_artemis != null) {
+	                	self.embedded_web_artemis.recoordinate(coordinates[0]);
+	                }
+	                  
 	                
 	        	});
 		    });
@@ -1352,20 +1358,69 @@ $(function(){
 		}
         
         self.redraw = function redraw(start, end) {
-        	//$.log("REDRAW DETECTED " + start + " " + end);
+        	// $.log("REDRAW DETECTED " + start + " " + end);
+        	 wa.webArtemisLinker.link(start, end);
         };
         
         self.select = function(uniqueName, fDisplay) {
-        	//$.log("SELECT DETECTED " + uniqueName + " ON DISPLAY ");
-        	//self.info(self.geneInfo,uniqueName);
+        	// $.log("SELECT DETECTED " + uniqueName + " ON DISPLAY ");
         	self.geneInfo.get_isoform(uniqueName, function(isoform) {
-        		//$.log(uniqueName, isoform.uniqueName);
-        		self.info(self.geneInfo,isoform.uniqueName);
+        		$.history.load(isoform.uniqueName);
         	});
     	};
 		
-		self.init();
-		
+    	
+    	/*
+    	 * Used to store the original uniquename. And to know if the object has already been initialised.
+    	 */
+    	self.original_uniquename = null;
+    	
+    	$.history.init(function(hash){
+    		if (self.original_uniquename == null) {
+    			if(hash != "") {
+    				self.uniqueName = hash;
+    			} 
+    			self.original_uniquename = self.uniqueName;
+    			self.init();
+    		} else {
+    			if(hash == "") {
+    				self.info(self.geneInfo, self.original_uniquename);
+    			} else {
+    				self.info(self.geneInfo, hash);
+    			}
+    		}
+	    },
+	    { unescape: ",/" });
+    	
+	}
+	
+	wa.WebArtemisLinker = function (options) {
+	    var defaults = {
+	        baseURL : "http://www.genedb.org/web-artemis/?src=",
+	        web_artemis_link : "#web-artemis-link",
+	        web_artemis_link_container : "#web-artemis-link-container",
+	        web_artemis_container : ".wacontainer",
+	        region : "some_contig"
+	    }
+	    var self = this;
+	    $.extend(self, defaults, options);
+	    
+	    $(self.web_artemis_container).hover(
+            function(e) {
+                $(self.web_artemis_link_container).show();                    
+            }, function(e) {
+                $(self.web_artemis_link_container).hide();
+            }
+        );
+        
+        self.link = function (fmin, fmax) {
+        	var href = self.baseURL + self.region 
+    			+ "&base=" + fmin 
+	    		+ "&bases=" + (fmax-fmin);
+        	$.log(href);
+    	 	$(self.web_artemis_link).attr("href", href);
+        }
+        	    
 	}
 	
 	wa.EmbeddedWebArtemis = function(options) {
@@ -1380,19 +1435,21 @@ $(function(){
 	            fmax : 1000,
 	            region : "some_region"
             },
-            initial_window_size : 20000,
+            //initial_window_size : 20000,
             webArtemisPath : "path",
 	        max_residues : 1000000,
 	        service : "/services/", 
 	        observers : [function () {
 	            $.log("default change");
-	        }]
+	        }],
+	        leftpadding:1000,
+	        rightpadding:1000
 	    }
 	    
 	    var self = this;
 	    $.extend(self, defaults, options);
 	    
-	    
+		wa.webArtemisLinker = new wa.WebArtemisLinker({leftpadding:self.leftpadding,rightpadding:self.rightpadding, region:self.coordinates.region});
 	    
 		var topLevelFeatureLength = parseInt(self.sequenceLength);
         var max = self.max_residues;
@@ -1420,10 +1477,15 @@ $(function(){
         
         //$.log(self.coordinates);
         
-        var real_fmin = self.coordinates.fmin-1000;
+        var real_fmin = self.coordinates.fmin - self.leftpadding;
         if (real_fmin < 1)
         	real_fmin = 1;
         
+        var real_fmax = self.coordinates.fmax + self.rightpadding;
+        
+        wa.webArtemisLinker.link(real_fmin, real_fmax);
+        
+        self.initial_window_size = real_fmax - real_fmin;
         
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
@@ -1439,12 +1501,14 @@ $(function(){
             zoomMaxRatio : zoomMaxRatio
         });
         
+        var chromosomeMapToWebArtemis = new ChromosomeMapToWebArtemis();
+        
         if (needsSlider) {
             
             $(self.chromosome_map_slider_element).ChromosomeMapSlider({
                 windowWidth : 870,
                 max : parseInt(self.sequenceLength), 
-                observers : [new ChromosomeMapToWebArtemis()],
+                observers : [chromosomeMapToWebArtemis],
                 pos : real_fmin,
                 width : self.initial_window_size
             });
@@ -1457,38 +1521,19 @@ $(function(){
             }, 500);
         }
         
-                
-	}
-	
-	wa.WebArtemisLinker = function (options) {
-	    var defaults = {
-	        baseURL : "http://www.genedb.org/web-artemis/?src=",
-	        web_artemis_link : "#web-artemis-link",
-	        web_artemis_link_container : "#web-artemis-link-container",
-	        web_artemis_container : ".wacontainer"
-	    }
-	    var self = this;
-	    $.extend(self, defaults, options);
-	    
-	    
-	    $(self.web_artemis_container).hover(
-            function(e) {
-                $(self.web_artemis_link_container).show();                    
-            }, function(e) {
-                $(self.web_artemis_link_container).hide();
-            }
-        );
         
-        self.link = function (coordinates) {
-            var href = self.baseURL + coordinates.region + "&base=" 
-        	    	+ (coordinates.fmin-1000) + "&bases=" + (coordinates.fmax-coordinates.fmin +2000);
-        	$(self.web_artemis_link).attr("href", href);
-        }
-	    
+        self.recoordinate = function (coordinates) {
+        	var fDisplay = featureDisplayObjs[0];
+        	var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2));
+        	chromosomeMapToWebArtemis.move(p);
+        	wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
+        } 
+        
 	}
 	
-	// also a singleton
-	wa.webArtemisLinker = new wa.WebArtemisLinker();
+	
+	
+	
 	
     
 });

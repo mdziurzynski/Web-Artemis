@@ -763,7 +763,7 @@ if(!String.prototype.startsWith){
 //			    		this.width = this.settings.max; 
 //			    	}
 //			    	
-//			    	console.log([start,witdh,this.pos,this.width,this.settings.min,this.settings.max]);
+			    	//console.log([start,witdh,this.pos,this.width,this.settings.min,this.settings.max]);
 			    	
 			    	var wStart = this.posToWindow(this.pos);
 			    	var wWidth = this.posToWindow(this.width) ;
@@ -839,7 +839,8 @@ function ChromosomeMapToWebArtemis() {
 	this.move = function(leftBase, bases) {
 		var fDisplay = featureDisplayObjs[0];
         fDisplay.leftBase = leftBase;
-        fDisplay.basesDisplayWidth = bases;
+        if (bases != null)
+        	fDisplay.basesDisplayWidth = bases;
         drawAndScroll(fDisplay, fDisplay.lastLeftBase); 
         $('#slider'+fDisplay.index).slider('option', 'value', leftBase);
 	};
