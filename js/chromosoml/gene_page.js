@@ -367,7 +367,7 @@ $(function() {
         }
 
         self.type = function() {
-            var type = "feature";
+            var type = self.hierarchy.type.name;
             var types = self.types;
             self.recurse_hierarchy(self.hierarchy, function(feature) {
                 if (types.special_transcript.indexOf(feature.type.name) > -1)
@@ -376,8 +376,6 @@ $(function() {
                     type = "Protein coding gene";
                 else if (feature.type.name.contains("pseudo"))
                     type = "Pseudogene";
-                else
-                    type = feature.type.name;
             });
             return type;
         }
