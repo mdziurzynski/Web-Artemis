@@ -376,6 +376,8 @@ $(function() {
                     type = "Protein coding gene";
                 else if (feature.type.name.contains("pseudo"))
                     type = "Pseudogene";
+                else
+                    type = feature.type.name;
             });
             return type;
         }
