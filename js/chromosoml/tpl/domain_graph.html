@@ -12,25 +12,28 @@
 	        top:${domain.y}px; 
 	        width:${domain.width}px; 
 	        height:${domain.height}px; 
-	        background:${domain.colour};" >
+	        background:${domain.colour};
+            border:1px solid ${domain.bordercolour};" >
 	        
-	        <a class="evidence" href="lalal"  >
+	        <a class="evidence"  >
                     
             </a>
-            {{if domain.dbxref != null }}
+            
              <div class="relative_block_tooltip" style="display:none;background:${domain.colour};padding:20px;">
                 Name : ${domain.uniqueName} <br>
                 Type : ${domain.type} <br>
                 Category : ${domain.category} <br> 
+                {{if domain.dbxref != null }}
                 Database : ${domain.dbxref.db.name} <br> 
                 Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
+                {{/if}}
                 Location : ${domain.fmin} - ${domain.fmax}
              </div>
-             {{/if}}
+             
                     
                     
 	        
-	        </div>
+	 </div>
 
 {{/each}}
 
