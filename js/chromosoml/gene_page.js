@@ -76,8 +76,10 @@ var current_directory = path.split('/').slice(0, -1).join('/') + '/';
 
             $(this).bind("mouseenter mouseover", function(e) {
                 var html = $("." + self.sub_element_class, self).html();
-                elout = false;
-                self.showTool(html, e);
+                if (html != null) {
+                    elout = false;
+                    self.showTool(html, e);
+                }
             });
 
             $(this).bind("mouseleave", function(e) {
@@ -109,7 +111,8 @@ $(function() {
                 "gene" : [ "gene", "pseudogene" ],
                 "special_transcript" : [ "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA" ],
                 "transcript" : [ "mRNA", "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA" ]
-            }
+            },
+            membrs : [ "non_cytoplasmic_polypeptide_region", "cytoplasmic_polypeptide_region", "transmembrane_polypeptide_region" ]
         }
 
         var self = this;
@@ -563,6 +566,9 @@ $(function() {
                         }
                     }
                     
+                    if (self.membrs.indexOf(domain.type.name) > -1)
+                        key = "Transmembrane";
+                    
                     domain.key = key;
                     domains.push(domain);
                 }
@@ -719,7 +725,8 @@ $(function() {
                 "ProDom" : "rgb(0, 160, 9)",
                 "Superfamily" : "rgb(0, 199, 127)",
                 "TIGR_TIGRFAMS" : "rgb(0, 255, 255)",
-                "CATEGORY" : "rgb(255, 0, 0)"
+                "CATEGORY" : "rgb(255, 0, 0)",
+                "TM" : 'blue'
             }
         };
 
@@ -875,10 +882,10 @@ $(function() {
 
             // the y property is what we are adjusting in the box1
             // the base_y of box2 is what we are comparing against
-            var boxes_same_height = (box1.y == box2.base_y);
+            var boxes_same_height = (box1.y == box2.y);
 
             if (debug)
-                $.log(box1.y, box2.base_y, boxes_same_height);
+                $.log(box1.y, box2.y, boxes_same_height);
 
             if (!boxes_same_height)
                 return false;
@@ -983,217 +990,206 @@ $(function() {
             var step = Math.pow(10, round);
             return step;
         }
-
-        self.determine_domain_positions = function(membrs_only) {
-            var category_y = 0;
-            var last_category = "";
+        
+        self.re_max = function (box) {
+            var box_max_y = box.y + box.dy;
+            if (box_max_y > self.max_y)
+                self.max_y = box_max_y;
+        }
+        
+        self.determine_domain_positions = function() {
+            var categories = [];
+            var domains_hash = {};
+            var category_boxes_hash = {};
+            var category_boxes_list = [];
+            var subcategory_boxes_list = [];
             
-//            for ( var feature in self.domains) {
-//                for ( var category in self.domains[feature]) {
-//                    
-//                    var domains = self.domains[feature][category];
+            var _gap = 5;
+            var _height = 5;
+            var _y = 0;
+            var _start_y = 20;
+            
+            for ( var d in self.domains) {
+                var domain = domains[d];
+                var category = domain.key;
+                
+                if (categories.indexOf(category) == -1) {
+                    categories.push(category);
+                    domains_hash[category] = [];
                     
-            
-            
-            var category_boxes = []
-            var category_box = null;
-            
-                    var first_box = null;
+                    var coordinates = self.hierarchy.coordinates[0];
                     
-                    for ( var d in self.domains) {
-                        var domain = domains[d];
-                        var category = domain.key;
-                        
-                        
-                        
-                        
-                        var is_membr = (self.membrs.indexOf(domain.type.name) > -1);
+                    var _fmin = 1;
+                    var _fmax = (coordinates.fmax - coordinates.fmin) / 3;
+                    
+                    var _x = self.scaleX(_fmin);
+                    
+                    var _width = self.scaleX(_fmax) - _x;
+                    var _colour = wa.viewHelper.colours["CATEGORY"];
+                    
+                    var description = category;
+                    
+                    if (domain.dbxrefs[0] != null) {
+                        description += " - " + domain.dbxrefs[0].description;
+                    }
+                    
+                    var category_box = {
+                        type : "CATEGORY",
+                        dbxref : null,
+                        category : category,
+                        uniqueName : category,
+                        text: description,
+                        x : _x,
+                        y : _y,
+                        dy : 0,
+                        fmin : _fmin,
+                        fmax : _fmax,
+                        width : _width,
+                        height : _height,
+                        colour : '',
+                        bordercolour : 'rgb(200,200,200)',
+                        is_category_box : true
+                    }
+                    
+                    category_boxes_hash[category] = category_box;
+                    category_boxes_list.push(category_box)
+                    
+                    _y = category_box.y + category_box.height + _gap;
+                    
+                }
+                
+                domains_hash[category].push(domain);
+            }
+            
+            
+            
+            for ( var c in categories) {
+                var category = categories[c];
+                
+                var category_box = category_boxes_hash[category];
+                
+                var this_subcategory_boxes_list = [];
+                
+                for (var d in domains_hash[category]) {
+                    var domain = domains_hash[category][d];
+                    
+                    
+                    
+                    var x = self.scaleX(domain.fmin);
+                    var width = self.scaleX(domain.fmax) - x;
+                    
+                    var dbname = "";
+                    var dbxref = null; 
+                    
+                    for (dx in domain.dbxrefs) {
+                        // we don't break, we want the last value
+                        dbxref = domain.dbxrefs[dx];
+                        dbname = dbxref.db.name;
+                    }
+                    
+                    var colour = null;
+                    if (dbname != null) {
+                        colour = wa.viewHelper.colours[dbname];
+                    }
 
-                        if (is_membr != membrs_only)
-                            continue;
-
-                        var x = self.scaleX(domain.fmin);
+                    // if still null
+                    if (colour == null) {
+                        colour = wa.viewHelper.colours["default"];
+                    }
+                    
+                    var box = {
+                        type : domain.type.name,
+                        dbxref : dbxref,
+                        category : category,
+                        //feature : feature,
+                        uniqueName : domain.uniqueName,
+                        x : x,
+                        y : _start_y,
+                        dy : 0,
+                        fmin : domain.fmin,
+                        fmax : domain.fmax,
+                        width : width,
+                        height : _height,
+                        colour : colour,
+                        bordercolour : colour
+                    }
+                    
+                    var is_membr = (self.membrs.indexOf(domain.type.name) > -1);
+                    
+                    if (is_membr) {
                         
-                        var width = self.scaleX(domain.fmax) - x;
-                        var height = 10;
+                        box.colour =  wa.viewHelper.colours['TM'];
+                        box.bordercolour = wa.viewHelper.colours['TM'];
                         
-                        var dbname = "";
-                        
-                        var dbxref = {
-                            acession : "",
-                            urlprefix : null,
-                            db : {
-                                name : ""
-                            }
-                        };
-                        for (dx in domain.dbxrefs) {
-                            // we don't break, we want the last value
-                            dbxref = domain.dbxrefs[dx];
-                            dbname = dbxref.db.name;
-                        }
-                        
-                        
-
-                        var colour = null;
-                        if (dbname != null) {
-                            colour = wa.viewHelper.colours[dbname];
-                        }
-                        // if still null
-                        if (colour == null) {
-                            colour = wa.viewHelper.colours["default"];
-                        }
-                        
-                        
-                        
-                        var box = {
-                            type : domain.type.name,
-                            dbxref : dbxref,
-                            category : category,
-                            //feature : feature,
-                            uniqueName : domain.uniqueName,
-                            x : x,
-                            y : category_y,
-                            base_y : category_y,
-                            fmin : domain.fmin,
-                            fmax : domain.fmax,
-                            width : width,
-                            height : height,
-                            colour : colour,
-                            bordercolour : colour
-                        }
-                        
-                        
-
-                        if (is_membr) {
-                            
-                            var last_is_membr = false;
-                            if (self.last_box != null)
-                                last_is_membr = (self.membrs.indexOf(self.last_box.type) > -1);
-                            
-                            if (last_is_membr) { // stay on the same level
-                                box.y = self.last_box.base_y;
-                            } else { // we hit a hard return in this case
-                                box.y = self.max_y + 15;
-                            }
-
-                        } else {
-
-                            var overlaps = true;
-
-                            while (overlaps == true) {
-                                
-                                overlaps = false;
-                                
-                                for (p in self.domain_graph) {
-                                    var previous = self.domain_graph[p];
-
-                                    //if (box.uniqueName == "PF3D7_0106300.1:pep:PRINTS:IPR001757:3" 
-                                    //      && previous.uniqueName == "PF3D7_0106300.1:pep:Superfamily:SSF56784") {
-                                    //    $.log([ box.uniqueName, previous.uniqueName, self.boxesOverlap(box, previous, true) ]);
-                                    //    box.colour = ' black ';
-                                    //    previous.colour = ' yellow '
-                                    //}
-                                    if (self.boxesOverlap(box, previous)) {
-                                        box.y += 15;
-                                        overlaps = true;
-                                    }
-
-                                }
-                                
-                                
-                            }
-
-                        }
-                        
-                        /*
-                         * The base_y won't get altered by any TM adjustments
-                         */
-                        box.base_y = box.y;
-
-                        if (box.base_y > self.max_y)
-                            self.max_y = box.base_y;
-
                         if (domain.type.name == "non_cytoplasmic_polypeptide_region") {
-                            box.height = 5;
-                            box.y += 5;
+                            box.height = _height / 2;
+                            box.dy += _height / 2;
                         } else if (domain.type.name == "cytoplasmic_polypeptide_region") {
-                            box.height = 5;
+                            box.height = _height / 2;
                         } else if (domain.type.name == "transmembrane_polypeptide_region") {
                             // not sure if this is necessary
                         }
-
                         
-                        
-                        
-                        
-                        if (last_category != category) {
-                            $.log(">" + category);
-                            
-                            //if (! membrs_only) {
-                                
-                                var coordinates = self.hierarchy.coordinates[0];
-                                
-                                var _fmin = 1;
-                                var _fmax = (coordinates.fmax - coordinates.fmin) / 3;
-                                var _x = self.scaleX(_fmin);
-                                
-                                var _width = self.scaleX(_fmax) - _x;
-                                
-                                var _colour = wa.viewHelper.colours["CATEGORY"];
-                                
-                                //$.log(_colour);
-                                
-                                category_box = {
-                                    type : "CATEGORY",
-                                    dbxref : null,
-                                    category : category,
-                                    uniqueName : category,
-                                    x : _x,
-                                    y : box.base_y,
-                                    base_y : box.base_y,
-                                    fmin : _fmin,
-                                    fmax : _fmax,
-                                    width : _width,
-                                    height : height,
-                                    colour : '',
-                                    bordercolour : 'rgb(200,200,200)'
+                    } else {
+                        var overlaps = true;
+                        while (overlaps == true) {
+                            overlaps = false;
+                            for (p in this_subcategory_boxes_list) {
+                                var previous = this_subcategory_boxes_list[p];
+                                //$.log([box.uniqueName, previous.uniqueName, self.boxesOverlap(box, previous)]);
+                                if (self.boxesOverlap(box, previous)) {
+                                    box.y = previous.y + previous.height + _gap;
+                                    overlaps = true;
                                 }
-                                
-                                //category_y = box.base_y;
-                                //$.log(category_y);
-                                
-                                self.domain_graph.push(category_box);
-                                self.last_box = category_box;
-                                
-                            //}
-                            
-                        } else {
-                            
-                            category_box.height = (height + box.base_y) - category_box.base_y;
-                            
-                            //if (category_box != null) {
-                                
-                            //}
+                            }
                         }
-                        
-                        
-                        self.domain_graph.push(box);
-                        self.last_box = box;
-                        
-                        last_category = category;
-                        
                     }
                     
+                    var new_category_box_height = (box.height + box.y + _gap);
                     
+                    if (new_category_box_height > category_box.height) {
+                        category_box.height = new_category_box_height;
+                    }
                     
-
-                    
-                    
-                //}
-            //}
-
+                    this_subcategory_boxes_list.push(box);
+                    subcategory_boxes_list.push(box);
+                }
+                
+                
+            }
+            
+            
+            // assemble the domain graph now
+            for (var c in category_boxes_list) {
+                var category_box = category_boxes_list[c];
+                
+                var previous = category_boxes_list[c-1];
+                if (previous != null) {
+                    var previous_max_y = previous.y + previous.height + _gap;
+                    if (category_box.y < previous_max_y) {
+                        category_box.y = previous_max_y;
+                    }
+                }
+                
+                
+                self.re_max(category_box);
+                self.domain_graph.push(category_box);
+                
+            }
+            
+            
+            for (var s in subcategory_boxes_list) {
+                var box = subcategory_boxes_list[s];
+                var category = box.category;
+                var category_box = category_boxes_hash[category];
+                
+                box.y += category_box.y;
+                
+                self.re_max(box);
+                self.domain_graph.push(box);
+            }
+            
         }
-        
         
 
         self.init = function() {
@@ -1276,11 +1272,9 @@ $(function() {
 
             // self.y = 0;
             self.membrs = [ "non_cytoplasmic_polypeptide_region", "cytoplasmic_polypeptide_region", "transmembrane_polypeptide_region" ];
-            self.last_box = null;
             self.max_y = 0;
 
-            self.determine_domain_positions(false);
-            self.determine_domain_positions(true);
+            self.determine_domain_positions();
 
         }
 
