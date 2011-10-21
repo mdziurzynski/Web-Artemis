@@ -9,28 +9,31 @@
     <div class="domain_graph absolute_tool" 
         style="position:absolute; 
 	        left:${domain.x}px; 
-	        top:${domain.y}px; 
+	        top:${domain.y + domain.dy}px; 
 	        width:${domain.width}px; 
 	        height:${domain.height}px; 
-	        background:${domain.colour};" >
+	        background:${domain.colour};
+            border:1px solid ${domain.bordercolour};" >
 	        
-	        <a class="evidence" href="lalal"  >
-                    
+	        <a class="evidence" style="font-size:x-small;" >
+                {{if domain.text != null}} ${domain.text} {{/if}}
             </a>
-            {{if domain.dbxref != null }}
+            {{if ! domain.is_category_box}} 
              <div class="relative_block_tooltip" style="display:none;background:${domain.colour};padding:20px;">
-                Name : ${domain.uniqueName} <br>
+                <b>${domain.uniqueName}</b><br>
                 Type : ${domain.type} <br>
                 Category : ${domain.category} <br> 
-                Database : ${domain.dbxref.db.name} <br> 
-                Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
+                {{if domain.dbxref != null }}
+                    Database : ${domain.dbxref.db.name} <br> 
+                    Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
+                {{/if}}
                 Location : ${domain.fmin} - ${domain.fmax}
              </div>
-             {{/if}}
+            {{/if}}
                     
                     
 	        
-	        </div>
+	 </div>
 
 {{/each}}
 

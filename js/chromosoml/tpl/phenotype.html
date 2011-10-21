@@ -37,8 +37,7 @@
 	                	        {{/each}}
 	                	        </div>
 	
-	            	            ( ${term.count} other{{if term.count >1 }}s{{/if}})
-	
+	            	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.others_cc_link(term.name, feature)} }" ></span>
 	                        </div>
 	                    </div>
                     </div>
@@ -56,6 +55,9 @@
                                 <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
                             {{/each}}
         	    </td>
+        	    
+        	    <td data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.others_cc_link(term.name, feature)} }"></td>
+        	    
         	</tr>
     	{{/each}}
     {{/each}}

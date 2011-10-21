@@ -1,26 +1,27 @@
 <table cellpadding="0" cellspacing="4" border="0" class="sequence-table">
 	<tr>
-		<th>Systematic Name</th>
-		<td data-bind="text: systematicName" ></td>
+		<th width="20%">Systematic Name</th>
+		<td>
+		  <span data-bind="text: systematicName"></span>
+		  <span data-bind="visible: len(previous_systematic_ids) > 0">
+            (previously known as : <span data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids} }"></span>)
+          </span>
+		</td>
 	</tr>
-	<tr data-bind="visible: geneName != systematicName" >
+	<tr data-bind="visible: (geneName != null) && (geneName != systematicName) " >
 		<th>Gene Name</th>
-		<td data-bind="text: geneName" ></td>
+		<td data-bind="text: geneName"></td>
 	</tr>
-	<tr data-bind="visible: len([previous_systematic_ids]) > 0">
-	    <th>Previous Systematic Name</th>
-		<td data-bind="template: {name: 'synonyms', data: previous_systematic_ids }" ></td>
-    </tr>
 	<tr data-bind="visible: len([synonyms]) > 0">
 	    <th>Synonym</th>
-		<td data-bind="template: {name: 'synonyms', data: synonyms }" ></td>
+		<td data-bind="template: {name: 'synonyms', data: {synonyms:synonyms} }" ></td>
     </tr>
 	<tr>
 		<th>Gene Type</th>
 		<td data-bind="text: type" ></td>
 	</tr>
         <th>Location</th>
-        <td >${coordinates[0].regionType.name} ${coordinates[0].region} : ${coordinates[0].fmin}-${coordinates[0].fmax}</td>
+        <td >${coordinates[0].regionType.name} ${coordinates[0].region} : ${coordinates[0].fmin+1}-${coordinates[0].fmax}</td>
     </tr>
 	<tr >
 		<th>Product</th>
@@ -28,9 +29,9 @@
 	</tr>
 	<tr data-bind="visible: len([product_synonyms]) > 0">
 	    <th>Product Synonym</th>
-		<td data-bind="template: {name: 'synonyms', data: product_synonyms }" ></td>
+		<td data-bind="template: {name: 'synonyms', data: {synonyms:product_synonyms} }" ></td>
     </tr>
-	<tr >
+	<tr data-bind="visible: len(dbxrefs) > 0 " >
 		<th>See Also</th>
 		<td data-bind="template: 'dbxrefs' " ></td>
 	</tr>
