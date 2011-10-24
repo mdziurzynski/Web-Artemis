@@ -16,76 +16,64 @@ var path = scripts[scripts.length - 1].src.split('?')[0];
 var current_directory = path.split('/').slice(0, -1).join('/') + '/';
 
 (function($) {
-
+    
+    var tooltipCount = 0;
+    
     /*
      * A tooltip implementation that copes with absolutely posisitioned divs
      * inside relative divs. This should really be moved into a plugins folder.
      */
     $.fn.AbsoluteToolTips = function(options) {
-
-        // $.log("AbsoluteToolTips");
-
+        
         var defaults = {
             "tooltip_element_id" : "reltool",
             "sub_element_class" : "relative_block_tooltip"
         }
-
-        // the tooltip is shared by all elements bound to this plugin
-        var tooltip = null;
-        var toolout = true;
-        var elout = false;
-
+        
         return this.each(function() {
-
-            // $.log(this);
-
+            
             var self = this;
             $.extend(self, defaults, options);
-
+            
+            var toolID = self.tooltip_element_id + tooltipCount++;
+            
+            $("<div />", {
+                id : toolID
+            }).appendTo($("body")).css("position", "absolute").addClass("tooltip");
+            
+            var tooltip = $("#" + toolID);
+            
+            var toolout = true;
+            var elout = false;
+            
             self.hideTool = function() {
                 setTimeout(function() {
                     if (toolout == true && elout == true)
                         tooltip.fadeOut('slow');
-                }, 500);
+                }, 100);
             }
-
+            
             self.showTool = function(html, e) {
-
-                if (tooltip == null) {
-
-                    var div = $("<div />", {
-                        id : self.tooltip_element_id
-                    }).appendTo($("body"));
-
-                    tooltip = $("#" + self.tooltip_element_id);
-
-                    tooltip.bind("mouseenter", function(e) {
-                        toolout = false;
-                    });
-
-                    tooltip.bind("mouseleave", function(e) {
-                        toolout = true;
-                        self.hideTool();
-                    });
-
-                }
-
-                tooltip.html(html).css('left', e.pageX + 10).css('top', e.pageY - 5).show();
-
+                tooltip.html(html).css('left', e.pageX + 10).css('top', e.pageY - 5).fadeIn("fast");
             }
-
-            $(this).bind("mouseenter mouseover", function(e) {
+            
+            tooltip.bind("mouseenter", function(e) {
+                toolout = false;
+            }).bind("mouseleave", function(e) {
+                toolout = true;
+                self.hideTool();
+            });
+            
+            $(self).bind("mouseenter mouseover", function(e) {
                 var html = $("." + self.sub_element_class, self).html();
                 if (html != null) {
                     elout = false;
                     self.showTool(html, e);
                 }
-            });
-
-            $(this).bind("mouseleave", function(e) {
+            }).bind("mouseleave", function(e) {
                 elout = true;
                 self.hideTool();
-            });
+            }).css("cursor", "pointer");
 
         });
 
@@ -1023,8 +1011,8 @@ $(function() {
                     var _fmax = (coordinates.fmax - coordinates.fmin) / 3;
                     
                     var _x = self.scaleX(_fmin);
-                    
                     var _width = self.scaleX(_fmax) - _x;
+                                        
                     var _colour = wa.viewHelper.colours["CATEGORY"];
                     
                     var description = category;
@@ -1072,8 +1060,6 @@ $(function() {
                 
                 for (var d in domains_hash[category]) {
                     var domain = domains_hash[category][d];
-                    
-                    
                     
                     var x = self.scaleX(domain.fmin);
                     var width = self.scaleX(domain.fmax) - x;
