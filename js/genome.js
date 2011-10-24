@@ -2740,6 +2740,7 @@ var _genome_js_scripts = document.getElementsByTagName('script');
 var _genome_js_path = _genome_js_scripts[_genome_js_scripts.length - 1].src.split('?')[0];
 var _genome_js_current_directory = _genome_js_path.split('/').slice(0, -1).join('/') + '/';
 
+// needed to instantiate the WebArtemis plugin function inside the jquery scope (so that it can pick up the svgManager)
 (function($) { 
 
     // put at the end of the script for ie
