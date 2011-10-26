@@ -28,7 +28,7 @@ h2 {
 
 <div class="main-grey-3-4-top"></div>
 <div class="light-grey">
-<span class="float-right grey-text">Last Modified ${lastmodified}</span>
+{{if lastmodified}}<span class="float-right grey-text">Last Modified ${lastmodified}</span>{{/if}}
 <div id="gene_summary" data-bind="template: 'summary' " ></div>
 </div>
 <div class="main-grey-3-4-bot"></div>
