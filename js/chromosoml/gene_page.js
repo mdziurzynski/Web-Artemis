@@ -1011,7 +1011,7 @@ $(function() {
                     var _fmax = (coordinates.fmax - coordinates.fmin) / 3;
                     
                     var _x = self.scaleX(_fmin);
-                    var _width = self.scaleX(_fmax) - _x;
+                    var _width = self.pixel_width;
                                         
                     var _colour = wa.viewHelper.colours["CATEGORY"];
                     
