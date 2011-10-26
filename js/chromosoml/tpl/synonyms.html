@@ -1,6 +1,6 @@
 <!-- note the $data variable is what knockout passes to the template -->
 {{each(k, list) synonyms}}
     {{each(s, syn) list}}
-        {{if s > 0 }},{{/if}}${syn.synonym} 
+        ${syn.synonym}{{if first_element(name) }},{{/if}}  
     {{/each}}
 {{/each}}

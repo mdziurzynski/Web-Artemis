@@ -371,8 +371,9 @@ $(function() {
             return type;
         }
 
-        self.synonyms = function(type, feature_type, must_not_be_current) {
+        self.synonyms = function(type, feature_type, current) {
             var synonyms = {};
+            
             self.recurse_hierarchy(self.hierarchy, function(feature) {
 
                 if (feature_type != null)
@@ -383,10 +384,11 @@ $(function() {
                 if (feature.synonyms != null && feature.synonyms.length > 0) {
                     for (s in feature.synonyms) {
                         var synonym = feature.synonyms[s];
-
-                        if (must_not_be_current == true && synonym.is_current)
-                            continue;
-
+                        
+                        if (current != null)
+                            if (current != synonym.is_current)
+                                continue;
+                        
                         if (type == null || synonym.synonymtype == type)
                             feature_synonyms.push(synonym);
                     }
@@ -1342,9 +1344,12 @@ $(function() {
                     var geneName = geneInfo.gene_name();
                     var transcripts = geneInfo.transcripts();
                     var type = geneInfo.type();
+                    
                     var synonyms = geneInfo.synonyms("synonym");
                     var product_synonyms = geneInfo.synonyms("product_synonym");
-                    var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", "gene", true);
+                    var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", null, true);
+                    
+                    
                     var systematicName = geneInfo.systematic_name();
                     
                     var organism = geneInfo.organism();
@@ -1436,7 +1441,7 @@ $(function() {
                         if (day.length == 1)
                             day += "0";
                         
-                        var month = self.months[parseInt(lastmodifiedSplit[1])];
+                        var month = self.months[parseInt(lastmodifiedSplit[1]) - 1];
                         
                         var year = lastmodifiedSplit[2];
                         
