@@ -1436,7 +1436,7 @@ $(function() {
                         if (day.length == 1)
                             day += "0";
                         
-                        var month = self.months[parseInt(lastmodifiedSplit[1]]);
+                        var month = self.months[parseInt(lastmodifiedSplit[1])];
                         
                         var year = lastmodifiedSplit[2];
                         
