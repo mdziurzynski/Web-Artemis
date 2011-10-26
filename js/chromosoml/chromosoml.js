@@ -985,7 +985,7 @@ function WebArtemisToChromosomeMap(selector) {
 				var s = "";
 				s += "<button class='ui-state-default fg-button region back' >Back</button>";
 				$.each(regions, function(index, region) {
-					s += "<button class='fg-button ui-state-default region' region='"+region.uniqueName+"' >" + region.uniqueName + "</button>";
+					s += "<button class='fg-button ui-state-default region' style='overflow:hidden;font-size:x-small;' alt='"+region.uniqueName+"' title='"+region.uniqueName+"' region='"+region.uniqueName+"' >" + region.uniqueName + "</button>";
 				});
 				
 				if (regions.length == self.limit) {
@@ -1011,8 +1011,8 @@ function WebArtemisToChromosomeMap(selector) {
 					}
 				}).button({
 					  icons: {
-						    primary: 'ui-icon-document',
-						    secondary: 'ui-icon-triangle-1-e'
+						    primary: 'ui-icon-document'//,
+						    //secondary: 'ui-icon-triangle-1-e'
 						  }
 						});
 				$('button.back').button({
