@@ -1303,7 +1303,8 @@ $(function() {
                 return dbxrefs;
             },
             spinner : ".spinner",
-            observers : []
+            observers : [],
+            months : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         }
 
         var self = this;
@@ -1345,7 +1346,21 @@ $(function() {
                     var product_synonyms = geneInfo.synonyms("product_synonym");
                     var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", "gene", true);
                     var systematicName = geneInfo.systematic_name();
-
+                    
+                    var lastmodifiedSplit = geneInfo.hierarchy.timelastmodified.split(" ")[0].split(".");
+                    //$.log(lastmodifiedDate.getDate());
+                    
+                    var day = lastmodifiedSplit[0];
+                    
+                    if (day.length == 1)
+                        day += "0";
+                    
+                    var month = self.months[lastmodifiedSplit[1]];
+                    
+                    var year = lastmodifiedSplit[2];
+                    
+                    var lastmodified = day + " " + month + " " + year;
+                    
                     var organism = geneInfo.organism();
                     wa.viewHelper.organism = organism;
 
@@ -1375,6 +1390,7 @@ $(function() {
                         geneName : geneName,
                         products : products,
                         synonyms : synonyms,
+                        lastmodified:lastmodified,
                         product_synonyms : product_synonyms,
                         previous_systematic_ids : previous_systematic_ids,
                         len : function(maps) { // returns the combined size of
