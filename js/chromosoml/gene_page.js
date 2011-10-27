@@ -470,7 +470,7 @@ $(function() {
                 if (terms != null && terms.length > 0) {
                     for ( var t in terms) {
                         var term = terms[t];
-                        if (cv == null || term.cv.name == cv) {
+                        if (cv == null || (term.cv != null && term.cv.name == cv)) {
                             matched.push(term)
                         }
                     }
