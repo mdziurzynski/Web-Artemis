@@ -17,7 +17,7 @@
          {{each(dp, dbxref) product.dbxrefs}} 
                   ${dbxref} 
           {{/each}} 
-         <span data-bind="template: {name: 'nothers', data: {count:product.count, link: wa.viewHelper.others_product_link(product.name, f)} }" ></span>
+         <span data-bind="template: {name: 'nothers', data: {count:product.count, link: window.wa.viewHelper.others_product_link(product.name, f)} }" ></span>
     {{/each}}
 {{/each}}
 

@@ -11,7 +11,7 @@
 	       </th>
     	    <td>
     	        <div>
-    	            <div class="absolute_tool" href="${wa.viewHelper.go_link(term.accession)}" >
+    	            <div class="absolute_tool" href="${window.wa.viewHelper.go_link(term.accession)}" >
     	            
         	        &raquo; ${term.name}
         	        
@@ -19,7 +19,7 @@
 	        	        <div class="relative_block_tooltip">
 	        	            
 	        	            <div><h2>
-	            	            <a href="${wa.viewHelper.go_link(term.accession)}" >
+	            	            <a href="${window.wa.viewHelper.go_link(term.accession)}" >
 	                                ${term.cv.name} / ${term.name} 
 	                	        </a>
 	                	        </h2>
@@ -27,7 +27,7 @@
 	        	            
 	        	            <div>Evidence : </div>
 	        	            
-	        	            <div style="float:right;"><img src="${wa.viewHelper.img(term.props)}" border="0" ></div>
+	        	            <div style="float:right;"><img src="${window.wa.viewHelper.img(term.props)}" border="0" ></div>
 	        	            
 	        	            <div>
 	        	            {{each(p,prop) term.props}}
@@ -46,7 +46,7 @@
 	            	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
 	            	        {{/each}}
 	            	        </div>
-	        	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
+	        	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
 	    	                
 	                    </div>
                     </div>
@@ -75,7 +75,7 @@
             </td>
             
             <td>
-                <span data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
+                <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
                 
 	              
             </td>

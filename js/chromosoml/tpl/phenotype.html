@@ -6,18 +6,18 @@
         	    <td>
         	        <div>
         	            <div class="absolute_tool" >
-                           <a href="${wa.viewHelper.go_link(term.accession)}" >${term.name}</a>
+                           <a href="${window.wa.viewHelper.go_link(term.accession)}" >${term.name}</a>
         	            
 	            	        <div class="relative_block_tooltip">
 	
 	            	            <div><h2>
-	                	            <a href="${wa.viewHelper.go_link(term.accession)}" >
+	                	            <a href="${window.wa.viewHelper.go_link(term.accession)}" >
 	                                    ${term.name} 
 	                    	        </a>
 	                    	        </h2>
 	                	        </div>
 	
-	            	            <div style="float:right;"><img src="${wa.viewHelper.img(term.props)}" border="0" ></div>
+	            	            <div style="float:right;"><img src="${window.wa.viewHelper.img(term.props)}" border="0" ></div>
 	
 	            	            <div>
 	            	            {{each(p,prop) term.props}}
@@ -37,7 +37,7 @@
 	                	        {{/each}}
 	                	        </div>
 	
-	            	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.others_cc_link(term.name, feature)} }" ></span>
+	            	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.others_cc_link(term.name, feature)} }" ></span>
 	                        </div>
 	                    </div>
                     </div>
@@ -56,7 +56,7 @@
                             {{/each}}
         	    </td>
         	    
-        	    <td data-bind="template: {name: 'nothers', data: {count:term.count, link: wa.viewHelper.others_cc_link(term.name, feature)} }"></td>
+        	    <td data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.others_cc_link(term.name, feature)} }"></td>
         	    
         	</tr>
     	{{/each}}

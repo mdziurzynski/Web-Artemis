@@ -20,10 +20,10 @@
             <td>
                 
                 <div class="absolute_tool">
-                   &raquo; <a href="${wa.ViewHelper.baseLinkURL}/Query/proteinMatchClusterOrthologue?clusterName=Trypanosoma:ORTHOMCL4223&extraParam=extraExtra"  > ${orthologue.uniqueName} </a> <br>
+                   &raquo; <a href="${window.wa.ViewHelper.baseLinkURL}/Query/proteinMatchClusterOrthologue?clusterName=Trypanosoma:ORTHOMCL4223&extraParam=extraExtra"  > ${orthologue.uniqueName} </a> <br>
                     <div class="relative_block_tooltip" >
                     {{each(c,cluster_orthologue) orthologue.cluster}}
-                        &raquo; <a href="${wa.ViewHelper.baseLinkURL}/gene/${cluster_orthologue.uniqueName}">${cluster_orthologue.uniqueName}</a> <br>
+                        &raquo; <a href="${window.wa.ViewHelper.baseLinkURL}/gene/${cluster_orthologue.uniqueName}">${cluster_orthologue.uniqueName}</a> <br>
                     {{/each}}
                     </div>
                 </div>
@@ -46,7 +46,7 @@
             {{/each}} 
 	        <td>{{each(o,orthologue) orthologue_list}}
 	                {{if orthologue.orthologyType == 'polypeptide'}}
-	                   &raquo;   <a href="${wa.ViewHelper.baseLinkURL}/gene/${orthologue.uniqueName}">${orthologue.uniqueName}</a> <br>
+	                   &raquo;   <a href="${window.wa.ViewHelper.baseLinkURL}/gene/${orthologue.uniqueName}">${orthologue.uniqueName}</a> <br>
 	                {{/if}}
 	            {{/each}}
 	        </td>
