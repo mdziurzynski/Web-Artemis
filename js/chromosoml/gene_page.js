@@ -1215,7 +1215,8 @@ $(function() {
                 var category = box.category;
                 var category_box = category_boxes_hash[category];
                 
-                box.y += category_box.y;
+                if (category_box.y != null)
+                    box.y += category_box.y;
                 
                 self.re_max(box);
                 self.domain_graph.push(box);
