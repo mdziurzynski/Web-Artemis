@@ -388,6 +388,10 @@ $(function() {
             var type = self.hierarchy.type.name;
             var types = self.types;
             self.recurse_hierarchy(self.hierarchy, function(feature) {
+                if (feature.type == null)
+                    return;
+                if (feature.type.name == null)
+                    return;
                 if (types.special_transcript.indexOf(feature.type.name) > -1)
                     type = feature.type.name;
                 else if (feature.type.name == "polypeptide")
