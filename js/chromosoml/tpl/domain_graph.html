@@ -23,7 +23,7 @@
                 <b>${domain.uniqueName}</b><br>
                 Type : ${domain.type} <br>
                 Category : ${domain.category} <br> 
-                {{if domain.dbxref != null }}
+                {{if domain.dbxref != null && domain.dbxref.db != null }}
                     Database : ${domain.dbxref.db.name} <br> 
                     Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
                 {{/if}}
