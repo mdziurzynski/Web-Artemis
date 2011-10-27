@@ -797,7 +797,7 @@ $(function() {
         self.img = function(props) {
             for (p in props) {
                 var prop = props[p];
-                if (prop.type.name == "evidence") {
+                if (prop.type != null && prop.type.name == "evidence") {
                     var evidence = prop.value;
                     return self.image.prefix + self.evidence_category(evidence) + self.image.suffix;
                 }
