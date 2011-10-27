@@ -1109,7 +1109,8 @@ $(function() {
                     for (dx in domain.dbxrefs) {
                         // we don't break, we want the last value
                         dbxref = domain.dbxrefs[dx];
-                        dbname = dbxref.db.name;
+                        if (dbxref.db != null)
+                            dbname = dbxref.db.name;
                     }
                     
                     var colour = null;
