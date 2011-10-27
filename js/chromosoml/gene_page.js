@@ -591,7 +591,7 @@ $(function() {
                         }
                     }
                     
-                    if (self.membrs.indexOf(domain.type.name) > -1)
+                    if (domain.type != null && self.membrs.indexOf(domain.type.name) > -1)
                         key = "Transmembrane";
                     
                     domain.key = key;
