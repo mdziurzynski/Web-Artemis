@@ -546,6 +546,8 @@ $(function() {
 
                     for (dx in domain.dbxrefs) {
                         var dbxref = domain.dbxrefs[dx];
+                        if (dbxref.db == null)
+                            continue;
                         if (dbxref.db.name == "InterPro") {
                             var key = dbxref.accession;
                             break;
