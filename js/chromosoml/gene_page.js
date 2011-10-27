@@ -1215,7 +1215,7 @@ $(function() {
                 var category = box.category;
                 var category_box = category_boxes_hash[category];
                 
-                if (category_box.y != null)
+                if (category_box != null)
                     box.y += category_box.y;
                 
                 self.re_max(box);
