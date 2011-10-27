@@ -668,6 +668,8 @@ $(function() {
             self.recurse_hierarchy(self.hierarchy, function(feature) {
                 for (d in feature.domains) {
                     var domain = feature.domains[d];
+                    if (domain.type == null)
+                        continue;
                     if (domain.type.name == "GPI_anchor_cleavage_site") {
                         summary(domain);
                         algorithm.cleavages.push(domain);
