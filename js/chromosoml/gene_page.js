@@ -368,6 +368,10 @@ $(function() {
             var types = self.types;
             var transcripts = [];
             self.recurse_hierarchy(self.hierarchy, function(feature) {
+                if (feature.type == null)
+                    return;
+                if (feature.type.name == null)
+                    return;
                 if (types.transcript.indexOf(feature.type.name) > -1) {
                     transcripts.push(feature);
                 }
