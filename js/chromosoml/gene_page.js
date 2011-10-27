@@ -1122,9 +1122,12 @@ $(function() {
                     if (colour == null) {
                         colour = wa.viewHelper.colours["default"];
                     }
+                    var type = "";
+                    if (domain.type != null)
+                        type = domain.type.name;
                     
                     var box = {
-                        type : domain.type.name,
+                        type : type,
                         dbxref : dbxref,
                         category : category,
                         //feature : feature,
@@ -1140,7 +1143,10 @@ $(function() {
                         bordercolour : colour
                     }
                     
-                    var is_membr = (self.membrs.indexOf(domain.type.name) > -1);
+                    var is_membr = false;
+                    if (domain.type != null) {
+                        is_membr = (self.membrs.indexOf(domain.type.name) > -1);
+                    }
                     
                     if (is_membr) {
                         
