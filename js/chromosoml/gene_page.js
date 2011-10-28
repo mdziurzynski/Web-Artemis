@@ -1491,7 +1491,8 @@ $(function() {
                             var title = [];
                             for (t in tokens) {
                                 var token = tokens[t];
-                                title.push(token.charAt(0).toUpperCase() + token.slice(1));
+                                if (token != null && token.length > 0)
+                                    title.push(token.charAt(0).toUpperCase() + token.slice(1));
                             }
                             return title.join(" ");
                         },
