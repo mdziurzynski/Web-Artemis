@@ -1594,8 +1594,12 @@ $(function() {
         };
 
         self.notify = function(isoform) {
-            for ( var o in self.observers)
-                self.observers[o].select(isoform.uniqueName);
+            for ( var o in self.observers) {
+                var observer = self.observers[o];
+                var uniqueName = isoform.uniqueName;
+                if (observer != null && uniqueName != null)
+                    observer.select(uniqueName);
+            }
         }
 
         /*
