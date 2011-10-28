@@ -606,16 +606,16 @@ $(function() {
             return domains;
         }
         
-        self.getBounds = function(domains) {
-            var coordinates = self.coordinates()[0];
-            var bounds = {
-                fmin : coordinates.fmin,
-                fmax : coordinates.fmax,
-            }
-            for (feature in domains) {
-
-            }
-        }
+        // self.getBounds = function(domains) {
+        //             var coordinates = self.coordinates()[0];
+        //             var bounds = {
+        //                 fmin : coordinates.fmin,
+        //                 fmax : coordinates.fmax,
+        //             }
+        //             for (feature in domains) {
+        // 
+        //             }
+        //         }
 
         self.orthologues = function() {
             return self.get_attribute_map("orthologues");
