@@ -1491,8 +1491,8 @@ $(function() {
                             var title = [];
                             for (t in tokens) {
                                 var token = tokens[t];
-                                if (token != undefined && token.length > 0) {
-                                    if (first_char.hasOwnProperty("charAt")) {
+                                if (token != null && token.length > 0) {
+                                    if (token.hasOwnProperty("charAt")) {
                                         var first_char = token.charAt(0);
                                         var first_char_uppercased = first_char.toUpperCase();
                                         var the_rest = token.slice(1);
@@ -1501,6 +1501,7 @@ $(function() {
                                     } else {
                                         title.push(token);
                                     }
+                                    
                                 }
                             }
                             return title.join(" ");
