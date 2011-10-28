@@ -1491,7 +1491,7 @@ $(function() {
                             var title = [];
                             for (t in tokens) {
                                 var token = tokens[t];
-                                if (token != null && token.length > 0) {
+                                if (token != undefined && token.length > 0) {
                                     if (first_char.hasOwnProperty("charAt")) {
                                         var first_char = token.charAt(0);
                                         var first_char_uppercased = first_char.toUpperCase();
