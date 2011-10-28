@@ -1056,7 +1056,7 @@ $(function() {
                     
                     var description = category;
                     
-                    if (domain.dbxrefs.length > 0) {
+                    if (domain.dbxrefs != null && domain.dbxrefs.length > 0) {
                         description += " - " + domain.dbxrefs[0].description;
                     }
                     
