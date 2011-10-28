@@ -1,25 +1,3 @@
-if (!Array.prototype.indexOf)
-{
-  Array.prototype.indexOf = function(elt /*, from*/)
-  {
-    var len = this.length >>> 0;
-
-    var from = Number(arguments[1]) || 0;
-    from = (from < 0)
-         ? Math.ceil(from)
-         : Math.floor(from);
-    if (from < 0)
-      from += len;
-
-    for (; from < len; from++)
-    {
-      if (from in this &&
-          this[from] === elt)
-        return from;
-    }
-    return -1;
-  };
-}
 
 if (!Object.create) {
     Object.create = function(o) {
@@ -202,11 +180,8 @@ $(function() {
                         // if trimming, we want to look for a default
                         // transcript if a gene has been requested
                         // essentially requesting the first transcript
-                        if (self.types.gene.indexOf(self.requestedFeature.type.name) > -1 && self.transcript_count > 0 /*
-                                                                                                                         * &&
-                                                                                                                         * transcript_count >=
-                                                                                                                         * 2
-                                                                                                                         */) {
+                        if ($.inArray(self.requestedFeature.type.name, self.types.gene) > -1
+                                && self.transcript_count > 0 ) {
                             self.requestedFeature = transcripts[0];
                         }
 
@@ -260,7 +235,7 @@ $(function() {
                 // none of the checks below apply for single transcript genes
                 if (transcript_count <= 1) {
                     children_of_original_feature = true;
-                } else if (self.types.gene.indexOf(feature.type.name) > -1 && featureIsRequested) {
+                } else if ($.inArray(feature.type.name, self.types.gene) > -1 && featureIsRequested) {
                     children_of_original_feature = true; // if the requested
                     // type is a gene
                     // then show
@@ -359,7 +334,7 @@ $(function() {
         self.gene_name = function() {
             var types = self.types;
             return self.recurse_hierarchy(self.hierarchy, function(feature) {
-                if (types.gene.indexOf(feature.type.name) > -1)
+                if ($.inArray(feature.type.name, types.gene) > -1)
                     return feature.uniqueName;
             });
         }
@@ -372,7 +347,7 @@ $(function() {
                     return;
                 if (feature.type.name == null)
                     return;
-                if (types.transcript.indexOf(feature.type.name) > -1) {
+                if ($.inArray(feature.type.name, types.transcript) > -1) {
                     transcripts.push(feature);
                 }
             });
@@ -392,7 +367,7 @@ $(function() {
                     return;
                 if (feature.type.name == null)
                     return;
-                if (types.special_transcript.indexOf(feature.type.name) > -1)
+                if ($.inArray(feature.type.name, types.special_transcript) > -1)
                     type = feature.type.name;
                 else if (feature.type.name == "polypeptide")
                     type = "Protein coding gene";
@@ -591,7 +566,7 @@ $(function() {
                         }
                     }
                     
-                    if (domain.type != null && self.membrs.indexOf(domain.type.name) > -1)
+                    if (domain.type != null && $.inArray(domain.type.name, self.membrs) > -1)
                         key = "Transmembrane";
                     
                     domain.key = key;
@@ -1040,7 +1015,7 @@ $(function() {
                 var domain = domains[d];
                 var category = domain.key;
                 
-                if (categories.indexOf(category) == -1) {
+                if ($.inArray(category, categories) == -1) {
                     categories.push(category);
                     domains_hash[category] = [];
                     
@@ -1145,7 +1120,7 @@ $(function() {
                     
                     var is_membr = false;
                     if (domain.type != null) {
-                        is_membr = (self.membrs.indexOf(domain.type.name) > -1);
+                        is_membr = ($.inArray(domain.type.name,self.membrs) > -1);
                     }
                     
                     if (is_membr) {
