@@ -1492,7 +1492,11 @@ $(function() {
                             for (t in tokens) {
                                 var token = tokens[t];
                                 if (token != null && token.length > 0)
-                                    title.push(token.charAt(0).toUpperCase() + token.slice(1));
+                                    var first_char = token.charAt(0);
+                                    var first_char_uppercased = first_char.toUpperCase();
+                                    var the_rest = token.slice(1);
+                                    var uppercased = first_char_uppercased + the_rest;
+                                    title.push(uppercased);
                             }
                             return title.join(" ");
                         },
