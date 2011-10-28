@@ -1597,8 +1597,11 @@ $(function() {
             for ( var o in self.observers) {
                 var observer = self.observers[o];
                 var uniqueName = isoform.uniqueName;
-                if (observer != null && uniqueName != null)
-                    observer.select(uniqueName);
+                if (observer != null && uniqueName != null) {
+                    if (observer.hasOwnProperty("select")) {
+                        observer.select(uniqueName);
+                    }
+                }
             }
         }
 
