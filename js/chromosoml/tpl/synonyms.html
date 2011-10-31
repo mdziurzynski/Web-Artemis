@@ -1,4 +1,3 @@
-<!-- note the $data variable is what knockout passes to the template -->
 {{each(k, list) synonyms}}
     {{each(s, syn) list}}${ separate(name, ', ') }${syn.synonym}{{/each}}
 {{/each}}

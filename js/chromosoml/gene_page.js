@@ -1420,25 +1420,17 @@ $(function() {
                         orthologues : orthologues,
                         algorithm : algorithm,
                         /*
-                         * This is a replacement of the first_element() appraoch below. The context of the function (this) is usually the data that's passed into a template
-                         * for example :
-                         * 
-                         *  data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids,separate:separate,name:'previous_systematic'} }"
-                         *  
-                         *  so the internal this.elements hashtable that is created will only be visible within that scope. Makes it useful therefore for separating elements
-                         *  of a list within a template's scope. Should not be used therefore for templates that do not have a data pasesed into them directly, and which
-                         *  are therefore relying on the wa.viewModel scope.
-                         *  
+                         * This is a replacement of the first_element() appraoch below. 
                          */
                         separate : function (name, separator) {
-                            if (this.elements == null)
-                                this.elements = {};
-                            if (this.elements[name] == null)
-                                this.elements[name] = 0;
-                            else
-                                this.elements[name]++;
-                            if (this.elements[name] > 0)
+                            if (wa.viewModel.separate.elements == null) {
+                                wa.viewModel.separate.elements = {};
+                            }
+                            var elements = wa.viewModel.separate.elements;
+                            if (elements.hasOwnProperty(name)) {
                                 return separator;
+                            } 
+                            elements[name] = 1;
                             return '';
                         },
                         /*
