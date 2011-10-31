@@ -1733,6 +1733,9 @@ ko.templateRewriting = (function () {
         },
 
         memoizeBindingAttributeSyntax: function (htmlString, templateEngine) {
+            if( window['console'] !== undefined ){
+                console.log(htmlString);
+            }
             // temporary hack to make the gene page mostly work in IE7
             if (htmlString == undefined) {
                 return '';
