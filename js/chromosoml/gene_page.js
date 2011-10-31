@@ -628,35 +628,20 @@ $(function() {
             algorithm.tms = [];
             algorithm.cleavages = [];
             algorithm.signals = [];
-
-            // we use a synchronous call here... tutut.
-            function summary(domain) {
-                var summary = $.ajax({
-                    url : self.service + "/feature/info.json",
-                    async : false,
-                    data : {
-                        uniqueName : domain.uniqueName
-                    },
-                    success : function(summary) {
-                        domain.properties = summary.properties
-                    }
-                });
-            }
-
+            
             self.recurse_hierarchy(self.hierarchy, function(feature) {
                 for (var d in feature.domains) {
                     var domain = feature.domains[d];
                     if (domain.type == null)
                         continue;
+                    // why not use the actual type names as keys in the algorithm hash? (though they might conflict with above property names)
                     if (domain.type.name == "GPI_anchor_cleavage_site") {
-                        summary(domain);
                         algorithm.cleavages.push(domain);
                     }
                     if (domain.type.name == "transmembrane_polypeptide_region") {
                         algorithm.tms.push(domain);
                     }
                     if (domain.type.name == "signal_peptide") {
-                        summary(domain);
                         algorithm.signals.push(domain);
                     }
                 }
