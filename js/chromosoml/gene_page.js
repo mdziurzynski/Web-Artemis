@@ -1660,7 +1660,6 @@ $(function() {
                 fmax : 1000,
                 region : "some_region"
             },
-            // initial_window_size : 20000,
             webArtemisPath : "path",
             max_residues : 1000000,
             service : "/services/",
@@ -1714,12 +1713,12 @@ $(function() {
 
         wa.webArtemisLinker.link(real_fmin, real_fmax);
 
-        self.initial_window_size = real_fmax - real_fmin;
+        var initial_window_size = real_fmax - real_fmin;
 
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
             start : real_fmin,
-            bases : self.initial_window_size,
+            bases : initial_window_size,
             showFeatureList : false,
             width : 950,
             directory : self.webArtemisPath,
@@ -1733,15 +1732,21 @@ $(function() {
         var chromosomeMapToWebArtemis = new ChromosomeMapToWebArtemis();
 
         if (needsSlider) {
-
+            
+            
+            
+            
+            
+            // added spaces to see if this is it.
             $(self.chromosome_map_slider_element).ChromosomeMapSlider({
                 windowWidth : 870,
                 max : parseInt(self.sequenceLength, 10),
                 observers : [ chromosomeMapToWebArtemis ],
                 pos : real_fmin,
-                width : self.initial_window_size
+                width : initial_window_size
             });
-
+            
+            // the timeout is needed to initialize Web-Artemis
             setTimeout(function() {
                 for (var o in self.observers) {
                     $(self.web_artemis_element).WebArtemis('addObserver', self.observers[o]);
@@ -1750,12 +1755,12 @@ $(function() {
             }, 500);
         }
 
-        self.recoordinate = function(coordinates) {
-            var fDisplay = featureDisplayObjs[0];
-            var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2), 10);
-            chromosomeMapToWebArtemis.move(p);
-            wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
-        }
+//        self.recoordinate = function(coordinates) {
+//            var fDisplay = featureDisplayObjs[0];
+//            var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2), 10);
+//            chromosomeMapToWebArtemis.move(p);
+//            wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
+//        }
 
     }
 
