@@ -1358,8 +1358,8 @@ $(function() {
                     var transcripts = geneInfo.transcripts();
                     var type = geneInfo.type();
                     
-                    var synonyms = geneInfo.synonyms("synonym");
-                    var product_synonyms = geneInfo.synonyms("product_synonym");
+                    var synonyms = geneInfo.synonyms("synonym", null, true);
+                    var product_synonyms = geneInfo.synonyms("product_synonym", null, true);
                     var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", null, true);
                     
                     
