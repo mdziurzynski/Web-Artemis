@@ -595,7 +595,7 @@ if(!String.prototype.startsWith){
 	
 	$.fn.ChromosomeMap.defaults = {
 		'region' : 'Pf3D7_01',
-		'types' : 'polypeptide,rRNA,snoRNA,snRNA,tRNA,miscRNA', 
+		'types' : 'polypeptide,rRNA,snoRNA,snRNA,tRNA,miscRNA,centromere', 
 		'bases_per_row' : 50000,
 		'row_height' : 50,
 		'row_width' : 800,
