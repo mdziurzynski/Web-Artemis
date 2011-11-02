@@ -717,6 +717,9 @@ $(function() {
                 "TIGR_TIGRFAMS" : "rgb(0, 255, 255)",
                 "CATEGORY" : "rgb(255, 0, 0)",
                 "TM" : 'blue'
+            },
+            dbxref_prefix_suffixes : {
+                "http://old.genedb.org/genedb/pathway_comparison_TriTryp/" : ".html"
             }
         };
 
