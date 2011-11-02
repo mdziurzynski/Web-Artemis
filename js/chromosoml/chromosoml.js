@@ -1118,7 +1118,7 @@ function WebArtemisToChromosomeMap(selector) {
 				$(self).append ("<P>Over last "+settings.defaultDateOffset+" days : <br/>");
 				var inserted = false;
 				$.each(statistics, function(index, statistic) {
-	        		$(self).append(" &raquo; " + statistic.name + " : " + statistic.value + " annotations<br>");
+	        		$(self).append(" &raquo; " + statistic.value + " features curated with <i>" + statistic.name + "</i> annotations<br>");
 	        		inserted = true;
 	        	});
 				if (! inserted) {
