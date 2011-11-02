@@ -1369,7 +1369,7 @@ $(function() {
                     wa.viewHelper.organism = organism;
 
                     var dbxrefs = geneInfo.dbxrefs();
-                    var extra_dbxrefs = self.extraDbxrefs(self.uniqueName, organism);
+                    var extra_dbxrefs = self.extraDbxrefs(geneInfo.isoform.uniqueName, organism);
 
                     var coordinates = geneInfo.coordinates();
                     var products = geneInfo.terms("genedb_products");
