@@ -501,6 +501,16 @@ $(function() {
             var new_terms = {}
             for (var f in terms) {
                 var ordered = terms[f].sort(function(t1, t2) {
+                    
+                    if (t1.pubs.length > 0 && t2.pubs.length > 0) {
+                        var pub1accession = parseInt(t1.pubs[0].accession, 10);
+                        var pub2accession = parseInt(t2.pubs[0].accession, 10);
+                        if (pub1accession != pub2accession) { 
+                            // only use this descriminator if the pubs are different
+                            return pub1accession > pub2accession;
+                        }
+                    }
+                    // if there are no pubs, or the pubs are the same, order alphabetically
                     return t1.name.toLowerCase() > t2.name.toLowerCase();
                 });
                 new_terms[f] = ordered;
