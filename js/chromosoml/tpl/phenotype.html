@@ -5,11 +5,17 @@
     	    <tr>
         	    <td>${term.name}
         	    </td>
-        	            	    
+        	    <td>
+                    {{each(p,prop) term.props}}
+                        {{if prop.type.name=="evidence"}}
+                            ${prop.value}
+                        {{/if}}
+                    {{/each}}
+                </td>
         	    <td>
         	       {{each(pu,pub) term.pubs}}
-                                <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
-                            {{/each}}
+                        <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+                   {{/each}}
         	    </td>
         	    
         	    <td data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.others_cc_link(term.name, feature)} }"></td>
@@ -18,6 +24,4 @@
     	{{/each}}
     {{/each}}
 
-
-    
 </table>
