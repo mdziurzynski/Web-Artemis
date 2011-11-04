@@ -23,6 +23,7 @@ function SVGManager() {
 	this.regional[''] = {notSupportedText: '',
 		errorLoadingText: 'Error loading'};
 	this.region = this.regional['']; // Current localisation
+	this.baseSVGPath = "js/jquery.drawinglibrary/"; // The path to the blankX.svg files (for cases where they are not in the same folder as the web page). 
 }
 
 $.extend(SVGManager.prototype, {
@@ -40,7 +41,7 @@ $.extend(SVGManager.prototype, {
 		var svgHtml = '<' + ($.browser.msie ? 'embed' : 'object') + 
 			' width="' + container.clientWidth +
 			'" height="' + container.clientHeight + '" type="image/svg+xml" ' +
-			($.browser.msie ? 'src' : 'data') + '="blank' + ($.browser.msie ? id : '') + '.svg' + 
+			($.browser.msie ? 'src' : 'data') + '="' + svgManager.baseSVGPath + 'blank' + ($.browser.msie ? id : '') + '.svg' + 
 			($.browser.msie ? '' : '?' + id) + '"' + ($.browser.msie ? '/>' :
 			'><p class="svg_error">' + this.region.notSupportedText + '</p></object>');
 		$(container).append(svgHtml);

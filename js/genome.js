@@ -2561,7 +2561,6 @@ function addFeatures(seqName, jsonFeatureObj, trackIndex, fnFeatureProps) {
 
 var methods = {
 	init : function(options) {
-
         if(!options.directory) {
             options.directory = ".";
         }
@@ -2733,17 +2732,33 @@ function attachObserver(isolate) {
     }
 }
 
-// put at the end of the script for ie
-$.fn.WebArtemis = function(method) {
-	// remove square brackets
-	// &exclude[]=repeat_region&exclude[]=gene
-	jQuery.ajaxSettings.traditional = true; 
+// we need to know the script directory for the svg library
+var _genome_js_scripts = document.getElementsByTagName('script');
+var _genome_js_path = _genome_js_scripts[_genome_js_scripts.length - 1].src.split('?')[0];
+var _genome_js_current_directory = _genome_js_path.split('/').slice(0, -1).join('/') + '/';
+
+// needed to put the WebArtemis plugin function inside the jquery scope so that it can pick up the svgManager 
+(function($) { 
+
+    // put at the end of the script for ie
+    $.fn.WebArtemis = function(method) {
+        
+        // set the path to the svg files relative to the path of >this< file
+        if (svgManager != null) {
+            svgManager.baseSVGPath = _genome_js_current_directory + "jquery.drawinglibrary/";
+        }
+        
+    	// remove square brackets
+    	// &exclude[]=repeat_region&exclude[]=gene
+    	jQuery.ajaxSettings.traditional = true; 
 	
-	if ( methods[method] ) {
-	      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
-	} else if ( typeof method === 'object' || ! method ) {
-	     return methods.init.apply( this, arguments );
-	} else {
-	      $.error( 'Method ' +  method + ' does not exist in WebArtemis' );
-	}
-};
+    	if ( methods[method] ) {
+    	      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
+    	} else if ( typeof method === 'object' || ! method ) {
+    	     return methods.init.apply( this, arguments );
+    	} else {
+    	      $.error( 'Method ' +  method + ' does not exist in WebArtemis' );
+    	}
+    };
+
+})(jQuery);
