@@ -1,9 +1,4 @@
-
-
-<div style="
-    height:${domain_graph_max_y+50}px; 
-    position:relative;"
-    >
+<div style="height:${domain_graph_max_y+50}px; position:relative;" >
 {{each(d, domain) domain_graph}}
     
     <div class="domain_graph absolute_tool" 
@@ -24,8 +19,10 @@
                 Type : ${domain.type} <br>
                 Category : ${domain.category} <br> 
                 {{if domain.dbxref != null }}
-                    Database : ${domain.dbxref.db.name} <br> 
-                    Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
+                   {{if domain.dbxref.db != null}}
+                       Database : ${domain.dbxref.db.name} <br> 
+                       Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
+                   {{/if}}
                 {{/if}}
                 Location : ${domain.fmin} - ${domain.fmax}
              </div>

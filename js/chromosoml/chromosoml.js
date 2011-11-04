@@ -136,7 +136,7 @@ if(!String.prototype.startsWith){
 				if (useCanvas) {
 					ctx.strokeRect(x,y,w,h);
 				} else {
-					axisHtml += "<div class='chromosome_axis' style='border:1px solid black;position:absolute;left:" + x + "px;top:" + y + "px;width:"+ w +"px;'></div>";
+					axisHtml += "<div class='chromosome_axis' style='border:1px solid black;position:absolute;left:" + x + "px;top:" + y + "px;width:"+ w +"px;height:0px;'></div>";
 				}
 				
 				axisHtml += "<div class='chromosome_axis_label' style='z-index:100000000;position:absolute;left:" + (x + 5) + "px;top:" + (y) + "px;'>"+text+"</div>";
@@ -595,7 +595,7 @@ if(!String.prototype.startsWith){
 	
 	$.fn.ChromosomeMap.defaults = {
 		'region' : 'Pf3D7_01',
-		'types' : 'polypeptide,rRNA,snoRNA,snRNA,tRNA,miscRNA', 
+		'types' : 'polypeptide,rRNA,snoRNA,snRNA,tRNA,miscRNA,centromere', 
 		'bases_per_row' : 50000,
 		'row_height' : 50,
 		'row_width' : 800,
@@ -985,7 +985,7 @@ function WebArtemisToChromosomeMap(selector) {
 				var s = "";
 				s += "<button class='ui-state-default fg-button region back' >Back</button>";
 				$.each(regions, function(index, region) {
-					s += "<button class='fg-button ui-state-default region' region='"+region.uniqueName+"' >" + region.uniqueName + "</button>";
+					s += "<button class='fg-button ui-state-default region' style='overflow:hidden;font-size:x-small;' alt='"+region.uniqueName+"' title='"+region.uniqueName+"' region='"+region.uniqueName+"' >" + region.uniqueName + "</button>";
 				});
 				
 				if (regions.length == self.limit) {
@@ -1011,8 +1011,8 @@ function WebArtemisToChromosomeMap(selector) {
 					}
 				}).button({
 					  icons: {
-						    primary: 'ui-icon-document',
-						    secondary: 'ui-icon-triangle-1-e'
+						    primary: 'ui-icon-document'//,
+						    //secondary: 'ui-icon-triangle-1-e'
 						  }
 						});
 				$('button.back').button({
@@ -1118,7 +1118,7 @@ function WebArtemisToChromosomeMap(selector) {
 				$(self).append ("<P>Over last "+settings.defaultDateOffset+" days : <br/>");
 				var inserted = false;
 				$.each(statistics, function(index, statistic) {
-	        		$(self).append(" &raquo; " + statistic.name + " : " + statistic.value + " annotations<br>");
+	        		$(self).append(" &raquo; " + statistic.value + " features with <i>" + statistic.name + "</i> curations <br>");
 	        		inserted = true;
 	        	});
 				if (! inserted) {

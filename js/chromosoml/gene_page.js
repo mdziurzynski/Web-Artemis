@@ -1,3 +1,4 @@
+
 if (!Object.create) {
     Object.create = function(o) {
         if (arguments.length > 1) {
@@ -16,80 +17,68 @@ var path = scripts[scripts.length - 1].src.split('?')[0];
 var current_directory = path.split('/').slice(0, -1).join('/') + '/';
 
 (function($) {
-
+    
+    var tooltipCount = 0;
+    
     /*
      * A tooltip implementation that copes with absolutely posisitioned divs
      * inside relative divs. This should really be moved into a plugins folder.
      */
     $.fn.AbsoluteToolTips = function(options) {
-
-        // $.log("AbsoluteToolTips");
-
+        
         var defaults = {
             "tooltip_element_id" : "reltool",
             "sub_element_class" : "relative_block_tooltip"
         }
-
-        // the tooltip is shared by all elements bound to this plugin
-        var tooltip = null;
-        var toolout = true;
-        var elout = false;
-
+        
         return this.each(function() {
-
-            // $.log(this);
-
+            
             var self = this;
             $.extend(self, defaults, options);
-
+            
+            var toolID = self.tooltip_element_id + tooltipCount++;
+            
+            $("<div />", {
+                id : toolID
+            }).appendTo($("body")).css("position", "absolute").addClass("tooltip");
+            
+            var tooltip = $("#" + toolID);
+            
+            var toolout = true;
+            var elout = false;
+            
             self.hideTool = function() {
                 setTimeout(function() {
                     if (toolout == true && elout == true)
                         tooltip.fadeOut('slow');
-                }, 500);
-            }
-
+                }, 100);
+            };
+            
             self.showTool = function(html, e) {
-
-                if (tooltip == null) {
-
-                    var div = $("<div />", {
-                        id : self.tooltip_element_id
-                    }).appendTo($("body"));
-
-                    tooltip = $("#" + self.tooltip_element_id);
-
-                    tooltip.bind("mouseenter", function(e) {
-                        toolout = false;
-                    });
-
-                    tooltip.bind("mouseleave", function(e) {
-                        toolout = true;
-                        self.hideTool();
-                    });
-
-                }
-
-                tooltip.html(html).css('left', e.pageX + 10).css('top', e.pageY - 5).show();
-
-            }
-
-            $(this).bind("mouseenter mouseover", function(e) {
+                tooltip.html(html).css('left', e.pageX + 10).css('top', e.pageY - 5).fadeIn("fast");
+            };
+            
+            tooltip.bind("mouseenter", function(e) {
+                toolout = false;
+            }).bind("mouseleave", function(e) {
+                toolout = true;
+                self.hideTool();
+            });
+            
+            $(self).bind("mouseenter mouseover", function(e) {
                 var html = $("." + self.sub_element_class, self).html();
                 if (html != null) {
                     elout = false;
                     self.showTool(html, e);
                 }
-            });
-
-            $(this).bind("mouseleave", function(e) {
+            }).bind("mouseleave", function(e) {
                 elout = true;
                 self.hideTool();
-            });
+            }).css("cursor", "pointer");
 
         });
 
-    }
+    };
 
 })(jQuery);
 
@@ -191,11 +180,8 @@ $(function() {
                         // if trimming, we want to look for a default
                         // transcript if a gene has been requested
                         // essentially requesting the first transcript
-                        if (self.types.gene.indexOf(self.requestedFeature.type.name) > -1 && self.transcript_count > 0 /*
-                                                                                                                         * &&
-                                                                                                                         * transcript_count >=
-                                                                                                                         * 2
-                                                                                                                         */) {
+                        if ($.inArray(self.requestedFeature.type.name, self.types.gene) > -1
+                                && self.transcript_count > 0 ) {
                             self.requestedFeature = transcripts[0];
                         }
 
@@ -223,7 +209,7 @@ $(function() {
          * hiearchy.
          */
         self.recurse_hierarchy = function(feature, callback) {
-            for (c in feature.children) {
+            for (var c in feature.children) {
                 var child = feature.children[c];
                 self.recurse_hierarchy(child, callback);
             }
@@ -249,7 +235,7 @@ $(function() {
                 // none of the checks below apply for single transcript genes
                 if (transcript_count <= 1) {
                     children_of_original_feature = true;
-                } else if (self.types.gene.indexOf(feature.type.name) > -1 && featureIsRequested) {
+                } else if ($.inArray(feature.type.name, self.types.gene) > -1 && featureIsRequested) {
                     children_of_original_feature = true; // if the requested
                     // type is a gene
                     // then show
@@ -264,7 +250,7 @@ $(function() {
                     // then we have to check this mRNA's children
                     else if (requestedFeature.type.name == "exon" || requestedFeature.type.name == "polypeptide") {
                         children_of_original_feature = false;
-                        for (c in feature.children) {
+                        for (var c in feature.children) {
                             var child = feature.children[c];
                             if (child.uniqueName == requestedFeature.uniqueName) {
                                 children_of_original_feature = true;
@@ -283,9 +269,8 @@ $(function() {
                     feature.children = [];
                 }
 
-                for (c in feature.children) {
-                    var child = feature.children[c];
-                    trim(child);
+                for (var ch in feature.children) {
+                    trim(feature.children[ch]);
                 }
 
             }
@@ -348,7 +333,7 @@ $(function() {
         self.gene_name = function() {
             var types = self.types;
             return self.recurse_hierarchy(self.hierarchy, function(feature) {
-                if (types.gene.indexOf(feature.type.name) > -1)
+                if ($.inArray(feature.type.name, types.gene) > -1)
                     return feature.uniqueName;
             });
         }
@@ -357,7 +342,11 @@ $(function() {
             var types = self.types;
             var transcripts = [];
             self.recurse_hierarchy(self.hierarchy, function(feature) {
-                if (types.transcript.indexOf(feature.type.name) > -1) {
+                if (feature.type == null)
+                    return;
+                if (feature.type.name == null)
+                    return;
+                if ($.inArray(feature.type.name, types.transcript) > -1) {
                     transcripts.push(feature);
                 }
             });
@@ -373,7 +362,11 @@ $(function() {
             var type = self.hierarchy.type.name;
             var types = self.types;
             self.recurse_hierarchy(self.hierarchy, function(feature) {
-                if (types.special_transcript.indexOf(feature.type.name) > -1)
+                if (feature.type == null)
+                    return;
+                if (feature.type.name == null)
+                    return;
+                if ($.inArray(feature.type.name, types.special_transcript) > -1)
                     type = feature.type.name;
                 else if (feature.type.name == "polypeptide")
                     type = "Protein coding gene";
@@ -383,22 +376,28 @@ $(function() {
             return type;
         }
 
-        self.synonyms = function(type, feature_type, must_not_be_current) {
+        self.synonyms = function(type, feature_type, current) {
             var synonyms = {};
+            
             self.recurse_hierarchy(self.hierarchy, function(feature) {
 
-                if (feature_type != null)
-                    if (feature_type != feature.type.name)
+                if (feature_type != null) {
+                    if (feature_type != feature.type.name) {
                         return;
+                    }
+                }
 
-                var feature_synonyms = []
+                var feature_synonyms = [];
                 if (feature.synonyms != null && feature.synonyms.length > 0) {
-                    for (s in feature.synonyms) {
+                    for (var s in feature.synonyms) {
                         var synonym = feature.synonyms[s];
-
-                        if (must_not_be_current == true && synonym.is_current)
-                            continue;
-
+                        
+                        if (current != null) {
+                            if (current != synonym.is_current) {
+                                continue;
+                            }
+                        }
+                        
                         if (type == null || synonym.synonymtype == type)
                             feature_synonyms.push(synonym);
                     }
@@ -442,14 +441,14 @@ $(function() {
             return self.hierarchy.coordinates;
         }
         self.terms = function(cv) {
-            var terms_map = {}
+            var terms_map = {};
             self.recurse_hierarchy(self.hierarchy, function(feature) {
-                var terms = feature.terms
-                var matched = []
+                var terms = feature.terms;
+                var matched = [];
                 if (terms != null && terms.length > 0) {
                     for ( var t in terms) {
                         var term = terms[t];
-                        if (cv == null || term.cv.name == cv) {
+                        if (cv == null || (term.cv != null && term.cv.name == cv)) {
                             matched.push(term)
                         }
                     }
@@ -473,8 +472,8 @@ $(function() {
                         if (property_names == null) {
                             push = true
                         } else if (property_names instanceof Array) {
-                            for ( var p in property_names) {
-                                if (property_names[p] == property.name) {
+                            for ( var pp in property_names) {
+                                if (property_names[pp] == property.name) {
                                     push = true;
                                     break;
                                 }
@@ -500,8 +499,18 @@ $(function() {
         }
         self.order_terms = function(terms) {
             var new_terms = {}
-            for (f in terms) {
-                ordered = terms[f].sort(function(t1, t2) {
+            for (var f in terms) {
+                var ordered = terms[f].sort(function(t1, t2) {
+                    
+                    if (t1.pubs.length > 0 && t2.pubs.length > 0) {
+                        var pub1accession = parseInt(t1.pubs[0].accession, 10);
+                        var pub2accession = parseInt(t2.pubs[0].accession, 10);
+                        if (pub1accession != pub2accession) { 
+                            // only use this descriminator if the pubs are different
+                            return pub1accession > pub2accession;
+                        }
+                    }
+                    // if there are no pubs, or the pubs are the same, order alphabetically
                     return t1.name.toLowerCase() > t2.name.toLowerCase();
                 });
                 new_terms[f] = ordered;
@@ -518,15 +527,17 @@ $(function() {
             // presence of an Interpro dbxref
             self.recurse_hierarchy(self.hierarchy, function(feature) {
 
-                for (d in feature.domains) {
+                for (var d in feature.domains) {
 
                     var domain = feature.domains[d];
                     var key = "Other Matches";
 
-                    for (dx in domain.dbxrefs) {
+                    for (var dx in domain.dbxrefs) {
                         var dbxref = domain.dbxrefs[dx];
+                        if (dbxref.db == null)
+                            continue;
                         if (dbxref.db.name == "InterPro") {
-                            var key = dbxref.accession;
+                            key = dbxref.accession;
                             break;
                         }
                     }
@@ -553,20 +564,22 @@ $(function() {
             // presence of an Interpro dbxref
             self.recurse_hierarchy(self.hierarchy, function(feature) {
 
-                for (d in feature.domains) {
+                for (var d in feature.domains) {
 
                     var domain = feature.domains[d];
                     var key = "Other Matches";
 
-                    for (dx in domain.dbxrefs) {
+                    for (var dx in domain.dbxrefs) {
                         var dbxref = domain.dbxrefs[dx];
+                        if (dbxref.db == null)
+                            continue;
                         if (dbxref.db.name == "InterPro") {
-                            var key = dbxref.accession;
+                            key = dbxref.accession;
                             break;
                         }
                     }
                     
-                    if (self.membrs.indexOf(domain.type.name) > -1)
+                    if (domain.type != null && $.inArray(domain.type.name, self.membrs) > -1)
                         key = "Transmembrane";
                     
                     domain.key = key;
@@ -581,16 +594,16 @@ $(function() {
             return domains;
         }
         
-        self.getBounds = function(domains) {
-            var coordinates = self.coordinates()[0];
-            var bounds = {
-                fmin : coordinates.fmin,
-                fmax : coordinates.fmax,
-            }
-            for (feature in domains) {
-
-            }
-        }
+        // self.getBounds = function(domains) {
+        //             var coordinates = self.coordinates()[0];
+        //             var bounds = {
+        //                 fmin : coordinates.fmin,
+        //                 fmax : coordinates.fmax,
+        //             }
+        //             for (feature in domains) {
+        // 
+        //             }
+        //         }
 
         self.orthologues = function() {
             return self.get_attribute_map("orthologues");
@@ -625,33 +638,20 @@ $(function() {
             algorithm.tms = [];
             algorithm.cleavages = [];
             algorithm.signals = [];
-
-            // we use a synchronous call here... tutut.
-            function summary(domain) {
-                var summary = $.ajax({
-                    url : self.service + "/feature/info.json",
-                    async : false,
-                    data : {
-                        uniqueName : domain.uniqueName
-                    },
-                    success : function(summary) {
-                        domain.properties = summary.properties
-                    }
-                });
-            }
-
+            
             self.recurse_hierarchy(self.hierarchy, function(feature) {
-                for (d in feature.domains) {
+                for (var d in feature.domains) {
                     var domain = feature.domains[d];
+                    if (domain.type == null)
+                        continue;
+                    // why not use the actual type names as keys in the algorithm hash? (though they might conflict with above property names)
                     if (domain.type.name == "GPI_anchor_cleavage_site") {
-                        summary(domain);
                         algorithm.cleavages.push(domain);
                     }
                     if (domain.type.name == "transmembrane_polypeptide_region") {
                         algorithm.tms.push(domain);
                     }
                     if (domain.type.name == "signal_peptide") {
-                        summary(domain);
                         algorithm.signals.push(domain);
                     }
                 }
@@ -727,6 +727,9 @@ $(function() {
                 "TIGR_TIGRFAMS" : "rgb(0, 255, 255)",
                 "CATEGORY" : "rgb(255, 0, 0)",
                 "TM" : 'blue'
+            },
+            dbxref_prefix_suffixes : {
+                "http://old.genedb.org/genedb/pathway_comparison_TriTryp/" : ".html"
             }
         };
 
@@ -735,10 +738,14 @@ $(function() {
         self.organism = null;
 
         self.evidence_category = function(supplied_evidence) {
-            for (c in self.evidence)
-                for (e in self.evidence[c])
-                    if (supplied_evidence == self.evidence[c][e])
+            for (var c in self.evidence) {
+                for (var e in self.evidence[c]) {
+                    if (supplied_evidence == self.evidence[c][e]) {
                         return c;
+                    }
+                }
+            }
+            return null;
         }
 
         self.go_link = function(accession) {
@@ -768,13 +775,14 @@ $(function() {
         }
 
         self.img = function(props) {
-            for (p in props) {
+            for (var p in props) {
                 var prop = props[p];
-                if (prop.type.name == "evidence") {
+                if (prop.type != null && prop.type.name == "evidence") {
                     var evidence = prop.value;
                     return self.image.prefix + self.evidence_category(evidence) + self.image.suffix;
                 }
             }
+            return null;
         }
 
     }
@@ -934,7 +942,7 @@ $(function() {
 
         self.totalGapLength = function() {
             var gapLength = 0;
-            for (g in self.gaps) {
+            for (var g in self.gaps) {
                 var gap = self.gaps[g];
                 gapLength += (gap.fmax - gap.fmin);
             }
@@ -943,7 +951,7 @@ $(function() {
 
         self.getDivPosition = function(base_position) {
             var subtract = 0;
-            for (g in self.gaps) {
+            for (var g in self.gaps) {
                 var gap = self.gaps[g];
                 var gap_length = gap.fmax - gap.fmin;
 
@@ -1013,7 +1021,7 @@ $(function() {
                 var domain = domains[d];
                 var category = domain.key;
                 
-                if (categories.indexOf(category) == -1) {
+                if ($.inArray(category, categories) == -1) {
                     categories.push(category);
                     domains_hash[category] = [];
                     
@@ -1023,13 +1031,13 @@ $(function() {
                     var _fmax = (coordinates.fmax - coordinates.fmin) / 3;
                     
                     var _x = self.scaleX(_fmin);
-                    
-                    var _width = self.scaleX(_fmax) - _x;
+                    var _width = self.pixel_width;
+                                        
                     var _colour = wa.viewHelper.colours["CATEGORY"];
                     
                     var description = category;
                     
-                    if (domain.dbxrefs[0] != null) {
+                    if (domain.dbxrefs != null && domain.dbxrefs.length > 0) {
                         description += " - " + domain.dbxrefs[0].description;
                     }
                     
@@ -1073,18 +1081,17 @@ $(function() {
                 for (var d in domains_hash[category]) {
                     var domain = domains_hash[category][d];
                     
-                    
-                    
                     var x = self.scaleX(domain.fmin);
                     var width = self.scaleX(domain.fmax) - x;
                     
                     var dbname = "";
                     var dbxref = null; 
                     
-                    for (dx in domain.dbxrefs) {
+                    for (var dx in domain.dbxrefs) {
                         // we don't break, we want the last value
                         dbxref = domain.dbxrefs[dx];
-                        dbname = dbxref.db.name;
+                        if (dbxref.db != null)
+                            dbname = dbxref.db.name;
                     }
                     
                     var colour = null;
@@ -1096,9 +1103,12 @@ $(function() {
                     if (colour == null) {
                         colour = wa.viewHelper.colours["default"];
                     }
+                    var type = "";
+                    if (domain.type != null)
+                        type = domain.type.name;
                     
                     var box = {
-                        type : domain.type.name,
+                        type : type,
                         dbxref : dbxref,
                         category : category,
                         //feature : feature,
@@ -1114,7 +1124,10 @@ $(function() {
                         bordercolour : colour
                     }
                     
-                    var is_membr = (self.membrs.indexOf(domain.type.name) > -1);
+                    var is_membr = false;
+                    if (domain.type != null) {
+                        is_membr = ($.inArray(domain.type.name,self.membrs) > -1);
+                    }
                     
                     if (is_membr) {
                         
@@ -1126,15 +1139,15 @@ $(function() {
                             box.dy += _height / 2;
                         } else if (domain.type.name == "cytoplasmic_polypeptide_region") {
                             box.height = _height / 2;
-                        } else if (domain.type.name == "transmembrane_polypeptide_region") {
+                        } //else if (domain.type.name == "transmembrane_polypeptide_region") {
                             // not sure if this is necessary
-                        }
+                        //}
                         
                     } else {
                         var overlaps = true;
                         while (overlaps == true) {
                             overlaps = false;
-                            for (p in this_subcategory_boxes_list) {
+                            for (var p in this_subcategory_boxes_list) {
                                 var previous = this_subcategory_boxes_list[p];
                                 //$.log([box.uniqueName, previous.uniqueName, self.boxesOverlap(box, previous)]);
                                 if (self.boxesOverlap(box, previous)) {
@@ -1183,7 +1196,8 @@ $(function() {
                 var category = box.category;
                 var category_box = category_boxes_hash[category];
                 
-                box.y += category_box.y;
+                if (category_box != null)
+                    box.y += category_box.y;
                 
                 self.re_max(box);
                 self.domain_graph.push(box);
@@ -1245,7 +1259,7 @@ $(function() {
                 // $.log(box.fmin, box.x);
 
                 var merging = false;
-                for (m in merged_gaps) {
+                for (var m in merged_gaps) {
                     var merged_gap = merged_gaps[m];
                     if (merged_gap.x2 == box.x) {
                         merged_gap.x2 = box.x2;
@@ -1296,7 +1310,7 @@ $(function() {
             },
             baseLinkURL : "http://www.genedb.org/",
             extraDbxrefs : function(uniqueName, organism) {
-                dbxrefs = []
+                var dbxrefs = [];
                 if (organism.genus == "Plasmodium") {
                     dbxrefs.push({
                         db : {
@@ -1317,7 +1331,8 @@ $(function() {
                 return dbxrefs;
             },
             spinner : ".spinner",
-            observers : []
+            observers : [],
+            months : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         }
 
         var self = this;
@@ -1355,16 +1370,19 @@ $(function() {
                     var geneName = geneInfo.gene_name();
                     var transcripts = geneInfo.transcripts();
                     var type = geneInfo.type();
-                    var synonyms = geneInfo.synonyms("synonym");
-                    var product_synonyms = geneInfo.synonyms("product_synonym");
-                    var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", "gene", true);
+                    
+                    var synonyms = geneInfo.synonyms("synonym", null, true);
+                    var product_synonyms = geneInfo.synonyms("product_synonym", null, true);
+                    var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", null, true);
+                    
+                    
                     var systematicName = geneInfo.systematic_name();
-
+                    
                     var organism = geneInfo.organism();
                     wa.viewHelper.organism = organism;
 
                     var dbxrefs = geneInfo.dbxrefs();
-                    var extra_dbxrefs = self.extraDbxrefs(self.uniqueName, organism);
+                    var extra_dbxrefs = self.extraDbxrefs(geneInfo.isoform.uniqueName, organism);
 
                     var coordinates = geneInfo.coordinates();
                     var products = geneInfo.terms("genedb_products");
@@ -1394,9 +1412,11 @@ $(function() {
                         len : function(maps) { // returns the combined size of
                             // a list of maps
                             var count = 0
-                            for (m in maps)
-                                for (mm in maps[m])
+                            for (var m in maps) {
+                                for (mm in maps[m]) {
                                     count++;
+                                }
+                            }
                             return count;
                         },
                         pubs : geneInfo.pubs(),
@@ -1412,8 +1432,27 @@ $(function() {
                         coordinates : coordinates,
                         orthologues : orthologues,
                         algorithm : algorithm,
+                        /*
+                         * This is a replacement of the first_element() appraoch below. 
+                         */
+                        separate : function (name, separator) {
+                            if (wa.viewModel.separate.elements == null) {
+                                wa.viewModel.separate.elements = {};
+                            }
+                            var elements = wa.viewModel.separate.elements;
+                            if (elements.hasOwnProperty(name)) {
+                                return separator;
+                            } 
+                            elements[name] = 1;
+                            return '';
+                        },
+                        /*
+                         * TODO All uses of first_element should eventually be replaced with the above separate function. first_element itself works, but for some reason
+                         * jquery.template {{if}} statements are called more than expected - probably due to knockout binding.  
+                         */
                         first_element : function(name, x) {
-                            // $.log("first_element",name,wa.viewModel.first_element[name]);
+                            
+                            //$.log("first_element",name,wa.viewModel.first_element[name]);
                             if (wa.viewModel.first_element[name] == null) {
                                 wa.viewModel.first_element[name] = true;
                                 // $.log("first_element",name, true, x, this);
@@ -1425,9 +1464,20 @@ $(function() {
                         camel_to_title : function(camel) {
                             var tokens = camel.split("_");
                             var title = [];
-                            for (t in tokens) {
+                            for (var t in tokens) {
                                 var token = tokens[t];
-                                title.push(token.charAt(0).toUpperCase() + token.slice(1));
+                                if (token != null && token.length > 0) {
+                                    if (token.hasOwnProperty("charAt")) {
+                                        var first_char = token.charAt(0);
+                                        var first_char_uppercased = first_char.toUpperCase();
+                                        var the_rest = token.slice(1);
+                                        var uppercased = first_char_uppercased + the_rest;
+                                        title.push(uppercased);
+                                    } else {
+                                        title.push(token);
+                                    }
+                                    
+                                }
                             }
                             return title.join(" ");
                         },
@@ -1440,6 +1490,27 @@ $(function() {
                     wa.viewModel.domain_graph_shown = proteinMap.shown;
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
+                    
+                    if (geneInfo.hierarchy.timelastmodified != null) {
+                        var lastmodifiedSplit = geneInfo.hierarchy.timelastmodified.split(" ")[0].split("."); 
+                        
+                        var day = lastmodifiedSplit[0];
+                        if (day.length == 1)
+                            day += "0";
+                        
+                        // var month = lastmodifiedSplit[1];
+                        //                         if (month.startsWith("0"))
+                        //                             month = month.substr(1);
+                        //                         month = self.months[parseInt(month) - 1];
+                        
+                        // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
+                        var month = self.months[parseInt(lastmodifiedSplit[1], 10) - 1];
+                        
+                        var year = lastmodifiedSplit[2];
+                        
+                        wa.viewModel.lastmodified = day + " " + month + " " + year;
+                    } 
+                    
 
                     ko.applyBindings(wa.viewModel);
 
@@ -1506,8 +1577,15 @@ $(function() {
         };
 
         self.notify = function(isoform) {
-            for ( var o in self.observers)
-                self.observers[o].select(isoform.uniqueName);
+            for ( var o in self.observers) {
+                var observer = self.observers[o];
+                var uniqueName = isoform.uniqueName;
+                if (observer != null && uniqueName != null) {
+                    if (observer.hasOwnProperty("select")) {
+                        observer.select(uniqueName);
+                    }
+                }
+            }
         }
 
         /*
@@ -1572,7 +1650,6 @@ $(function() {
                 fmax : 1000,
                 region : "some_region"
             },
-            // initial_window_size : 20000,
             webArtemisPath : "path",
             max_residues : 1000000,
             service : "/services/",
@@ -1592,21 +1669,21 @@ $(function() {
             region : self.coordinates.region
         });
 
-        var topLevelFeatureLength = parseInt(self.sequenceLength);
+        var topLevelFeatureLength = parseInt(self.sequenceLength, 10);
         var max = self.max_residues;
         var needsSlider = true;
         if (max > topLevelFeatureLength) {
             max = topLevelFeatureLength;
             // needsSlider = false;
         }
-        var zoomMaxRatio = max / parseInt(self.sequenceLength);
+        var zoomMaxRatio = max / parseInt(self.sequenceLength, 10);
 
         // $.log("zooom " + zoomMaxRatio);
 
         $(self.chromosome_map_element).ChromosomeMap({
             region : self.coordinates.region,
             overideUseCanvas : false,
-            bases_per_row : parseInt(self.sequenceLength),
+            bases_per_row : parseInt(self.sequenceLength, 10),
             row_height : 10,
             row_width : 870,
             overideUseCanvas : true,
@@ -1626,12 +1703,12 @@ $(function() {
 
         wa.webArtemisLinker.link(real_fmin, real_fmax);
 
-        self.initial_window_size = real_fmax - real_fmin;
+        var initial_window_size = real_fmax - real_fmin;
 
         $(self.web_artemis_element).WebArtemis({
             source : self.coordinates.region,
             start : real_fmin,
-            bases : self.initial_window_size,
+            bases : initial_window_size,
             showFeatureList : false,
             width : 950,
             directory : self.webArtemisPath,
@@ -1645,29 +1722,35 @@ $(function() {
         var chromosomeMapToWebArtemis = new ChromosomeMapToWebArtemis();
 
         if (needsSlider) {
-
+            
+            
+            
+            
+            
+            // added spaces to see if this is it.
             $(self.chromosome_map_slider_element).ChromosomeMapSlider({
                 windowWidth : 870,
-                max : parseInt(self.sequenceLength),
+                max : parseInt(self.sequenceLength, 10),
                 observers : [ chromosomeMapToWebArtemis ],
                 pos : real_fmin,
-                width : self.initial_window_size
+                width : initial_window_size
             });
-
+            
+            // the timeout is needed to initialize Web-Artemis
             setTimeout(function() {
-                for (o in self.observers) {
+                for (var o in self.observers) {
                     $(self.web_artemis_element).WebArtemis('addObserver', self.observers[o]);
                 }
                 $(self.web_artemis_element).WebArtemis('addObserver', new WebArtemisToChromosomeMap(self.chromosome_map_slider_element));
             }, 500);
         }
 
-        self.recoordinate = function(coordinates) {
-            var fDisplay = featureDisplayObjs[0];
-            var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2));
-            chromosomeMapToWebArtemis.move(p);
-            wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
-        }
+//        self.recoordinate = function(coordinates) {
+//            var fDisplay = featureDisplayObjs[0];
+//            var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2), 10);
+//            chromosomeMapToWebArtemis.move(p);
+//            wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
+//        }
 
     }
 

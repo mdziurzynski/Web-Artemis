@@ -4,7 +4,7 @@
 		<td>
 		  <span data-bind="text: systematicName"></span>
 		  <span data-bind="visible: len(previous_systematic_ids) > 0">
-            (previously known as : <span data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids} }"></span>)
+            (previously known as : <span data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids,separate:separate,name:'previous_systematic'} }"></span>)
           </span>
 		</td>
 	</tr>
@@ -14,7 +14,7 @@
 	</tr>
 	<tr data-bind="visible: len([synonyms]) > 0">
 	    <th>Synonym</th>
-		<td data-bind="template: {name: 'synonyms', data: {synonyms:synonyms} }" ></td>
+		<td data-bind="template: {name: 'synonyms', data: {synonyms:synonyms,separate:separate,name:'synonyms'} }" ></td>
     </tr>
 	<tr>
 		<th>Gene Type</th>
@@ -29,7 +29,7 @@
 	</tr>
 	<tr data-bind="visible: len([product_synonyms]) > 0">
 	    <th>Product Synonym</th>
-		<td data-bind="template: {name: 'synonyms', data: {synonyms:product_synonyms} }" ></td>
+		<td data-bind="template: {name: 'synonyms', data: {synonyms:product_synonyms,separate:separate,name:'product_synonyms'} }" ></td>
     </tr>
 	<tr data-bind="visible: len(dbxrefs) > 0 " >
 		<th>See Also</th>
