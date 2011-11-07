@@ -435,7 +435,40 @@ $(function() {
             return map;
         }
         self.dbxrefs = function() {
-            return self.get_attribute_map("dbxrefs");
+            //return self.get_attribute_map("dbxrefs");
+            var dbxrefs = {};
+            
+            self.recurse_hierarchy(self.hierarchy, function(feature) {
+                
+                var dbxrefs_list = [];
+                
+                if (feature.dbxrefs != null && feature.dbxrefs.length > 0) {
+                    dbxrefs_list = feature.dbxrefs;
+                }
+                
+                // EC numbers are stored as properties currently, but let's pretend they are dbxrefs
+                for (var p in feature.properties) {
+                    var prop = feature.properties[p];
+                    
+                    if (prop.name == "EC_number") {
+                        dbxrefs_list.push({
+                            db : {
+                                name : "EC",
+                                urlprefix : "/DbLinkRedirect/EC/"
+                            },
+                            accession : prop.value
+                        });
+                    }
+                }
+                
+                if (dbxrefs_list.length > 0) {
+                    dbxrefs[feature.uniqueName] = dbxrefs_list;
+                }
+                
+            });
+            
+            return dbxrefs;
+            
         }
         self.coordinates = function() {
             return self.hierarchy.coordinates;
@@ -1382,6 +1415,10 @@ $(function() {
                     wa.viewHelper.organism = organism;
 
                     var dbxrefs = geneInfo.dbxrefs();
+                    
+                    
+                    
+                    
                     var extra_dbxrefs = self.extraDbxrefs(geneInfo.isoform.uniqueName, organism);
 
                     var coordinates = geneInfo.coordinates();
