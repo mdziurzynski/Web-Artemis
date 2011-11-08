@@ -14,8 +14,9 @@
          {{each(pu, pub) product.pubs}} 
                   <a href='http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.uniqueName}'>${pub.uniqueName}</a> 
          {{/each}} 
+         
          {{each(dp, dbxref) product.dbxrefs}} 
-                  ${dbxref} 
+                  <a href='${dbxref.db.urlprefix}${dbxref.accession}${wa.viewHelper.dbxref_prefix_suffixes[dbxref.db.urlprefix]}'>${dbxref.accession}</a>
           {{/each}} 
          <span data-bind="template: {name: 'nothers', data: {count:product.count, link: window.wa.viewHelper.others_product_link(product.name, f)} }" ></span>
     {{/each}}
