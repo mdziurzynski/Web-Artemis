@@ -1,5 +1,1 @@
-{{if synonyms != null}}
-{{each(k, list) synonyms}}{{if list != null}}
-    {{each(s, syn) list}}{{if syn != null}}${ separate(name, ', ') }${syn.synonym}{{/if}}{{/each}}
-{{/if}}{{/each}}
-{{/if}}
+{{if synonyms != null}}{{each(k, list) synonyms}}{{if list != null}}{{each(s, syn) list}}{{if syn != null}}${ separate(name, ', ') }${syn.synonym}{{/if}}{{/each}}{{/if}}{{/each}}{{/if}}
