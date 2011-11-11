@@ -136,7 +136,7 @@ if(!String.prototype.startsWith){
 				if (useCanvas) {
 					ctx.strokeRect(x,y,w,h);
 				} else {
-					axisHtml += "<div class='chromosome_axis' style='border:1px solid black;position:absolute;left:" + x + "px;top:" + y + "px;width:"+ w +"px;height:0px;'></div>";
+					axisHtml += "<div class='chromosome_axis' style='border-top:1px solid black;position:absolute;left:" + x + "px;top:" + y + "px;width:"+ w +"px;height:0px;'></div>";
 				}
 				
 				axisHtml += "<div class='chromosome_axis_label' style='z-index:100000000;position:absolute;left:" + (x + 5) + "px;top:" + (y) + "px;'>"+text+"</div>";
@@ -318,8 +318,9 @@ if(!String.prototype.startsWith){
 	        							continue;
 	        						}
 		        					
+		        					
 		        					if (feature.strand == -1) {
-				        				r_y += settings.row_height / 2;
+		        					    y += (settings.row_height / 2) + 1
 				        			}
 		        					
 		        					buffer += self.append(r_x,r_y,r_w,h,color,feature.uniqueName,text);
@@ -330,7 +331,7 @@ if(!String.prototype.startsWith){
 		        				}
 		        				
 		        			} else {
-		        				
+		        			    
 		        				if (feature.fmin >= base_position_start) {
 		        					
 		        					var x = coordsFmin.x / xscale; 
@@ -339,7 +340,7 @@ if(!String.prototype.startsWith){
 				        			
 				        			
 				        			if (feature.strand == -1) {
-				        				y += settings.row_height / 2;
+				        				y += (settings.row_height / 2) + 1;
 				        			}
 				        			
 				        			buffer += self.append(x,y,w,h,color,feature.uniqueName, text);
