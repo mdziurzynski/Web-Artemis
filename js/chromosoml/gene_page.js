@@ -691,7 +691,40 @@ $(function() {
             });
 
             return algorithm;
-        }
+        };
+        
+        self.mostRecentTimelastmodified = function() {
+            
+            var timelastmodified = null;
+            
+            self.recurse_hierarchy(self.hierarchy, function(feature) {
+                
+                var lastmodifiedSplit = feature.timelastmodified.split(" ")[0].split("."); 
+                
+                // $.log(feature.uniqueName + " :: " + feature.timelastmodified + "  " + lastmodifiedSplit);
+                
+                // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
+                var day = parseInt(lastmodifiedSplit[0], 10);
+                var month = parseInt(lastmodifiedSplit[1], 10);
+                var year = parseInt(lastmodifiedSplit[2], 10);
+                
+                var date = new Date();
+                date.setYear(year);
+                date.setMonth(month);
+                date.setDate(day);
+                
+                if (timelastmodified == null) {
+                    timelastmodified = date;
+                } else {
+                    if (date.getTime() > timelastmodified.getTime()) {
+                        timelastmodified = date;
+                    }
+                }
+                
+            });
+            
+            return timelastmodified;
+        };
     };
 
     /*
@@ -1427,6 +1460,8 @@ $(function() {
                     var domains = geneInfo.domains();
                     
                     var domain_list = geneInfo.domain_list();
+                    
+                    // $.log(domain_list);
                     //$.log(domain_graph);
 //                    for (var d in domain_list) {
 //                        var dg = domain_list[d];
@@ -1528,27 +1563,20 @@ $(function() {
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
                     
-                    if (geneInfo.hierarchy.timelastmodified != null) {
-                        var lastmodifiedSplit = geneInfo.hierarchy.timelastmodified.split(" ")[0].split("."); 
+                    var timelastmodified = geneInfo.mostRecentTimelastmodified();
+                    if (timelastmodified != null) {
                         
-                        var day = lastmodifiedSplit[0];
-                        if (day.length == 1)
-                            day += "0";
-                        
-                        // var month = lastmodifiedSplit[1];
-                        //                         if (month.startsWith("0"))
-                        //                             month = month.substr(1);
-                        //                         month = self.months[parseInt(month) - 1];
-                        
-                        // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
-                        var month = self.months[parseInt(lastmodifiedSplit[1], 10) - 1];
-                        
-                        var year = lastmodifiedSplit[2];
+                        var day = timelastmodified.getDate();
+                        if (day < 10) {
+                            day = "0" + day;
+                        }
+                        var month = self.months[timelastmodified.getMonth() -1];
+                        var year = timelastmodified.getYear();
                         
                         wa.viewModel.lastmodified = day + " " + month + " " + year;
-                    } 
+                        
+                    }
                     
-
                     ko.applyBindings(wa.viewModel);
 
                     // $.log(["onComplete?",
