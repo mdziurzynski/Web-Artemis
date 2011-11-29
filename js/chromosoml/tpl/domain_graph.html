@@ -46,7 +46,17 @@
             font-size:xx-small;
             color:black; 
             ">
-        <div style="position:relative;right:${String(box.fmax).length * 4.5}px;top:5px;">${box.fmax}</div>
+    </div>
+    <div style="position:absolute; 
+            left:${box.x2 -25}px; 
+            bottom:10px; 
+            width:50px;
+            text-align:center; 
+            height:5px;
+            font-size:xx-small;
+            color:black; 
+            ">
+        ${box.fmax}
     </div>
     
 {{/each}}
@@ -66,12 +76,12 @@
             
             "></div>
     <div style="position:absolute; 
-            left:${box.x}px; 
+            left:${box.x -25}px; 
             bottom:-15px;
-            width:10px;  
+            width:50px;
+            text-align:center;  
             font-style:italic;
-            font-size:xx-small;
-            color: grey;">${box.fmin}&#x2212;${box.fmax}</div>
+            font-size:xx-small;">${box.fmin}&#x2212;${box.fmax}</div>
     
 {{/each}}
 

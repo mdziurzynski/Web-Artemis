@@ -1,3 +1,4 @@
+//"use strict";
 
 if (!Object.create) {
     Object.create = function(o) {
@@ -1371,6 +1372,9 @@ $(function() {
 //                    }
                 }
                 if (!merging) {
+                    
+                    
+                    
                     merged_gaps.push({
                         fmin : box.fmin,
                         fmax : box.fmax,
@@ -1385,7 +1389,22 @@ $(function() {
             
             self.gaps = merged_gaps;
             
+            var trimmed_shown = [];
+            for ( var b in self.shown) {
+                var box = self.shown[b];
+                var include_box = true;
+                for (var m in merged_gaps) {
+                    var merged_gap = merged_gaps[m];
+                    if (box.fmax == merged_gap.fmin) {
+                        include_box = false;
+                    }
+                }
+                if (include_box) {
+                    trimmed_shown.push(box);
+                }
+            }
             
+            self.shown = trimmed_shown;
             
             
             self.domain_graph = [];
@@ -1789,7 +1808,7 @@ $(function() {
 
         $(self.chromosome_map_element).ChromosomeMap({
             region : self.coordinates.region,
-            overideUseCanvas : false,
+            //overideUseCanvas : false,
             bases_per_row : parseInt(self.sequenceLength, 10),
             row_height : 10,
             row_width : 870,
