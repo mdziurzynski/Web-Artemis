@@ -903,13 +903,15 @@ $(function() {
 
                         var domain_box = {
                             x : domain.fmin,
-                            width : domain.fmax - domain.fmin
+                            width : domain.fmax - domain.fmin + 1
                         }
 
                         var bounds_box = {
                             x : bounds.fmin,
-                            width : bounds.fmax - bounds.fmin
+                            width : bounds.fmax - bounds.fmin + 1
                         }
+                        
+                        //$.log(domain.uniqueName, bounds.fmin, domain_box, bounds_box);
 
                         var d1 = self.pointInBox(domain.fmin, bounds_box);
                         var d2 = self.pointInBox(domain.fmax, bounds_box);
@@ -917,6 +919,7 @@ $(function() {
                         var b2 = self.pointInBox(bounds.fmax, domain_box);
 
                         if (d1 || d2 || b1 || b2) {
+                            //$.log("!");
                             return true;
                         }
 
@@ -1015,24 +1018,31 @@ $(function() {
             return gapLength;
         }
 
-        self.getDivPosition = function(base_position) {
+        self.getDivPosition = function(base_position, debug) {
             var subtract = 0;
             for (var g in self.gaps) {
                 var gap = self.gaps[g];
                 var gap_length = gap.fmax - gap.fmin;
-
+                
+                if (debug) {
+                    $.log("gap", gap.fmax, "-", gap.fmin)
+                }
+                
                 if (gap.fmax < base_position) {
                     subtract += gap_length;
                 } else {
                     break;
                 }
             }
-            // $.log(g, self.gaps[g -1], base_position, subtract, base_position
-            // - subtract);
+            
+//            if (debug) {
+//                $.log(g, self.gaps[g -1], base_position, subtract, base_position - subtract);
+//            }
+            
             return base_position - subtract;
         }
 
-        self.scaleX = function(base_position) {
+        self.scaleX = function(base_position, debug) {
             var coordinates = self.hierarchy.coordinates[0];
             var base_length = coordinates.fmax - coordinates.fmin;
 
@@ -1040,15 +1050,22 @@ $(function() {
 
             var max = base_length - totalGapLength;
 
-            var div_position = self.getDivPosition(base_position);
+            var div_position = self.getDivPosition(base_position, debug);
 
             var pos = (self.pixel_width / max) * div_position
-
-            // $.log("scaleX", base_length, totalGapLength, max, base_position,
-            // "div:", div_position, self.pixel_width, pos);
+            
+            if (debug) {
+                $.log("scaleX", base_position, div_position, self.pixel_width, max, div_position, pos);
+            }
+            
+//            $.log(self.pixel_width, max, div_position, pos);
+//            
+//            $.log("scaleX", base_length, totalGapLength, max, base_position,
+//             "div:", div_position, self.pixel_width, pos);
 
             return pos;
         }
+        
 
         self.determine_step = function(max) {
 
@@ -1253,7 +1270,7 @@ $(function() {
                 
                 self.re_max(category_box);
                 self.domain_graph.push(category_box);
-                
+                //$.log(category_box);
             }
             
             
@@ -1267,6 +1284,7 @@ $(function() {
                 
                 self.re_max(box);
                 self.domain_graph.push(box);
+                //$.log(box);
             }
             
         }
@@ -1307,32 +1325,50 @@ $(function() {
                     self.gaps.push(bounds);
                 }
             }
-            // $.log("shown");
+            
+            //$.log("gaps");
+            // $.log(self.gaps);
+            
+            //$.log("shown");
             for ( var b in self.shown) {
                 var box = self.shown[b];
-                box.x = self.scaleX(box.fmin);
-                // box.x2 = self.scaleX(box.fmax);
-                // $.log(box.fmin, box.x);
+                //$.log("BOX", box.fmin, box.fmax);
+                
+                // not using box.x in the template
+                //box.x = self.scaleX(box.fmin, true);
+                
+                box.x2 = self.scaleX(box.fmax);
+                //$.log("x", box.x, box.x2);
             }
-            // $.log("gaps");
 
             var merged_gaps = [];
 
             for ( var b in self.gaps) {
                 var box = self.gaps[b];
+                
                 box.x = self.scaleX(box.fmin);
                 box.x2 = self.scaleX(box.fmax);
-                // $.log(box.fmin, box.x);
-
+                //$.log("box", box.fmin, box.fmax, box.x, box.x2);
+                
                 var merging = false;
                 for (var m in merged_gaps) {
                     var merged_gap = merged_gaps[m];
-                    if (merged_gap.x2 == box.x) {
+                    if (merged_gap.fmax == box.fmin) {
                         merged_gap.x2 = box.x2;
                         merged_gap.fmax = box.fmax;
                         merging = true;
                         break;
                     }
+                    
+//                    $.log(box.x, box.x2, merged_gap.x, merged_gap.x2);
+//                    if (box.x != merged_gap.x                
+//                            && box.x == merged_gap.x2) {
+//                        $.log("!");
+//                        merged_gap.x2 = box.x2;
+//                        merged_gap.fmax = box.fmax;
+//                        merging = true;
+//                        break;
+//                    }
                 }
                 if (!merging) {
                     merged_gaps.push({
@@ -1343,11 +1379,15 @@ $(function() {
                     });
                 }
             }
-
-            // $.log(merged_gaps);
-
+            
+//            $.log("merged");
+//            $.log(merged_gaps);
+            
             self.gaps = merged_gaps;
-
+            
+            
+            
+            
             self.domain_graph = [];
 
             // self.y = 0;
@@ -1562,6 +1602,8 @@ $(function() {
                     wa.viewModel.domain_graph_shown = proteinMap.shown;
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
+                    
+                    // $.log(proteinMap.domain_graph);
                     
                     var timelastmodified = geneInfo.mostRecentTimelastmodified();
                     if (timelastmodified != null) {
