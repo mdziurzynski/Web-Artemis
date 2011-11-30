@@ -38,6 +38,14 @@
             z-index:100;
         }
         
+        div.orglink {
+            padding:5px;
+            border:1px solid gey;
+        }
+        
+        div.orglink :hover {
+            text-decoration:underline;
+        }
     
     </style>
     
@@ -104,7 +112,7 @@
                 var org_links = [];
                 for (var o in organisms) {
                     var organism = organisms[o];
-                    var org_link = "<a style='font-size:large;' id='" + organism.common_name + "' >" + organism.name + "</a>" ;
+                    var org_link = "<a class='orglink' style='font-size:large;' id='" + organism.common_name + "' >" + organism.name + "</a>" ;
                     org_links.push(org_link);
                     orgs.push(organism.common_name);
                 }
@@ -137,6 +145,9 @@
         }
         
         function onGeneClick(event) {
+            
+           var region = event.target.title;
+            
             $.ajax({
                 url: service + "feature/isoform.json",
                 type: 'GET',
@@ -148,8 +159,20 @@
                     $.ajax({
                         url: service + "/regions/sequenceLength.json",
                         dataType: 'jsonp',
-                        data: { 'region' : event.target.title },
+                        data: { 'region' : region },
                         success: function(regions) {
+                            
+                            var fmax = 1000;
+                            if (fmax > sequenceLength) {
+                                fmax = sequenceLength;
+                            }
+                            
+                            var coordinates = {
+                                fmin : 1,
+                                fmax : fmax,
+                                region : region
+                            }
+                            
                             var sequenceLength = regions[0].length; 
                             new wa.EmbeddedWebArtemis({
                                 coordinates : coordinates, 
