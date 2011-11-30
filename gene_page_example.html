@@ -43,7 +43,7 @@
             border:1px solid gey;
         }
         
-        div.orglink :hover {
+        a.orglink :hover {
             text-decoration:underline;
         }
     
@@ -140,7 +140,7 @@
                 overideUseCanvas : true,
                 loading_interval : 100000,
                 click : onGeneClick
-            });
+            }).show();
             $("#apptabs").tabs('select', 2);
         }
         
@@ -161,6 +161,7 @@
                         dataType: 'jsonp',
                         data: { 'region' : region },
                         success: function(regions) {
+                            var sequenceLength = regions[0].length; 
                             
                             var fmax = 1000;
                             if (fmax > sequenceLength) {
@@ -173,7 +174,8 @@
                                 region : region
                             }
                             
-                            var sequenceLength = regions[0].length; 
+                            $("#chromsome").hide();
+                            
                             new wa.EmbeddedWebArtemis({
                                 coordinates : coordinates, 
                                 webArtemisPath: $.url().attr("directory"), 
