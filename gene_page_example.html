@@ -38,7 +38,7 @@
             z-index:100;
         }
         
-        div.orglink {
+        a.orglink {
             padding:5px;
             border:1px solid gey;
         }
@@ -148,35 +148,27 @@
         
         function onGeneClick(event) {
             
-           var region = event.target.title;
-            
+           var gene = event.target.title;
+           $("#chromsome").hide();
+           
             $.ajax({
-                url: service + "feature/isoform.json",
+                url: service + "feature/info.json",
                 type: 'GET',
                 dataType: 'jsonp',
                 data: {
-                    'uniqueName' : event.target.title
+                    'uniqueName' : gene
                 },
-                success: function(isoform) {
+                success: function(feature) {
+                    
+                    var coordinates = feature.coordinates[0];
+                    console.log(feature);
+                    
                     $.ajax({
                         url: service + "/regions/sequenceLength.json",
                         dataType: 'jsonp',
                         data: { 'region' : region },
                         success: function(regions) {
                             var sequenceLength = regions[0].length; 
-                            
-                            var fmax = 1000;
-                            if (fmax > sequenceLength) {
-                                fmax = sequenceLength;
-                            }
-                            
-                            var coordinates = {
-                                fmin : 1,
-                                fmax : fmax,
-                                region : region
-                            }
-                            
-                            $("#chromsome").hide();
                             
                             embeddedWebArtemis = null;
                             
@@ -186,9 +178,10 @@
                                 sequenceLength : sequenceLength,
                                 service : service
                             });
-                            $("#apptabs").tabs('select', 3);
+                            console.log("embedded " + embeddedWebArtemis);
                         }
                     }); 
+                    
                 }
             });
         }
