@@ -127,12 +127,13 @@
         }
         
         function onChromosomeClick(region) {
-            $("#chromosome-container").ChromosomeMap({
-                region : "${region}", 
+            $("#chromsome").ChromosomeMap({
+                region : region, 
                 overideUseCanvas : true,
                 loading_interval : 100000,
                 click : onGeneClick
             });
+            $("#apptabs").tabs('select', 2);
         }
         
         function onGeneClick(event) {
@@ -158,6 +159,7 @@
                             });
                         }
                     }); 
+                    $("#apptabs").tabs('select', 3);
                 }
             });
         }
@@ -174,7 +176,7 @@
     <ul>
         <li><a href="#tabs-1">Organisms</a></li>
         <li><a href="#tabs-2">Chromosomes</a></li>
-        <li><a href="#tabs-3">Genes</a></li>
+        <li><a href="#tabs-3">Chromosome Map</a></li>
         <li><a href="#tabs-3">Gene</a></li>
     </ul>
     <div id="tabs-1">
