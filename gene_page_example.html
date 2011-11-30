@@ -38,12 +38,13 @@
             z-index:100;
         }
         
-        a.orglink {
+        div.orglink {
             padding:5px;
             border:1px solid gey;
+            font-size:large;
         }
         
-        a.orglink :hover {
+        div.orglink a:hover {
             text-decoration:underline;
         }
     
@@ -112,11 +113,11 @@
                 var org_links = [];
                 for (var o in organisms) {
                     var organism = organisms[o];
-                    var org_link = "<a class='orglink' style='font-size:large;' id='" + organism.common_name + "' >" + organism.name + "</a>" ;
+                    var org_link = "<div class='orglink'><a id='" + organism.common_name + "' >" + organism.name + "</a></div>" ;
                     org_links.push(org_link);
                     orgs.push(organism.common_name);
                 }
-                $("#organisms").html(org_links.join("<br>")).click(onOrganismClick);
+                $("#organisms").html(org_links.join(" ")).click(onOrganismClick);
             }
         });
         
