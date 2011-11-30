@@ -148,7 +148,7 @@
                     $.ajax({
                         url: service + "/regions/sequenceLength.json",
                         dataType: 'jsonp',
-                        data: { 'region' : coordinates.region },
+                        data: { 'region' : event.target.title },
                         success: function(regions) {
                             var sequenceLength = regions[0].length; 
                             new wa.EmbeddedWebArtemis({
@@ -157,9 +157,9 @@
                                 sequenceLength : sequenceLength,
                                 service : service
                             });
+                            $("#apptabs").tabs('select', 3);
                         }
                     }); 
-                    $("#apptabs").tabs('select', 3);
                 }
             });
         }
