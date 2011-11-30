@@ -24,7 +24,12 @@
                        Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
                    {{/if}}
                 {{/if}}
-                Location : ${domain.fmin} - ${domain.fmax}
+                {{if domain.properties != null }}
+                    {{each(p, prop) domain.properties}}
+                        ${prop.name} : ${prop.value} <br> 
+                    {{/each}}
+                {{/if}}
+                Location : ${domain.fmin} {{if domain.fmax != domain.fmin}} - ${domain.fmax} {{/if}}
              </div>
             {{/if}}
                     
@@ -38,7 +43,7 @@
 
 {{each(b, box) domain_graph_shown}}
     <div style="position:absolute; 
-            left:${box.x}px; 
+            left:${box.x2}px; 
             bottom:15px; 
             width:10px; 
             height:5px;
@@ -46,9 +51,22 @@
             font-size:xx-small;
             color:black; 
             ">
-        ${box.fmin}
     </div>
+    <div style="position:absolute; 
+            left:${box.x2 -25}px; 
+            bottom:10px; 
+            width:50px;
+            text-align:center; 
+            height:5px;
+            font-size:xx-small;
+            color:black; 
+            ">
+        ${box.fmax}
+    </div>
+    
 {{/each}}
+
+
 
 {{each(b, box) domain_graph_hidden}}
     
@@ -63,12 +81,12 @@
             
             "></div>
     <div style="position:absolute; 
-            left:${box.x}px; 
+            left:${box.x -25}px; 
             bottom:-15px;
-            width:10px;  
+            width:50px;
+            text-align:center;  
             font-style:italic;
-            font-size:xx-small;
-            color: grey;">${box.fmin}-${box.fmax}</div>
+            font-size:xx-small;">${box.fmin}&#x2212;${box.fmax}</div>
     
 {{/each}}
 

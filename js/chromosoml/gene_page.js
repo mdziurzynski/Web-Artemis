@@ -1,3 +1,4 @@
+"use strict";
 
 if (!Object.create) {
     Object.create = function(o) {
@@ -691,7 +692,40 @@ $(function() {
             });
 
             return algorithm;
-        }
+        };
+        
+        self.mostRecentTimelastmodified = function() {
+            
+            var timelastmodified = null;
+            
+            self.recurse_hierarchy(self.hierarchy, function(feature) {
+                
+                var lastmodifiedSplit = feature.timelastmodified.split(" ")[0].split("."); 
+                
+                // $.log(feature.uniqueName + " :: " + feature.timelastmodified + "  " + lastmodifiedSplit);
+                
+                // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
+                var day = parseInt(lastmodifiedSplit[0], 10);
+                var month = parseInt(lastmodifiedSplit[1], 10);
+                var year = parseInt(lastmodifiedSplit[2], 10);
+                
+                var date = new Date();
+                date.setYear(year);
+                date.setMonth(month);
+                date.setDate(day);
+                
+                if (timelastmodified == null) {
+                    timelastmodified = date;
+                } else {
+                    if (date.getTime() > timelastmodified.getTime()) {
+                        timelastmodified = date;
+                    }
+                }
+                
+            });
+            
+            return timelastmodified;
+        };
     };
 
     /*
@@ -834,76 +868,31 @@ $(function() {
         self.domains = domains;
         self.sequenceLength = sequenceLength;
 
-        // self.init = function() {
-        // //var coordinates = self.coordinates()[0];
-        // self.bounds = {
-        // fmin : sequenceLength,
-        // fmax : 1
-        // }
-        // self.positions = {}
-        // for (var feature in domains) {
-        // for (var category in domains[feature]) {
-        // var domain = domains[feature][category];
-        // self.positions [feature+"::"+category] = {
-        // fmin : domain.fmin,
-        // fmax : domain.fmax
-        // }
-        // if (domain.fmin < self.bounds.fmin)
-        // self.bounds.fmin = domain.fmin;
-        // if (domain.fmin > self.bounds.fmax)
-        // self.bounds.fmax = domain.fmax;
-        // }
-        //    	        
-        // }
-        // return bounds;
-        // }
-
         self.isOverlap = function(bounds) {
-//            for ( var feature in self.domains) {
-//
-//                for ( var category in self.domains[feature]) {
-//
-//                    var domains = self.domains[feature][category];
 
-                    for ( var d in self.domains) {
-                        var domain = domains[d];
+            for ( var d in self.domains) {
+                var domain = domains[d];
 
-                        var domain_box = {
-                            x : domain.fmin,
-                            width : domain.fmax - domain.fmin
-                        }
+                var domain_box = {
+                    x : domain.fmin,
+                    width : domain.fmax - domain.fmin + 1
+                }
 
-                        var bounds_box = {
-                            x : bounds.fmin,
-                            width : bounds.fmax - bounds.fmin
-                        }
+                var bounds_box = {
+                    x : bounds.fmin,
+                    width : bounds.fmax - bounds.fmin + 1
+                }
 
-                        var d1 = self.pointInBox(domain.fmin, bounds_box);
-                        var d2 = self.pointInBox(domain.fmax, bounds_box);
-                        var b1 = self.pointInBox(bounds.fmin, domain_box);
-                        var b2 = self.pointInBox(bounds.fmax, domain_box);
+                var d1 = self.pointInBox(domain.fmin, bounds_box);
+                var d2 = self.pointInBox(domain.fmax, bounds_box);
+                var b1 = self.pointInBox(bounds.fmin, domain_box);
+                var b2 = self.pointInBox(bounds.fmax, domain_box);
 
-                        if (d1 || d2 || b1 || b2) {
-                            return true;
-                        }
+                if (d1 || d2 || b1 || b2) {
+                    return true;
+                }
 
-                        // $.log(category, domain.uniqueName, bounds.fmin,
-                        // domain.fmin, domain.fmax, bounds.fmax,
-                        // bounds.fmin <= domain.fmin && domain.fmin <=
-                        // bounds.fmax,
-                        // bounds.fmin <= domain.fmax && domain.fmax <=
-                        // bounds.fmax);
-                        // if ((bounds.fmin <= domain.fmin && domain.fmin <=
-                        // bounds.fmax) ||
-                        // (bounds.fmin <= domain.fmax && domain.fmax <=
-                        // bounds.fmax)) {
-                        // //$.log("!");
-                        // return true;
-                        // }
-                    }
-
-//                }
-//            }
+            }
             return false;
         }
 
@@ -947,8 +936,9 @@ $(function() {
             // $.log(box1.uniqueName, box1x_in_box2,box1x2_in_box2,
             // box2.uniqueName, box2x_in_box1, box2x2_in_box1);
 
-            if (debug)
+            if (debug) {
                 $.log([ box1.fmin, box1.fmax, box2.fmin, box2.fmax, box1x_in_box2, box1x2_in_box2, box2x_in_box1, box2x2_in_box1 ]);
+            }
 
             if (box1x_in_box2 || box1x2_in_box2 || box2x_in_box1 || box2x2_in_box1 ||
                     box1y_in_box2 || box1y2_in_box2 || box2y_in_box1 || box2y2_in_box1
@@ -956,11 +946,6 @@ $(function() {
                 return true;
             }
             
-            
-            
-            
-            
-
             return false;
         }
 
@@ -982,24 +967,27 @@ $(function() {
             return gapLength;
         }
 
-        self.getDivPosition = function(base_position) {
+        self.getDivPosition = function(base_position, debug) {
             var subtract = 0;
             for (var g in self.gaps) {
                 var gap = self.gaps[g];
                 var gap_length = gap.fmax - gap.fmin;
-
+                
+                if (debug) {
+                    $.log("gap", gap.fmax, "-", gap.fmin)
+                }
+                
                 if (gap.fmax < base_position) {
                     subtract += gap_length;
                 } else {
                     break;
                 }
             }
-            // $.log(g, self.gaps[g -1], base_position, subtract, base_position
-            // - subtract);
+            
             return base_position - subtract;
         }
 
-        self.scaleX = function(base_position) {
+        self.scaleX = function(base_position, debug) {
             var coordinates = self.hierarchy.coordinates[0];
             var base_length = coordinates.fmax - coordinates.fmin;
 
@@ -1007,23 +995,23 @@ $(function() {
 
             var max = base_length - totalGapLength;
 
-            var div_position = self.getDivPosition(base_position);
+            var div_position = self.getDivPosition(base_position, debug);
 
             var pos = (self.pixel_width / max) * div_position
-
-            // $.log("scaleX", base_length, totalGapLength, max, base_position,
-            // "div:", div_position, self.pixel_width, pos);
-
+            
+            if (debug) {
+                $.log("scaleX", base_position, div_position, self.pixel_width, max, div_position, pos);
+            }
+            
             return pos;
         }
+        
 
         self.determine_step = function(max) {
 
             function log10(val) {
                 return Math.log(val) / Math.log(10);
             }
-
-            // diff = max; // divide by 3 for amino acids
 
             var stepsUncorrected = max / self.step_number;
             var log = log10(stepsUncorrected);
@@ -1050,6 +1038,10 @@ $(function() {
             var _y = 0;
             var _start_y = 20;
             
+            /*
+             * First create boxes for each domain, and determine unique categories. 
+             * 
+             */
             for ( var d in self.domains) {
                 var domain = domains[d];
                 var category = domain.key;
@@ -1103,7 +1095,9 @@ $(function() {
             }
             
             
-            
+            /*
+             * Now create boxes for each category, and fit the domain boxes in them.
+             * */
             for ( var c in categories) {
                 var category = categories[c];
                 
@@ -1144,7 +1138,6 @@ $(function() {
                         type : type,
                         dbxref : dbxref,
                         category : category,
-                        //feature : feature,
                         uniqueName : domain.uniqueName,
                         x : x,
                         y : _start_y,
@@ -1154,7 +1147,8 @@ $(function() {
                         width : width,
                         height : _height,
                         colour : colour,
-                        bordercolour : colour
+                        bordercolour : colour,
+                        properties : domain.properties
                     }
                     
                     var is_membr = false;
@@ -1220,7 +1214,7 @@ $(function() {
                 
                 self.re_max(category_box);
                 self.domain_graph.push(category_box);
-                
+                //$.log(category_box);
             }
             
             
@@ -1234,6 +1228,7 @@ $(function() {
                 
                 self.re_max(box);
                 self.domain_graph.push(box);
+                //$.log(box);
             }
             
         }
@@ -1274,34 +1269,46 @@ $(function() {
                     self.gaps.push(bounds);
                 }
             }
-            // $.log("shown");
+            
+            //$.log("gaps");
+            // $.log(self.gaps);
+            
+            //$.log("shown");
             for ( var b in self.shown) {
                 var box = self.shown[b];
-                box.x = self.scaleX(box.fmin);
-                // box.x2 = self.scaleX(box.fmax);
-                // $.log(box.fmin, box.x);
+                //$.log("BOX", box.fmin, box.fmax);
+                
+                // not using box.x in the template
+                //box.x = self.scaleX(box.fmin, true);
+                
+                box.x2 = self.scaleX(box.fmax);
+                //$.log("x", box.x, box.x2);
             }
-            // $.log("gaps");
 
             var merged_gaps = [];
 
             for ( var b in self.gaps) {
                 var box = self.gaps[b];
+                
                 box.x = self.scaleX(box.fmin);
                 box.x2 = self.scaleX(box.fmax);
-                // $.log(box.fmin, box.x);
-
+                //$.log("box", box.fmin, box.fmax, box.x, box.x2);
+                
                 var merging = false;
                 for (var m in merged_gaps) {
                     var merged_gap = merged_gaps[m];
-                    if (merged_gap.x2 == box.x) {
+                    if (merged_gap.fmax == box.fmin) {
                         merged_gap.x2 = box.x2;
                         merged_gap.fmax = box.fmax;
                         merging = true;
                         break;
                     }
+                    
                 }
                 if (!merging) {
+                    
+                    
+                    
                     merged_gaps.push({
                         fmin : box.fmin,
                         fmax : box.fmax,
@@ -1310,17 +1317,36 @@ $(function() {
                     });
                 }
             }
-
-            // $.log(merged_gaps);
-
+            
+//            $.log("merged");
+//            $.log(merged_gaps);
+            
             self.gaps = merged_gaps;
-
+            
+            var trimmed_shown = [];
+            for ( var b in self.shown) {
+                var box = self.shown[b];
+                var include_box = true;
+                for (var m in merged_gaps) {
+                    var merged_gap = merged_gaps[m];
+                    if (box.fmax == merged_gap.fmin) {
+                        include_box = false;
+                    }
+                }
+                if (include_box) {
+                    trimmed_shown.push(box);
+                }
+            }
+            
+            self.shown = trimmed_shown;
+            
+            
             self.domain_graph = [];
 
             // self.y = 0;
             self.membrs = [ "non_cytoplasmic_polypeptide_region", "cytoplasmic_polypeptide_region", "transmembrane_polypeptide_region" ];
             self.max_y = 0;
-
+            
             self.determine_domain_positions();
 
         }
@@ -1425,13 +1451,7 @@ $(function() {
                     var products = geneInfo.terms("genedb_products");
                     var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
                     var domains = geneInfo.domains();
-                    
                     var domain_list = geneInfo.domain_list();
-                    //$.log(domain_graph);
-//                    for (var d in domain_list) {
-//                        var dg = domain_list[d];
-//                        $.log(dg.key, dg.uniqueName);
-//                    }
                     
                     var orthologues = geneInfo.orthologues();
                     var algorithm = geneInfo.algorithm();
@@ -1450,7 +1470,7 @@ $(function() {
                             // a list of maps
                             var count = 0
                             for (var m in maps) {
-                                for (mm in maps[m]) {
+                                for (var mm in maps[m]) {
                                     count++;
                                 }
                             }
@@ -1528,27 +1548,22 @@ $(function() {
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
                     
-                    if (geneInfo.hierarchy.timelastmodified != null) {
-                        var lastmodifiedSplit = geneInfo.hierarchy.timelastmodified.split(" ")[0].split("."); 
+                    // $.log(proteinMap.domain_graph);
+                    
+                    var timelastmodified = geneInfo.mostRecentTimelastmodified();
+                    if (timelastmodified != null) {
                         
-                        var day = lastmodifiedSplit[0];
-                        if (day.length == 1)
-                            day += "0";
-                        
-                        // var month = lastmodifiedSplit[1];
-                        //                         if (month.startsWith("0"))
-                        //                             month = month.substr(1);
-                        //                         month = self.months[parseInt(month) - 1];
-                        
-                        // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
-                        var month = self.months[parseInt(lastmodifiedSplit[1], 10) - 1];
-                        
-                        var year = lastmodifiedSplit[2];
+                        var day = timelastmodified.getDate();
+                        if (day < 10) {
+                            day = "0" + day;
+                        }
+                        var month = self.months[timelastmodified.getMonth() -1];
+                        var year = timelastmodified.getYear();
                         
                         wa.viewModel.lastmodified = day + " " + month + " " + year;
-                    } 
+                        
+                    }
                     
-
                     ko.applyBindings(wa.viewModel);
 
                     // $.log(["onComplete?",
@@ -1719,7 +1734,7 @@ $(function() {
 
         $(self.chromosome_map_element).ChromosomeMap({
             region : self.coordinates.region,
-            overideUseCanvas : false,
+            //overideUseCanvas : false,
             bases_per_row : parseInt(self.sequenceLength, 10),
             row_height : 10,
             row_width : 870,
