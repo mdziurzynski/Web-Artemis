@@ -144,6 +144,8 @@
             $("#apptabs").tabs('select', 2);
         }
         
+        var embeddedWebArtemis;
+        
         function onGeneClick(event) {
             
            var region = event.target.title;
@@ -176,7 +178,9 @@
                             
                             $("#chromsome").hide();
                             
-                            new wa.EmbeddedWebArtemis({
+                            embeddedWebArtemis = null;
+                            
+                            embeddedWebArtemis = new wa.EmbeddedWebArtemis({
                                 coordinates : coordinates, 
                                 webArtemisPath: $.url().attr("directory"), 
                                 sequenceLength : sequenceLength,
@@ -197,12 +201,19 @@
 
 <div style="width:200px;margin:auto;text-align:center;" id="spinner" class="spinner" ></div>
 
+<div id="chromosome-map-container"  >
+    <div id="chromosome-map" ></div>
+    <div id="chromosome-map-slider" ></div> 
+</div>
+<div class="wacontainer">
+    <div id="webartemis"></div>
+</div>
+
 <div style="font-family:sans-serif;" id="apptabs">
     <ul>
         <li><a href="#tabs-1">Organisms</a></li>
         <li><a href="#tabs-2">Chromosomes</a></li>
         <li><a href="#tabs-3">Chromosome Map</a></li>
-        <li><a href="#tabs-3">Gene</a></li>
     </ul>
     <div id="tabs-1">
         <div id="organisms"></div>
@@ -212,15 +223,6 @@
     </div>
     <div id="tabs-3">
         <div id="chromsome" ></div>
-    </div>
-    <div id="tabs-4">
-        <div id="chromosome-map-container"  >
-            <div id="chromosome-map" ></div>
-            <div id="chromosome-map-slider" ></div> 
-        </div>
-        <div class="wacontainer">
-            <div id="webartemis"></div>
-        </div>
     </div>
 </div>
 
