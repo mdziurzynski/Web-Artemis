@@ -102,8 +102,9 @@
             dataType: 'jsonp',
             success: function(organisms) {
                 var org_links = [];
-                for (var organism in organisms) {
-                    var org_link = "<a id='" + organism.common_name + "' >" + organism.name + "</a>" ;
+                for (var o in organisms) {
+                    var organism = organisms[o];
+                    var org_link = "<a style='font-size:large;' id='" + organism.common_name + "' >" + organism.name + "</a>" ;
                     org_links.push(org_link);
                     orgs.push(organism.common_name);
                 }
