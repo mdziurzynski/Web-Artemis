@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Gene Page Example</title>
+<style type="text/css">
+        @import "css/ui-lightness/jquery-ui-1.8.4.custom.css";
+    </style>
+    
+    <link rel="stylesheet" type="text/css" href="css/superfish.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="js/jquery.contextMenu-1.01/jquery.contextMenu.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="css/artemis.css" media="screen">
+    
+    
+    <style>
+        
+    div.wacontainer {
+            position:relative;
+            height:230px;
+            margin:0px;
+            padding:0px;
+            margin-top:-25px;
+        }
+        
+        .chromosome_feature {
+            border:0px;
+        }
+        
+        #chromosome-map-container {
+            margin-top:15px;
+            margin-left:25px;
+        }
+        
+        #chromosome-map-slider {
+            margin-top:-26px;
+            height:22px;
+            z-index:100;
+        }
+        
+    
+    </style>
+    
+    <script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.4.custom.min.js"></script>
+    
+    <script type="text/javascript" src="js/jquery.drawinglibrary/js/jquery.svg.js"></script>
+    <script type="text/javascript" src="js/jquery.drawinglibrary/js/jquery.drawinglibrary.js"></script>
+    <script type="text/javascript" src="js/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="js/jquery.flot.selection.min.js"></script>
+    
+    <script type="text/javascript" src="js/popup.js"></script>
+    <script type="text/javascript" src="js/jquery.contextMenu-1.01/jquery.contextMenu.js"></script>
+    
+    <script type="text/javascript" src="js/observerable.js"></script>
+    <script type="text/javascript" src="js/utility.js"></script>
+    <script type="text/javascript" src="js/bases.js"></script>
+    <script type="text/javascript" src="js/aminoacid.js"></script>
+    <script type="text/javascript" src="js/superfish-1.4.8/hoverIntent.js"></script>
+    <script type="text/javascript" src="js/superfish-1.4.8/superfish.js"></script>
+    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="js/graph.js"></script>
+    <script type="text/javascript" src="js/scrolling.js"></script>
+    <script type="text/javascript" src="js/selection.js"></script>
+    <script type="text/javascript" src="js/zoom.js"></script>
+    <script type="text/javascript" src="js/featureCvTerm.js"></script>
+    <script type="text/javascript" src="js/bam.js"></script>
+    <script type="text/javascript" src="js/vcf.js"></script>
+    <script type="text/javascript" src="js/featureList.js"></script>
+    <script type="text/javascript" src="js/navigate.js"></script>
+    <script type="text/javascript" src="js/genome.js"></script>
+    <script type="text/javascript" src="js/samFlag.js"></script>
+    
+    <script type="text/javascript" src="js/chromosoml/lib/jquery.log.js"></script>
+    <script type="text/javascript" src="js/chromosoml/lib/jquery.tmpl.js"></script>
+    <script type="text/javascript" src="js/chromosoml/lib/jquery.url.js"></script>
+    <script type='text/javascript' src='js/chromosoml/lib/knockout.js'></script>
+    <script type='text/javascript' src='js/chromosoml/lib/koExternalTemplateEngine.js'></script>
+    
+    <script type="text/javascript" src="js/chromosoml/chromosoml.js"></script>
+    <script type="text/javascript" src="js/chromosoml/gene_page.js"></script>
+    
+    <script>
+        
+    $(document).ready(function() {
+        
+        "use strict";
+        
+        var service = "http://www.genedb.org/services/";
+        var orgs = [];
+        
+        $.fn.CallStatusSpinner.defaults = {
+                height : 11.5,
+                width : 50,
+                img : 'js/chromosoml/img/spinner'
+        };
+        
+        $('.spinner').CallStatusSpinner();
+        
+        $.ajax({
+            url: service + "organisms/list.json",
+            dataType: 'jsonp',
+            success: function(organisms) {
+                var org_links = [];
+                for (var organism in organisms) {
+                    var org_link = "<a id='" + organism.common_name + "' >" + organism.name "</a>" ;
+                    org_links.push(org_link);
+                    orgs.push(organism.common_name);
+                }
+                $('#organisms').html(org_links).click(onOrganismClick);
+            }
+        });
+        
+        function onOrganismClick(event) {
+            var target = event.target;
+            if (target.id != null) {
+                if ($.inArray(target.id, orgs) > -1) {
+                    $("#chromosomes").ChromosomePicker({
+                        organism : organism,
+                        on_select : onChromosomeClick, 
+                        spinner : ".spinner"
+                    });
+                }
+            }
+        }
+        
+        function onChromosomeClick(region) {
+            $("#chromosome-container").ChromosomeMap({
+                region : "${region}", 
+                overideUseCanvas : true,
+                loading_interval : 100000,
+                click : onGeneClick
+            });
+        }
+        
+        function onGeneClick(event) {
+            $.ajax({
+                url: service + "feature/isoform.json",
+                type: 'GET',
+                dataType: 'jsonp',
+                data: {
+                    'uniqueName' : event.target.title
+                },
+                success: function(isoform) {
+                    $.ajax({
+                        url: service + "/regions/sequenceLength.json",
+                        dataType: 'jsonp',
+                        data: { 'region' : coordinates.region },
+                        success: function(regions) {
+                            var sequenceLength = regions[0].length; 
+                            new wa.EmbeddedWebArtemis({
+                                coordinates : coordinates, 
+                                webArtemisPath: $.url().attr("directory"), 
+                                sequenceLength : sequenceLength,
+                                service : service
+                            });
+                        }
+                    }); 
+                }
+            });
+        }
+        
+        
+    });
+    </script>
+</head>
+<body>
+
+<div style="width:200px;margin:auto;text-align:center;" id="spinner" class="spinner" ></div>
+
+<div style="font-family:sans-serif;" id="apptabs">
+    <ul>
+        <li><a href="#tabs-1">Organisms</a></li>
+        <li><a href="#tabs-2">Chromosomes</a></li>
+        <li><a href="#tabs-3">Genes</a></li>
+        <li><a href="#tabs-3">Gene</a></li>
+    </ul>
+    <div id="tabs-1">
+        <div id="organisms"></div>
+    </div>
+    <div id="tabs-2">
+        <div id="chromsomes" ></div>
+    </div>
+    <div id="tabs-3">
+        <div id="chromsome" ></div>
+    </div>
+    <div id="tabs-4">
+        <div id="chromosome-map-container"  >
+            <div id="chromosome-map" ></div>
+            <div id="chromosome-map-slider" ></div> 
+        </div>
+        <div class="wacontainer">
+            <div id="webartemis"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>
