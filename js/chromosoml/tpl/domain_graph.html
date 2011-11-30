@@ -24,7 +24,12 @@
                        Accession : <a href="${domain.dbxref.db.urlprefix}${domain.dbxref.accession}"> ${domain.dbxref.db.name}:${domain.dbxref.accession}</a>  <br>
                    {{/if}}
                 {{/if}}
-                Location : ${domain.fmin} - ${domain.fmax}
+                {{if domain.properties != null }}
+                    {{each(p, prop) domain.properties}}
+                        ${prop.name} : ${prop.value} <br> 
+                    {{/each}}
+                {{/if}}
+                Location : ${domain.fmin} {{if domain.fmax != domain.fmin}} - ${domain.fmax} {{/if}}
              </div>
             {{/if}}
                     

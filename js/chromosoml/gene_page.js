@@ -1,4 +1,4 @@
-//"use strict";
+"use strict";
 
 if (!Object.create) {
     Object.create = function(o) {
@@ -868,79 +868,31 @@ $(function() {
         self.domains = domains;
         self.sequenceLength = sequenceLength;
 
-        // self.init = function() {
-        // //var coordinates = self.coordinates()[0];
-        // self.bounds = {
-        // fmin : sequenceLength,
-        // fmax : 1
-        // }
-        // self.positions = {}
-        // for (var feature in domains) {
-        // for (var category in domains[feature]) {
-        // var domain = domains[feature][category];
-        // self.positions [feature+"::"+category] = {
-        // fmin : domain.fmin,
-        // fmax : domain.fmax
-        // }
-        // if (domain.fmin < self.bounds.fmin)
-        // self.bounds.fmin = domain.fmin;
-        // if (domain.fmin > self.bounds.fmax)
-        // self.bounds.fmax = domain.fmax;
-        // }
-        //    	        
-        // }
-        // return bounds;
-        // }
-
         self.isOverlap = function(bounds) {
-//            for ( var feature in self.domains) {
-//
-//                for ( var category in self.domains[feature]) {
-//
-//                    var domains = self.domains[feature][category];
 
-                    for ( var d in self.domains) {
-                        var domain = domains[d];
+            for ( var d in self.domains) {
+                var domain = domains[d];
 
-                        var domain_box = {
-                            x : domain.fmin,
-                            width : domain.fmax - domain.fmin + 1
-                        }
+                var domain_box = {
+                    x : domain.fmin,
+                    width : domain.fmax - domain.fmin + 1
+                }
 
-                        var bounds_box = {
-                            x : bounds.fmin,
-                            width : bounds.fmax - bounds.fmin + 1
-                        }
-                        
-                        //$.log(domain.uniqueName, bounds.fmin, domain_box, bounds_box);
+                var bounds_box = {
+                    x : bounds.fmin,
+                    width : bounds.fmax - bounds.fmin + 1
+                }
 
-                        var d1 = self.pointInBox(domain.fmin, bounds_box);
-                        var d2 = self.pointInBox(domain.fmax, bounds_box);
-                        var b1 = self.pointInBox(bounds.fmin, domain_box);
-                        var b2 = self.pointInBox(bounds.fmax, domain_box);
+                var d1 = self.pointInBox(domain.fmin, bounds_box);
+                var d2 = self.pointInBox(domain.fmax, bounds_box);
+                var b1 = self.pointInBox(bounds.fmin, domain_box);
+                var b2 = self.pointInBox(bounds.fmax, domain_box);
 
-                        if (d1 || d2 || b1 || b2) {
-                            //$.log("!");
-                            return true;
-                        }
+                if (d1 || d2 || b1 || b2) {
+                    return true;
+                }
 
-                        // $.log(category, domain.uniqueName, bounds.fmin,
-                        // domain.fmin, domain.fmax, bounds.fmax,
-                        // bounds.fmin <= domain.fmin && domain.fmin <=
-                        // bounds.fmax,
-                        // bounds.fmin <= domain.fmax && domain.fmax <=
-                        // bounds.fmax);
-                        // if ((bounds.fmin <= domain.fmin && domain.fmin <=
-                        // bounds.fmax) ||
-                        // (bounds.fmin <= domain.fmax && domain.fmax <=
-                        // bounds.fmax)) {
-                        // //$.log("!");
-                        // return true;
-                        // }
-                    }
-
-//                }
-//            }
+            }
             return false;
         }
 
@@ -984,8 +936,9 @@ $(function() {
             // $.log(box1.uniqueName, box1x_in_box2,box1x2_in_box2,
             // box2.uniqueName, box2x_in_box1, box2x2_in_box1);
 
-            if (debug)
+            if (debug) {
                 $.log([ box1.fmin, box1.fmax, box2.fmin, box2.fmax, box1x_in_box2, box1x2_in_box2, box2x_in_box1, box2x2_in_box1 ]);
+            }
 
             if (box1x_in_box2 || box1x2_in_box2 || box2x_in_box1 || box2x2_in_box1 ||
                     box1y_in_box2 || box1y2_in_box2 || box2y_in_box1 || box2y2_in_box1
@@ -993,11 +946,6 @@ $(function() {
                 return true;
             }
             
-            
-            
-            
-            
-
             return false;
         }
 
@@ -1036,10 +984,6 @@ $(function() {
                 }
             }
             
-//            if (debug) {
-//                $.log(g, self.gaps[g -1], base_position, subtract, base_position - subtract);
-//            }
-            
             return base_position - subtract;
         }
 
@@ -1059,11 +1003,6 @@ $(function() {
                 $.log("scaleX", base_position, div_position, self.pixel_width, max, div_position, pos);
             }
             
-//            $.log(self.pixel_width, max, div_position, pos);
-//            
-//            $.log("scaleX", base_length, totalGapLength, max, base_position,
-//             "div:", div_position, self.pixel_width, pos);
-
             return pos;
         }
         
@@ -1073,8 +1012,6 @@ $(function() {
             function log10(val) {
                 return Math.log(val) / Math.log(10);
             }
-
-            // diff = max; // divide by 3 for amino acids
 
             var stepsUncorrected = max / self.step_number;
             var log = log10(stepsUncorrected);
@@ -1101,6 +1038,10 @@ $(function() {
             var _y = 0;
             var _start_y = 20;
             
+            /*
+             * First create boxes for each domain, and determine unique categories. 
+             * 
+             */
             for ( var d in self.domains) {
                 var domain = domains[d];
                 var category = domain.key;
@@ -1154,7 +1095,9 @@ $(function() {
             }
             
             
-            
+            /*
+             * Now create boxes for each category, and fit the domain boxes in them.
+             * */
             for ( var c in categories) {
                 var category = categories[c];
                 
@@ -1195,7 +1138,6 @@ $(function() {
                         type : type,
                         dbxref : dbxref,
                         category : category,
-                        //feature : feature,
                         uniqueName : domain.uniqueName,
                         x : x,
                         y : _start_y,
@@ -1205,7 +1147,8 @@ $(function() {
                         width : width,
                         height : _height,
                         colour : colour,
-                        bordercolour : colour
+                        bordercolour : colour,
+                        properties : domain.properties
                     }
                     
                     var is_membr = false;
@@ -1361,15 +1304,6 @@ $(function() {
                         break;
                     }
                     
-//                    $.log(box.x, box.x2, merged_gap.x, merged_gap.x2);
-//                    if (box.x != merged_gap.x                
-//                            && box.x == merged_gap.x2) {
-//                        $.log("!");
-//                        merged_gap.x2 = box.x2;
-//                        merged_gap.fmax = box.fmax;
-//                        merging = true;
-//                        break;
-//                    }
                 }
                 if (!merging) {
                     
@@ -1412,7 +1346,7 @@ $(function() {
             // self.y = 0;
             self.membrs = [ "non_cytoplasmic_polypeptide_region", "cytoplasmic_polypeptide_region", "transmembrane_polypeptide_region" ];
             self.max_y = 0;
-
+            
             self.determine_domain_positions();
 
         }
@@ -1517,15 +1451,7 @@ $(function() {
                     var products = geneInfo.terms("genedb_products");
                     var controlled_curation = geneInfo.order_terms(geneInfo.terms("CC_genedb_controlledcuration"));
                     var domains = geneInfo.domains();
-                    
                     var domain_list = geneInfo.domain_list();
-                    
-                    // $.log(domain_list);
-                    //$.log(domain_graph);
-//                    for (var d in domain_list) {
-//                        var dg = domain_list[d];
-//                        $.log(dg.key, dg.uniqueName);
-//                    }
                     
                     var orthologues = geneInfo.orthologues();
                     var algorithm = geneInfo.algorithm();
@@ -1544,7 +1470,7 @@ $(function() {
                             // a list of maps
                             var count = 0
                             for (var m in maps) {
-                                for (mm in maps[m]) {
+                                for (var mm in maps[m]) {
                                     count++;
                                 }
                             }
