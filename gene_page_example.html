@@ -84,8 +84,6 @@
         
     $(document).ready(function() {
         
-        "use strict";
-        
         var service = "http://www.genedb.org/services/";
         var orgs = [];
         
@@ -109,7 +107,7 @@
                     org_links.push(org_link);
                     orgs.push(organism.common_name);
                 }
-                $('#organisms').html(org_links).click(onOrganismClick);
+                $("#organisms").html(org_links.join("<br>")).click(onOrganismClick);
             }
         });
         
