@@ -117,10 +117,11 @@
             if (target.id != null) {
                 if ($.inArray(target.id, orgs) > -1) {
                     $("#chromosomes").ChromosomePicker({
-                        organism : organism,
+                        organism : target.id,
                         on_select : onChromosomeClick, 
                         spinner : ".spinner"
                     });
+                    $("#apptabs").tabs('select', 2);
                 }
             }
         }
