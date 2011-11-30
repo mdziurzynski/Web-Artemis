@@ -97,13 +97,15 @@
         
         $('.spinner').CallStatusSpinner();
         
+        $("#apptabs").tabs();
+        
         $.ajax({
             url: service + "organisms/list.json",
             dataType: 'jsonp',
             success: function(organisms) {
                 var org_links = [];
                 for (var organism in organisms) {
-                    var org_link = "<a id='" + organism.common_name + "' >" + organism.name "</a>" ;
+                    var org_link = "<a id='" + organism.common_name + "' >" + organism.name + "</a>" ;
                     org_links.push(org_link);
                     orgs.push(organism.common_name);
                 }
