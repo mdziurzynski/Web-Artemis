@@ -704,15 +704,12 @@ $(function() {
                 
                 // $.log(feature.uniqueName + " :: " + feature.timelastmodified + "  " + lastmodifiedSplit);
                 
-                // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
-                var day = parseInt(lastmodifiedSplit[0], 10);
-                var month = parseInt(lastmodifiedSplit[1], 10);
+                var day = parseInt(lastmodifiedSplit[0], 10); // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
+                var month = parseInt(lastmodifiedSplit[1] - 1, 10); // the Date constructor is expecting a date starting at zero
                 var year = parseInt(lastmodifiedSplit[2], 10);
                 
-                var date = new Date();
-                date.setYear(year);
-                date.setMonth(month);
-                date.setDate(day);
+                // note the year-day-month parameter order
+                var date = new Date(year,day,month);
                 
                 if (timelastmodified == null) {
                     timelastmodified = date;
@@ -1558,31 +1555,20 @@ $(function() {
                             day = "0" + day;
                         }
                         var month = self.months[timelastmodified.getMonth() -1];
-                        var year = timelastmodified.getYear();
+                        var year = timelastmodified.getFullYear();
                         
                         wa.viewModel.lastmodified = day + " " + month + " " + year;
                         
                     }
                     
+                    // bind the model to the view
                     ko.applyBindings(wa.viewModel);
-
-                    // $.log(["onComplete?",
-                    // onComplete]);
-
-                    // self.embed_web_artemis(coordinates[0]);
+                    
+                    
                     $(".absolute_tool").AbsoluteToolTips();
-//                    $(".absolute_tool").AbsoluteToolTips().hover(function(e){
-//                        $(this).css('borderColor','red');
-//                    }, function(e){
-//                        $(this).css('borderColor', 'black')
-//                    });
                     
-                    
-                    
-                    // $(".evidence").AbsoluteToolTips();
-
                     $("#tabs").tabs();
-
+                    
                     $(self.spinner).CallStatusSpinner("removeCall");
                     $(".gene_page").stop().fadeTo(100, 1);
 
