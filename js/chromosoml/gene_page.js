@@ -704,12 +704,13 @@ $(function() {
                 
                 // $.log(feature.uniqueName + " :: " + feature.timelastmodified + "  " + lastmodifiedSplit);
                 
-                var day = parseInt(lastmodifiedSplit[0], 10); // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
-                var month = parseInt(lastmodifiedSplit[1] - 1, 10); // the Date constructor is expecting a date starting at zero
+             // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
+                var day = parseInt(lastmodifiedSplit[0], 10); 
+                var month = parseInt(lastmodifiedSplit[1], 10); 
                 var year = parseInt(lastmodifiedSplit[2], 10);
                 
                 // note the year-day-month parameter order
-                var date = new Date(year,day,month);
+                var date = new Date(year,month,day);
                 
                 if (timelastmodified == null) {
                     timelastmodified = date;
