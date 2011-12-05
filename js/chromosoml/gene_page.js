@@ -706,7 +706,7 @@ $(function() {
                 
              // parseInt needs to be told the raddix is base 10 for strings that start with "0" (e.g. "01")
                 var day = parseInt(lastmodifiedSplit[0], 10); 
-                var month = parseInt(lastmodifiedSplit[1], 10); 
+                var month = parseInt(lastmodifiedSplit[1] -1 , 10); 
                 var year = parseInt(lastmodifiedSplit[2], 10);
                 
                 // note the year-day-month parameter order
@@ -1555,7 +1555,7 @@ $(function() {
                         if (day < 10) {
                             day = "0" + day;
                         }
-                        var month = self.months[timelastmodified.getMonth() -1];
+                        var month = self.months[timelastmodified.getMonth() ];
                         var year = timelastmodified.getFullYear();
                         
                         wa.viewModel.lastmodified = day + " " + month + " " + year;
