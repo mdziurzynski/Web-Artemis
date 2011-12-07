@@ -1656,23 +1656,58 @@ $(function() {
     wa.WebArtemisLinker = function(options) {
         var defaults = {
             baseURL : "http://www.genedb.org/web-artemis/?src=",
-            web_artemis_link : "#web-artemis-link",
-            web_artemis_link_container : "#web-artemis-link-container",
+            web_artemis_link : ".web-artemis-link",
+            web_artemis_link_text : ".web-artemis-link-text",
+            web_artemis_link_container : ".web-artemis-link-container",
             web_artemis_container : ".wacontainer",
             region : "some_contig"
         }
         var self = this;
         $.extend(self, defaults, options);
-
+        
+        var link_out = true;
+        var wa_out = true;
+        
+        $(self.web_artemis_link_container).css("display", "none");
+        
         $(self.web_artemis_container).hover(function(e) {
-            $(self.web_artemis_link_container).show();
+            wa_out = false;
+            self.show();
         }, function(e) {
-            $(self.web_artemis_link_container).hide();
+            wa_out = true;
+            self.hide();
         });
+        
+        $(self.web_artemis_link_container).hover(function(e) {
+            link_out = false;
+            self.show();
+        }, function(e) {
+            link_out = true;
+            self.hide();
+        });
+        
+        self.hide = function() {
+            setTimeout(function() {
+                if (link_out == true && wa_out == true) {
+                    $(self.web_artemis_link_container).slideUp(); //tooltip.fadeOut('slow');
+                }
+            }, 500);
+        };
+        
+        self.show = function() {
+            $(self.web_artemis_link_container).slideDown();
+        }
+        
+        
+        
+        //self.hide();
 
         self.link = function(fmin, fmax) {
             var href = self.baseURL + self.region + "&base=" + fmin + "&bases=" + (fmax - fmin);
             $(self.web_artemis_link).attr("href", href);
+            $(self.web_artemis_link_text).html(
+                    "View this region (" + self.region + ", positions : " + fmin + "-" + fmax + ") in a separate Web-Artemis window - useful for high-overlap areas.");
+            
         }
 
     }
