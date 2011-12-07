@@ -1706,7 +1706,7 @@ $(function() {
             var href = self.baseURL + self.region + "&base=" + fmin + "&bases=" + (fmax - fmin);
             $(self.web_artemis_link).attr("href", href);
             $(self.web_artemis_link_text).html(
-                    "View this region (" + self.region + ", positions : " + fmin + "-" + fmax + ") in a separate Web-Artemis window (useful for high-overlap areas).");
+                    "View this region (" + self.region + ", positions : " + fmin + "-" + fmax + ") in a separate Web-Artemis window - useful for high-overlap areas.");
             
         }
 
