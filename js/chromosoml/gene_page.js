@@ -1668,6 +1668,8 @@ $(function() {
         var link_out = true;
         var wa_out = true;
         
+        $(self.web_artemis_link_container).css("display", "none");
+        
         $(self.web_artemis_container).hover(function(e) {
             wa_out = false;
             self.show();
@@ -1687,22 +1689,24 @@ $(function() {
         self.hide = function() {
             setTimeout(function() {
                 if (link_out == true && wa_out == true) {
-                    $(self.web_artemis_link_container).hide(); //tooltip.fadeOut('slow');
+                    $(self.web_artemis_link_container).slideUp(); //tooltip.fadeOut('slow');
                 }
-            }, 100);
+            }, 500);
         };
         
         self.show = function() {
-            $(self.web_artemis_link_container).show();
+            $(self.web_artemis_link_container).slideDown();
         }
         
-        self.hide();
+        
+        
+        //self.hide();
 
         self.link = function(fmin, fmax) {
             var href = self.baseURL + self.region + "&base=" + fmin + "&bases=" + (fmax - fmin);
             $(self.web_artemis_link).attr("href", href);
             $(self.web_artemis_link_text).html(
-                    "View this region " + self.region + " (positions : " + fmin + "-" + fmax + " ) in a separate Web-Artemis window (useful for high-overlap areas).");
+                    "View this region (" + self.region + ", positions : " + fmin + "-" + fmax + ") in a separate Web-Artemis window (useful for high-overlap areas).");
             
         }
 
