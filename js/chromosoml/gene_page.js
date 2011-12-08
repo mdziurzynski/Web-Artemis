@@ -1670,21 +1670,21 @@ $(function() {
         
         $(self.web_artemis_link_container).css("display", "none");
         
-        $(self.web_artemis_container).hover(function(e) {
-            wa_out = false;
-            self.show();
-        }, function(e) {
-            wa_out = true;
-            self.hide();
-        });
-        
-        $(self.web_artemis_link_container).hover(function(e) {
-            link_out = false;
-            self.show();
-        }, function(e) {
-            link_out = true;
-            self.hide();
-        });
+//        $(self.web_artemis_container).hover(function(e) {
+//            wa_out = false;
+//            self.show();
+//        }, function(e) {
+//            wa_out = true;
+//            self.hide();
+//        });
+//        
+//        $(self.web_artemis_link_container).hover(function(e) {
+//            link_out = false;
+//            self.show();
+//        }, function(e) {
+//            link_out = true;
+//            self.hide();
+//        });
         
         self.hide = function() {
             setTimeout(function() {
