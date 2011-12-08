@@ -724,6 +724,16 @@ $(function() {
             
             return timelastmodified;
         };
+        
+        self.exons = function() {
+            var exons = [];
+            self.recurse_hierarchy(self.hierarchy, function(feature) {
+                if (feature.type.name ==  "exon") {
+                    exons.push(feature);
+                }
+            });
+            return exons;
+        }
     };
 
     /*
@@ -1590,7 +1600,8 @@ $(function() {
                     coordinates : feature.coordinates[0],
                     webArtemisPath : self.webArtemisPath,
                     sequenceLength : sequenceLength,
-                    observers : [ self ]
+                    observers : [ self ], 
+                    geneInfo : self.geneInfo
                 });
             });
 
@@ -1740,7 +1751,8 @@ $(function() {
                 $.log("default change");
             } ],
             leftpadding : 1000,
-            rightpadding : 1000
+            rightpadding : 1000,
+            geneInfo : null
         }
 
         var self = this;
@@ -1806,10 +1818,6 @@ $(function() {
 
         if (needsSlider) {
             
-            
-            
-            
-            
             // added spaces to see if this is it.
             $(self.chromosome_map_slider_element).ChromosomeMapSlider({
                 windowWidth : 870,
@@ -1825,6 +1833,21 @@ $(function() {
                     $(self.web_artemis_element).WebArtemis('addObserver', self.observers[o]);
                 }
                 $(self.web_artemis_element).WebArtemis('addObserver', new WebArtemisToChromosomeMap(self.chromosome_map_slider_element));
+                
+                /*
+                    Prompt web-artemis to highlight the feature.
+                */
+                if (self.geneInfo != null) {
+                    var exons = self.geneInfo.exons();
+                    if (exons.length > 0) {
+                        var firstExon = exons[0];
+                        if (firstExon != null) {
+                            var fDisplay = featureDisplayObjs[0];
+                            selectFeature(firstExon.uniqueName, fDisplay);
+                        }
+                    }
+                }
+                
             }, 500);
         }
 
