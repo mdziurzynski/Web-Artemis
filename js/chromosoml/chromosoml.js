@@ -689,13 +689,13 @@ if(!String.prototype.startsWith){
 					this.set(this.pos,this.width);
 					
 					$(this).mousedown(function(event) {
-						this.notify('down');
+						this.notify('down', this.pos,this.width);
 						this.down = true;
 						$(this).css('cursor', 'move');
 					});
 					
 					$(this).mouseup(function(event) {
-						this.notify('up');
+						this.notify('up', this.pos,this.width);
 						if (this.down) {
 							this.redraw(event.pageX - $(this).offset().left);
 						}
@@ -837,13 +837,7 @@ if(!String.prototype.startsWith){
  */
 function ChromosomeMapToWebArtemis() {
 	
-    this.leftBase = 0;
-    this.bases = 0;
-
-    function _move() {
-        var leftBase = this.leftBase;
-        var bases = this.bases;
-
+    function _move (leftBase, bases) {
         var fDisplay = featureDisplayObjs[0];
         fDisplay.leftBase = leftBase;
         if (bases != null)
@@ -852,22 +846,19 @@ function ChromosomeMapToWebArtemis() {
         $('#slider' + fDisplay.index).slider('option', 'value', leftBase);
     }
     
-    
-	this.move = function(leftBase, bases) {
-	    // do nothing for now except set the values
-	    this.leftBase = leftBase;
-	    this.bases = bases;
+    this.move = function(leftBase, bases) {
+	    // do nothing for now 
 	};
 	
-	this.down = function() {
+	this.down = function(leftBase, bases) {
 		var fDisplay = featureDisplayObjs[0];
 		fDisplay.minimumDisplay = true;
 	};
 	
-	this.up = function() {
+	this.up = function(leftBase, bases) {
 		var fDisplay = featureDisplayObjs[0];
         fDisplay.minimumDisplay = false;
-        _move();
+        _move(leftBase, bases);
 	};
 	
 	
