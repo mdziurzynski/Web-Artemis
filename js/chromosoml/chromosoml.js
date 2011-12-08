@@ -838,12 +838,12 @@ if(!String.prototype.startsWith){
 function ChromosomeMapToWebArtemis() {
 	
 	this.move = function(leftBase, bases) {
-		var fDisplay = featureDisplayObjs[0];
-        fDisplay.leftBase = leftBase;
-        if (bases != null)
-        	fDisplay.basesDisplayWidth = bases;
-        drawAndScroll(fDisplay, fDisplay.lastLeftBase); 
-        $('#slider'+fDisplay.index).slider('option', 'value', leftBase);
+//		var fDisplay = featureDisplayObjs[0];
+//        fDisplay.leftBase = leftBase;
+//        if (bases != null)
+//        	fDisplay.basesDisplayWidth = bases;
+//        drawAndScroll(fDisplay, fDisplay.lastLeftBase); 
+//        $('#slider'+fDisplay.index).slider('option', 'value', leftBase);
 	};
 	
 	this.down = function() {
