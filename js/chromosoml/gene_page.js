@@ -1691,7 +1691,7 @@ $(function() {
                 if (link_out == true && wa_out == true) {
                     $(self.web_artemis_link_container).slideUp(); //tooltip.fadeOut('slow');
                 }
-            }, 500);
+            }, 5000);
         };
         
         self.show = function() {
