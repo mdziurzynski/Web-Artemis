@@ -837,13 +837,17 @@ if(!String.prototype.startsWith){
  */
 function ChromosomeMapToWebArtemis() {
 	
+    function _move() {
+      var fDisplay = featureDisplayObjs[0];
+      fDisplay.leftBase = leftBase;
+      if (bases != null)
+        fDisplay.basesDisplayWidth = bases;
+      drawAndScroll(fDisplay, fDisplay.lastLeftBase); 
+      $('#slider'+fDisplay.index).slider('option', 'value', leftBase);
+    }
+    
 	this.move = function(leftBase, bases) {
-//		var fDisplay = featureDisplayObjs[0];
-//        fDisplay.leftBase = leftBase;
-//        if (bases != null)
-//        	fDisplay.basesDisplayWidth = bases;
-//        drawAndScroll(fDisplay, fDisplay.lastLeftBase); 
-//        $('#slider'+fDisplay.index).slider('option', 'value', leftBase);
+	    // do nothing for now
 	};
 	
 	this.down = function() {
@@ -854,7 +858,10 @@ function ChromosomeMapToWebArtemis() {
 	this.up = function() {
 		var fDisplay = featureDisplayObjs[0];
         fDisplay.minimumDisplay = false;
+        _move();
 	};
+	
+	
 };
 
 
