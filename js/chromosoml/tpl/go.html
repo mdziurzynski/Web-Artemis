@@ -37,9 +37,9 @@
 	            	        </div>
 	            	        
 	            	        <div>
-	            	        {{each(d,dbxref) term.dbxrefs}}
-	            	            <i>to</i> <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
-	            	        {{/each}}
+	            	        <!-- {{each(d,dbxref) term.dbxrefs}}
+	            	                                      <i>to</i> <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
+	            	                                  {{/each}} -->
 	            	        
 	            	        {{each(pu,pub) term.pubs}}
 	            	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
@@ -67,11 +67,11 @@
                 {{/each}}
             </td>
             
-            <td>
-                {{each(d,dbxref) term.dbxrefs}}
-                  <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
-                {{/each}}
-            </td>
+            <!-- <td>
+                            {{each(d,dbxref) term.dbxrefs}}
+                              <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
+                            {{/each}}
+                        </td> -->
             
             <td>
                 <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
