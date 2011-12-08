@@ -64,8 +64,13 @@ if(jQuery)( function() {
 								d.innerHeight = document.body.clientHeight;
 								d.innerWidth = document.body.clientWidth;
 							}
+							
 							(e.pageX) ? x = e.pageX : x = e.clientX + d.scrollLeft;
 							(e.pageY) ? y = e.pageY : y = e.clientY + d.scrollTop;
+							
+							var offset = $("#popupContact").parent().offset();
+							y -= offset.top;
+                        	x -= offset.left;
 							
 							// Show the menu
 							$(document).unbind('click');
