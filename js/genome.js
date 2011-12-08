@@ -43,8 +43,8 @@ var count = 0;
 var featureDisplayObjs = new Array();
 var returnedSequence;
 var useCanvas = false;
-var excludes = ['gene', 'pseudogene', 'sequence_feature', 'databank_entry', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
-var includes = ['exon', 'pseudogenic_exon', 'CDS', 'gap', 'contig', 'ncRNA', 'tRNA', 'five_prime_UTR', 'three_prime_UTR', 'polypeptide_motif'];
+var excludes = ['scaffold', 'mitochondrial_chromosome' ,  'chromosome', 'supercontig', 'contig', 'gene', 'pseudogene', 'sequence_feature', 'databank_entry', 'match_part', 'repeat_region', 'repeat_unit', 'direct_repeat', 'EST_match', 'region', 'polypeptide', 'mRNA', 'pseudogenic_transcript', 'nucleotide_match'];
+var includes = ['exon', 'pseudogenic_exon', 'CDS', 'gap', 'ncRNA', 'tRNA', 'five_prime_UTR', 'three_prime_UTR', 'polypeptide_motif'];
 
 var colour = [ 
     '255,255,255',
