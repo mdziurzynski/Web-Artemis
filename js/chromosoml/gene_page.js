@@ -1576,9 +1576,9 @@ $(function() {
                     if (onComplete != null)
                         onComplete(geneInfo.hierarchy);
 
-                    // if (self.embedded_web_artemis != null) {
-                    // self.embedded_web_artemis.recoordinate(coordinates[0]);
-                    // }
+                    if (self.embedded_web_artemis != null) {
+                        self.embedded_web_artemis.recoordinate(coordinates[0]);
+                    }
 
                 });
             });
@@ -1660,6 +1660,7 @@ $(function() {
             web_artemis_link_text : ".web-artemis-link-text",
             web_artemis_link_container : ".web-artemis-link-container",
             web_artemis_container : ".wacontainer",
+            web_artemis_map_container : "#chromosome-map-slider",
             region : "some_contig"
         }
         var self = this;
@@ -1667,6 +1668,7 @@ $(function() {
         
         var link_out = true;
         var wa_out = true;
+        var map_out = true;
         
         $(self.web_artemis_link_container).css("display", "none");
         
@@ -1686,10 +1688,18 @@ $(function() {
             self.hide();
         });
         
+        $(self.web_artemis_map_container).hover(function(e) {
+            map_out = false;
+            self.show();
+        }, function(e) {
+            map_out = true;
+            self.hide();
+        });
+        
         self.hide = function() {
             setTimeout(function() {
-                if (link_out == true && wa_out == true) {
-                    $(self.web_artemis_link_container).slideUp(); //tooltip.fadeOut('slow');
+                if (link_out == true && wa_out == true && map_out == true) {
+                    $(self.web_artemis_link_container).slideUp(); 
                 }
             }, 5000);
         };
@@ -1706,8 +1716,7 @@ $(function() {
             var href = self.baseURL + self.region + "&base=" + fmin + "&bases=" + (fmax - fmin);
             $(self.web_artemis_link).attr("href", href);
             $(self.web_artemis_link_text).html(
-                    "View this region (" + self.region + ", positions : " + fmin + "-" + fmax + ") in a separate Web-Artemis window - useful for high-overlap areas.");
-            
+                    "View " + self.region + " (" + fmin + "-" + fmax + ") in a separate Web-Artemis window.");
         }
 
     }
@@ -1819,12 +1828,12 @@ $(function() {
             }, 500);
         }
 
-//        self.recoordinate = function(coordinates) {
-//            var fDisplay = featureDisplayObjs[0];
-//            var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2), 10);
-//            chromosomeMapToWebArtemis.move(p);
-//            wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
-//        }
+        self.recoordinate = function(coordinates) {
+            var fDisplay = featureDisplayObjs[0];
+            var p = parseInt(coordinates.fmin - (fDisplay.basesDisplayWidth / 2), 10);
+            chromosomeMapToWebArtemis.move(p);
+            //wa.webArtemisLinker.link(p, fDisplay.basesDisplayWidth);
+        }
 
     }
 
