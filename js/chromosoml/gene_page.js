@@ -1551,11 +1551,6 @@ $(function() {
                     }
                     
                     
-                    wa.viewModel.domain_graph_template = function() {
-                        return "empty";
-                    }
-                    
-                    
                     var proteinMap = new wa.ProteinMap({}, geneInfo.hierarchy, domain_list, geneInfo.sequenceLength);
                     wa.viewModel.domain_graph = proteinMap.domain_graph;
                     wa.viewModel.domain_graph_shown = proteinMap.shown;
