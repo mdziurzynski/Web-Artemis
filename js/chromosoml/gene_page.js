@@ -1549,12 +1549,20 @@ $(function() {
                         baseLinkURL : self.baseLinkURL,
                         polypeptide_properties : geneInfo.polypeptide_properties
                     }
-
+                    
+                    
                     var proteinMap = new wa.ProteinMap({}, geneInfo.hierarchy, domain_list, geneInfo.sequenceLength);
                     wa.viewModel.domain_graph = proteinMap.domain_graph;
                     wa.viewModel.domain_graph_shown = proteinMap.shown;
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
+                    
+                    
+                    
+                    wa.viewModel.domain_graph_template = function() {
+                        return (type != "Pseudogene") ? "domain_graph" : "domain_graph_empty";
+                    }
+                    
                     
                     // $.log(proteinMap.domain_graph);
                     
