@@ -152,7 +152,7 @@ if(!String.prototype.startsWith){
 			this.loadSequence=function(options, success) {
 				
 				$.ajax({
-			        url: settings.web_service_root + "regions/sequenceLength.json",
+			        url: settings.web_service_root + "/regions/sequenceLength.json",
 			        type: 'GET',
 			        dataType: 'jsonp',
 			        data: {
@@ -222,7 +222,7 @@ if(!String.prototype.startsWith){
 			
 			this.loadChunk=function(start, end, onComplete) {
 				$.ajax({
-			        url: settings.web_service_root + "regions/locations.json",
+			        url: settings.web_service_root + "/regions/locations.json",
 			        type: 'GET',
 			        dataType: 'jsonp',
 			        data: {
@@ -265,7 +265,12 @@ if(!String.prototype.startsWith){
 		        			
 		        			var color = settings.mouseoutColor;
 		        			
-		        			var propcolor = feature.properties[0].value;
+		        			var propcolor = null;
+		        			
+		        			if (feature.hasOwnProperty("properties") && feature.properties.length > 0) {
+		        			    propcolor = feature.properties[0].value;
+		        			}
+		        			
 		        			if (propcolor != null) {
 		        				color = "rgb(" + colours[propcolor] + ")";
 		        			}
