@@ -222,7 +222,7 @@ if(!String.prototype.startsWith){
 			
 			this.loadChunk=function(start, end, onComplete) {
 				$.ajax({
-			        url: settings.web_service_root + "regions/locations.json",
+			        url: settings.web_service_root + "/regions/locations.json",
 			        type: 'GET',
 			        dataType: 'jsonp',
 			        data: {
