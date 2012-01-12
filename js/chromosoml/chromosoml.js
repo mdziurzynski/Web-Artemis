@@ -265,7 +265,12 @@ if(!String.prototype.startsWith){
 		        			
 		        			var color = settings.mouseoutColor;
 		        			
-		        			var propcolor = feature.properties[0].value;
+		        			var propcolor = null;
+		        			
+		        			if (feature.hasOwnProperty("properties")) {
+		        			    propcolor = feature.properties[0].value;
+		        			}
+		        			
 		        			if (propcolor != null) {
 		        				color = "rgb(" + colours[propcolor] + ")";
 		        			}
