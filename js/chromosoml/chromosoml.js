@@ -152,7 +152,7 @@ if(!String.prototype.startsWith){
 			this.loadSequence=function(options, success) {
 				
 				$.ajax({
-			        url: settings.web_service_root + "regions/sequenceLength.json",
+			        url: settings.web_service_root + "/regions/sequenceLength.json",
 			        type: 'GET',
 			        dataType: 'jsonp',
 			        data: {
