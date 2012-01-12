@@ -267,7 +267,7 @@ if(!String.prototype.startsWith){
 		        			
 		        			var propcolor = null;
 		        			
-		        			if (feature.hasOwnProperty("properties")) {
+		        			if (feature.hasOwnProperty("properties") && feature.properties.length > 0) {
 		        			    propcolor = feature.properties[0].value;
 		        			}
 		        			
