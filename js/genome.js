@@ -934,7 +934,7 @@ function chromosomeMap(fDisplay, sequenceLength) {
 }
 
 function getSequence(fDisplay) {
-	var start = fDisplay.leftBase;
+	var start = fDisplay.leftBase-1;
 	var end = parseInt(start)+parseInt(fDisplay.basesDisplayWidth);
 	
 	if(isZoomedIn(fDisplay)) {
@@ -948,8 +948,8 @@ function getSequence(fDisplay) {
 	  }
 	  end = end + (fDisplay.basesDisplayWidth*8);
 	  start = start - (fDisplay.basesDisplayWidth*8);
-	  if(start < 1)
-		  start = 1;
+	  if(start < 0)
+		  start = 0;
 	} else {
 	  currentSeq = null;
 	}
@@ -2291,8 +2291,8 @@ function displaySequence(names, fDisplay, asDNA) {
             return 0;
         } );
 
-        var start = parseInt(coords[0].fmin)+1;
-        var end = parseInt(coords[coords.length-1].fmax)+1;
+        var start = parseInt(coords[0].fmin);
+        var end = parseInt(coords[coords.length-1].fmax);
         var name = options.names[0];
 
         for(var i=1; i<coords.length; i++) {
@@ -2307,7 +2307,7 @@ function displaySequence(names, fDisplay, asDNA) {
         var serviceName = '/regions/sequence.json?';
         handleAjaxCalling(serviceName, aDisplaySequence,
                                     { region:featureDisplay.srcFeature, start:start, end:end },
-                                    featureDisplay, { name:name, strand:strand, start:start, coords:coords, suff:options.names[0], asDNA:options.asDNA });
+                                    featureDisplay, { name:name, strand:strand, start:start+1, coords:coords, suff:options.names[0], asDNA:options.asDNA });
      }, { features: names }, fDisplay, { names:names, asDNA:asDNA });
 
 }
@@ -2369,9 +2369,11 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	//console.time('draw all');
 	var seq = returned[0];
 	fDisplay.sequenceLength = seq.length;
-	var start = seq.start;
+	var start = seq.start+1;
 	
+	// note substring used when zoomed in
 	var sequence = seq.dna.substring(fDisplay.leftBase-start).toUpperCase();
+	
 	fDisplay.sequence = sequence;
 	fDisplay.organism_id = seq.organism_id;
 
