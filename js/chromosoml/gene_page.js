@@ -1394,15 +1394,14 @@ $(function() {
                         },
                         accession : uniqueName
                     });
-                } else if (organism.common_name == "Smansoni" && uniquename == "Smp_00\d\d\d\d")
+                } else if (organism.common_name == "Smansoni" && uniqueName =/^Smp_00\d{4}$/)
 		{
 		 dbxrefs.push({
                         db : {
                             name : "Transcript Expression",
-                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_00/",
-			    urlsuffix : ".pdf"
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_00/"			   
                         },
-                        accession : uniqueName
+                        accession : uniqueName + ".pdf"
                     });
 		}
                 return dbxrefs;
