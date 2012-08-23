@@ -1394,7 +1394,17 @@ $(function() {
                         },
                         accession : uniqueName
                     });
-                }
+                } else if (organism.common_name == "Smansoni" && uniquename ^= "Smp_00")
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_00/",
+			    urlsuffix : ".pdf"
+                        },
+                        accession : uniqueName
+                    });
+		}
                 return dbxrefs;
             },
             spinner : ".spinner",
