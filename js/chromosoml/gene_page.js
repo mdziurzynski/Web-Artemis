@@ -1394,7 +1394,7 @@ $(function() {
                         },
                         accession : uniqueName
                     });
-                } else if (organism.common_name == "Smansoni" && uniquename ^= "Smp_00")
+                } else if (organism.common_name == "Smansoni" && uniquename == "Smp_00\d\d\d\d")
 		{
 		 dbxrefs.push({
                         db : {
