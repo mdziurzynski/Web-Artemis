@@ -1403,6 +1403,204 @@ $(function() {
                         },
                         accession : uniqueName + ".pdf"
                     });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_01\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_01/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_02\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_02/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_03\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_03/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_04\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_04/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_05\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_05/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_06\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_06/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_07\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_07/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_08\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_08/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_09\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_09/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_10\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_10/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_11\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_11/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_12\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_12/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_13\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_13/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_14\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_14/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_15\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_15/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_16\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_16/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_17\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_17/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_18\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_18/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_19\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_19/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_20\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_20/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_21\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_21/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
+		}else if (organism.common_name == "Smansoni" && uniqueName.search(/Smp_90\d{4}/i) > -1)
+		{
+		 dbxrefs.push({
+                        db : {
+                            name : "Transcript Expression",
+                            urlprefix : "ftp://ftp.sanger.ac.uk/pub/pathogens/Schistosoma/mansoni/RNA-seq_plots/Smp_90/"			   
+                        },
+                        accession : uniqueName + ".pdf"
+                    });
 		}
                 return dbxrefs;
             },
