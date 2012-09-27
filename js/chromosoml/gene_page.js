@@ -417,21 +417,21 @@ $(function() {
 
             var systematicName = self.isoform.uniqueName;
 
-	    //	              var transcripts = self.transcripts();
-	    //	               var transcript_count = transcripts.length;
+	    	              var transcripts = self.transcripts();
+	    	               var transcript_count = transcripts.length;
 
-	    //	              if (transcript_count > 1) {
-	    //              systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
-	    //           }
+	    	              if (transcript_count > 1) {
+	                  systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
+	               }
 
             return systematicName;
         }
 
-        self.trans_count = function() {
-	  var transcripts = self.transcripts();
-	  var transcript_count = transcripts.length;
-	  return trans_count;
-	}
+	//       self.trans_count = function() {
+	//  var transcripts = self.transcripts();
+	//  var transcript_count = transcripts.length;
+	//  return trans_count;
+	//	}
         self.get_attribute_map = function(name) {
             var map = {};
             self.recurse_hierarchy(self.hierarchy, function(feature) {
