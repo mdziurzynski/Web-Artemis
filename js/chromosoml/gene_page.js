@@ -426,10 +426,11 @@ $(function() {
 
             return systematicName;
         }
-        self.transcript_count = function() {
+
+        self.trans_count = function() {
 	  var transcripts = self.transcripts();
 	  var transcript_count = transcripts.length;
-	  return transcript_count;
+	  return trans_count;
 	}
         self.get_attribute_map = function(name) {
             var map = {};
