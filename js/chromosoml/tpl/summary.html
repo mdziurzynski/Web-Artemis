@@ -3,8 +3,8 @@
 		<th width="20%">Systematic Name</th>
 		<td>
 		  <span data-bind="text: systematicName"></span>
-<!--		  <span data-bind="visible: transcripts.length >1"> 
-		    (one splice form of this gene) </span> -->
+		  <span data-bind="visible: transcript_count >1"> 
+		    (one splice form of this gene) </span>
 		  <span data-bind="visible: len(previous_systematic_ids) > 0">
             (previously known as : <span data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids,separate:separate,name:'previous_systematic'} }"></span>)
           </span>
