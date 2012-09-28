@@ -417,12 +417,12 @@ $(function() {
 
             var systematicName = self.isoform.uniqueName;
 
-            var transcripts = self.transcripts();
+/*            var transcripts = self.transcripts();
             var transcript_count = transcripts.length;
 
             if (transcript_count > 1) {
                 systematicName += " (one splice form of " + self.hierarchy.uniqueName + ")";
-            }
+            }*/
 
             return systematicName;
         }
@@ -1466,6 +1466,7 @@ $(function() {
 
                     wa.viewModel = {
                         systematicName : systematicName,
+                        ntranscripts : transcripts.length,
                         type : type,
                         dbxrefs : dbxrefs,
                         extra_dbxrefs : extra_dbxrefs,
