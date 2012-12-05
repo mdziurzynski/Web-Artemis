@@ -371,7 +371,7 @@ $(function() {
                     type = feature.type.name;
                 else if (feature.type.name == "polypeptide")
                     type = "Protein coding gene";
-                else if (feature.type.name.contains("pseudo"))
+                else if (feature.type.name.indexOf("pseudo") !== -1)
                     type = "Pseudogene";
             });
             return type;
