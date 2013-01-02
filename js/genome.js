@@ -2396,7 +2396,7 @@ var aSequence = function ajaxGetSequence(fDisplay, returned, options) {
 	  drawCodons(fDisplay, basePerPixel);
 	  drawAminoAcids(fDisplay, basePerPixel);
 	  returnedSequence = returned;
-	} else if(fDisplay.showStopCodons) {
+	} else if(fDisplay.showStopCodons && !fDisplay.oneLinePerEntry) {
 	  $('#sequence'+fDisplay.index).html('');
 	  $('#translation'+fDisplay.index).html('');
       drawStopCodons(fDisplay, basePerPixel);
