@@ -2105,6 +2105,23 @@ function drawExons(fDisplay, exons, featureStr, basePerPixel, trackName) {
 	  var lastYpos = -1;
 	  var colour = '#666666';
 	  var ypos = 0;
+	  
+	  // search the exons for colour property in case
+	  // some exons do not have it set
+	  var colProp = '';
+	  for(var k=0; k<exons.length; k++) {
+	    var col = getColourProperty(exons[k])
+	    if(col != '') {
+	      colProp = col;
+	      break;
+	    }
+	  }
+	  
+	  if(colProp != '') {
+	    for(var k=0; k<exons.length; k++) {
+		  setColourProperty(exons[k], colProp)
+	    }
+	  }
 
 	  for(var k=0; k<exons.length; k++) {
 	    var exon = exons[k];
