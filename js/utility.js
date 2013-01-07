@@ -268,8 +268,16 @@ function getColourProperty(f) {
 				  }
 			  }
 		  }
+		  
+		  if(f.properties['colour']) {
+			return f.properties['colour'];
+		  }
 	  }
 	return '';
+}
+
+function setColourProperty(f, col) {
+	f.properties['colour'] = col;
 }
 
 function escapeId(myid) { 
