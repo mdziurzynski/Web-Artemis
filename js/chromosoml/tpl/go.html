@@ -9,47 +9,7 @@
 	           {{/if}}
 	       </th>
     	    <td>
-    	        <div>
-    	            <div class="absolute_tool" href="${window.wa.viewHelper.go_link(term.accession)}" >
-    	            
-        	        &raquo; ${term.name}
-        	        
-    	            
-	        	        <div class="relative_block_tooltip">
-	        	            
-	        	            <div><h2>
-	            	            <a href="${window.wa.viewHelper.go_link(term.accession)}" >
-	                                ${term.cv.name} / ${term.name} 
-	                	        </a>
-	                	        </h2>
-	            	        </div>
-	        	            
-	        	            <div>Evidence : </div>
-	        	            
-	        	            <div style="float:right;"><img src="${window.wa.viewHelper.img(term.props)}" border="0" ></div>
-	        	            
-	        	            <div>
-	        	            {{each(p,prop) term.props}}
-	            	            {{if prop.type.name=="evidence"}}
-	            	                &raquo;  ${prop.value} 
-	            	            {{/if}}
-	            	        {{/each}}
-	            	        </div>
-	            	        
-	            	        <div>
-	            	        <!-- {{each(d,dbxref) term.dbxrefs}}
-	            	                                      <i>to</i> <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
-	            	                                  {{/each}} -->
-	            	        
-	            	        {{each(pu,pub) term.pubs}}
-	            	            <i>based on</i> <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
-	            	        {{/each}}
-	            	        </div>
-	        	            <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
-	    	                
-	                    </div>
-                    </div>
-                </div>
+ 	  	        &raquo; ${term.name}
     	    </td>
     	    
     	    
@@ -75,8 +35,7 @@
             
             <td>
                 <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
-                
-	              
+                              
             </td>
     	
     	</tr>
