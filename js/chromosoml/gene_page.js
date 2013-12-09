@@ -1778,6 +1778,15 @@ dbxrefs.push({
                             }
                             return title.join(" ");
                         },
+                        linkify_pmids : function(tolinkify) {
+							var linkified;
+							if (tolinkify === undefined || tolinkify == null) return '';
+							linkified = String(tolinkify).replace(/PMID:(\s+)?(\d+)/g, function(match, m1, m2, link) {
+								return 'PMID:<a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi' +
+								  '?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids='+ m2 +'">'+ m2 +'</a>';
+							  });
+							  return linkified;
+                        },
                         baseLinkURL : self.baseLinkURL,
                         polypeptide_properties : geneInfo.polypeptide_properties
                     }
