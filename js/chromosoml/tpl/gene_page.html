@@ -27,20 +27,9 @@ a.web-artemis-link:hover {
 
 </style>
 
-
-
- <div  style="font-weight:bold;position:relative;height:90px;" class="ui-state-default ui-corner-all web-artemis-link-container" >
-    <a class="web-artemis-link" target="webArtemis" style="
-        position:absolute;
-        top:5px;
-        left:5px;" >
-     <img border="0" height="80" src="${window.wa.viewHelper.image.prefix}/wa2.png" border="0" >
-    </a>
-    <div style="position:absolute;top:37px;left:100px;" >
-      <a class="web-artemis-link web-artemis-link-text" target="webArtemis" ></a>
-    </div>
+ <div style="text-align:center; font-weight:bold; margin-bottom: 15px;" class="ui-state-default ui-corner-all web-artemis-link-container">
+   <a class="web-artemis-link web-artemis-link-text" target="webArtemis" ></a>
  </div>
-
 
 <h2 style="padding-top:0px;margin-top:0px;">General Information</h2>
 <div id="col-4-1">
@@ -68,7 +57,7 @@ a.web-artemis-link:hover {
 <br class="clear" /><br />
 
 <div class='full-light-grey-top' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "></div>
-<div class='light-grey' data-bind="visible: len([notes, comments, curations, pubs]) > 0 "> 
+<div class='light-grey' data-bind="visible: len([notes, comments, curations, pubs]) > 0 ">
 <div  >
 <h2>Comments</h2>
 <div data-bind="template: 'properties' " ></div>
@@ -81,9 +70,9 @@ a.web-artemis-link:hover {
 <h2 data-bind="visible: len([controlled_curation, cellular_component, molecular_function, biological_process]) > 0 " >Curation</h2>
 
 <div class='full-light-grey-top' data-bind="visible: len(controlled_curation) > 0 "></div>
-<div class='light-grey' data-bind="visible: len(controlled_curation) > 0 "> 
+<div class='light-grey' data-bind="visible: len(controlled_curation) > 0 ">
 <h2>&nbsp;</h2>
-<table 
+<table
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%"
     data-bind="template: {name:'phenotype', data: controlled_curation}" >
 </table>
@@ -93,11 +82,11 @@ a.web-artemis-link:hover {
 <br class="clear" data-bind="visible: len(controlled_curation) > 0 " />
 
 <div class='full-light-grey-top' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "></div>
-<div class='light-grey' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "> 
+<div class='light-grey' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 ">
 <div>
 <h2>Gene Ontology</h2>
-<table 
-    cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%" 
+<table
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%"
     data-bind="template: 'gos' " >
 </table>
 </div>
@@ -118,8 +107,8 @@ a.web-artemis-link:hover {
         <div data-bind="template: { name: domain_graph_template } "  ></div>
     </div>
     <div id="tabs-2">
-        <table 
-            cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+        <table
+            cellpadding="0" cellspacing="4" border="0" class="sequence-table"
             data-bind="template: 'domains' " >
         </table>
     </div>
@@ -139,10 +128,10 @@ a.web-artemis-link:hover {
 
 
 <div class='full-light-grey-top' data-bind="visible: len([orthologues]) > 0"></div>
-<div class='light-grey' data-bind="visible: len([orthologues]) > 0"> 
+<div class='light-grey' data-bind="visible: len([orthologues]) > 0">
 <h2>Orthologues and Paralogues</h2>
-<table 
-    cellpadding="0" cellspacing="4" border="0" class="sequence-table" 
+<table
+    cellpadding="0" cellspacing="4" border="0" class="sequence-table"
     data-bind="template: 'orthologues' " >
 </table>
 </div>
