@@ -1131,8 +1131,10 @@ function WebArtemisToChromosomeMap(selector) {
 					$(self).append ("&raquo; No changes. <br>");
 				}
 				$(self).append ("<a id='showstats' style='cursor:pointer;' >More details...</a> </P>");
-        $('span#activity_rss').html("<a href='" + settings.baseHREF + "../rss/" + settings.organism.slice(4) + "/since/4/months'><img src='" + settings.baseHREF + "../includes/images/rss.gif' alt='RSS' /></a>");
-        $('head').append('<link rel="alternate" type="application/rss+xml" title="Annotation activity for ' + settings.organism.slice(4) + '" href="' + settings.baseHREF + '../rss/' + settings.organism.slice(4) + '/since/4/months" />');
+        if($('span#activity_rss').length) {  // only try to show RSS links if the placeholder exists
+          $('span#activity_rss').html("<a href='" + settings.baseHREF + "../rss/" + settings.organism.slice(4) + "/since/4/months'><img src='" + settings.baseHREF + "../includes/images/rss.gif' alt='RSS' /></a>");
+          $('head').append('<link rel="alternate" type="application/rss+xml" title="Annotation activity for ' + settings.organism.slice(4) + '" href="' + settings.baseHREF + '../rss/' + settings.organism.slice(4) + '/since/4/months" />');
+        }
 				$('a#showstats').click(function(event) {
 					self.loadAnnotationChanges(settings.organism, self.getDefaultDate(), self.onLoadAnnotationChanges);
 				});
