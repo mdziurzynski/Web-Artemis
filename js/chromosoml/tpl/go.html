@@ -1,46 +1,54 @@
 {{each(feature, list) go}}
-    
+
     {{each(t, term) list}}
-	       <tr>
-	       <th>
-	           
-	           {{if first_element(term.cv.name) }}
-	                 ${ camel_to_title(term.cv.name) }
-	           {{/if}}
-	       </th>
-    	    <td>
- 	  	        &raquo; ${term.name}
-    	    </td>
-    	    
-    	    
+      <tr>
+        <th>
+             {{if first_element(term.cv.name) }}
+                  ${ camel_to_title(term.cv.name) }
+             {{/if}}
+        </th>
+         <td>
+                &raquo;
+                {{if term.is_not=="true" || term.is_not}}
+                    <span style="color:red;">not</span>
+                {{/if}}
+                {{each(p,prop) term.props}}
+                    {{if prop.value=="contributes_to"}}
+                        <span class="grey-text">contributes to</span>
+                    {{/if}}
+                {{/each}}
+                {{each(p,prop) term.props}}
+                    {{if prop.value=="colocalizes_with"}}
+                        <span class="grey-text">colocalizes with</span>
+                    {{/if}}
+                {{/each}}
+                ${term.name}
+          </td>
             <td class="grey-text">
                 {{each(p,prop) term.props}}
                     {{if prop.type.name=="evidence"}}
-                        ${prop.value} 
+                        ${prop.value}
                     {{/if}}
                 {{/each}}
             </td>
-            
+
             <td>
                 {{each(pu,pub) term.pubs}}
-                    <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a> 
+                    <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.accession}">${pub.uniqueName}</a>
                 {{/each}}
             </td>
-            
-            <!-- <td>
-                            {{each(d,dbxref) term.dbxrefs}}
-                              <span data-bind="template: {name:'dbxref', data: dbxref } " ></span> 
-                            {{/each}}
-                        </td> -->
-            
+
+            <td>
+                {{each(d,dbxref) term.dbxrefs}}
+                    <span data-bind="template: {name:'dbxref', data: dbxref } " ></span>
+                {{/each}}
+            </td>
+
             <td>
                 <span data-bind="template: {name: 'nothers', data: {count:term.count, link: window.wa.viewHelper.go_others_link(term.name, term.cv.name, feature)} }" ></span>
-                              
             </td>
-    	
-    	</tr>
+          </tr>
+     {{/each}}
 
-	{{/each}}
-	 
 {{/each}}
 
