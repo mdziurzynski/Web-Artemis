@@ -2,6 +2,6 @@
     {{each(d, dbxref) dbxref_list}}
          <a href='${dbxref.db.urlprefix}${dbxref.accession}${wa.viewHelper.dbxref_prefix_suffixes[dbxref.db.urlprefix]}'>${dbxref.accession}</a>
          (${ (dbxref.db.description != null) ? dbxref.db.description : dbxref.db.name })
-         <br> 
+         <br>
     {{/each}}
 {{/each}}
