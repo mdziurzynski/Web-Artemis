@@ -26,8 +26,10 @@
           </td>
             <td class="grey-text">
                 {{each(p,prop) term.props}}
-                    {{if prop.type.name=="evidence"}}
-                        ${prop.value}
+                    {{if prop.type != null}}
+                        {{if prop.type.name=="evidence"}}
+                            ${prop.value}
+                        {{/if}}
                     {{/if}}
                 {{/each}}
             </td>

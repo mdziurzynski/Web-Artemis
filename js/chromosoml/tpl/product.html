@@ -1,23 +1,27 @@
 {{each(f, feature) products}}
     {{each(p, product) feature}}
-        ${product.name} 
-          {{each(pr, prop) product.props}} 
-             {{if prop.type.name == 'qualifier' }} 
-                 (${prop.value}) {{if p > 0}} | {{/if}}  
-             {{/if}} 
-         {{/each}} 
-         {{each(pr, prop) product.props}} 
-             {{if prop.type.name == 'evidence' }} 
-                 (${prop.value}) {{if p > 0}} | {{/if}}  
-             {{/if}} 
-         {{/each}} 
-         {{each(pu, pub) product.pubs}} 
-                  (<a href='http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.uniqueName}'>${pub.uniqueName}</a>) 
-         {{/each}} 
-         
-         {{each(dp, dbxref) product.dbxrefs}} 
+        ${product.name}
+          {{each(pr, prop) product.props}}
+              {{if prop.type != null}}
+                 {{if prop.type.name == 'qualifier' }}
+                     (${prop.value}) {{if p > 0}} | {{/if}}
+                 {{/if}}
+             {{/if}}
+         {{/each}}
+         {{each(pr, prop) product.props}}
+             {{if prop.type != null}}
+                 {{if prop.type.name == 'evidence' }}
+                     (${prop.value}) {{if p > 0}} | {{/if}}
+                 {{/if}}
+             {{/if}}
+         {{/each}}
+         {{each(pu, pub) product.pubs}}
+                  (<a href='http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=${pub.uniqueName}'>${pub.uniqueName}</a>)
+         {{/each}}
+
+         {{each(dp, dbxref) product.dbxrefs}}
                   (<a href='${dbxref.db.urlprefix}${dbxref.accession}${wa.viewHelper.dbxref_prefix_suffixes[dbxref.db.urlprefix]}'>${dbxref.accession}</a>)
-          {{/each}} 
+          {{/each}}
          <span data-bind="template: {name: 'nothers', data: {count:product.count, link: window.wa.viewHelper.others_product_link(product.name, f)} }" ></span><br>
     {{/each}}
 {{/each}}
