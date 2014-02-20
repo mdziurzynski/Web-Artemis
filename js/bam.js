@@ -2,6 +2,7 @@
 var maxBamHgt = 650;
 var bamViewPortHgt = 150;
 var step = 4;
+var maxDisplayWidth = 4000;
 var bamObjs = new Array();
 
 function bamObj(bamId) {
@@ -96,7 +97,7 @@ var aSamSeqs = function ajaxGetSamSeqs(fDisplay, samSeqs, options) {
 	var start = fDisplay.leftBase;
 	var end = parseInt(start) + parseInt(fDisplay.basesDisplayWidth);
 	
-	if(fDisplay.basesDisplayWidth > 4000) {
+	if(fDisplay.basesDisplayWidth > maxDisplayWidth) {
 		var window = Math.round(fDisplay.basesDisplayWidth/400);
 		var serviceName = '/sams/coverage.json?';
 		handleAjaxCalling(serviceName, aSamCoverage,
@@ -453,15 +454,21 @@ function addBamMenu(fDisplay, bamId) {
 }
 
 var rightClickBamMenu = function(action, el, pos, self, bamId) {
-	var thisBam = getBamObj(bamId);
-
 	if(action.match(/stack/)) {
+		maxDisplayWidth = self.basesDisplayWidth;
+		drawBam(self, bamId);
+		var thisBam = getBamObj(bamId);
+		
 		thisBam.isStrand = false;
 		thisBam.isStack = true;
 		$("#bam"+bamId).html('');
 		$("#bamscroll"+bamId).scrollTop(maxBamHgt);
 		drawReadDisplay(self, thisBam);
 	} else if(action.match(/strand/)) {
+		maxDisplayWidth = self.basesDisplayWidth;
+		drawBam(self, bamId);
+		var thisBam = getBamObj(bamId);
+		
 		thisBam.isStrand = true;
 		thisBam.isStack = false;
 		$("#bam"+bamId).html('');	
@@ -513,6 +520,9 @@ function showPopupBam(thisBam, event) {
 }
 
 function handleBamClick(fDisplay, event, tgt) {
+	if(fDisplay.basesDisplayWidth > maxDisplayWidth) {
+		return;
+	}
 	var bamId = $(event.currentTarget).attr('id').replace("bam","");
 	var x = Math.round(event.pageX - $(event.target).offset().left);
 	var y = Math.round(event.pageY - $(event.target).offset().top);
@@ -530,6 +540,9 @@ function handleBamClick(fDisplay, event, tgt) {
 }
 
 function handleBamDoubleClick(fDisplay, event, tgt, region) {
+	if(fDisplay.basesDisplayWidth > maxDisplayWidth) {
+		return;
+	}
 	var bamId = $(event.currentTarget).attr('id').replace("bam","");
 	var thisBam = getBamObj(bamId);
 	thisBam.x = undefined;
