@@ -454,21 +454,14 @@ function addBamMenu(fDisplay, bamId) {
 }
 
 var rightClickBamMenu = function(action, el, pos, self, bamId) {
+	var thisBam = getBamObj(bamId);
 	if(action.match(/stack/)) {
-		maxDisplayWidth = self.basesDisplayWidth;
-		drawBam(self, bamId);
-		var thisBam = getBamObj(bamId);
-		
 		thisBam.isStrand = false;
 		thisBam.isStack = true;
 		$("#bam"+bamId).html('');
 		$("#bamscroll"+bamId).scrollTop(maxBamHgt);
 		drawReadDisplay(self, thisBam);
 	} else if(action.match(/strand/)) {
-		maxDisplayWidth = self.basesDisplayWidth;
-		drawBam(self, bamId);
-		var thisBam = getBamObj(bamId);
-		
 		thisBam.isStrand = true;
 		thisBam.isStack = false;
 		$("#bam"+bamId).html('');	
