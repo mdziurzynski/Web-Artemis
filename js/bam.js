@@ -2,7 +2,7 @@
 var maxBamHgt = 650;
 var bamViewPortHgt = 150;
 var step = 4;
-var maxDisplayWidth = 4000;
+var maxDisplayWidth = 16000;
 var bamObjs = new Array();
 
 function bamObj(bamId) {
