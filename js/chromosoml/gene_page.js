@@ -200,6 +200,15 @@ $(function() {
 
                     // $.log(self.hierarchy);
 
+                },
+                error : function(xhr, opts, error) {
+                    self.error_msg = error;
+                    self.error_code = xhr.status;
+                    $(".spinner").hide();
+                    $(".wacontainer").hide();
+                    var mtext = $.tmpl("<div class='full-light-grey-top'></div><div class='light-grey'><h2> Error ${error_code}</h2> <div> An error occurred fetching the annotation for ${uniquename}: <i>${error_msg}</i>. </div></div><div class='full-light-grey-bot' ></div>", 
+                        {"error_msg" : error, "error_code" : xhr.status, "uniquename" : self.uniqueName});
+                    mtext.appendTo("#col-2-1");
                 }
             });
         }
@@ -1681,9 +1690,6 @@ dbxrefs.push({
 
                     var dbxrefs = geneInfo.dbxrefs();
 
-
-
-
                     var extra_dbxrefs = self.extraDbxrefs(geneInfo.isoform.uniqueName, organism);
 
                     var coordinates = geneInfo.coordinates();
@@ -1694,6 +1700,7 @@ dbxrefs.push({
 
                     var orthologues = geneInfo.orthologues();
                     var algorithm = geneInfo.algorithm();
+
 
                     wa.viewModel = {
                         systematicName : systematicName,
@@ -1729,6 +1736,15 @@ dbxrefs.push({
                         coordinates : coordinates,
                         orthologues : orthologues,
                         algorithm : algorithm,
+                        error_msg : geneInfo.error_msg,
+                        error_code : geneInfo.error_code,
+                        getTemplate : function() {
+                          if (geneInfo.error_msg == null) {
+                            return 'gene_page';
+                          } else {
+                            return 'error_page';
+                          }
+                        },
                         /*
                          * This is a replacement of the first_element() appraoch below.
                          */
