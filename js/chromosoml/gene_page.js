@@ -209,6 +209,7 @@ $(function() {
                     var mtext = $.tmpl("<div class='full-light-grey-top'></div><div class='light-grey'><h2> Error ${error_code}</h2> <div> An error occurred fetching the annotation for ${uniquename}: <i>${error_msg}</i>. </div></div><div class='full-light-grey-bot' ></div>", 
                         {"error_msg" : error, "error_code" : xhr.status, "uniquename" : self.uniqueName});
                     mtext.appendTo("#col-2-1");
+                    $("#col-2-1").stop().fadeTo(100, 1);
                 }
             });
         }
@@ -1736,15 +1737,6 @@ dbxrefs.push({
                         coordinates : coordinates,
                         orthologues : orthologues,
                         algorithm : algorithm,
-                        error_msg : geneInfo.error_msg,
-                        error_code : geneInfo.error_code,
-                        getTemplate : function() {
-                          if (geneInfo.error_msg == null) {
-                            return 'gene_page';
-                          } else {
-                            return 'error_page';
-                          }
-                        },
                         /*
                          * This is a replacement of the first_element() appraoch below.
                          */
