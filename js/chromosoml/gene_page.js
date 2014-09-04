@@ -206,7 +206,7 @@ $(function() {
                     self.error_code = xhr.status;
                     $(".spinner").hide();
                     $(".wacontainer").hide();
-                    var mtext = $.tmpl("<div class='full-light-grey-top'></div><div class='light-grey'><h2> Error ${error_code}</h2> <div> An error occurred fetching the annotation for ${uniquename}: <i>${error_msg}</i>. </div></div><div class='full-light-grey-bot' ></div>", 
+                    var mtext = $.tmpl("<div class='full-light-grey-top'></div><div class='light-grey'><h2> Error ${error_code}</h2> <div> An error occurred fetching the annotation for ${uniquename}: <i>${error_msg}</i>. </div></div><div class='full-light-grey-bot' ></div>",
                         {"error_msg" : error, "error_code" : xhr.status, "uniquename" : self.uniqueName});
                     mtext.appendTo("#col-2-1");
                     $("#col-2-1").stop().fadeTo(100, 1);
@@ -1832,10 +1832,12 @@ dbxrefs.push({
                     // bind the model to the view
                     ko.applyBindings(wa.viewModel);
 
-
                     $(".absolute_tool").AbsoluteToolTips();
 
+                    // if there are no domains, do not show the first two tabs
                     $("#tabs").tabs();
+                    if (Object.keys(domains).length == 0)
+                        $("#tabs").tabs("select", "#tabs-3");
 
                     $(self.spinner).CallStatusSpinner("removeCall");
                     $(".gene_page").stop().fadeTo(100, 1);
