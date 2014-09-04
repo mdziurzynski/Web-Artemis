@@ -95,11 +95,11 @@ a.web-artemis-link:hover {
 
 <br class="clear" /><br />
 
-<h2 data-bind="visible: len([domain_graph, domains]) > 0" >Protein Data</h2>
-<div style="font-family:sans-serif;" data-bind="visible: len([domain_graph, domains]) > 0" id="tabs">
+<h2>Protein Data</h2>
+<div style="font-family:sans-serif;" id="tabs">
     <ul>
-        <li><a href="#tabs-1">Protein Map</a></li>
-        <li><a href="#tabs-2">Domain Information Table</a></li>
+        <li data-bind="visible: len([domain_graph, domains]) > 0" ><a href="#tabs-1">Protein Map</a></li>
+        <li data-bind="visible: len([domain_graph, domains]) > 0" ><a href="#tabs-2">Domain Information Table</a></li>
         <li><a href="#tabs-3">Predicted Peptide Data</a></li>
         <li><a href="#tabs-4">Algorithmic Predictions</a></li>
     </ul>
