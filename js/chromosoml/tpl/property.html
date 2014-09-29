@@ -1,5 +1,5 @@
 {{each(k, list) $data.field}}
     {{each(p,prop) list}}
-        <div>&raquo; {{html linkify_pmids(prop.value) }}</div>
+        <div>&raquo; {{html linkify_pmids(linkify_urls(prop.value)) }}</div>
     {{/each}}
 {{/each}}

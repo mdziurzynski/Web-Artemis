@@ -1795,6 +1795,14 @@ dbxrefs.push({
                             });
                             return linkified;
                         },
+                        linkify_urls : function(tolinkify) {
+                            var linkified;
+                            if (tolinkify === undefined || tolinkify == null) return '';
+                            linkified = String(tolinkify).replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g, function(match) {
+                                return '<a href="' + match + '">' + match +'</a>';
+                            });
+                            return linkified;
+                        },
                         baseLinkURL : self.baseLinkURL,
                         polypeptide_properties : geneInfo.polypeptide_properties
                     }
@@ -1805,8 +1813,6 @@ dbxrefs.push({
                     wa.viewModel.domain_graph_shown = proteinMap.shown;
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
-
-
 
                     wa.viewModel.domain_graph_template = function() {
                         return (type != "Pseudogene") ? "domain_graph" : "domain_graph_empty";
