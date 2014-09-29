@@ -1814,8 +1814,6 @@ dbxrefs.push({
                     wa.viewModel.domain_graph_hidden = proteinMap.gaps;
                     wa.viewModel.domain_graph_max_y = proteinMap.max_y;
 
-
-
                     wa.viewModel.domain_graph_template = function() {
                         return (type != "Pseudogene") ? "domain_graph" : "domain_graph_empty";
                     }
