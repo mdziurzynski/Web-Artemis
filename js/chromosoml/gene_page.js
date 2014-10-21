@@ -1855,6 +1855,13 @@ dbxrefs.push({
                         self.embedded_web_artemis.recoordinate(coordinates[0]);
                     }
 
+                    if (document.location.hash.substring(0,2) == "#_") {
+                        // if there is a hash suffix, jump to it after the page loaded
+                        var hdr = document.getElementById(document.location.hash.substring(1));
+                        hdr.scrollIntoView();
+                        hdr.focus();
+                    }
+
                 });
             });
         }
@@ -1910,8 +1917,9 @@ dbxrefs.push({
         self.original_uniquename = null;
 
         $.history.init(function(hash) {
+            /* legitimate anchor jumps begin with '_' */
             if (self.original_uniquename == null) {
-                if (hash != "") {
+                if (hash != "" && hash.substring(0, 1) != "_") {
                     self.uniqueName = hash;
                 }
                 self.original_uniquename = self.uniqueName;

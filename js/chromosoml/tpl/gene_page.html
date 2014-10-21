@@ -71,7 +71,7 @@ a.web-artemis-link:hover {
 
 <div class='full-light-grey-top' data-bind="visible: len(controlled_curation) > 0 "></div>
 <div class='light-grey' data-bind="visible: len(controlled_curation) > 0 ">
-<h2>&nbsp;</h2>
+<h2 id="_curation_general">&nbsp;</h2>
 <table
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%"
     data-bind="template: {name:'phenotype', data: controlled_curation}" >
@@ -84,7 +84,7 @@ a.web-artemis-link:hover {
 <div class='full-light-grey-top' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 "></div>
 <div class='light-grey' data-bind="visible: len([cellular_component, molecular_function, biological_process]) > 0 ">
 <div>
-<h2>Gene Ontology</h2>
+<h2 id="_gene_ontology">Gene Ontology</h2>
 <table
     cellpadding="0" cellspacing="4" border="0" class="sequence-table" width="100%"
     data-bind="template: 'gos' " >
