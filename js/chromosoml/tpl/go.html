@@ -23,10 +23,13 @@
                     {{/if}}
                 {{/each}}
                 ${term.name}
+                {{if term.accession!=null}}
+                  (<a href="http://amigo.geneontology.org/amigo/term/GO:${term.accession}">GO:${term.accession}</a>)
+                {{/if}}
           </td>
             <td class="grey-text">
                 {{each(p,prop) term.props}}
-                    {{if prop.type != null}}
+                    {{if prop.type!=null}}
                         {{if prop.type.name=="evidence"}}
                             ${prop.value}
                         {{/if}}
