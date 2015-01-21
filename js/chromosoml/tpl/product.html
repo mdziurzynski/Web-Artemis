@@ -1,6 +1,11 @@
 {{each(f, feature) products}}
     {{each(p, product) feature}}
         ${product.name}
+        {{if feature.length > 1}}
+          {{if product.rank == 0}}
+            (preferred name)
+          {{/if}}
+        {{/if}}
           {{each(pr, prop) product.props}}
               {{if prop.type != null}}
                  {{if prop.type.name == 'qualifier' }}
