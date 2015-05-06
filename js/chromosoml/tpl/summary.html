@@ -5,8 +5,8 @@
 		  <span data-bind="text: systematicName"></span>
 		  <span data-bind="visible: ntranscripts > 1">
             (one splice form of this gene)</span>
-          
-		  
+
+
 		  <span data-bind="visible: len(previous_systematic_ids) > 0">
             (previously known as : <span data-bind="template: {name: 'synonyms', data: {synonyms:previous_systematic_ids,separate:separate,name:'previous_systematic'} }"></span>)
           </span>
@@ -19,6 +19,10 @@
 	<tr data-bind="visible: len([synonyms]) > 0">
 	    <th>Synonym</th>
 		<td data-bind="template: {name: 'synonyms', data: {synonyms:synonyms,separate:separate,name:'synonyms'} }" ></td>
+    </tr>
+    <tr data-bind="visible: len([aliases]) > 0">
+	    <th>Alias</th>
+		<td data-bind="template: {name: 'synonyms', data: {synonyms:aliases,separate:separate,name:'aliases'} }" ></td>
     </tr>
 	<tr>
 		<th>Gene Type</th>
