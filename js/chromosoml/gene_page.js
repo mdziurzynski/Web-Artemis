@@ -1714,6 +1714,7 @@ dbxrefs.push({
                         synonyms : synonyms,
                         product_synonyms : product_synonyms,
                         previous_systematic_ids : previous_systematic_ids,
+                        aliases : aliases,
                         len : function(maps) { // returns the combined size of
                             // a list of maps
                             var count = 0
