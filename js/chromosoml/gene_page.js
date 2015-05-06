@@ -1682,7 +1682,7 @@ dbxrefs.push({
                     var synonyms = geneInfo.synonyms("synonym", null, true);
                     var product_synonyms = geneInfo.synonyms("product_synonym", null, true);
                     var previous_systematic_ids = geneInfo.synonyms("previous_systematic_id", null, true);
-
+                    var aliases = geneInfo.synonyms("alias", null, true);
 
                     var systematicName = geneInfo.systematic_name();
 
