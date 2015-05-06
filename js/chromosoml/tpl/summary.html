@@ -20,8 +20,8 @@
 	    <th>Synonym</th>
 		<td data-bind="template: {name: 'synonyms', data: {synonyms:synonyms,separate:separate,name:'synonyms'} }" ></td>
     </tr>
-    <tr data-bind="visible: len([synonyms]) > 0">
-	    <th>Synonym</th>
+    <tr data-bind="visible: len([aliases]) > 0">
+	    <th>Alias</th>
 		<td data-bind="template: {name: 'synonyms', data: {synonyms:aliases,separate:separate,name:'aliases'} }" ></td>
     </tr>
 	<tr>
