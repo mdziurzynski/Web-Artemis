@@ -22,7 +22,7 @@ var current_directory = path.split('/').slice(0, -1).join('/') + '/';
     var tooltipCount = 0;
 
     /*
-     * A tooltip implementation that copes with absolutely posisitioned divs
+     * A tooltip implementation that copes with absolutely positioned divs
      * inside relative divs. This should really be moved into a plugins folder.
      */
     $.fn.AbsoluteToolTips = function(options) {
@@ -30,7 +30,7 @@ var current_directory = path.split('/').slice(0, -1).join('/') + '/';
         var defaults = {
             "tooltip_element_id" : "reltool",
             "sub_element_class" : "relative_block_tooltip"
-        }
+        };
 
         return this.each(function() {
 
@@ -86,7 +86,7 @@ var current_directory = path.split('/').slice(0, -1).join('/') + '/';
 $(function() {
 
     // we create a window wide web artemis namespace
-    window.wa = {}
+    window.wa = {};
 
     /*
      * A crawl client, that specialises in recursing feature/hierarchy results,
@@ -103,7 +103,7 @@ $(function() {
                 "transcript" : [ "mRNA", "ncRNA", "snoRNA", "snRNA", "tRNA", "miscRNA", "rRNA" ]
             },
             membrs : [ "non_cytoplasmic_polypeptide_region", "cytoplasmic_polypeptide_region", "transmembrane_polypeptide_region" ]
-        }
+        };
 
         var self = this;
 
@@ -166,10 +166,21 @@ $(function() {
                     // this property it first
                     self.requestedFeature = null;
                     self.recurse_hierarchy(self.hierarchy, function(feature) {
-                        if (self.requestedFeature != null)
+                        if (self.requestedFeature !== null)
                             return;
-                        if (feature.uniqueName == self.uniqueName)
+                        if (feature.uniqueName == self.uniqueName) {
                             self.requestedFeature = feature;
+                            return;
+                        }
+                        // also look in current synonyms for
+                        // requested feature ID
+                        feature.synonyms.every(function(syn) {
+                            if (syn.synonym == self.uniqueName) {
+                                self.requestedFeature = feature;
+                                return false;
+                            }
+                            return true;
+                        });
                     });
 
                     // let's get the number of transcripts
