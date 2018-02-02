@@ -837,7 +837,7 @@ function drawAll(fDisplay) {
       
       if(!fDisplay.minimumDisplay) {
           drawBam(fDisplay);
-          drawVcf(fDisplay);
+          //drawVcf(fDisplay);
           fDisplay.observers.notify('redraw', fDisplay.leftBase, parseInt(fDisplay.leftBase)+parseInt(fDisplay.basesDisplayWidth));
       }
       
@@ -969,10 +969,10 @@ function drawStopCodons(fDisplay, basePerPixel) {
     var bwdStops2 = new Array();
     var bwdStops3 = new Array();
 
-    //console.time('calculate stop codons');  
+    console.time('calculate stop codons');  
     calculateStopCodons(fDisplay, fwdStops1, fwdStops2, fwdStops3, 'TAG', 'TAA', 'TGA', 1);
     calculateStopCodons(fDisplay, bwdStops1, bwdStops2, bwdStops3, 'CTA', 'TTA', 'TCA', -1);
-    //console.timeEnd('calculate stop codons');
+    console.timeEnd('calculate stop codons');
 	
 	var nstops = fwdStops1.length + fwdStops2.length + fwdStops3.length +
 				 bwdStops1.length + bwdStops2.length + bwdStops3.length; 
@@ -1120,8 +1120,8 @@ function drawCodons(fDisplay, basePerPixel) {
   if(useCanvas) {
 	  var ctx = getSequenceCanvasCtx(fDisplay, true);
   }
-  var yposFwd = fwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2;
-  var yposBwd = bwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2;
+  var yposFwd = fwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2; // nucleotide strand y for
+  var yposBwd = bwdStrandYpos(fDisplay, useCanvas)-fDisplay.frameLnHgt-2; // nucleotide strand y rev
   
   var xpos = margin;
   var baseStr = '';
@@ -1220,7 +1220,7 @@ function drawFeatures(fDisplay) {
 	//var serviceName = '/regions/featureloc.json?';
 	var serviceName = '/regions/locations.json?';
 	var currentTime = new Date().getTime();
-	
+
 	handleAjaxCalling(serviceName, aFeatureFlatten,
 			{ region:fDisplay.srcFeature, 
 		      start:fDisplay.leftBase, end:end, 
@@ -1961,8 +1961,11 @@ var aFeaturePropColours = function ajaxGetFeaturePropColours(fDisplay, featProps
 };
 
 var aFeatureFlatten = function ajaxGetFeaturesFlatten(fDisplay, features, options) {
-    
+
 	var nfeatures = features.length;
+
+    console.log(features)
+
 
 	debugLog("No. of features "+ nfeatures+"  "+fDisplay.leftBase+".."+
 			(parseInt(fDisplay.leftBase)+parseInt(fDisplay.basesDisplayWidth)));
@@ -2583,6 +2586,7 @@ var methods = {
         if(!options.directory) {
             options.directory = ".";
         }
+        // loading html file from server to replace 'this'
 		$(this).load(options.directory+"/js/WebArtemis.html", function(){
 			//set the default values for the options
 			var settings = $.extend({
@@ -2604,7 +2608,7 @@ var methods = {
             webService = settings.webService;
             dataType = settings.dataType;
 
-			var arr = getUrlVars();
+			var arr = getUrlVars(); // get window address params
 			var leftBase = arr["base"];
 			if(!leftBase) {
 				leftBase = settings.start;
@@ -2649,7 +2653,7 @@ var methods = {
 				if(debugSetting == "true")
 					debug = true;
 				else
-					debug = false;
+					debug = true;
 			}
 		
 			if(basesDisplayWidth > 50000) {
@@ -2659,6 +2663,7 @@ var methods = {
 			}
 		  
 			var hgt = arr["height"];
+            // webartemis hight
 			if(!hgt) {
 				hgt = 10;
 			} else {
@@ -2675,6 +2680,7 @@ var methods = {
 			}
 			for(var i in arr) {
 				var value = arr[i];
+
 				if(i.indexOf("src") > -1) {
 					title+=value+' ';
 
@@ -2770,10 +2776,10 @@ var _genome_js_current_directory = _genome_js_path.split('/').slice(0, -1).join(
     	// remove square brackets
     	// &exclude[]=repeat_region&exclude[]=gene
     	jQuery.ajaxSettings.traditional = true; 
-	
     	if ( methods[method] ) {
     	      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
     	} else if ( typeof method === 'object' || ! method ) {
+            // it goes this way
     	     return methods.init.apply( this, arguments );
     	} else {
     	      $.error( 'Method ' +  method + ' does not exist in WebArtemis' );
